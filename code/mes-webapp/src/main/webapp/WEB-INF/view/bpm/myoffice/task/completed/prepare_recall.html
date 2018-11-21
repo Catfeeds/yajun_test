@@ -1,0 +1,20 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+</script>
+<body style="overflow-y: hidden" scroll="no" >
+<@p.editForm url="${baseUrl}/bpm/task/recall.do" class="form-horizontal" noPermissionModule="true" >
+	<input id="processDefinitionId" type="hidden" name="processDefinitionId" value="${processDefinitionId!}">
+	<input id="taskDefinitionKey" type="hidden" name="taskDefinitionKey" value="${taskDefinitionKey!}">
+	<input id="processInstanceId" type="hidden" name="processInstanceId" value="${processInstanceId!}">
+	<@p.formRow>
+		<@p.formColmd class="col-md-8" title="BPM_TASK_RECALL_REASON">
+			<textarea name="recallReason"  datatype="*" ></textarea>
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+</body>
+</html>

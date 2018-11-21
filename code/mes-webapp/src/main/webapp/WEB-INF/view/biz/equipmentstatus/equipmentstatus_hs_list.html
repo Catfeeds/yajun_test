@@ -1,0 +1,143 @@
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="EQUIPMENT_HS_LIST_TITLE" permissionModule="EQUIPMENT_HS"noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EQUIPMENT_TM_PLANT" type="select" field="tmEquipment.tmPlantId" options=plantOptions></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_LINE" type="select" field="tmLineId" options=lines ></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_NO_NAME" type="multiple" multipleSelect="false" id="tmEquipmentId"  field="tmEquipmentId" options=equipmentOptions ></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_STATUS" field="runningState" type="select" options=eqcirculateStates></@p.input>
+			<@p.input title="CLASS_MANAGER_CLASS_GROUP" field="classManager.classGroup" type="select" options=classGroupOptions></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_BEGIN_TIME_START" field="createTimeStart" id="createTimeStart"></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_BEGIN_TIME_END" field="createTimeEnd" id="createTimeEnd"></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_FINISH_TIME_START" field="updateTimeStart" id="updateTimeStart"></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_FINISH_TIME_END" field="updateTimeEnd" id="updateTimeEnd"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+			<@p.button title="EQUIPMENT_STATUS_EXPORT" url="${baseUrl}/tbEquipmentStatus/exportData.do"  permissionCode="EquipmentHsExport" onclick="downLoadAjax()" iconCls="upload-alt" type="button"  ></@p.button>
+<!-- 			<@p.button title="PORDER_HOLD" permissionCode="UlocHsExport" iconCls="edit"onclick="doHoldOrNotHold()"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tbEquipmentStatus/list.do?queryCondition[IS_HISTORY]=YES">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_DATE" field="createTime" permissionCode="EQUIPMENT_HS_DATE"></@p.column>
+		<@p.column title="EQUIPMENT_TM_PLANT" field="tmEquipment.tmPlantId" permissionCode="EQUIPMENT_HS_CLASSES" formatter="getPlants"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_LINE" field="tmline.nameCn" permissionCode="EQUIPMENT_HS_LINE"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_CLASSES" field="worktime.shiftno" permissionCode="EQUIPMENT_HS_CLASSES" formatter="rendShiftno"></@p.column>
+		<@p.column title="PRODUCT_TRACING_CLASS_MANAGER_CLASSGROUP" field="classManager.classGroup" permissionCode="EQUIPMENT_HS_CLASSES" formatter="rendClassGroup"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_NO" field="tmEquipment.no" permissionCode="EQUIPMENT_HS_NO"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_NAME" field="tmEquipment.name" permissionCode="EQUIPMENT_HS_NAME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS" field="runningState" permissionCode="EQUIPMENT_HS_STATUS" formatter="renderRunningState"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_STATUS_NO" field="codeRule.code" permissionCode="EQUIPMENT_HS_STATUS_NO" formatter="renderRunningStateNo"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_CONTENT" field="codeRule.codeDesc" permissionCode="EQUIPMENT_HS_CONTENT"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_BEGIN_TIME" field="beginTime" permissionCode="EQUIPMENT_HS_BEGIN_TIME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_FINISH_TIME" field="finishTime" permissionCode="EQUIPMENT_HS_FINISH_TIME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_DURATION" field="duration" permissionCode="EQUIPMENT_HS_DURATION"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	pushMessage($("#userId").val());
+	initQueryTime();
+});
+function initQueryTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	endTime=endTime +" "+caseLessTen(date.getHours())+":"+caseLessTen(date.getMinutes())+":"+caseLessTen(date.getSeconds());
+	$("#createTimeEnd").val(endTime);
+	date = new Date();
+	month = month-1;
+	var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	startTime=startTime +" "+caseLessTen(date.getHours())+":"+caseLessTen(date.getMinutes())+":"+caseLessTen(date.getSeconds());
+	$("#createTimeStart").val(startTime);
+}
+function downLoadAjax(){
+	downAjax("","${baseUrl}/tbEquipmentStatus/exportData.do",'dg${currentPageId}');
+}
+function doHoldOrNotHold(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	alert(rowsData[0].id);
+}
+$('#createTimeStart').click(function(){
+	var createTimeEnd=$dp.$('createTimeEnd');
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		onpicked:function(){
+			createTimeEnd.click();
+		},
+		maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+	})
+});
+$('#createTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		minDate:'#F{$dp.$D(\'createTimeStart\')}'
+	})
+});
+$('#updateTimeStart').click(function(){
+	var createTimeEnd=$dp.$('updateTimeEnd');
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		onpicked:function(){
+			createTimeEnd.click();
+		},
+		maxDate:'#F{$dp.$D(\'updateTimeEnd\')}'
+	})
+});
+$('#updateTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		minDate:'#F{$dp.$D(\'updateTimeStart\')}'
+	})
+});
+function renderRunningStateNo(value,row,index){
+	if(!value){
+		return row.statusNumber;
+	}
+	return  value;
+}
+	function renderRunningState(value) {
+		if(value =="0001"){
+			value ="1";
+		}else if(value =="0010"){
+			value ="2";
+		}else if(value =="0100"){
+			value ="3";
+		}else if(value =="1000"){
+			value ="4";
+		}else if(value=="0011"){
+			value ="2";
+		}else{
+			/* value ="10"; */
+			return value;
+		}
+		return entryRenderer('EQ_CIRCULATE_STATE', value);
+	}
+	function rendShiftno(value){
+		return entryRenderer('SHIFT_TYPE', value);
+	}
+	function getPlants(value){
+		var plants = eval('('+ '${plants!}' +')');
+		for(var i in plants){
+			if(plants[i].code==value){
+				return plants[i].name;
+			}
+		}
+	}
+	
+	function rendClassGroup(value){
+		return entryRenderer('CLASS_GROUP', value);
+	}
+</script>

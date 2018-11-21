@@ -1,0 +1,1353 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="FinAnnualReportMapper" >
+	<select id="getFinNoFailStopData" resultType="Integer" parameterType="java.util.HashMap">
+		select 
+			count(f.id) count
+		  from fin_no_fault_stop f
+		 where 1 = 1
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 group by to_char(f.create_time, 'yyyymm')
+		 order by to_char(f.create_time, 'yyyymm') asc
+	</select>
+	
+	<select id="getFinSwitchStopData" resultType="Integer" parameterType="java.util.HashMap">
+		select 
+			count(f.id) count
+		  from fin_no_fault_stop f
+		 where 1 = 1
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 group by to_char(f.create_time, 'yyyymm')
+		 order by to_char(f.create_time, 'yyyymm') asc
+	</select>
+	
+	<select id="getFinChangeMaterialStopData" resultType="Integer" parameterType="java.util.HashMap">
+		select 
+			count(f.id) count
+		  from FIN_CHANGE_MATERIAL_STOP f
+		 where 1 = 1
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 group by to_char(f.create_time, 'yyyymm')
+		 order by to_char(f.create_time, 'yyyymm') asc
+	</select>
+	
+	<select id="getFinAddOilStopData" resultType="Integer" parameterType="java.util.HashMap">
+		select 
+			count(f.id) count
+		  from FIN_ADD_OIL_STOP f
+		 where 1 = 1
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 group by to_char(f.create_time, 'yyyymm')
+		 order by to_char(f.create_time, 'yyyymm') asc
+	</select>
+	
+	<select id="getFinFaultedData" resultType="Integer" parameterType="java.util.HashMap">
+		select 
+			count(f.id) count
+		  from FIN_FAULTED f
+		 where 1 = 1
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 group by to_char(f.create_time, 'yyyymm')
+		 order by to_char(f.create_time, 'yyyymm') asc
+	</select>
+	<!-- 非故障停机 -->
+	<select id="getFinNoFailStopByParams" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		 from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-01-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'二月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'三月' as showMonth  ,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-04-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'四月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'04-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'五月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'六月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select
+			 sum(f.duration) as duration,
+			 count(f.id) as showCount, 
+			 '七月' as showMonth,
+			 sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			 count(decode(f.shift_no,'1',1)) as whiteShift,
+             count(decode(f.shift_no,'2',1)) as nightShift
+			 from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'八月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'九月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十二月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from fin_no_fault_stop f where f.create_time &gt; to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-31 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+	</select>
+	
+	<!-- 切换停机 -->
+	<select id="getFinSwitchStopByParams" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		 from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-01-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'二月' as showMonth ,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'三月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-04-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'四月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'04-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'五月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'六月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select
+			 sum(f.duration) as duration,
+			 count(f.id) as showCount, 
+			 '七月' as showMonth,
+			 sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			 count(decode(f.shift_no,'1',1)) as whiteShift,
+             count(decode(f.shift_no,'2',1)) as nightShift
+			 from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'八月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'九月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十二月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_SWITCH_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-31 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+	</select>
+	
+	<!-- 换料停机 -->
+	<select id="getFinChangeMaterialStopByParams" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		 from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-01-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'二月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'三月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-04-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'四月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'04-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'五月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'六月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select
+			 sum(f.duration) as duration,
+			 count(f.id) as showCount, 
+			 '七月' as showMonth,
+			 sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			 count(decode(f.shift_no,'1',1)) as whiteShift,
+             count(decode(f.shift_no,'2',1)) as nightShift
+			 from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'八月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'九月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十二月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_CHANGE_MATERIAL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-31 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+	</select>
+	
+	<!-- 加油停机 -->
+	<select id="getFinAddOilStopByParams" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		 from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-01-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'二月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'三月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-04-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'四月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'04-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'五月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'六月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select
+			 sum(f.duration) as duration,
+			 count(f.id) as showCount, 
+			 '七月' as showMonth,
+			 sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			 count(decode(f.shift_no,'1',1)) as whiteShift,
+             count(decode(f.shift_no,'2',1)) as nightShift
+			 from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'八月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'九月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十二月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_ADD_OIL_STOP f where f.create_time &gt; to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-31 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+	</select>
+	
+		<!-- 故障 -->
+	<select id="getFinFaultedByParams" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		 from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-01-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'二月' as showMonth ,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-02-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'三月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-03-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-04-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'四月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'04-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'五月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-05-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'六月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-06-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select
+			 sum(f.duration) as duration,
+			 count(f.id) as showCount, 
+			 '七月' as showMonth,
+			 sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			 count(decode(f.shift_no,'1',1)) as whiteShift,
+             count(decode(f.shift_no,'2',1)) as nightShift
+			 from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-07-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'八月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+		from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-08-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'九月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-09-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-10-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十一月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-11-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+		union all 
+		select 
+			sum(f.duration) as duration,
+			count(f.id) as showCount, 
+			'十二月' as showMonth,
+			sum(decode(f.shift_no,'1',f.duration))as whiteMin,
+      		sum(decode(f.shift_no,'2',f.duration))as nightMin,
+			count(decode(f.shift_no,'1',1)) as whiteShift,
+            count(decode(f.shift_no,'2',1)) as nightShift
+			from FIN_FAULTED f where f.create_time &gt; to_date(CONCAT(#{year},'-12-01'),'yyyy-mm-dd') and f.create_time &lt;= to_date(CONCAT(#{year},'-12-31 23:59:59'),'yyyy-mm-dd hh24:mi:ss')
+		 <if test="shiftNo !=null and shiftNo!='' ">
+	 		and f.shift_no = #{shiftNo}
+	    </if>
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		 and f.is_rest = 'N'
+	</select>
+	
+	<select id="getFinFaultedDetails" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select (select count(a.id) from fin_faulted a) as totalNum,
+		       count(f.faulted_code) as faultCodeCount,
+		       f.faulted_code as faultedCode,
+		       decode(b.entry_name, null, '未知错误名称', b.entry_name) as entryName
+		  from fin_faulted f
+		  left join (select tde.entry_name, tde.entry_code
+		               from ts_dict_entry tde, ts_dict_type tdt
+		              where tde.type_id = tdt.id
+		                and tdt.type_code = 'FAULTED_DETAILS_CODE') b
+		    on f.faulted_code = b.entry_code
+		 	where 1 = 1 and f.faulted_code!='999' and f.faulted_code is not null
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and f.WORK_CALENDAR_BEGIN &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+		 </if>
+		 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+		 	and f.WORK_CALENDAR_BEGIN &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+		 </if>
+		group by b.entry_name, f.faulted_code
+	</select>
+	<!-- 获取出勤时间 -->
+	<select id="getFinAttendanceTime" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select decode(a.workTimeTotal,null,0,a.workTimeTotal) as workTime, b.yearMonth
+		  from (select sum(decode(t.shiftno, 'MORNINGSHIFT', 0.5, 'NIGHTSHIFT', 0) +
+		                   decode(t.shiftno, 'NIGHTSHIFT', 0.5, 'MORNINGSHIFT', 0)) as workTimeTotal,
+		               to_char(t.work_date, 'yyyy-MM') as yearMonth
+		          from tm_worktime t
+		         where t.enabled = 'ON'
+		         <if test="createTimeStart!=null and createTimeStart!='' ">
+					 and t.work_date &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+				 </if>
+				 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+				 	 and t.work_date &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+				 </if>
+		         group by to_char(t.work_date, 'yyyy-MM')) a
+				 right join (SELECT DISTINCT TO_CHAR(T.ROWDATE, 'yyyy-mm') as yearMonth
+				               FROM (SELECT ROWNUM,
+				                            TO_DATE(CONCAT(#{year},'-01'), 'yyyy-mm') + ROWNUM - 1 ROWDATE
+				                       FROM DUAL
+				                     CONNECT BY ROWNUM &lt; TO_DATE(CONCAT(#{year},'-12'), 'yyyy-mm') -
+				                                TO_DATE(CONCAT(#{year},'-01'), 'yyyy-mm') + 2) T
+				              ORDER BY yearMonth ASC) b
+				    on a.yearMonth = b.yearMonth
+				 order by b.yearMonth
+	</select>
+</mapper>  

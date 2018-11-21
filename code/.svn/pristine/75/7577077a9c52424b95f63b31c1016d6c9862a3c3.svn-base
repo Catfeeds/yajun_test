@@ -1,0 +1,572 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body title="PRODUCTIONSCHEDULE_LIST_TITLE" permissionModule="PRODUCTION_SCHEDULE">
+<style>
+span.frameInputSpan {
+	/* float:right; */
+	min-width:0px;
+    display: inline-block;
+    margin-bottom: 3px;
+    margin-right:100px;
+}
+.frameInputSpan label {
+	min-width:0px;
+	text-align: right;
+	font-size: 13px;
+}
+</style>
+<div style="width:100%;float: left;height: 100%;">
+	<div class="breadcrumbs">
+		<ul class="breadcrumb">
+			<li class="active"><@s.m code="PRODUCTIONSCHEDULE_LEFT_TITLE" /></li>
+		</ul>
+	</div>
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PRODUCTIONSCHEDULE_DATE" field="taskDate" id="taskDate"></@p.input>
+		    <@p.input title="PRODUCTIONSCHEDULE_PRODUCTIONMODEL" field="model"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="METALPLATE_ADD" permissionCode="ProductionScheduleAdd" iconCls="plus" url="${baseUrl}/mpSourceData/addInput.do" type="add"  ></@p.button>
+			<@p.button title="METALPLATE_UPDATE" permissionCode="ProductionScheduleUpdate" iconCls="edit" type="button" onclick="updateCheck()"></@p.button>
+			<@p.button title="METALPLATE_DELETE" permissionCode="ProductionScheduleDelete" iconCls="trash" url="${baseUrl}/mpSourceData/delete.do" type="delete"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_SINGLE" permissionCode="ProductionScheduleSingle" iconCls="plus" type="button" onclick="checkSingleMulti()"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_BATCH" permissionCode="ProductionScheduleBatch" iconCls="edit" type="button" onclick="batchCheck()"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/mpSourceData/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PRODUCTIONSCHEDULE_TASKDATE" field="taskDate" permissionCode="TASKDATE"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="PRODUCTIONSCHEDULE_DATATYPE" field="dataType" permissionCode="DATATYPE"  formatter="renderDataType"></@p.column>
+		<!-- <@p.column title="PRODUCTIONSCHEDULE_WORKSCHEDULE" field="workSchedule" permissionCode="WORKSCHEDULE"  formatter="renderWorkSchedule"></@p.column> -->
+		<@p.column title="PRODUCTIONSCHEDULE_PRODUCTIONMODEL" field="model" permissionCode="MODEL"  formatter="renderModel"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_REGIONMARK" field="material.regionMark" permissionCode="S_REGIONMARK"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="PRODUCTIONSCHEDULE_APCTOTALNUMBER" field="apcTotalNumber" permissionCode="APCTOTALNUMBER"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="PRODUCTIONSCHEDULE_INVENTORYNUMBER" field="material.inventoryNumber" permissionCode="INVENTORYNUMBER"></@p.column>
+		<@p.column title="PRODUCTIONSCHEDULE_PLANNEDPRODUCTION" field="plannedProduction" permissionCode="PLANNEDPRODUCTION"  formatter="renderBatchQty"></@p.column>
+		<!-- <@p.column title="PRODUCTIONSCHEDULE_SENDPERIODTIME" field="sendPeriodTime" permissionCode="SENDPERIODTIME"  formatter="renderBatchQty"></@p.column> -->
+	</@p.dataGrid>
+</div>
+<div  style="width:100%;float: right;height: 100%;">
+<div class="breadcrumbs" style="">
+	<ul class="breadcrumb">
+		<li class="active"><@s.m code="PRODUCTIONSCHEDULE_RIGHT_TITLE" /></li>
+	</ul>
+</div>
+<!-- <div style="margin-top:80px;"> -->
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PRODUCTIONSCHEDULE_MOVE_UP" permissionCode="ProductionScheduleSingle" iconCls="caret-up" type="button" onclick="positionSwitch('lag')"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_MOVE_DOWN" permissionCode="ProductionScheduleSingle" iconCls="caret-down" type="button" onclick="positionSwitch('lead')"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_MOVE_TOP" permissionCode="ProductionScheduleSingle" iconCls="upload-alt" type="button" onclick="positionSwitch('top')"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_CANCEL" permissionCode="ProductionScheduleCancel" iconCls="trash" type="button" onclick="checkCancel()"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_DEBLOCKING" permissionCode="ProductionScheduleDeblocking" iconCls="unlock-alt" type="button" onclick="deblocking()"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_LOCKING" permissionCode="ProductionScheduleLocking" iconCls="lock" type="button" onclick="locking()"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_MANDATORY_END" permissionCode="ProductionScheduleMandatoryEnd" iconCls="trash" type="button" onclick="mandatoryEnd()"></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_REFURBISH" permissionCode="ProductionScheduleSingle" iconCls="refresh" onclick="refurbish()"></@p.button>
+			<!-- 生产完成临时测试触发 -->
+			<@p.button title="PRODUCTIONSCHEDULE_COMPLETION" permissionCode="ProductionScheduleSingle" iconCls="trash" onclick="productionCompletion()"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/mpSchedul/list.do" id="mps${currentPageId}">
+		<@p.column checkbox="true" formatter="renderCheckbox"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_SCHEDULDATE" field="schedulDate" permissionCode="S_SCHEDULDATE"  formatter="renderBatchQty"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_WORKSCHEDULE" field="workSchedule" permissionCode="S_WORKSCHEDULE"  formatter="renderWorkSchedule"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_MODEL" field="material.programNumber" permissionCode="S_MODEL"  formatter="renderModel"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_BATCHNUMBER" field="batchNumber" permissionCode="S_BATCHNUMBER"  formatter="renderBatchQty"></@p.column>
+		<@p.column sortable="false" title="METALPLATE_REGIONMARK" field="regionMark" permissionCode="S_REGIONMARK"  formatter="renderRegionMark"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_PUNCH_PRESS" field="press" permissionCode="S_PRESS" formatter="renderPress"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_MOULDS" field="moulds" permissionCode="S_MOULDS" formatter="renderMoulds"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_DISPATCHNUMBER" field="dispatchNumber" permissionCode="S_DISPATCHNUMBER"  formatter="renderBatchQty"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_FINISHNUMBER" field="finishNumber" permissionCode="S_FINISHNUMBER"  formatter="renderBatchQty"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_SENDWORKERS" field="sendWorkers" permissionCode="S_SENDWORKERS"  formatter="renderBatchQty"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_STATUS" field="status" permissionCode="S_STATUS"  formatter="renderStatus"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_DISPATCHTIME" field="dispatchTime" permissionCode="S_DISPATCHTIME"  formatter="renderBatchQty"></@p.column>
+		<@p.column sortable="false" title="PRODUCTIONSCHEDULE_S_SYNPOSITION" field="synPosition" permissionCode="S_BATCHNUMBER" formatter="renderBatchQty"></@p.column>
+	</@p.dataGrid>
+<!-- </div> -->
+</div>
+</@p.body>
+<script type="text/javascript">
+$('#taskDate').focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true});
+});
+function renderBatchQty(value){return value == null ? "" : value;}
+function renderModel(value){return entryRendererMulti('SM_MACHINING_SURFACE', value);}
+function renderWorkSchedule(value){return entryRenderer('SHIFT_TYPE', value);}
+function renderStatus(value){return entryRenderer('SM_PRODUCTION_STATE', value);}
+function renderDataType(value){return entryRenderer('SM_SOURCE_DATA_TYPE', value);}
+function renderPress(value,row,index){
+	if(row.verify){
+		var press = "";
+ 		var template = "<span style='background-color: green;color:#FFF;'>{0}</span>";
+ 		var pressArray = value.split(",");
+ 		for(var i in pressArray){
+ 			if(row.verify.indexOf(pressArray[i]) != -1){
+ 				/* press+=template.replace("{0}",pressArray[i])+','; */
+ 				press+=pressArray[i]+'√,';
+ 			}else{
+ 				press+=pressArray[i]+',';
+ 			}
+ 		}
+ 		if(press){
+ 			press = press.substr(0,press.length-1);
+ 		}
+ 		return press;
+	}
+	return value;
+}
+function renderMoulds(value,row,index){
+	  if(!value)return '';
+	  if(value.indexOf("~") != -1){
+	    var toolNumbers = value.split("~")
+	    var equipmentMoulds = eval('(' + '${equipments!}' + ')');
+	    var toolVal = "";
+	    for(var i in toolNumbers){
+	      var modelNames="";
+	      var toolSrc = toolNumbers[i].split(":");
+	      var modelArray = keysValue(equipmentMoulds,toolSrc[1]).split(",");
+	      for(var i in modelArray){
+	 			if(row.verify && row.verify.indexOf(modelArray[i]) != -1){
+	 				modelNames+=modelArray[i]+'√,';
+	 			}else{
+	 				modelNames+=modelArray[i]+',';
+	 			}
+	 	  }
+	      if(modelNames){
+	    	  modelNames = modelNames.substr(0,modelNames.length-1);
+	 	  }
+	      toolVal += modelNames+"~";
+	    }
+	    if(toolVal.length>0){
+	      toolVal = toolVal.substring(0, toolVal.length - 1);
+	    }
+	  }
+	  return toolVal;
+	}
+
+function renderRegionMark(value){return entryRenderer('SM_REGION_MARK', value);}
+function updateCheck() {
+	var title="<@s.m code='METALPLATE_UPDATE'/>";
+	var url="${baseUrl}/mpSourceData/updateInput.do";
+	var gridId="dg${currentPageId}";
+	var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	if (rowsData[0].status == 1 || rowsData[0].status == 2) {
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_STATUS_ERROR'/>");
+		return;
+	}
+	var array = ${allGlobalJson!};
+	if(rowsData[0].dataType == "1" && $.inArray(rowsData[0].model, array)==-1){
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_DATATYPE1_NOTUPDATE'/>");
+		return;
+	}
+	var isSkip = true;
+	$.ajax({
+		data:{id:rowsData[0].id},
+		url:"${baseUrl}/mpSourceData/checkUpdateMulti.do",
+		dataType : 'json', 
+		async:false,
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.info){
+					errorTip(result.info);
+					isSkip = false;
+				}
+			}
+		},
+		error : function(result, status) {}
+	});
+	if(isSkip){
+		update(title, url, gridId);
+	}
+}
+
+function checkSingleMulti() {
+	var title="<@s.m code='PRODUCTIONSCHEDULE_SINGLE'/>";
+	var url="${baseUrl}/mpSourceData/singleInput.do";
+	var gridId="dg${currentPageId},mps${currentPageId}";
+	var rowsData = getSelectedRows("dg${currentPageId}");
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	var isSkip = true;
+	$.ajax({
+		data:{id:rowsData[0].id},
+		url:"${baseUrl}/mpSourceData/checkSingleMulti.do",
+		dataType : 'json', 
+		async:false,
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.info){
+					errorTip(result.info);
+					isSkip = false;
+				}
+			}
+		},
+		error : function(result, status) {}
+	});
+	if(isSkip){
+		update(title, url, gridId);
+	}
+}
+
+function checkCancel() {
+	var title="<@s.m code='PRODUCTIONSCHEDULE_SINGLE'/>";
+	var url="${baseUrl}/mpSchedul/cancelSchedul.do";
+	var gridId="mps${currentPageId}";
+	var rows = getSelectedRows(gridId);
+	if (!rows || rows.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	for(var i=0;i<rows.length;i++){
+		if(rows[i].status != "0"){
+			infoTip("<@s.m code='PRODUCTIONSCHEDULE_DATASTATUS1_NOTDELETE'/>");
+			return;
+		}
+	}
+	if (rows.length > 0) {
+		var ids = [];
+		BootstrapDialog
+				.confirm({
+					title : commons_msg.btnDelete,
+					message : commons_msg.deleteConfirm,
+					closable : true, // <-- Default value is false
+					draggable : true, // <-- Default value is false
+					btnCancelLabel : commons_msg.btnCancel, // <-- Default value is 'Cancel',
+					btnOKLabel : commons_msg.btnConfirm, // <-- Default value is 'OK',
+					callback : function(result) {
+						if (result) {
+							var refCount = 0;
+							var sysDataCount = 0;
+							for (var i = 0; i < rows.length; i++) {
+								if (rows[i].id != null) {
+									if (rows[i].refCount
+											&& rows[i].refCount > 0) {
+										refCount++;
+									}
+									if (rows[i].systemData
+											&& rows[i].systemData == 'Y') {
+										sysDataCount++;
+									}
+									ids.push(rows[i].id);
+								}
+							}
+							if (sysDataCount > 0) {
+								infoTip(commons_msg.noDeleteSysData);
+							} else if (refCount > 0) {
+								infoTip(commons_msg.noDeleteQuoteData);
+							} else {
+								ajaxRequest(url, {
+									'ids' : JSON.stringify(ids)
+								}, function() {
+									var currentPage = 1;
+									var totalPage = 1;
+									var deleteRows = ids.length;
+									var currentPageRows = $('#' + gridId).bootstrapTable('getData', true).length;
+									totalPage = $(".pagination").find('.page-number').length;
+									currentPage = $(".pagination .page-number.active a").html() * 1;
+									if (currentPage > 1 && currentPage == totalPage && deleteRows == currentPageRows) {
+										$('#' + gridId).bootstrapTable('prevPage');
+									} else {
+										reloadTable(gridId);
+										reloadTable("dg${currentPageId}");
+									}
+								});
+							}
+						}
+	          }
+		});
+	} else {
+		infoTip(commons_msg.plsSelDeleteData);
+	}
+}
+var selectId = 0;
+function positionSwitch(sign) {
+	var title="<@s.m code='PRODUCTIONSCHEDULE_SINGLE'/>";
+	var url="${baseUrl}/mpSchedul/positionSwitch.do";
+	var gridId="mps${currentPageId}";
+	var rows = getSelectedRows(gridId);
+	if (!rows || rows.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rows.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	selectId = rows[0].id;
+	ajaxRequest(url, {
+		sign:sign,id:selectId
+	}, function() {
+		var currentPage = 1;
+		var totalPage = 1;
+		var deleteRows = 1;
+		var currentPageRows = $('#' + gridId).bootstrapTable('getData', true).length;
+		totalPage = $(".pagination").find('.page-number').length;
+		currentPage = $(".pagination .page-number.active a").html() * 1;
+		if (currentPage > 1 && currentPage == totalPage && deleteRows == currentPageRows) {
+			$('#' + gridId).bootstrapTable('prevPage');
+		} else {
+			$('#' + gridId).bootstrapTable('refresh');
+			
+		}
+	});
+}
+function productionCompletion() {
+	var title="<@s.m code='PRODUCTIONSCHEDULE_SINGLE'/>";
+	var url="${baseUrl}/mpSchedul/productionCompletion.do";
+	var gridId="mps${currentPageId}";
+	var rows = getSelectedRows(gridId);
+	if (!rows || rows.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	var ids = [];
+	for (var i = 0; i < rows.length; i++) {
+		if (rows[i].id != null) {
+			ids.push(rows[i].id);
+		}
+	}
+	ajaxRequest(url, {
+		'ids' : JSON.stringify(ids)
+	}, function() {
+		var currentPage = 1;
+		var totalPage = 1;
+		var deleteRows = 1;
+		var currentPageRows = $('#' + gridId).bootstrapTable('getData', true).length;
+		totalPage = $(".pagination").find('.page-number').length;
+		currentPage = $(".pagination .page-number.active a").html() * 1;
+		if (currentPage > 1 && currentPage == totalPage && deleteRows == currentPageRows) {
+			$('#' + gridId).bootstrapTable('prevPage');
+		} else {
+			$('#' + gridId).bootstrapTable('refresh');
+			
+		}
+	});
+}
+function renderCheckbox(value,row,index){
+	if (selectId!=0 && row.id == selectId){
+      return {
+          checked : true//设置选中
+      };
+	}
+}
+function batchCheck() {
+	var url="${baseUrl}/mpSchedul/batchDispatching.do";
+	var gridId="dg${currentPageId}";
+	var rows = getSelectedRows(gridId);
+	var array = ${allGlobalJson!};
+	for(var i=0;i<rows.length;i++){
+		if(rows[i].dataType!="1"){
+			infoTip("<@s.m code='PRODUCTIONSCHEDULE_BATCHDISPATCHING_DATATYPE_NOT1'/>");
+			return;
+		}
+		if($.inArray(rows[i].model, array)!=-1){
+			infoTip("机型["+rows[i].model+"]<@s.m code='PRODUCTIONSCHEDULE_BATCHDISPATCHING_ERROR'/>");
+			return;
+		}
+	}
+	if (rows.length > 0) {
+		var ids = [];
+		BootstrapDialog
+				.confirm({
+					title : commons_msg.btnBatch,
+					message : commons_msg.batchConfirm,
+					closable : true, 
+					draggable : true,
+					btnCancelLabel : commons_msg.btnCancel,
+					btnOKLabel : commons_msg.btnConfirm,
+					callback : function(result) {
+						if (result) {
+							for (var i = 0; i < rows.length; i++) {
+								if (rows[i].id != null) {
+									ids.push(rows[i].id);
+								}
+							}
+							ajaxRequest(url, {
+								'ids' : JSON.stringify(ids)
+							}, function() {
+								reloadTable(gridId);
+								reloadTable("mps${currentPageId}");
+							});
+						}
+			}
+		});
+	} else {
+		infoTip(commons_msg.plsSelBatchData);
+	}
+}
+function frame_grid_remove(url, gridId) {
+	var rows = getSelectedRows(gridId);
+	for(var i=0;i<rows.length;i++){
+		if(rows[i].dataType == "1"){
+			infoTip("<@s.m code='PRODUCTIONSCHEDULE_DATATYPE1_NOTDELETE'/>");
+			return;
+		}
+	}
+	remove(url, gridId);
+}
+
+//解锁
+function deblocking(){
+	var url="${baseUrl}/mpSchedul/unLock.do";
+	var gridId="mps${currentPageId}";
+	var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	
+	if (rowsData[0].status != 5) {
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_STATUS_UNLOCK'/>");
+		return;
+	}
+	if (rowsData.length > 0) {
+		var ids = [];
+		BootstrapDialog
+				.confirm({
+					title : commons_msg.unLock,
+					message : commons_msg.unLockConfirm,
+					closable : true, 
+					draggable : true,
+					btnCancelLabel : commons_msg.btnCancel,
+					btnOKLabel : commons_msg.btnConfirm,
+					callback : function(result) {
+						if (result) {
+							for (var i = 0; i < rowsData.length; i++) {
+								if (rowsData[i].id != null) {
+									ids.push(rowsData[i].id);
+								}
+							}
+							ajaxRequest(url, {
+								'ids' : JSON.stringify(ids)
+							}, function() {
+								reloadTable("dg${currentPageId}");
+								reloadTable(gridId);
+							});
+						}
+			}
+		});
+	} else {
+		infoTip(commons_msg.plsSelBatchData);
+	}
+}
+
+//锁定
+function locking(){
+	var url="${baseUrl}/mpSchedul/lock.do";
+	var gridId="mps${currentPageId}";
+	var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	if(rowsData[0].status != 1 && rowsData[0].status != 7){
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_STATUS_LOCK'/>");
+		return;
+	}
+	if (rowsData.length > 0) {
+		var ids = [];
+		BootstrapDialog
+				.confirm({
+					title : commons_msg.lock,
+					message : commons_msg.lockConfirm,
+					closable : true, 
+					draggable : true,
+					btnCancelLabel : commons_msg.btnCancel,
+					btnOKLabel : commons_msg.btnConfirm,
+					callback : function(result) {
+						if (result) {
+							for (var i = 0; i < rowsData.length; i++) {
+								if (rowsData[i].id != null) {
+									ids.push(rowsData[i].id);
+								}
+							}
+							ajaxRequest(url, {
+								'ids' : JSON.stringify(ids)
+							}, function() {
+								reloadTable("dg${currentPageId}");
+								reloadTable(gridId);
+							});
+						}
+			}
+		});
+	} else {
+		infoTip(commons_msg.plsSelBatchData);
+	}
+}
+
+//强制结束
+function mandatoryEnd(){
+	
+	var url="${baseUrl}/mpSchedul/mandatoryEnd.do";
+	var gridId="mps${currentPageId}";
+	var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	if(rowsData[0].status != 1 && rowsData[0].status != 7){
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_STATUS_LOCK'/>");
+		return;
+	}
+	if (rowsData.length > 0) {
+		var ids = [];
+		BootstrapDialog
+				.confirm({
+					title : commons_msg.mandatoryEnd,
+					message : commons_msg.mandatoryEndConfirm,
+					closable : true, 
+					draggable : true,
+					btnCancelLabel : commons_msg.btnCancel,
+					btnOKLabel : commons_msg.btnConfirm,
+					callback : function(result) {
+						if (result) {
+							for (var i = 0; i < rowsData.length; i++) {
+								if (rowsData[i].id != null) {
+									ids.push(rowsData[i].id);
+								}
+							}
+							ajaxRequest(url, {
+								'ids' : JSON.stringify(ids)
+							}, function() {
+								reloadTable("dg${currentPageId}");
+								reloadTable(gridId);
+							});
+						}
+			}
+		});
+	} else {
+		infoTip(commons_msg.plsSelBatchData);
+	}
+	
+}
+function refurbish(){
+	 $('#mps${currentPageId}').bootstrapTable('refresh');
+}
+</script>

@@ -1,0 +1,86 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+function setUser() {
+	BootstrapDialog.show({
+		size : BootstrapDialog.SIZE_WIDE,
+		title : '<@s.m code="USER_SELECT" />',
+		message : function(dialog) {
+			var $message = $('<div></div>');
+			var pageToLoad = dialog.getData('pageToLoad');
+			$message.load(pageToLoad);
+
+			return $message;
+		},
+		buttons : [ {
+			label : commons_msg.btnConfirm,
+			cssClass : 'btn-primary',
+			action : function(dialogRef) {
+				var rows = getSelectedRows('dgUserSelectGrid');
+				if (rows.length > 0) {
+					var ids = getSelectedIds('dgUserSelectGrid');
+					ajaxRequest('${baseUrl}/position/updateUser.do',{'positionId' : '${positionId}','userIds' : JSON.stringify(ids)},function(){
+						reloadTable('dgUserPosition');
+						dialogRef.close();
+					});
+				
+				}else{
+					infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+				}
+			}
+		}, {
+			label : commons_msg.btnClose,
+			cssClass : 'btn-default',
+			action : function(dialogRef) {
+				dialogRef.close();
+			}
+		} ],
+		data : {
+			'pageToLoad' : '${baseUrl}/user/listSelect.do?currentPageId=UserSelectGrid'
+		}
+	});        
+}
+
+function deleteUser(){
+    var rows = getSelectedRows('dgUserPosition');
+    if (rows.length > 0) {
+    	var ids = getSelectedIds('dgUserPosition');
+		ajaxRequest("${baseUrl}/position/deleteUser.do?positionId=${positionId}",{'ids' : JSON.stringify(ids)},function(){
+			reloadTable('dgUserPosition');
+		});
+	} else {
+		infoTip(commons_msg.plsSelDeleteData);
+	}
+}
+</script>
+<@p.body permissionModule="USER" noBreadcrumbs="true">
+	<@p.searchPanel gridId="dgUserPosition">
+		<@p.searchColumns>
+			<@p.input title="USER_NAME" field="name"  permissionCode="USER_NAME"></@p.input>
+			<@p.input title="USER_ACCOUNT_NUMBER" field="account" permissionCode="USER_ACCOUNT_NUMBER"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="dtUserPosition">
+			<@p.button title="BTN_DIALOG_ADD"  onclick="setUser()" iconCls="plus"></@p.button>
+			<@p.button title="BTN_MOVE"  onclick="deleteUser()" iconCls="trash"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/user/list.do?queryCondition[positionId]=${positionId}" id="dgUserPosition">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="USER_NAME" field="name"   permissionCode="USER_NAME"></@p.column>
+		<@p.column title="USER_ACCOUNT_NUMBER" field="account"   permissionCode="USER_ACCOUNT_NUMBER"></@p.column>
+		<@p.column title="USER_STATUS" width="80"field="status"  permissionCode="USER_STATUS"  formatter="renderStatus"  ></@p.column>
+		<@p.column title="USER_SEX" width="80" field="gender"    permissionCode="USER_SEX"  formatter="renderGender"  ></@p.column>
+		<@p.column title="USER_MAIL" field="email"  permissionCode="USER_MAIL"></@p.column>
+		<@p.column title="USER_PHONE" field="phone"  permissionCode="USER_PHONE"></@p.column>
+		<@p.column title="USER_FAX" field="fax"  permissionCode="USER_FAX"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+	function renderGender(value) {
+		return entryRenderer('GENDER', value);
+	}
+	function renderStatus(value) {
+		return entryRenderer('LOGINSTATUS', value);
+	}
+</script>

@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="format-detection" content="telephone=no" />
+	<link rel="stylesheet" href="../../mui/css/mui.min.css" />
+	<script src="../../mui/js/mui.min.js"></script>
+	<script src="../../mui/js/app.js"></script>
+	<script src="../../js/jquery-1.8.0.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+	<style>
+		.page-content{
+			margin-top: 50px;
+		}
+		.link-area {
+			text-align: center;
+		}
+	</style>
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<h1 class="mui-title">登录</h1>
+	</header>
+	<div class="page-content">
+		<div class="mui-input-group">
+			<div class="mui-input-row">
+				<label>用户名：</label>
+				<input id="account" type="text" value="admin" class="mui-input-clear mui-input"/>
+			</div>
+			<div class="mui-input-row">
+				<label>密码：</label>
+				<input  id="password" type="password" value="123456" class="mui-input-clear mui-input"/>
+			</div>
+			<input style="display: none;"/>
+		</div>
+		<div class="mui-content-padded">
+			<button class="mui-btn mui-btn-block mui-btn-primary" data-loading-icon-position="right" onclick="sumbit(this)">登录</button>
+		</div>
+		<div class="mui-content-padded oauth-area"></div>
+	</div>
+	<script>
+		function sumbit(e){
+			var _account = document.getElementById("account").value;
+			var _password = document.getElementById("password").value;
+			if(!_account){
+				mui.toast("用户名不能为空。");
+				return;
+			}
+			if(!_password){
+				mui.toast("密码不能为空。");
+				return;
+			}
+			app.ajaxRequest({
+				url:'phoneMain/phoneLogin.do',
+				data:{
+					'j_username': _account,
+					'j_password':_password
+				 },
+				 callback:function(res){
+				 	app.localStorage('entrys',res.data.entrys);
+				 	app.localStorage('user',res.data.user);
+				 	window.location.href="../home/home.html";
+				 }
+			});
+		}
+	</script>
+</body>
+</html>

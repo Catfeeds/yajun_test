@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+</script>
+<body style="overflow-y: hidden" scroll="no" >
+<@p.editForm url="${baseUrl}/bpm/model/manage/deploy.do" class="form-horizontal"  noPermissionModule="true" >
+	<input type="hidden" name="modelId" value="${modelId!}" >
+	<@p.formRow>
+		<@p.formColmd title="PROCESS_COLUMN_HISTORY_URL">
+			<input name="historyUrl"  class="inputxt"  datatype="*">
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+</body>
+</html>

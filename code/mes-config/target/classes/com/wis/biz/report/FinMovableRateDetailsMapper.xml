@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="FinMovableRateDetailsMapper" >
+	<select id="getFinMovableRateWhiteAndNightData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			select 
+				tab.maxValue,
+		       tab.minValue,
+		       tab.targetValue,
+		       (select t.real_run_rate  from fin_movable_rate t  where t.id = tab.maxId) lastRate,
+		       tab.dateShow 
+			from (
+				select 
+						   max(fmr.id)maxId,
+					       max(fmr.real_run_rate) as maxValue,
+					       min(fmr.real_run_rate) as minValue,
+					       max(fmr.target_value) as targetValue,
+					       to_char(fmr.work_calendar_begin, 'MM/dd') as dateShow
+					  from fin_movable_rate fmr
+					 where fmr.shift_no = #{shiftNo}
+					   and fmr.work_calendar_begin is not null
+					   and fmr.is_rest = 'N'
+			   <if test="createTimeStart!=null and createTimeStart!='' ">
+				 and fmr.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+			   </if>
+			   <if test="createTimeEnd!=null and createTimeEnd!='' ">
+			 	and fmr.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+			   </if> 
+			    group by to_char(fmr.work_calendar_begin,'yyyy-MM-dd'),
+			    to_char(fmr.work_calendar_begin,'MM/dd')
+			    order by to_char(fmr.work_calendar_begin, 'yyyy-MM-dd')
+			)tab
+	</select>
+	<select id="getFaultAndNoFaultTime" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select to_char(fmr.create_time, 'hh24:mi:ss') as detailsTime,
+		   sum(fmr.real_run_rate) as realRunRate
+		  from fin_movable_rate fmr
+		 where fmr.shift_no = #{shiftNo}
+		   and to_char(fmr.create_time,'yyyy-MM-dd') = #{workCalendarTime} 
+		   and fmr.is_rest = 'N'
+		   group by fmr.create_time
+		   order by fmr.create_time asc
+	</select>
+	
+	<select id="getFaultAndNoFaultMessage" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+			select fnfs.duration as noFaultDuration,
+			       (select ff.duration
+			          from fin_faulted ff
+			         where ff.shift_no = #{shiftNo}
+			           and to_date((to_char(ff.create_time,'yyyy-MM-dd')|| ff.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			           and to_date((to_char(ff.create_time,'yyyy-MM-dd')|| ff.finish),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') and rownum = 1) as faultedDuration
+			  from fin_no_fault_stop fnfs
+			 where fnfs.shift_no = #{shiftNo}
+			   and fnfs.is_rest = 'N'
+			and to_date((to_char(fnfs.create_time,'yyyy-MM-dd')|| fnfs.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fnfs.create_time,'yyyy-MM-dd')|| fnfs.finish),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and rownum = 1
+	</select>
+	<select id="getFaulitedOrNotCountAndDurationByTime" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+		select tab.count count,tab.duration duration,tab.type type from 
+		(select count(t.id) count, sum(t.duration) duration, 'FAULTED' type
+          from fin_faulted t
+          where 
+           to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss')&gt;=#{beginTime}
+                 and
+             to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss')&lt;= #{finishTime}
+              or 
+           #{beginTime} between to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss') 
+           			and to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss') 
+           	or 
+           	#{finishTime} between to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss') 
+           	and to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss')
+        union all
+        select count(t.id) count, sum(t.duration) duration, 'NO_FAULTED' type
+          from fin_no_fault_stop t where
+          to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss')&gt;=#{beginTime}
+                 and
+             to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss')&lt;=#{finishTime}
+              or 
+           	#{beginTime} between to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss') 
+           			and to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss') 
+           	or 
+           	#{finishTime} between to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss') 
+           	and to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss')
+          ) tab
+	</select>
+	<select id="getMovableRateByTime" resultType="com.wis.mes.dakin.report.entity.FinMovableRate" parameterType="java.util.HashMap">
+		  select t.id                  id,
+              t.real_run_rate       realRunRate,
+              t.create_time         createDateTime,
+              t.shift_no            shiftNo,
+              t.work_calendar_begin workCalendarBegin,
+              t.target_value        targetValue
+         from fin_movable_rate t
+         where t.shift_no=#{shiftNo}
+            and t.is_rest = 'N'
+         <if test="createTimeStart!=null and createTimeStart!=''">
+         	and t.create_time &gt;=to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi:ss')
+         </if>
+          <if test="createTimeEnd!=null and createTimeEnd!=''">
+         	and t.create_time &lt;=to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi:ss')
+         </if>
+        order by t.id asc
+	</select>
+	<select id="getFinOneLivelStatusContent" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select a.content content, a.type, sum(a.duration) duration from
+	       (
+			select (select tde.entry_name
+	          from ts_dict_entry tde, ts_dict_type tdt
+	         where tde.type_id = tdt.id
+	           and tdt.type_code = 'FAULTED_DETAILS_CODE'
+	           and tde.entry_code = t.faulted_code)  content,
+	           'FAULTED' type,
+	       t.duration  duration
+		  from fin_faulted t
+		  where
+		       to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss')&gt;=#{beginTime}
+		             and
+		         to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss')&lt;= #{finishTime}) a
+	   group by a.content, a.type  
+	  union all
+	  select a.content content, a.type type, sum(a.duration) duration from 
+	   ( select (select tde.entry_name
+	          from ts_dict_entry tde, ts_dict_type tdt
+	         where tde.type_id = tdt.id
+	           and tdt.type_code = 'FIN_ONE_LIVEL_STATUSCONTENT'
+	           and tde.entry_code = '切换停机')  content,
+	           'NO_FAULTED' type,
+	           t.duration duration
+	           from FIN_SWITCH_STOP t 
+	           where
+	           to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss')&gt;=#{beginTime}
+	                 and
+	             to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss')&lt;= #{finishTime}
+	        union all
+	        select (select tde.entry_name
+	          from ts_dict_entry tde, ts_dict_type tdt
+	         where tde.type_id = tdt.id
+	           and tdt.type_code = 'FIN_ONE_LIVEL_STATUSCONTENT'
+	           and tde.entry_code = '换料停机')  content,
+	           'NO_FAULTED' type,
+	           t.duration duration
+	           from FIN_CHANGE_MATERIAL_STOP t 
+	            where
+	           to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss')&gt;=#{beginTime}
+	                 and
+	             to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss')&lt;= #{finishTime}
+	        union all
+	          select (select tde.entry_name
+	          from ts_dict_entry tde, ts_dict_type tdt
+	         where tde.type_id = tdt.id
+	           and tdt.type_code = 'FIN_ONE_LIVEL_STATUSCONTENT'
+	           and tde.entry_code = '加油停机')  content,
+	           'NO_FAULTED' type,
+	           t.duration duration
+	           from FIN_ADD_OIL_STOP t 
+	            where
+	           to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.begin,'yyyy-MM-dd HH24:mi:ss')&gt;=#{beginTime}
+	                 and
+	             to_date(to_char(t.create_time, 'yyyy-MM-dd') || ' ' || t.finish,'yyyy-MM-dd HH24:mi:ss')&lt;= #{finishTime}
+	          ) a where a.duration is not null group by a.content, a.type 
+	</select>
+</mapper>  

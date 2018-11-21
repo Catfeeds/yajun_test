@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="EquipmentStatusMapper">
+	<select id="queryPageTbEquipmentStatusCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+ select count(*)
+  from tb_equipment_status t
+      left join tm_line le on le.id = t.tm_line_id
+      left join tm_equipment et on et.id = t.tm_equipment_id
+      left join tm_worktime wt on wt.id = t.tm_work_time_id
+   where exists (select 1
+            from (select max(tt.id) tid
+                    from tb_equipment_status tt
+                   group by tt.tm_equipment_id) tbl
+           where tbl.tid = t.id)
+         <if test="tmLineId!=null and tmLineId!='' ">
+			and le.id like #{tmLineId}
+		</if>
+		<if test="equipmentName!=null and equipmentName!='' ">
+			and et.name like '%'||#{equipmentName}|| '%'
+		</if>
+		<if test="runningState!=null and runningState!='' ">
+			and t.running_state = #{runningState}
+		</if>
+		<if test="runningStateIN!=null and runningStateIN!='' ">
+          and t.running_state IN (${runningStateIN})
+        </if>
+		<if test="tmEquipmentId!=null and tmEquipmentId!='' ">
+          and t.TM_EQUIPMENT_ID = #{tmEquipmentId}
+        </if>
+	</select>
+<select id="queryPageTbEquipmentStatus" resultType="com.wis.mes.production.equipmentstatus.entity.TbEquipmentStatus" parameterType="java.util.HashMap">
+ SELECT
+    *
+    FROM
+    (
+    SELECT
+    ROW_.*,
+    ROWNUM ROWNUM_
+    FROM
+    (
+       select wt.shiftno "worktime.shiftno",
+        le.no "tmline.no",
+        le.name_cn "tmline.nameCn",
+        et.no "tmEquipment.no",
+        et.name "tmEquipment.name",
+        et.tm_plant_id "tmEquipment.tmPlantId",
+        t.running_state "runningState",
+        t.status_number "statusNumber",
+        t.status_content "statusContent",
+        t.begin_time "beginTime",
+        t.finish_time "finishTime",
+        t.duration "duration",
+        t.create_time "createTime",
+        cm.class_group "classManager.classGroup",
+        coderule.code as"codeRule.code",
+        coderule.code_desc as "codeRule.codeDesc"
+      from tb_equipment_status t
+     	  left join tm_equipment_abnormal equipmentabnormal on equipmentabnormal.tm_equipment_id = t.tm_equipment_id
+     	  	and equipmentabnormal.abnormal_code = t.status_number
+          left join tm_line le on le.id = t.tm_line_id
+          left join tm_equipment et on et.id = t.tm_equipment_id
+          left join tm_worktime wt on wt.id = t.tm_work_time_id
+          left join tm_class_manager cm on cm.id = t.tm_class_manager_id
+          left join tm_code_rule coderule
+			    on coderule.plc_code = et.no || ' ' || t.status_number
+			   and coderule.tm_line_id = t.tm_line_id
+       where exists (select 1
+                from (select max(tt.id) tid
+                        from tb_equipment_status tt
+                       group by tt.tm_equipment_id) tbl
+               where tbl.tid = t.id) 
+        <if test="tmLineId!=null and tmLineId!='' ">
+          and le.id like #{tmLineId}
+        </if>
+        <if test="equipmentName!=null and equipmentName!='' ">
+          and et.name like '%'||#{equipmentName}|| '%'
+        </if>
+        <if test="runningState!=null and runningState!='' ">
+          and t.running_state = #{runningState}
+        </if>
+        <if test="runningStateIN!=null and runningStateIN!='' ">
+          and t.running_state IN (${runningStateIN})
+        </if>
+        <if test="tmEquipmentId!=null and tmEquipmentId!='' ">
+          and t.TM_EQUIPMENT_ID = #{tmEquipmentId}
+        </if>
+          order by ${orderField} ${orderDirection}
+    ) ROW_
+    )
+    WHERE
+   ROWNUM_ > #{firstRow}
+   AND #{pageSize} >= ROWNUM_
+	</select>
+</mapper>

@@ -1,0 +1,18 @@
+<#include "../../../include/bootstrapTableCommons.html">
+
+<@p.body permissionModule="PARAMETER" noBreadcrumbs="true">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PARAMETER_CODE" field="code"></@p.input>
+			<@p.input title="PARAMETER_NAME" field="name"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid  url="${baseUrl}/equipmentParam/getParamList.do?tmEquipmentId="+"${tmEquipmentId}" singleSelect=singleSelect>
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="PARAMETER_CODE" field="code" permissionCode="PARAMETER_CODE"></@p.column>
+		<@p.column title="PARAMETER_NAME" field="name" permissionCode="PARAMETER_NAME"></@p.column>
+		<@p.column title="PARAMETER_REGULAREXPRESSION" field="regularExpression"  permissionCode="PARAMETER_REGULAR_EXPRESSION" ></@p.column>
+		<@p.column title="PARAMETER_NOTE" field="note"  permissionCode="PARAMETER_NOTE" ></@p.column>
+	</@p.dataGrid>
+</@p.body>

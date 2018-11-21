@@ -1,0 +1,144 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+$('#startDate_lisPage').focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd'});
+	WdatePicker({
+		maxDate : '#F{$dp.$D(\'settingEnd\',{d:-1})}'
+	});
+});
+$('#endDate_listPage').focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd'});
+	WdatePicker({
+		maxDate : '#F{$dp.$D(\'settingEnd\',{d:-1})}'
+	});
+});
+$('#dg${currentPageId}').on('click-row.bs.table', function (e, row, $element) {
+	var workTimeRestShow=document.getElementById("workTimeRestShow");
+	workTimeRestShow.style.display="block";
+		var parameters = {currentPageId:"SelectGrid",params:"queryCondition[tmWorktimeId]="+row.id,tmWorktimeId:row.id};
+		ajaxResponseHtml('${baseUrl}/worktimerest/listInput.do',parameters,'workTimeRestShow');
+});
+		
+	function importData(){
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/worktime/exportTemplate.do";
+		importFile("<@s.m code="WORKSHOP_IMPORT" />", "${baseUrl}/worktime/importData.do", "dg${currentPageId}",obj);
+	}
+   function rendEnabled(value) {
+		return entryRenderer('ENABLED', value);
+   }
+   
+   function rendClassGroup(value) {
+		return entryRenderer('CLASS_GROUP', value);
+  }
+   
+   function rendClassOrder(value) {
+		return entryRenderer('SHIFT_TYPE', value);
+  }
+	function renderPlantNoOrName(value,record) {
+		if(value && record.plant.no){
+			return record.plant.no+ " - " + value;
+		}
+		return "";
+	}
+	function renderWorkShopNoOrName(value,record) {
+		if(value && record.workshop.no){
+			return record.workshop.no+ " - " + value;
+		}
+		return "";
+	}
+	function renderLineNoOrName(value,record) {
+		if(value && record.line.no){
+			return record.line.no+ " - " + value;
+		}
+		return "";
+	}
+	function renderPlantNum(value) {
+		if(value){
+			return value;
+		}
+		return "";
+	}
+	
+	function renderActNum(value) {
+		if(value){
+			return value;
+		}
+		return "";
+	}
+
+	function deleatePathUloc(){
+		var rowsData = getSelectedRows('dg${currentPageId}');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		var ids = [];
+		$(rowsData).each(function(i,item){
+			ids.push(item.id);
+		});
+		var url="${baseUrl}/worktime/deleteWorkTimeARestByIds.do?ids="+JSON.stringify(ids);
+		createConfirmWindow("删除","删除时会把对应的子信息一起删除，确定删除吗?",url, 'dg${currentPageId}');
+	}
+</script>
+
+<@p.body title="WORK_TIME_LIST_TITLE" permissionModule="WORKTIME" noBreadcrumbs="true">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="WORK_TIME_SHIFTNO_NO" type="select"  field="shiftno" options=classOrderOptions class="select2"></@p.input>
+			<@p.input title="WORK_TIME_LINE" id="lineId" type="select"  field="tmLineId" options=line></@p.input>
+			<@p.input title="WORK_TIME_WORK_DATA_START" field="workDateStart" id="startDate_lisPage" class="timepicker"></@p.input>
+			<@p.input title="WORK_TIME_WORK_DATA_END" field="workDateEnd" id="endDate_listPage" class="timepicker"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+			<@p.button title="WORK_TIME_ADD" permissionCode="WorkTimeAdd" iconCls="plus" onclick="workTimeAdd('新增','${baseUrl}/worktime/addInput.do','dg${currentPageId}')" type="button"></@p.button>
+			<@p.button title="WORK_TIME_UPDATE" permissionCode="WorkTimeUpdate" iconCls="edit"  onclick="workTimeUpdate('编辑','${baseUrl}/worktime/updateInput.do','dg${currentPageId}')" type="button"></@p.button>
+			<@p.button title="WORK_TIME_DELETE" iconCls="trash" permissionCode="WorkTimeDelete"onclick="deleatePathUloc();" type="button"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/worktime/list.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="WORK_TIME_WORK_DATA" field="workDate" permissionCode="WORK_TIME_WORK_DATA" ></@p.column>
+		<@p.column title="WORK_TIME_SHIFTNO_NO" field="shiftno"   permissionCode="WORK_TIME_SHIFTNO_NO" formatter="rendClassOrder"></@p.column>
+		<@p.column title="WORK_TIME_LINE" field="line.nameCn" permissionCode="WORK_TIME_LINE" formatter="renderLineNoOrName" ></@p.column>
+		<@p.column title="WORK_TIME_CLASS_GROUP" field="tmClassManager.classGroup"   permissionCode="WORK_TIME_CLASS_GROUP" formatter="rendClassGroup"></@p.column>
+		<@p.column title="WORK_TIME_START_TIME" field="startTime" permissionCode="WORK_TIME_START_TIME" ></@p.column>
+		<@p.column title="WORK_TIME_END_TIME" field="endTime" permissionCode="WORK_TIME_END_TIME" ></@p.column>
+		<@p.column title="WORK_TIME_PLAN_ONLINE_QTY" field="planOnlineQty" formatter="renderPlantNum" permissionCode="WORK_TIME_PLAN_ONLINE_QTY" ></@p.column>
+		<@p.column title="WORK_TIME_ENABLED" field="enabled" permissionCode="WORK_TIME_ENABLED" formatter="rendEnabled"></@p.column>
+	</@p.dataGrid>
+	<div id ="workTimeRestShow">
+	</div>
+</@p.body>
+<script type="text/javascript">
+
+function importDataAll (){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/worktime/exportTemplateAll.do";
+    importFile("<@s.m code="WORK_TIME_IMPORT_ALL" />", "${baseUrl}/worktime/importDataAll.do", "dg${currentPageId}",obj);
+}
+
+function  workTimeAdd(title, addurl, gridId){
+	createwindow(title, addurl, gridId,'','workTimeAddSubmit');
+}
+function   workTimeUpdate(title, url, gridId){
+    var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	if (url.indexOf('?') != -1) {
+		url += '&id=' + rowsData[0].id;
+	} else {
+		url += '?id=' + rowsData[0].id;
+	}
+	createwindow(title, url, gridId,'','workTimeUpdateSubmit');
+}
+</script>
+

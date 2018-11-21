@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/nc/add.do?tmNcGroupId=${tmNcGroupId}" class="form-horizontal" permissionModule="NC">
+	<input type ="hidden" name="tmNcGroupId" id="tmNcGroupId"/>
+		<@p.formRow>
+			<!-- <@p.formColmd title="TM_NC_NO" permissionCode="TM_NC_NO">
+				<input name="no" class="inputxt" errormsg="<@s.m code='NO_ONLY'/>" datatype="/^[\w\d-_\\\/]+$/" maxlength='100' />
+			</@p.formColmd> -->
+			<@p.formColmd title="TM_NC_NAME" permissionCode="TM_NC_NAME">
+				<input name="name" class="inputxt" datatype="*" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="FAULT_GRADE_LEVEL" permissionCode="TM_NC_NAME">
+				<@p.input type="select" field="tmFaultGradeId" onchange="setEntrance(this.value);" options=optionFaultGrades datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="FAULT_GRADE_ENTRANCE" permissionCode="TM_NC_NAME">
+				<input class="inputxt" id="entranceId" maxlength='100' ignore="ignore" readonly="readonly"/>
+			</@p.formColmd>
+			<@p.formColmd title="TM_NC_REMARKS" permissionCode="TM_NC_REMARKS">
+				<input name="remarks" class="inputxt" maxlength='100' ignore="ignore"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$("#tmNcGroupId").val($("#ncGroupId").val());
+});
+function setEntrance(val){
+	var faultGrades = eval('(' + '${faultGrades!}' + ')');
+	var optionNgEntrance = eval('(' + '${optionNgEntrance!}' + ')');
+	for(var i in faultGrades){
+		if(faultGrades[i].code == val){
+			$('#entranceId').val(keysValue(optionNgEntrance,faultGrades[i].relevantParameter));
+			break;
+		}
+	}
+}
+</script>

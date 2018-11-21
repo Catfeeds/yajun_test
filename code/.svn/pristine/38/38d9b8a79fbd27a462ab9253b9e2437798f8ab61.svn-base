@@ -1,0 +1,31 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body permissionModule="TASK_REMIND" noBreadcrumbs="true">
+	<@p.searchPanel>
+		<@p.searchColumns >
+			<@p.input title="TASK_REMIND_PROCESS_NAME" field="node.processName" permissionCode="PROCESS_NAME"></@p.input>
+			<@p.input title="TASK_REMIND_PROCESS_DESCRIPTION" field="node.processDescription" permissionCode="PROCESS_DESCRIPTION"></@p.input>
+			<@p.input title="TASK_REMIND_REMINDER_NAME" field="remindUser.name" permissionCode="REMINDER_NAME"></@p.input>
+			<br/>
+			<@p.input title="TASK_REMIND_NODE_NAME" field="node.name" permissionCode="NODE_NAME"></@p.input>
+			<@p.input title="TASK_REMIND_NODE_DESCRIPTION" field="node.description" permissionCode="NODE_DESCRIPTION"></@p.input>			
+			<@p.input title="TASK_REMIND_REMINDER_ACCOUNT" field="remindUser.account" permissionCode="REMINDER_ACCOUNT"></@p.input><br/>
+			<@p.input title="TASK_REMIND_IS_RELEASED" options=options type="select" field="released" permissionCode="RELEASED"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/manage/remind/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="TASK_REMIND_PROCESS_NAME" width="100" field="processName" permissionCode="PROCESS_NAME"></@p.column>
+		<@p.column title="TASK_REMIND_PROCESS_DESCRIPTION" width="160" field="processDescription" permissionCode="PROCESS_DESCRIPTION"></@p.column>
+		<@p.column title="TASK_REMIND_PROCESS_VERSION" width="70" field="version" permissionCode="PROCESS_VERSION"></@p.column>
+		<@p.column title="TASK_REMIND_NODE_NAME" field="name" width="100" permissionCode="NODE_NAME"></@p.column>
+		<@p.column title="TASK_REMIND_NODE_DESCRIPTION" width="160" field="description" permissionCode="NODE_DESCRIPTION"></@p.column>
+		<@p.column title="TASK_REMIND_TITLE" field="title" width="140" permissionCode="TITLE"></@p.column>
+		<@p.column title="TASK_REMIND_REMINDER_NAME" width="100" field="reminderName" permissionCode="REMINDER_NAME"></@p.column>
+		<@p.column title="TASK_REMIND_REMINDER_ACCOUNT"  width="100" field="reminderAccount" permissionCode="REMINDER_ACCOUNT"></@p.column>
+		<@p.column title="TASK_REMIND_EXPRESSION" field="expression" width="120" permissionCode="EXPRESSION"></@p.column>
+		<@p.column title="TASK_REMIND_IS_RELEASED" field="released" width="120" formatter="releasedRenderer"  permissionCode="RELEASED"></@p.column>
+	</@p.dataGrid>
+</@p.body>	
+

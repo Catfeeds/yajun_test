@@ -1,0 +1,24 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body permissionModule="DICT_ENTRY"  noBreadcrumbs="true">
+	<@p.searchPanel>
+		<@p.searchColumns >
+			<@p.input title="ENTRY_CODE" field="code" permissionCode="ENTRY_CODE"></@p.input>
+			<@p.input title="ENTRY_NAME_CN" field="name" permissionCode="ENTRY_NAME"></@p.input>
+			<@p.input title="ENTRY_NAME_EN" field="enName" permissionCode="ENTRY_NAME"></@p.input>
+			<@p.input title="TYPE_NAME_CN" field="type.name" permissionCode="TYPE_NAME_"></@p.input>
+			<@p.input title="TYPE_NAME_EN" field="type.enName" permissionCode="TYPE_NAME"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/entry/list.do">
+		<@p.column title="Id" checkbox="true" field="entryId" ></@p.column>
+		<@p.column title="TYPE_CODE" field="type.code" permissionCode="TYPE_CODE"></@p.column>
+		<@p.column title="TYPE_NAME_CN" field="type.name" permissionCode="TYPE_NAME"></@p.column>
+		<@p.column title="TYPE_NAME_EN" field="type.enName" permissionCode="TYPE_NAME"></@p.column>
+		<@p.column title="ENTRY_CODE" field="code" permissionCode="ENTRY_CODE"></@p.column>
+		<@p.column title="ENTRY_NAME_CN" field="name" permissionCode="ENTRY_NAME"></@p.column>
+		<@p.column title="ENTRY_NAME_EN" field="enName" permissionCode="ENTRY_NAME"></@p.column>
+		<@p.column title="ENTRY_SORT" field="sortNo" permissionCode="ENTRY_SORT"></@p.column>
+	</@p.dataGrid>
+</@p.body>	
+

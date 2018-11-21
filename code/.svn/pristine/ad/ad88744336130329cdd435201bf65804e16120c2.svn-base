@@ -1,0 +1,40 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function operator(action){
+	 var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var taskId = rows[0].id;
+    var taskName = rows[0].name;
+    var url = '${baseUrl}/bpm/task/todo/taskForm.do?taskId='+taskId;
+    update('<@s.m code="BPM_TASK_COMPLETE_NAME" />：'+taskName, url, 'dg${currentPageId}');
+    /* ajaxRequest(url, {'taskId' :  taskId},function(){
+		grid.datagrid('reload');
+	}); */
+}
+</script>
+<@p.body title="BPM_TASK_LIST_DELEGATING_TITLE"   permissionModule="TASK_DELEGATING">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="BPM_TASK_COL_NAME" permissionCode="NAME" field="taskNameLike" ></@p.input>
+			<@p.input title="BPM_TASK_COL_DESCRIPTION" permissionCode="DESCRIPTION" field="taskDescriptionLike" ></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar>
+		<@p.button title="BPM_TASK_BUT_DO" height="250" permissionCode="ProxyTaskEdit" url="${baseUrl}/bpm/model/addInput.do" onclick="operator()" iconCls="play"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/task/delegating/list.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="BPM_TASK_COL_ID" permissionCode="TASK_ID" field="id" width="100"></@p.column>
+		<@p.column title="BPM_TASK_COL_NAME" permissionCode="NAME" field="name" width="100"></@p.column>
+		<@p.column title="BPM_TASK_COL_INSTANCE" permissionCode="PROCESS_INSTANCE_ID" width="100" field="processDefinitionId" ></@p.column>
+		<@p.column title="PROCESS_INSTANCE_PROCESS"   permissionCode="PROCESS_NAME" width="120" field="processDefinitionName" ></@p.column>
+		<@p.column title="BPM_TASK_COL_CREATETIME" permissionCode="CREATE_TIME" field="createTime" width="150"></@p.column>
+		<@p.column title="BPM_TASK_COL_ASSIGNEE_NAME"  permissionCode="ASSIGNEE_NAME"    field="assigneeName" width="120"></@p.column>
+		<@p.column title="BPM_TASK_COL_DESCRIPTION" permissionCode="DESCRIPTION" field="description" width="200"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+

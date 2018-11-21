@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"/> 
+</head>	
+<script type="text/javascript">
+function checkPartIdIsHave(id){
+	if($("#partIds").val()!=""){
+		
+		var partIds=$("#partIds").val().split(",");
+		for(var i =0;i<partIds.length;i++){
+			if(partIds[i] == id){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+function clickPartCallback(dialog){
+	var rowsData = getSelectedRows('dgPartGridId');
+	debugger;
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	$("#display_tmPartId").val("以下是辅材信息");
+	
+	var tbody = "";
+	var partIdValue="";
+	for(var i =0;i< rowsData.length ;i++){
+		partIdValue =(partIdValue==""?rowsData[i].id:(partIdValue+","+rowsData[i].id));
+		if(checkPartIdIsHave(rowsData[i].id)){
+			continue;
+		}
+		tbody+="<tr id="+rowsData[i].id+"><td style='display: none'><input type='hidden' value="+rowsData[i].id+" name='tmPartId'></td><td>"+rowsData[i].nameCn+"</td>"
+					+"<td>"+rowsData[i].no+"</td><td><input type='text' name='note' width='200px'></td><td style='width:30px;'><button value="+rowsData[i].id+" class='btn btn-primary  btn-sm' onclick='clickDeletePart(this.value)'>删除</button></td></tr>";
+	}
+	$("#partIds").val(partIdValue);
+	$("#partBody").append(tbody);
+	dialog.close();
+}
+
+
+function frame_cleanSelect(){
+	$("#partBody").empty();
+	$("#partIds").val("");
+	$("#display_tmPartId").val("");
+}
+
+function clickDeletePart(obj){
+	$("#"+obj).remove();
+	if($("input[name='tmPartId']").length == 0){
+		$("#partIds").val("");
+		$("#display_tmPartId").val("");
+	}else{
+		var partIdValue="";
+		$("input[name='tmPartId']").each(function(i,item){
+			partIdValue =(partIdValue==""?item.value:(partIdValue+","+item.value));
+		});
+		$("#partIds").val(partIdValue);
+	}
+}
+
+
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/equipmentMaterials/add.do" class="form-horizontal" permissionModule="EQUIPMENT_MATERIALS">
+		<input type ="hidden" name="tmEquipmentId" value="${tmEquipmentId}"/>
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_MATERIALS_SELECT"    permissionCode="EQUIPMENT_PART"  checktip="EQUIPMENT_MATERIALS_SELECT"  >
+				<@p.magnify id="tmPartId" url="${baseUrl}/equipmentMaterials/partListInput.do?currentPageId=PartGridId&tmEquipmentId="+"${tmEquipmentId}" callback="clickPartCallback" datatype="*"></@p.magnify>
+			</@p.formColmd>
+		</@p.formRow>
+	
+	<div id="toEquipmentMaterials">
+	<input type="hidden" id="partIds">
+		<table style="width: 100%;"class="table table-striped table-hover table-bordered">
+			<thead>
+				<tr>
+					<th>物料</th>
+					<th>编号</th>
+					<th>备注</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody id="partBody">
+				
+			</tbody>
+		</table>
+	</div>
+	</@p.editForm>
+</body>
+</html>
+
+

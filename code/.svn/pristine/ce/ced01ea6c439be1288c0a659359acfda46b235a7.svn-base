@@ -1,0 +1,8 @@
+package com.wis.mes.production.regionstatus.service;
+
+import com.wis.core.service.BaseService;
+import com.wis.mes.production.regionstatus.entity.TmpRegionstatus;
+
+public interface TmpRegionstatusService extends BaseService<TmpRegionstatus>{
+
+}

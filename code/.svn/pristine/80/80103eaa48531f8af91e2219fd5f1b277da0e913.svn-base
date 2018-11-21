@@ -1,0 +1,45 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body title="PLANT_LIST_TITLE" permissionModule="PLANT">
+	<@p.searchPanel >
+		<@p.searchColumns>
+		    <@p.input title="PLANT_NAME_CN" field="nameCn"></@p.input>
+		    <@p.input title="PLATN_NO" field="no"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="PLANT_ADD" permissionCode="PlantAdd" iconCls="plus" url="${baseUrl}/plant/addInput.do" type="add" ></@p.button>
+			<@p.button title="PLANT_UPDATE" permissionCode="PlantDelete" iconCls="edit" url="${baseUrl}/plant/updateInput.do" type="update" ></@p.button>
+			<@p.button title="PLANT_DELETE" permissionCode="PlantUpdate" iconCls="trash" url="${baseUrl}/plant/delete.do" type="delete" ></@p.button>
+		<#--	<@p.button title="PLANT_IMPORT" permissionCode="PlantImport" downName="PLANT_IMPORT_NAME" onclick="importData();" iconCls="signin" />
+			<@p.button title="PLANT_EXPORT" permissionCode="PlantExport" downName="PLANT_EXPORT_NAME" url="${baseUrl}/plant/exportData.do" iconCls="upload-alt" type="down" />
+			-->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid  url="${baseUrl}/plant/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="PLATN_NO" field="no" permissionCode="PLANT_NO"></@p.column>
+		<@p.column title="PLANT_NAME_CN" field="nameCn" permissionCode="PLANT_NAME_CN" formatter="renderNullValue"></@p.column>
+		<@p.column title="PLANT_COMPANY_ADDRESS" field="companyAddress" permissionCode="PLANT_COMPANY_ADDRESS" formatter="renderNullValue"></@p.column>
+		<@p.column title="PLANT_CONTACT" field="contact" permissionCode="PLANT_CONTACT" formatter="renderNullValue"></@p.column>
+		<@p.column title="PLANT_REMARK" field="remark" permissionCode="PLANT_REMARK" formatter="renderNullValue"></@p.column>
+		<@p.column title="PLANT_ENABLED" field="enabled"   permissionCode="PLANT_ENABLED" formatter="renderEnabled"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+function renderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+function importData (){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/plant/exportTemplate.do";
+    importFile("<@s.m code="PLANT_IMPORT" />", "${baseUrl}/plant/importData.do", "dg${currentPageId}",obj);
+}
+function importDataAll(){ 
+    importFile("<@s.m code="PLANT_IMPORT_ALL" />", "${baseUrl}/plant/importDataAll.do", "dg${currentPageId}","");
+}
+
+</script>

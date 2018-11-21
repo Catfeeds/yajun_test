@@ -1,0 +1,39 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body title="BPM_TASK_LIST_RUN_TASK_TITLE"  noPermissionModule="true" noBreadcrumbs="true">
+    <div id="histroyDetail">
+    </div>
+    <@p.formBlock title="PROCESS_VALUE_PICTURE" collapse="true" defaultCollapse="false">
+	    <div region="center">	
+	   		<img src='${baseUrl}/bpm/hisinstance/personal/viewHistoricProcessPicture.do?processInstanceId=${instanceId!}'/>
+		</div>
+	    <@p.dataGrid url="${baseUrl}/bpm/hisinstance/viewHistoricProcessList.do?queryCondition[processInstanceId]=${instanceId!}" id="viewHistoricProcessListId">
+			<@p.column title="view_HISTORIC_PROCESS_NAME" field="name"   permissionCode="HISTORIC_PROCESS_PROCESSDEFINITIONID"  width="200"></@p.column>
+			<!-- 
+			<@p.column title="view_HISTORIC_PROCESS_STARTTIME" field="startTime" permissionCode="HISTORIC_PROCESS_STARTTIME"   width="200" ></@p.column>
+			<@p.column title="view_HISTORIC_PROCESS_RESULT"   permissionCode="HISTORIC_PROCESS_ENDTIME"  width="100" field="deleteReason" ></@p.column>
+			 -->
+			<@p.column title="view_HISTORIC_PROCESS_ENDTIME" permissionCode="HISTORIC_PROCESS_ENDTIME"  width="100" field="endTime"  ></@p.column>
+			<@p.column title="view_HISTORIC_PROCESS_USER" width="100" field="completeTaskAssignee"   permissionCode="HISTORIC_PROCESS_STARTUSERID" ></@p.column>
+			<@p.column title="PROCESS_COLUMN_DESC" field="jumpReason"  ></@p.column>
+		</@p.dataGrid>
+	</@p.formBlock>
+</@p.body>
+<script>
+$(function(){
+	$.ajax({
+        url: "${baseUrl}${historyUrl}",
+        cache: false,
+        global: false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {
+        	"processInstanceId":'${instanceId!}'
+        },
+        success: function(html){
+    		$("#histroyDetail").html(html);
+        }
+	});
+})
+</script>

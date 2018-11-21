@@ -1,0 +1,221 @@
+package com.wis.mes.service.impl;
+
+import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.TooManyListenersException;
+
+import javax.jws.WebService;
+
+import org.apache.cxf.common.util.StringUtils;
+import org.springframework.stereotype.Component;
+
+import com.wis.mes.service.SpiSerialCommunicat;
+import com.wis.mes.utils.ScanningConfig;
+
+import gnu.io.CommPortIdentifier;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
+
+@Component("spiSerialCommunicat")
+@WebService
+public class SpiSerialCommunicatImpl extends Thread implements SpiSerialCommunicat, SerialPortEventListener {
+	// 监听器,我的理解是独立开辟一个线程监听串口数据
+	static CommPortIdentifier portId; // 串口通信管理类
+	static Enumeration<?> portList; // 有效连接上的端口的枚举
+	InputStream inputStream; // 从串口来的输入流
+	static OutputStream outputStream;// 向串口输出的流
+	static SerialPort serialPort; // 串口的引用
+	String resultValue = "";
+	final static String scanningGun_wsdl = ScanningConfig.getPropertyByKey("scanningGun_wsdl");
+	final static String scanningGun_method = ScanningConfig.getPropertyByKey("scanningGun_method");
+	final static String serial_port_name = ScanningConfig.getPropertyByKey("serial_port_name");
+	final static String is_port_name = ScanningConfig.getPropertyByKey("is_port_name");
+	volatile boolean isConnect = false;
+	static {
+
+	}
+
+	/**
+	 * SerialPort EventListene 的方法,持续监听端口上是否有数据流
+	 */
+	@Override
+	public void serialEvent(SerialPortEvent event) {//
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		switch (event.getEventType()) {
+		case SerialPortEvent.BI:/* Break interrupt,通讯中断 */
+		case SerialPortEvent.OE:/* Overrun error，溢位错误 */
+		case SerialPortEvent.FE:/* Framing error，传帧错误 */
+		case SerialPortEvent.PE:/* Parity error，校验错误 */
+		case SerialPortEvent.CD:/* Carrier detect，载波检测 */
+		case SerialPortEvent.CTS:/* Clear to send，清除发送 */
+		case SerialPortEvent.DSR:/* Data set ready，数据设备就绪 */
+		case SerialPortEvent.RI:/* Ring indicator，响铃指示 */
+		case SerialPortEvent.OUTPUT_BUFFER_EMPTY:/* Output buffer is empty，输出缓冲区清空 */
+			break;
+		case SerialPortEvent.DATA_AVAILABLE:// 当有可用数据时读取数据
+			byte[] readBuffer = new byte[22];
+			try {
+				int numBytes = -1;
+				while (inputStream.available() > 0) {
+					numBytes = inputStream.read(readBuffer);
+					if (numBytes > 0) {
+						resultValue = byteToString(readBuffer);
+//                    	JaxWsDynamicClientFactory clientFactory = JaxWsDynamicClientFactory.newInstance();  
+//        				Client client = clientFactory.createClient(scanningGun_wsdl);  
+//        				client.invoke(scanningGun_method, resultValue);
+						readBuffer = new byte[22];// 重新构造缓冲对象，否则有可能会影响接下来接收的数据
+					} else {
+						System.out.println("额------没有读到数据。");
+					}
+				}
+				Robot robot = new Robot();
+				keyPressString(robot, resultValue);
+				keyPressWithCtrl(robot, KeyEvent.VK_ENTER);// 回車
+
+			} catch (IOException e) {
+				e.printStackTrace();
+				closeConnect();
+				openConnect();
+			} catch (Exception e) {
+				System.out.println("webservice:发送失败。");
+				e.printStackTrace();
+			}
+			break;
+		}
+	}
+
+	public static void keyPressString(Robot r, String str) {
+		Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();// 获取剪切板
+		Transferable tText = new StringSelection(str);
+		clip.setContents(tText, null); // 设置剪切板内容
+		keyPressWithCtrl(r, KeyEvent.VK_V);// 粘贴
+		r.delay(100);
+	}
+
+	// ctrl+ 按键
+	public static void keyPressWithCtrl(Robot r, int key) {
+		r.keyPress(KeyEvent.VK_CONTROL);
+		r.keyPress(key);
+		r.keyRelease(key);
+		r.keyRelease(KeyEvent.VK_CONTROL);
+		r.delay(100);
+	}
+
+	/**
+	 * 
+	 * 通过程序打开COM4串口，设置监听器以及相关的参数
+	 * 
+	 * @return 返回true 表示端口打开成功，返回 false表示端口打开失败
+	 */
+	public boolean startComPort() {
+		portList = CommPortIdentifier.getPortIdentifiers();// 通过串口通信管理类获得当前连接上的串口列表
+		while (portList.hasMoreElements()) {
+			portId = (CommPortIdentifier) portList.nextElement();// 获取相应串口对象
+			System.out.println("设备名称：---->" + portId.getName());
+			if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {// 判断端口类型是否为串口
+				if (portId.getName().equals(is_port_name)) {// 判断如果COM4串口存在，就打开该串口
+					if (!isConnect) {
+						try {
+							serialPort = (SerialPort) portId.open(serial_port_name, 2000);// 打开串口名字为COM_4(名字任意),延迟为2毫秒
+							inputStream = serialPort.getInputStream();// 设置当前串口的输入输出流
+							outputStream = serialPort.getOutputStream();
+							serialPort.addEventListener(this);// 给当前串口添加一个监听器
+							serialPort.notifyOnDataAvailable(true);// 设置监听器生效，即：当有数据时通知
+							// 比特率、数据位、停止位、奇偶校验位
+							serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
+									SerialPort.PARITY_NONE);
+							isConnect = true;
+						} catch (PortInUseException e) {
+							System.out.println("打开串口" + serial_port_name + "：失败。");
+							e.printStackTrace();
+						} catch (IOException e) {
+							System.out.println("设置当前串口的输入输出流：失败。");
+							e.printStackTrace();
+						} catch (TooManyListenersException e) {
+							System.out.println("添加监听：失败。");
+							e.printStackTrace();
+						} catch (UnsupportedCommOperationException e) {
+							System.out.println("设置串口参数：失败。");
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		return isConnect;
+	}
+
+	public void openConnect() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					if (isConnect) {
+						break;
+					}
+					startComPort();
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+					}
+				}
+			}
+		}).start();
+	}
+
+	public void closeConnect() {
+		if (isConnect) {
+			serialPort.close();
+			isConnect = false;
+		}
+	}
+
+	public String receiveSpiMessage(String spiData, String sendData) {
+		System.err.println("接收到的spi数据==============：" + spiData);
+		if ("ERROR".equals(spiData)) {
+			if ("QC".equals(sendData)) {
+				resultValue = null;
+			} else {
+				if (startComPort()) {
+					try {
+						String st = sendData;
+						outputStream.write(st.getBytes("utf-8"), 0, st.getBytes("utf-8").length);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				} else {
+					return null;
+				}
+			}
+		}
+		return resultValue;
+	}
+
+	public static String byteToString(byte[] bytes) {
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i < bytes.length; i++) {
+			char charSrc = (char) bytes[i];
+			String src = String.valueOf(charSrc).trim();
+			if (!StringUtils.isEmpty(src)) {
+				buffer.append(src);
+			}
+		}
+		return buffer.toString();
+	}
+
+}

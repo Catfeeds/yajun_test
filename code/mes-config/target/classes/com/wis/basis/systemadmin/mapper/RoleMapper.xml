@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="RoleMapper" >
+  <resultMap id="RoleResult" type="com.wis.core.framework.entity.Role" extends="com.wis.core.framework.mapper.CommonMapper.CommonResult">
+    <id column="ID" property="id" />
+    <result column="ROLE_CODE" property="code" />
+    <result column="ROLE_NAME" property="name" />
+    <result column="ROLE_DESC" property="desc" />
+    <result column="MARK_FOR_DELETE" property="removed" />
+    <collection property="permissions" ofType="Permission" column="ID" select="PermissionMapper.getPermissionByRoleId"/>
+    <collection property="formPermissions" ofType="FormPermissionNew" column="ID" select="FormPermissionNewMapper.getPermissionByRoleId"/>
+    <collection property="users" ofType="User" column="ID" select="UserMapper.getUserByRoleId"/>
+  </resultMap>
+
+  <select id="getRoleByUserId" resultMap="RoleResult" parameterType="java.lang.Integer" >
+    <![CDATA[select t1.* from ts_role t1 left join TR_ROLE_USER t2 on t1.id = t2.role_id where t2.user_id = #{id}]]>
+  </select>
+  <delete id="deletePermissionRelation" parameterType="java.lang.Integer">
+        delete from TR_ROLE_PERMISSION where ROLE_ID=#{id}  
+   </delete>
+   <delete id="deleteFunctionPermissionRelationById" parameterType="java.util.Map">
+        delete from TR_ROLE_PERMISSION where ROLE_ID=#{roleId}  and PERMISSION_ID in 
+          <foreach item="item" index="index" collection="permissionIds" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+   </delete>
+   <delete id="deleteFormPermissionRelationById" parameterType="java.util.Map">
+        delete from TR_ROLE_FROM_PERMISSION_NEW where ROLE_ID=#{roleId}  and PERMISSION_ID in 
+          <foreach item="item" index="index" collection="permissionIds" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+   </delete>
+   <insert id="addFunctionPermisson" parameterType="java.util.Map">
+   	INSERT INTO TR_ROLE_PERMISSION(ROLE_ID,PERMISSION_ID)VALUES(#{roleId,jdbcType=INTEGER},#{permissionId,jdbcType=INTEGER})
+   </insert>
+   <insert id="addFormPermisson" parameterType="java.util.Map">
+   	INSERT INTO TR_ROLE_FROM_PERMISSION_NEW(ROLE_ID,PERMISSION_ID)VALUES(#{roleId,jdbcType=INTEGER},#{permissionId,jdbcType=INTEGER})
+   </insert>
+</mapper>

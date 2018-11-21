@@ -1,0 +1,12 @@
+package com.wis.mes.production.metalplate.service;
+
+import java.util.Map;
+import com.wis.core.service.BaseService;
+import com.wis.mes.production.metalplate.entity.TbMetalPlateProductionRecord;
+
+public interface TbMetalPlateProductionRecordService extends
+		BaseService<TbMetalPlateProductionRecord> {
+	Map getEveryDayPrd(String time,String model,String prdLine);
+	
+	Map<String,Object> productionStatusData(String dataTime,Integer equipmentId,String shiftno);
+}

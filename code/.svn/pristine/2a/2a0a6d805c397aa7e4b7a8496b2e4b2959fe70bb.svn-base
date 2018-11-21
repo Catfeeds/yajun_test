@@ -1,0 +1,76 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+
+</head>	
+<script type="text/javascript">
+$(function(){
+	$("#userType").change(function(){
+		var userType=$("#userType").val();
+		if(userType=='SUPPLIER'){
+			$("#supplierName").removeAttr('ignore');
+		}else{
+			$("#supplierName").attr('ignore','ignore');
+		}
+	});
+});
+	function clickcallback(dialog){
+		var iframe =  dialog.iframe.contentWindow;
+		var selectedRows=iframe.getSelected('dgPositionSelectGrid');	
+		if(!selectedRows){return false;}
+		$('#positionName').val(selectedRows[0].name);
+		$('#positionId').val(selectedRows[0].id);
+	}
+	function suppliercallback(dialog){
+		var iframe =  dialog.iframe.contentWindow;
+		var selectedRows=iframe.getSelected('dgSelectGrid');	
+		if(!selectedRows){return false;}
+		$('#supplierId').val(selectedRows[0].id);
+		$('#supplierName').val(selectedRows[0].name);
+	}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/user/update.do?AUDIT.TYPE=0001&AUDIT.OPERATION=001" class="form-horizontal" idValue=user.id   permissionModule="USER">
+	<@p.formRow>
+		<@p.formColmd title="USER_ACCOUNT_NUMBER"  permissionCode="USER_ACCOUNT_NUMBER">
+			<input type="hidden" name="systemData" value="${user.systemData!}">
+			<input name="account" class="inputxt"  readonly="readonly"  value="${user.account}" >
+		</@p.formColmd>
+		<@p.formColmd title="REAL_NAME"  checktip="FILL_IN_THE_PERSONAL_NAMES"  permissionCode="REAL_NAME">
+			  <input name="name" class="inputxt"   datatype="s2-10" value="${user.name}">
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_STATUS" checktip="PLEASE_SELECT_STATUS"  permissionCode="USER_STATUS">
+			 <@p.input type="select"excludeSelectOption="true" field="status" value=user.status options=options></@p.input>
+		</@p.formColmd>
+		<@p.formColmd title="USER_SEX"     permissionCode="USER_SEX">
+			<@p.input type="radio" field="gender" value=user.gender options=sexOptions datatype="*"></@p.input>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_PHONE"  permissionCode="USER_PHONE" >
+			 <input  name="phone" class="inputxt" value="${user.phone!}" datatype="n"  errormsg="<@s.m code='USER_PHONE_CHECK_TIP'/>"  ignore="ignore">
+		</@p.formColmd>
+		<@p.formColmd title="USER_FAX"   permissionCode="USER_FAX">
+			<input   name="fax" class="inputxt" value="${user.fax!}"  datatype="n" errormsg="<@s.m code='USER_FAX_CHECK_TIP'/>" ignore="ignore">
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_MAIL"    permissionCode="USER_MAIL">
+			<input   name="email" class="inputxt" value="${user.email!}"  datatype="e" errormsg="<@s.m code='USER_MAIL_CHECK_TIP'/>"  ignore="ignore">
+		</@p.formColmd>
+		<@p.formColmd title="PMC_LINE"  permissionCode="USER_STATUS">
+			<@p.input type="multiple" id="tmLineIds" field="tmLineIds"  values="${user.tmLineIds!}" options=lineOptions excludeSelectOption="false"></@p.input>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd  class="col-md-8" title="USER_ADDRESS"    permissionCode="USER_ADDRESS">
+			<textarea name="address" class="inputxt"   ignore="ignore" >${user.address!}</textarea>
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+   
+</body>
+</html>

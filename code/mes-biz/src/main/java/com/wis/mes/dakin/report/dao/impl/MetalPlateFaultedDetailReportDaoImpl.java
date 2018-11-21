@@ -1,0 +1,65 @@
+/**
+ * 
+ */
+package com.wis.mes.dakin.report.dao.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.support.SqlSessionDaoSupport;
+import org.springframework.stereotype.Repository;
+
+import com.wis.mes.dakin.report.dao.MetalPlateFaultedDetailReportDao;
+
+/**
+ * @author caixia
+ *
+ */
+@Repository
+public class MetalPlateFaultedDetailReportDaoImpl extends SqlSessionDaoSupport  implements MetalPlateFaultedDetailReportDao{
+	
+	@Resource(name = "sqlSessionTemplate")
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		super.setSqlSessionTemplate(sqlSessionTemplate);
+	}
+	
+	@Override
+	public List<Map<String, Object>> getMetalPlateFaultedDetailReport(String whitOrNight,String shiftNo, String beginTime, String endTime) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("beginTime", beginTime);
+		param.put("endTime", endTime);
+		param.put("shiftNo", shiftNo);
+		param.put("whitOrNight", whitOrNight);
+		List<Map<String, Object>> selectList = this.getSqlSession().selectList("MetalPlateReportMapper.getMetalPlateFaultedDetailReport", param);
+		return selectList;
+	}
+
+	@Override
+	public List<Map<String, Object>> getfaultedDetailsInfo(String beginTime,String endTime) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("beginTime", beginTime);
+		param.put("endTime", endTime);
+		List<Map<String, Object>> selectList = this.getSqlSession().selectList("MetalPlateReportMapper.getfaultedDetailsInfo", param);
+		return selectList;
+	}
+
+	@Override
+	public List<Map<String, Object>> productionStateYearData(Map<String, Object> parameters) {
+		return this.getSqlSession().selectList("MetalPlateReportMapper.productionStateYearData", parameters);
+	}
+
+	@Override
+	public List<Map<String, Object>> noFaultDetailsReportData(Map<String, Object> parameters) {
+		return this.getSqlSession().selectList("MetalPlateReportMapper.noFaultDetailsReportData", parameters);
+	}
+
+	@Override
+	public List<Map<String, Object>> noHaltReportData(Map<String, Object> parameters) {
+		return this.getSqlSession().selectList("MetalPlateReportMapper.noHaltReportData", parameters);
+	}
+
+}

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html">
+<script type="text/javascript" src="${baseUrl}/res/js/flow/raphael-min.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/flow/myflow.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/flow/myflow.rule.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/flow/myflow.editors.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/flow/wis_path.js"></script>
+<style type="text/css">
+.flow_body {
+	margin: 0;
+	pading: 0;
+	text-align: left;
+	font-family: Arial, sans-serif, Helvetica, Tahoma;
+	font-size: 12px;
+	line-height: 1.5;
+	color: black;
+	background-image: url('${baseUrl}/res/js/flow/img/bg.png');
+}
+
+.node {
+	width: 160px;
+	text-align: center;
+	vertical-align: middle;
+	border: 1px solid #fff;
+}
+
+.mover {
+	border: 1px solid #ddd;
+	background-color: #ddd;
+}
+
+.selected {
+	background-color: #ddd;
+}
+
+.state {
+}
+
+#myflow_props table {
+	
+}
+
+#myflow_props th {
+	letter-spacing: 2px;
+	text-align: left;
+	padding: 6px;
+	background: #ddd;
+}
+
+#myflow_props td {
+	background: #fff;
+	padding: 6px;
+}
+
+#pointer,#path,#state,#task {
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.ui-dialog-titlebar {
+	display: none;
+}
+</style>
+<script type="text/javascript">
+$("#clickGoBack").bind("click",function(){
+	$.ajax({
+        url: "${baseUrl}/path/listInput.do",
+        cache: false,
+        global: false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {
+        	id:9714
+        },
+        success: function(html){
+        	var conLen = html.length;
+    		$(".main-content").html(html);
+        }
+    });
+	if ($("#menu-toggler").hasClass("display")) {
+		$("#menu-toggler").removeClass("display")
+		$("#sidebar").removeClass("display");
+	}
+	
+	if($("#sidebar-collapse").children().attr("class")=="icon-double-angle-right"){
+		$("#sidebar-collapse").children().click();
+	}
+});
+</script>
+</head>
+<body style="overflow-y: hidden;" scroll="no" >
+<input type="hidden" value="${tmPathId!}" id="tmPathId">
+<input type="hidden" value="${tmWorkshopId!}" id="tmWorkshopId">
+<input type="hidden" value="${tmPlantId!}" id="tmPlantId">
+<input type="hidden" value="${tmLineId!}" id="tmLineId">
+<input type="hidden" id="tmPathUlocParameterIds">
+<input type="hidden" id="tmPathUlocPartIds">
+	<div class="flow_body" style="position: relative;height:1000px;border:1px solid #ccc;">
+		<!-- <div id="tracePathInfo"
+			style="position:absolute; left:10px; top: 10px; background-color: #fff; width: 400px; cursor: default; padding: 3px; border: 1px solid #ccc;"
+			class="ui-widget-content">
+			<b>工艺路径信息</b>&nbsp;&nbsp;<span id="tracePathName"></span><br /> 
+			<span>编号：</span>&nbsp;&nbsp;<input type="text" id="pathNo" value="${no!}"><br>
+			<span>名称：</span>&nbsp;&nbsp;<input type="text" id="pathName" value="${name!}"><br>
+			<span>物料：</span>&nbsp;&nbsp;<select id="pathPartSelectId"></select><br>
+			<span>启用：</span>&nbsp;&nbsp;<select id="pathEnabledSelectId"></select>
+		</div> -->
+		<div id="buttonPanal" style="position:absolute;left:400px;top:60px;display:none;background-color: #fff; width: 290px; cursor: default; padding: 3px; border: 1px solid #ccc;margin: 0 auto;"	class="ui-widget-content">
+		</div>
+		<div id="coveDiv" style="z-index: 1000;width: 1500px;height: 1500px;position:absolute;vertical-align: middle;text-align:center;display: none" >
+				<div  style="width:1000px;height:1000px;margin-top: 50px;">
+			<div  style="text-align: center">请稍等....</div>
+			<div  style="text-align: center">
+				<img src="${baseUrl}/process-editor/editor-app/images/loading.gif" >
+			</div>
+		</div>
+		</div>
+		<div id="myflow_tools"
+			style="position:absolute; top: 80px; left: 10px;margin-top:80px; background-color: #fff; width: 160px; cursor: default; padding: 3px;border: 1px solid #ccc;"
+			class="ui-widget-content">
+			<div id="myflow_tools_handle" style="text-align: center;"
+				class="ui-widget-header"><!-- 所有工位 --></div>
+			<div class="node" id="myflow_save">
+				<img src="${baseUrl}/res/js/flow/img/save.gif" />&nbsp;&nbsp;保存
+			</div>
+			<div class="node" id="clickGoBack">
+				<img alt="返回" src="${baseUrl}/res/js/flow/img/back.gif" style="width: 20px;height: 20px;">&nbsp;&nbsp;返回
+			</div>
+			<hr />
+			<div class="node selectable" id="pointer">
+				<img src="${baseUrl}/res/js/flow/img/select16.gif" />&nbsp;&nbsp;选择
+			</div>
+			<div class="node selectable" id="path">
+				<img src="${baseUrl}/res/js/flow/img/16/flow_sequence.png" />&nbsp;&nbsp;连接
+			</div>
+			<div>
+				<hr />
+			</div>
+			<div>
+				<div style="margin-top: 5px;">
+					<span>工厂：</span>
+					<select style="width:90px;height: 25px;" id="plantSelect" onchange="plantChange(this.value);"></select>
+				</div>
+				<div style="margin-top: 5px;">
+					<span>车间：</span>
+					<select style="width:90px;height: 25px;" id="workshopSelect" onchange="workshopChange(this.value);"></select>
+				</div>
+				
+				<div style="margin-top: 5px;">
+					<span>产线：</span>
+					<select style="width:90px;height: 25px;" id="lineSelect" onchange="lineChange(this.value);"></select>
+				</div>
+			</div>
+			<div>
+				<hr/>
+			</div>
+			<div style="width: 140px;" id="ulocPanel">
+		<!-- 	<div class="node state" id="start" type="start">
+				<img src="${baseUrl}/res/js/flow/img/16/start_event_empty.png" />&nbsp;&nbsp;开始
+			</div>
+			<div id="ulocPanel">
+				<div class="node state" type="task">
+				<img src="${baseUrl}/res/js/flow/img/16/task_empty.png" />&nbsp;&nbsp;工位
+				</div>
+			</div>
+			<div class="node state" id="end" type="end">
+				<img src="${baseUrl}/res/js/flow/img/16/end_event_terminate.png" />&nbsp;&nbsp;结束
+			</div> -->
+		</div>
+			</div>
+			
+		<div id="myflow_props"
+			style="position: absolute; top: 30; right: 50; background-color: #fff; width: 220px; padding: 3px;"
+			class="ui-widget-content">
+		<div id="myflow_props_handle" class="ui-widget-header">属性</div>
+		<table border="1" width="100%" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>aaa</td>
+			</tr>
+			<tr>
+				<td>aaa</td>
+			</tr>
+		</table>
+		<div>&nbsp;</div>
+		</div>
+		<div id="myflow_props"></div>
+		<div id="myflow"></div>
+		<div id="loadWaiting" style="margin: auto;position: absolute;top: 0; left: 0; bottom: 0; right: 0;width:300px;height:200px;">
+			<div style="text-align: center">稍安勿躁,马上为您呈上!!</div>
+			<div style="text-align: center">
+				<img src="${baseUrl}/process-editor/editor-app/images/loading.gif">
+			</div>
+		</div>
+		<div id="saveWaiting" style="margin: auto;position: absolute;top: 0; left: 0; bottom: 0; right: 0;width:300px;height:200px;display:none;">
+			<div  style="text-align: center">请不要关闭,马上为您保存好!!</div>
+			<div  style="text-align: center">
+				<img src="${baseUrl}/process-editor/editor-app/images/loading.gif">
+			</div>
+		</div>
+	</div>
+	
+	<div style="height: 100px;width: 200px;solid:1px;z-index: 1000;"></div>
+</body>
+</html>

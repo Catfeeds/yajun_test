@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/scrap/update.do" idValue=scrap.id class="form-horizontal" permissionModule="SCRAP">
+		<@p.formRow>
+			<@p.formColmd title="NC_NO" permissionCode="TM_SCRAP_NO">
+				<input name="no" value="${scrap.no}" class="inputxt" errormsg="<@s.m code='NO_ONLY'/>" readonly="readonly" datatype="/^[\w\d-_\\\/]+$/" maxlength='100' />
+			</@p.formColmd>
+			<@p.formColmd title="NC_NAME" permissionCode="TM_SCRAP_NOTE">
+				<input name="note" value="${scrap.note}" class="inputxt" datatype="*" maxlength='150' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="NC_EXTCODE" permissionCode="TM_SCRAP_EXT_CODE">
+				<input name="extCode" value="${scrap.extCode}" class="inputxt" errormsg="<@s.m code='NO_ONLY'/>" ignore="ignore" datatype="/^[\w\d-_\\\/]{0,}$/" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+

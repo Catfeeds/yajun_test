@@ -1,0 +1,84 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+$(function(){
+	$("#beginTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'endTime\')}'});
+	});
+	$("#endTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'beginTime\')}'});
+	});
+});
+function terminate(){
+     var rows = getSelectedRows('dg${currentPageId}');
+    if(0 == rows.length){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    var executionIds = [];
+    for (var i = 0; i < rows.length; i++) {
+		if (rows[i].executionId != null) {
+			executionIds.push(rows[i].executionId);
+		}
+	}
+    var url='${baseUrl}/bpm/instance/terminateInput.do?ids='+getSelectedIds('dg${currentPageId}')+"&executionIds="+executionIds;
+    createwindow('<@s.m code="PROCESS_INSTANCE_TERMINATE" />',url,'dg${currentPageId}');
+   /*  BootstrapDialog.confirm({
+    	title : commons_msg.btnDelete,
+		message : '<@s.m code="PROCESS_INSTANCE_END_CONFIRM"/>',
+		closable : true,
+		draggable : true, 
+		btnCancelLabel : commons_msg.btnCancel, 
+		btnOKLabel : commons_msg.btnConfirm,
+		callback : function(result) {
+        	if (result) {
+        		ajaxRequest('${baseUrl}/bpm/instance/terminate.do', {
+        			'ids' :  JSON.stringify(getSelectedIds('dg${currentPageId}')),
+        	    	'executionIds' :  JSON.stringify(executionIds)
+      	      	}, function() {
+	      	    	reloadTable('dg${currentPageId}');
+	            });
+        	}
+		}
+    }); */
+}
+function showHistory(){
+    var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var id = rows[0].executionId;
+    showProcHistory(id, 'dg${currentPageId}');
+}
+</script>
+<@p.body title="PROCESS_INSTANCE_MYOFFICE_TITLE" permissionModule="MY_INSTANCE">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="PROCESS_INSTANCE_PROCESS" field="execution.name"></@p.input>
+			<@p.input title="DATETIME_START" field="createTimeStart" id="beginTime"></@p.input>
+			<@p.input title="DATETIME_END" field="createTimeEnd" id="endTime"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar>
+			<!-- 
+			<@p.button title="BTN_VIEW" onclick="showBuinessHistory()" iconCls="search"></@p.button>
+		 	-->
+			<@p.button title="PROCESS_INSTANCE_BUTTON_END" permissionCode="RunningProcessStop" onclick="terminate()" iconCls="stop"></@p.button>
+			<@p.button title="PROCESS_VALUE_PICTURE"  permissionCode="RunningProcessPicture" onclick="showHistory()" iconCls="h-sign"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/instance/personal/list.do" >
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PROCESS_INSTANCE_PROCESS" sortable="false" permissionCode="PROCESS_INSTANCE_PROCESS" field="execution.name" width="350"></@p.column>
+		<!-- 
+		<@p.column title="PROCESS_INSTANCE_ID" sortable="false" permissionCode="PROCESS_INSTANCE_ID" field="executionId"></@p.column>
+		<@p.column title="PROCESS_COLUMN_DEF_ID" sortable="false" permissionCode="PROCESS_COLUMN_DEF_ID" field="executionProcDefId"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_STATE" sortable="false" permissionCode="PROCESS_INSTANCE_STATE_" field="executionSuspensionState" formatter="entryRenderer('PROCESS_STATUS')"></@p.column>
+		<@p.column title="BPM_TASK_COL_DESCRIPTION" sortable="false" permissionCode="BPM_TASK_COL_DESCRIPTION" field="description" width="300"></@p.column>
+		-->
+		<@p.column title="PROCESS_INSTANCE_CREATE_TIME" sortable="false" permissionCode="PROCESS_INSTANCE_CREATE_TIME" field="createTime" width="150"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_ACT_NAME" sortable="false" permissionCode="PROCESS_INSTANCE_ACT_NAME" width="180" field="taskName"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_OWNER" sortable="false" permissionCode="PROCESS_INSTANCE_OWNER" width="200" field="tasksOwnersStr"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+

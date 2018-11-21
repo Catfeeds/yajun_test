@@ -1,0 +1,345 @@
+package com.wis.mes.master.maintenance.service.impl;
+
+import static com.wis.basis.common.utils.GetPropertiesMessageUtils.getMessage;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.openscada.opc.lib.da.AddFailedException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.wis.basis.common.utils.BaseExcelUtil;
+import com.wis.basis.common.utils.ConstantUtils;
+import com.wis.basis.common.utils.LoadUtils;
+import com.wis.basis.common.utils.SpiltUtils;
+import com.wis.basis.systemadmin.entity.ImportLog;
+import com.wis.basis.systemadmin.service.ImportLogService;
+import com.wis.core.framework.entity.DictEntry;
+import com.wis.core.framework.service.DictEntryService;
+import com.wis.core.framework.service.GlobalConfigurationService;
+import com.wis.core.framework.service.exception.BusinessException;
+import com.wis.core.service.impl.BaseServiceImpl;
+import com.wis.mes.master.equipment.entity.TmEquipment;
+import com.wis.mes.master.equipment.service.TmEquipmentService;
+import com.wis.mes.master.maintenance.dao.TmDeviceMaintenanceDao;
+import com.wis.mes.master.maintenance.entity.TmDeviceMaintenance;
+import com.wis.mes.master.maintenance.service.TmDeviceMaintenanceService;
+import com.wis.mes.opc.util.metalplate.OpcMetalPlateHelper;
+import com.wis.mes.util.StringUtil;
+
+@Service
+public class TmDeviceMaintenanceServiceImpl extends BaseServiceImpl<TmDeviceMaintenance>
+		implements TmDeviceMaintenanceService {
+
+	@Autowired
+	private DictEntryService entryService;
+
+	@Autowired
+	private GlobalConfigurationService globalConfigurationService;
+
+	@Autowired
+	private ImportLogService importLogService;
+
+	@Autowired
+	private TmEquipmentService equipmentService;
+	
+
+	@Autowired
+	public void setDao(TmDeviceMaintenanceDao dao) {
+		this.dao = dao;
+	}
+
+	@Override
+	public Map<String, Object> exportExcelData(HttpServletResponse response, List<TmDeviceMaintenance> list,
+			String filePath, String[] header) {
+		final List<Map<String, Object>> exportDataList = new ArrayList<Map<String, Object>>();
+		if (list != null && list.size() > ConstantUtils.MATH_ZERO) {
+			Map<String, DictEntry> smMaintenanceProject = entryService
+					.getMapTypeCode(ConstantUtils.SM_MAINTENANCE_PROJECT);
+			Map<String, DictEntry> smMaintenanceUnit = entryService.getMapTypeCode(ConstantUtils.SM_MAINTENANCE_UNIT);
+
+			for (final TmDeviceMaintenance bean : list) {
+				final Map<String, Object> map = new HashMap<String, Object>();
+				map.put("设备编号", StringUtil.getString(bean.getDeviceCode()));
+				map.put("设备名称", StringUtil.getString(bean.getDeviceName()));
+				/*map.put("保养项目", smMaintenanceProject.containsKey(bean.getMaintenanceProject())
+						? smMaintenanceProject.get(bean.getMaintenanceProject()).getName() : "");*/
+				map.put("保养项目", StringUtil.getString(bean.getMaintenanceProject())=="保留"?"":StringUtil.getString(bean.getMaintenanceProject()));
+				map.put("保养代码", StringUtil.getString(bean.getMaintenanceCode()));
+				map.put("保养单位", smMaintenanceUnit.containsKey(bean.getMaintenanceUnit())
+						? smMaintenanceUnit.get(bean.getMaintenanceUnit()).getName() : "");
+				map.put("保养值", StringUtil.getString(bean.getMaintenanceValue()));
+				map.put("保养点检内容", StringUtil.getString(bean.getRemark()));
+				map.put("备注", StringUtil.getString(bean.getMaintenanceRemark()));
+				exportDataList.add(map);
+			}
+			return BaseExcelUtil.exportData(response, exportDataList, filePath, header);
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public String doImportExcelData(Workbook workbook, HttpServletRequest req) {
+
+		// 覆盖或更新标识
+		String repeatOrUpdateFlag = globalConfigurationService
+				.getValueByKey(ConstantUtils.SYS_CONFIG_IMP_EXE_UPDATE_WHEN_REPEAT);
+		// 回滚标识
+		String isRollBack = globalConfigurationService.getValueByKey(ConstantUtils.EXCEL_IMPORT_IS_ALL_ROLLBACK);
+
+		final List<String> errorInfos = new ArrayList<String>();
+
+		final List<TmDeviceMaintenance> addList = new ArrayList<TmDeviceMaintenance>();
+		final Map<Integer, TmDeviceMaintenance> updateMap = new HashMap<Integer, TmDeviceMaintenance>();
+
+		final Map<String, String> entryDict = new HashMap<String, String>();
+		String maintenanceProjectKeyName = "";
+		String maintenanceUnitKeyName = "";
+
+		for (final DictEntry e : entryService.getEntryByTypeCode(ConstantUtils.SM_MAINTENANCE_PROJECT)) {
+			entryDict.put(e.getName(), e.getCode());
+			maintenanceProjectKeyName += e.getName() + ",";
+		}
+
+		for (final DictEntry e : entryService.getEntryByTypeCode(ConstantUtils.SM_MAINTENANCE_UNIT)) {
+			entryDict.put(e.getName(), e.getCode());
+			maintenanceUnitKeyName += e.getName() + ",";
+		}
+
+		// "第"
+		final String DI = getMessage(req, "DI");
+		String value = null;
+		TmDeviceMaintenance entity = null;
+		// 读取第一章表格内容
+		final Sheet sheet = workbook.getSheetAt(0);
+		Row row = null;
+		int judgeSize = 25;// 数据表格的列数（字段数）
+		int totalInt = 0;
+		// 循环输出表格中的内容
+		for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+			row = sheet.getRow(i);
+			int index = 0;
+			entity = new TmDeviceMaintenance();
+
+			if (BaseExcelUtil.isAllLineBlank(row, judgeSize)) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "IMPORT_WHOLE_LINE_BLANK"));
+				break;
+			}
+			totalInt++;
+
+			// 设备编号
+			value = LoadUtils.getCell(row, index);
+			if (StringUtils.isBlank(value)) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "DEVICEMAINTENANCE_IMPORT_DEVICECODE_REQUIRED"));
+				continue;
+			}
+			TmEquipment tmEquipment = new TmEquipment();
+			tmEquipment.setNo(value);
+			List<TmEquipment> tmEquipmentList = equipmentService.findByEg(tmEquipment);
+			if (tmEquipmentList == null || tmEquipmentList.size() == 0) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "DEVICEMAINTENANCE_IMPORT_DEVICECODE_INEXISTENCE"));
+				continue;
+			}
+			entity.setDeviceCode(value);
+
+			// 设备名称
+			index++;
+			value = LoadUtils.getCell(row, index);
+			if (StringUtils.isBlank(value)) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "DEVICEMAINTENANCE_IMPORT_DEVICENAME_REQUIRED"));
+				continue;
+			}
+			entity.setDeviceName(value);
+
+			// 保养项目
+			index++;
+			value = LoadUtils.getCell(row, index);
+			if (StringUtils.isBlank(value)) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "DEVICEMAINTENANCE_IMPORT_MAINTENANCEPROJECT_REQUIRED"));
+				continue;
+			}
+			/*if (entryDict.get(value) == null) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "METALPLATE_IMPORT_TYPE_VERIFY",
+						getMessage(req, "DEVICEMAINTENANCE_MAINTENANCEPROJECT"), maintenanceProjectKeyName));
+				continue;
+			}*/
+//			entity.setMaintenanceProject(entryDict.get(value.trim()));
+			entity.setMaintenanceProject(value.trim());
+
+			// 保养代码
+			index++;
+			value = LoadUtils.getCell(row, index);
+			if (StringUtils.isBlank(value)) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "DEVICEMAINTENANCE_IMPORT_MAINTENANCECODE_REQUIRED"));
+				continue;
+			}
+			TmDeviceMaintenance bean = new TmDeviceMaintenance();
+			bean.setMaintenanceCode(value);
+			Integer num = findByEg(bean).size();
+			if (num > 0) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "DEVICEMAINTENANCE_IMPORT_MAINTENANCECODE_CHECK", value));
+				continue;
+			}
+			entity.setMaintenanceCode(value);
+
+			// 保养单位
+			index++;
+			value = LoadUtils.getCell(row, index);
+			if (StringUtils.isBlank(value)) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "DEVICEMAINTENANCE_IMPORT_MAINTENANCEUNIT_REQUIRED"));
+				continue;
+			}
+			if (entryDict.get(value) == null) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "METALPLATE_IMPORT_TYPE_VERIFY",
+						getMessage(req, "DEVICEMAINTENANCE_MAINTENANCEUNIT"), maintenanceUnitKeyName));
+				continue;
+			}
+			entity.setMaintenanceUnit(entryDict.get(value.trim()));
+
+			// 保养值：保养值必填,必须是整数
+			index++;
+			value = LoadUtils.getCell(row, index);
+			if (StringUtils.isBlank(value) || !isInteger(value)) {
+				errorInfos.add(DI + (i + 1) + getMessage(req, "DEVICEMAINTENANCE_IMPORT_MAINTENANCEVALUE_REQUIRED"));
+				continue;
+			}
+			entity.setMaintenanceValue(Integer.parseInt(value));
+
+			// 保养点检内容
+			index++;
+			value = LoadUtils.getCell(row, index);
+			if (StringUtils.isNotBlank(value)) {
+				entity.setRemark(value);
+			}
+			//备注
+			index++;
+			value = LoadUtils.getCell(row, index);
+			if (StringUtils.isNotBlank(value)) {
+				entity.setMaintenanceRemark(value);
+			}
+			addList.add(entity);
+		}
+		List<TmDeviceMaintenance> updateList = needUpdateEntitys(updateMap);
+		StringBuffer addCount = new StringBuffer();
+		StringBuffer updateCount = new StringBuffer();
+		try {
+			if (errorInfos.size() == 0) {
+				batchImport(addList, ConstantUtils.IMPORT_BATCH_COUNT, ConstantUtils.OPERATION_INSERT, addCount);
+				// 修改数据
+				if ("true".equals(repeatOrUpdateFlag)) {
+					batchImport(updateList, ConstantUtils.IMPORT_BATCH_COUNT, null, updateCount);
+				}
+			} else {
+				addCount.append(0);
+				updateCount.append(0);
+			}
+		} catch (Exception e) {
+			if ("true".equals(isRollBack)) {
+				throw new BusinessException("IMPORT_DATA_VALID_ERROR_INFO",
+						getMessage(req, "IMPORT_UNKNOWN_EXCEPTION"));
+			} else {
+				return getMessage(req, "IMPORT_UNKNOWN_EXCEPTION");
+			}
+		}
+
+		Set<Integer> repeatLindexes = updateMap.keySet();
+		Map<String, Object> logsAndMsgTip = BaseExcelUtil.getLogsAndMsgTip(repeatOrUpdateFlag, addCount, updateCount,
+				totalInt, repeatLindexes, errorInfos, req, getMessage(req, "METALPLATE_MANAGEMENT"));
+
+		importLogService.doSaveBatch((List<ImportLog>) logsAndMsgTip.get("logs"));
+		return (String) logsAndMsgTip.get("msgTip");
+	}
+
+	private void batchImport(List<TmDeviceMaintenance> list, int num, String insert, StringBuffer countBuffer) {
+		int successCount = 0;
+		if (list.size() > 0) {
+			List<List<TmDeviceMaintenance>> parts = SpiltUtils.averageAssign(list, num);
+			try {
+				for (int i = 0; i < parts.size(); i++) {
+					if ("insert".equals(insert)) {
+						doSaveBatch(parts.get(i));
+						successCount += parts.get(i).size();
+					} else {
+						doUpdateBatch(parts.get(i));
+						successCount += parts.get(i).size();
+					}
+				}
+				countBuffer.append(successCount);
+			} catch (Exception e) {
+				countBuffer.append(successCount);
+				throw new RuntimeException();
+			}
+		} else {
+			countBuffer.append(successCount);
+		}
+	}
+
+	private List<TmDeviceMaintenance> needUpdateEntitys(Map<Integer, TmDeviceMaintenance> updatePathMap) {
+		List<TmDeviceMaintenance> updateList = new ArrayList<TmDeviceMaintenance>();
+		// for (Integer key : updatePathMap.keySet()) {
+		// TmSheetMetalMaterial insert = updatePathMap.get(key);
+		// TmSheetMetalMaterial material = new TmSheetMetalMaterial();
+		// material.setTmBomId(insert.getTmBomId());
+		// TmSheetMetalMaterial newData = findUniqueByEg(material);
+		// insert.setId(newData.getId());
+		// updateList.add(insert);
+		// }
+		return updateList;
+	}
+
+	@Override
+	public Workbook getWorkbookTemp(String downName, String templatePath, List<TmDeviceMaintenance> list) {
+		try {
+			final Workbook wb = WorkbookFactory.create(new File(templatePath));
+			return wb;
+		} catch (final Exception e) {
+			log.error("Error down assembleDefect template.", e);
+			throw new BusinessException("ERROR_DOWNLOAD_FILE");
+		}
+	}
+
+	private static boolean isInteger(String str) {
+		Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+		return pattern.matcher(str).matches();
+	}
+
+	/**
+	 * 保养预警通知
+	 * 
+	 * @throws AddFailedException
+	 * 
+	 */
+	@Override
+	public void maintenanceWarningNotice() {
+		int countNumber = ((TmDeviceMaintenanceDao) dao).findMaintenanceWarningNotice();
+		//查询到当前值大于保养值进行报警
+		if(countNumber>0) {
+			this.alarmSetting(true);
+		}else {
+			this.alarmSetting(false);
+		}
+	}
+
+	@Override
+	public void alarmSetting(boolean flag) {
+		String[] LIGHT = new String[] {"Banjin2.1756-L72_1.Set.Maintenance_alm"};
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("Maintenance_alm", flag);
+		OpcMetalPlateHelper.sendDataToOpc(LIGHT, map);
+	}
+}

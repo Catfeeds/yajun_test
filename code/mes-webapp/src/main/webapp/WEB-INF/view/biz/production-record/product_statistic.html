@@ -1,0 +1,257 @@
+<#include "../include/bootstrapTableCommons.html">
+<script src="././res/js/echarts.min.js"></script>
+<script type="text/javascript">
+	var pageNow = 0;
+	 // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('showTable'));
+	$(function(){
+		$('#startTime').focus(function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+		$('#endTime').focus(function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+		var d = new Date();
+		$('#startTime').val(formatDate(d) + "-01 00:00:00");
+		$('#endTime').val(formatDate(d) + "-07 23:59:59");
+		getNext(true);
+	});
+	function getOption(xData,ncData,data){
+		// 指定图表的配置项和数据
+        var option = {
+        	backgroundColor: '#1b1b1b',
+			title : {
+				text: "下线数量",
+				backgroundColor: '#ff0000', 
+			},
+			label:{ 
+				normal:{ 
+					show: true, 
+					position: "top"
+				} 
+			},
+			textStyle: {  
+                fontWeight: 'normal', 
+                color: '#408829'  
+            }, 
+			tooltip : {
+				show:true,
+				trigger:'axis',
+				formatter:function(params){
+					var relVal =params[0].name;
+					relVal +=params[0].value;
+					return relVal;
+				},
+			    showDelay:0,
+			    hideDelay:50,
+			    transitionDuration:0,
+			    backgroundColor:'#FFF',
+			    borderColor:'green',
+			    showContent: true,
+			    borderRadius:8,
+			    padding:10
+		    },
+		    dataZoom:[{
+				type:'slider',
+				show:true,
+				height:20,
+				backgroundColor:'#fff',
+				borderColor:'#0a2b24'
+			}],
+		    axisPointer:{
+				type:'line',
+				axis:'auto'
+		    },
+			legend: {
+				data:eval(ncData)
+			},
+			toolbox: {
+				show : true,
+				feature : {
+					dataView : {show: true, readOnly: false},
+					magicType : {show: true, type: ['line', 'bar']},
+					restore : {show: true},
+					saveAsImage : {show: true}
+				}
+			},
+			calculable : true,
+			xAxis : [
+				{
+					type : 'category',
+					data : eval(xData)
+				}
+			],
+			yAxis : [
+				{
+					type : 'value'
+				}
+			],
+			series : eval(data)
+		};
+		return option;
+	}
+	function getReportData(){
+		myChart.clear();
+		if($("#hselected").val() == ""){
+			infoTip("请您指定需要展示的不合格");
+	     	return;
+     	}
+		if($("#startTime").val() == ""){
+			infoTip("请您选择起始时间");
+	     	return;
+     	}
+		if($("#endTime").val() == ""){
+			infoTip("请您选择截止时间");
+	     	return;
+     	}
+   	 if($("#startTime").val() > $("#endTime").val()){
+		 	infoTip("起始日期不能晚于截止时间");
+  		return;
+  	 }
+		$.ajax({
+	        url: "${baseUrl}/productStatistic/getReportData.do",
+	        cache: false,
+	        global: false,
+	        type: "POST",
+			dataType:"json",
+	        data : {
+	        	"sn" : $("#sn").val(),
+	        	"time" : $("#time").val(),
+	        	"startTime" : $("#startTime").val(),
+	        	"endTime" : $("#endTime").val(),
+	        	"partIds" : $("#hselected").val().substring(0,$("#hselected").val().length - 1)
+	        },
+	        success: function(result){
+	        	if(result == "ERROR"){
+					infoTip("请检查网络或硬件");
+	        	}else if(result == "NULL"){
+					infoTip("未检索到班次信息");
+	        	}else{
+	        		var arr = result.split("-----------");
+	                myChart.setOption(getOption(arr[0],arr[1],arr[2]));
+	        	}
+	        }
+	    });
+	}
+	document.onkeydown = function(event){
+        var e = event || window.event || arguments.callee.caller.arguments[0];           
+         if(e && e.keyCode==13){
+        	 getReportData();
+        }
+    }; 
+    function fillIn(nc){
+    	var len = $("#hselected").val().split(";").length;
+    	if(len == 6){
+			infoTip("最多可选入5个不合格类型");
+			return;
+    	}
+    	if($("#selected").val().lastIndexOf(document.getElementById(nc).innerText) == -1 && $("#hselected").val().lastIndexOf(nc) == -1){
+    		document.getElementById("selected").value = document.getElementById("selected").value + document.getElementById(nc).innerText + ";";
+    		document.getElementById("hselected").value = document.getElementById("hselected").value + nc + ";";
+    	}
+    	document.getElementById(nc).style.color = "grey";
+    }
+    function fillAll(){
+		$("#selected").val("");
+		$("#hselected").val("");
+		$("#tb a").each(function(){
+    		document.getElementById("selected").value = document.getElementById("selected").value + document.getElementById(this.id).innerText + ";";
+    		document.getElementById("hselected").value = document.getElementById("hselected").value + this.id + ";";
+        	document.getElementById(this.id).style.color = "grey";
+		});
+    }
+	function getNext(isStart){
+		$.ajax({
+	        url: "${baseUrl}/productStatistic/getNext.do",
+	        cache: false,
+	        global: false,
+	        type: "POST",
+	        data : {
+	        	"pageNow" : pageNow
+	        },
+	        success: function(result){
+	        	var str = "";
+	        	if(result == "ERROR"){
+					infoTip("请检查网络或硬件");
+	        	}else{
+	        		var arr = eval(result);
+	        		for(var i = 0;i < arr.length;i++){
+	        			str = str + "<td width='20%'><a style='color: " + (($("#hselected").val().lastIndexOf(arr[i].ID) > -1 && $("#selected").val().lastIndexOf(arr[i].NAME) > -1) ? "grey" : "red") + ";cursor: pointer;' onclick='fillIn(this.id);' id='" + arr[i].ID + "'>" + arr[i].NAME + "</a></td>";
+	        		}
+	        		if(arr.length == 5){
+		        		pageNow = pageNow + arr.length;
+	        		}else{
+	        			pageNow = 0;
+	        			getNext(false);
+	        		}
+	        	}
+	        	document.getElementById("tb").innerHTML = str;
+	        	if(isStart){
+	        		fillAll();
+	        		getReportData();
+	        	}
+	        }
+	    });
+    }
+	function clearAll(){
+		$("#selected").val("");
+		$("#hselected").val("");
+	}
+	function doChange(){
+		$("#selected").val("");
+		pageNow = 0;
+		clearAll();
+		getNext(true);
+	}
+	function formatDate(date){
+    	var d = date.getFullYear() + "-";
+    	d = d + (date.getMonth() < 10 ? "0" : "") + (date.getMonth());
+    	return d;
+    }
+</script>
+<@p.body title="PRODUCT_STATISTIC_TITLE" permissionModule="PRODUCT_STATISTIC">	
+<div style="width: 100%">
+	<table width="100%">
+		<tbody>
+			<tr height="35px">
+				<td width="20%"><input id="sn" placeholder="请输入SN" style="height: 90%;width: 100%;" /></td>
+				<td width="15%">&nbsp;&nbsp;时间单位：
+					<select id="time" style="height: 100%;width: 60%;">
+						<option value="shift">班次</option>
+						<option value="day">日</option>
+						<option value="week">周</option>
+						<option value="month">月</option>
+					</select>
+				</td>
+				<td width="75%">
+					<@p.input title="DATETIME_START" id="startTime" />
+					<@p.input title="DATETIME_END" id="endTime" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div style="width:40%;overflow-x:auto;float: left;">
+	<table width="100%">
+		<tr height="35px" id="tb"><tr>
+	</table>
+</div>
+<input type="hidden" id="hselected" value="" />
+<div style="width:60%;overflow-x:auto;float: right;">
+	<table width="100%">
+		<tr height="35px">
+			<td width="20%">
+				<a style="color: #4C8F8D;cursor: pointer;" onclick="fillAll();">全部填入</a>
+				<a style="color: #4C8F8D;cursor: pointer;" onclick="getNext(false);">换一批</a>
+			</td>
+			<td width="75%">
+				<input readonly="readonly" id="selected" style="width: 100%;" />
+			</td>
+			<td width="5%">
+				<a style="color: #ADC7E2;cursor: pointer;" onclick="clearAll();">&nbsp;清空</a>
+			</td>
+		<tr>
+	</table>
+</div><br /><br /><br /><br /><br />
+<div id="showTable" style="width: 100%;height: 650px;"></div>
+</@p.body>

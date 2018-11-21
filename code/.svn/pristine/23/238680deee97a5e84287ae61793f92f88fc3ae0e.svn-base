@@ -1,0 +1,121 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>
+<script type="text/javascript">
+function delayTypeChange() {
+	var type = $("#delayType").val();
+	if(type == 'DELAY_DAYS'){
+		$('#delayTypeConfigDays').show();
+		$('#delayDays').removeAttr("ignore");
+		$('#delayTypeConfigDate').hide();
+		$('#delayToDate').attr('ignore', 'ignore');
+		$('#delayToDate').val('');
+	}else if(type == 'DELAY_TO_DATE') {
+		$('#delayTypeConfigDays').hide();
+		$('#delayDays').attr('ignore', 'ignore');
+		$('#delayDays').val('');
+		$('#delayTypeConfigDate').show();
+		$('#delayToDate').removeAttr("ignore");
+	}else{
+		$('#delayTypeConfigDays').hide();
+		$('#delayDays').attr('ignore', 'ignore');
+		$('#delayDays').val('');
+		$('#delayTypeConfigDate').hide();
+		$('#delayToDate').attr('ignore', 'ignore');
+		$('#delayToDate').val('');
+	}
+}
+function remindTypeChange() {
+	var type = $("#remindType").val();
+	if(type == '' || type == 'OWNER' || type == 'SUPERVISOR'){
+		$('#remindTypeConfigRole').hide();
+		$('#display_remindRoles').attr('ignore', 'ignore');
+		$('#display_remindRoles').val('');
+		$('#hidden_remindRoles').val('');
+		$('#remindTypeConfigExpression').hide();
+		$('#expression').attr('ignore', 'ignore');
+		$('#expression').val('');
+	}else if(type == 'ROLE') {
+		$('#remindTypeConfigRole').show();
+		$('#display_remindRoles').removeAttr("ignore");
+		$('#remindTypeConfigExpression').hide();
+		$('#expression').attr('ignore', 'ignore');
+		$('#expression').val('');
+	}else if(type == 'EXPRESSION'){
+		$('#remindTypeConfigRole').hide();
+		$('#display_remindRoles').attr('ignore', 'ignore');
+		$('#display_remindRoles').val('');
+		$('#hidden_remindRoles').val('');
+		$('#remindTypeConfigExpression').show();
+		$('#expression').removeAttr("ignore");
+	}
+}
+function rolecallback(dialog){
+	var rowsData = getSelectedRows('roleSelectGrid');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	
+	var ids = '';
+	var names = '';
+	for (var i = 0; i < rowsData.length; i++) {
+		if(i > 0){
+			ids += ';';
+			names += ';';
+		}
+		ids += rowsData[i].id;
+		names += rowsData[i].name;
+	}
+	$('#hidden_remindRoles').val(ids);
+	$('#display_remindRoles').val(names);
+	dialog.close();
+}
+$(function(){
+	$("#delayToDate").focus(function() {
+		WdatePicker({dateFmt:'yyyy-MM-dd'});
+	});
+	$('#delayTypeConfigDays').hide();
+	$('#delayTypeConfigDate').hide();
+	$('#remindTypeConfigRole').hide();
+	$('#remindTypeConfigExpression').hide();
+})
+</script>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/bpm/delayAlertConfig/add.do" class="form-horizontal" noPermissionModule="true">
+	<input name="nodeId"  type="hidden" value="${nodeId!}">
+	<@p.formRow>
+		<@p.formColmd title="REMIND_DELAY_TYPE">
+			<@p.input id="delayType" type="select" field="delayType" options=delayTypeOptions datatype="*" onchange="delayTypeChange()"></@p.input>
+		</@p.formColmd>
+		<span id="delayTypeConfigDays">
+			<@p.formColmd title="REMIND_DELAY_DAYS">
+				<input id="delayDays" name="delayDays" class="inputxt" datatype="n">
+			</@p.formColmd>
+		</span>
+		<span id="delayTypeConfigDate">
+			<@p.formColmd title="REMIND_DELAY_DATE">
+				<input id="delayToDate" name="delayToDate" class="inputxt" datatype="*">
+			</@p.formColmd>
+		</span>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="REMIND_TYPE">
+			<@p.input id="remindType" type="select" field="remindType" options=remindTypeOptions datatype="*" onchange="remindTypeChange()"></@p.input>
+		</@p.formColmd>
+		<span id="remindTypeConfigRole">
+			<@p.formColmd title="REMIND_ROLE">
+				<@p.magnify id="remindRoles" field="remindRoles" url="${baseUrl}/user/userSelectRole.do" callback="rolecallback" datatype="*"></@p.magnify>
+			</@p.formColmd>
+		</span>
+		<span id="remindTypeConfigExpression">
+			<@p.formColmd title="REMIND_EXPRESSION">
+				<input id="expression" name="expression" class="inputxt" datatype="*1-500">
+			</@p.formColmd>
+		</span>
+	</@p.formRow>
+</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/uloc/add.do" class="form-horizontal"   permissionModule="ULOC">
+		<@p.formRow>
+			<@p.formColmd title="ULOC_PLANT" permissionCode="ULOC_PLANT">
+				<@p.input type="select" id="plantId_addPage" datatype="*" onchange="plantWorkshopCascade_lisAdd(this.value);" field="tmPlantId" options=plants ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_LINE" permissionCode="ULOC_LINE">
+				<@p.input type="select" id="lineId_addPage" datatype="*" field="tmLineId" options=lines></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_NO" permissionCode="ULOC_NO">
+				<input name="no"   datatype="no" class="inputxt" maxlength='100'>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_NAME" permissionCode="ULOC_NAME">
+				<input name="name" class="inputxt" maxlength='150'>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_POSITION_TYPE" permissionCode="ULOC_POSITION_TYPE">
+				 <@p.input type="select" field="positionType" options=positionOptions ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_IS_ENTRANCE" permissionCode="ULOC_IS_ENTRANCE">
+				 <@p.input type="select" field="isEntrance"  options=entranceOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="ULOC_RFID_IP" permissionCode="ULOC_RFID_IP">
+				 <input name="rfidIP" class="inputxt" maxlength='30'>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_RFID_PORT" permissionCode="ULOC_RFID_PORT">
+				 <input name="rfidPort" class="inputxt" maxlength='30'>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="ULOC_RFID_ANT" permissionCode="ULOC_RFID_ANT">
+				  <input name="rfidAnt" class="inputxt" maxlength='30'>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_TM_EQUIPMENT_ID" permissionCode="ULOC_TM_EQUIPMENT_ID">
+				 <@p.input type="select"  field="tmEquipmentId" options=optionEquipment></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="ULOC_ENABLED" permissionCode="ULOC_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>
+				<@p.formColmd title="ULOC_NOTE" permissionCode="ULOC_NOTE">
+					<input name="note" class="inputxt" maxlength='256' >
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+
+$(function(){
+	var optionSize = $("#plantId_addPage option").size();
+	if(optionSize==2){
+		$('#plantId_addPage option:eq(1)').prop("selected",true);
+		plantWorkshopCascade_lisAdd($("#plantId_addPage").val());
+	}
+});
+
+//工厂车间 联动 
+//2018/3/16 修改为公司产线联动
+function plantWorkshopCascade_lisAdd(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/uloc/selectLintNameOrPlantId.do", //修改为通过公司id得到所属产线
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#lineId_addPage").empty(); //清空产线列表
+				$("#lineId_addPage").append("<option value=''>-----请选择-----</option>");
+				$(result).each(function(i,item){
+					$("#lineId_addPage").append(" <option value='" + item.code + "'>"+item.name+ "</option>");
+				});
+				document.getElementById("lineId_addPage").value = '';
+				} catch (e) {
+					alert(e);
+				return;
+				} 
+				
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+</script>

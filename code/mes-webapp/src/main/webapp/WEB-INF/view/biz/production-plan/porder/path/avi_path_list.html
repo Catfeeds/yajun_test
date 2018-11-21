@@ -1,0 +1,157 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<script src="./././res/js/echarts.min.js"></script>
+<script type="text/javascript">
+$("#echarts").hide();
+function getEchartsData(){
+	var myChart = echarts.init(document.getElementById('echarts'));
+	var option = getOption();
+	myChart.showLoading();
+	$.ajax({
+		data:{
+			aviId:"${aviId}"
+		},
+		url:"${baseUrl}/aviPath/getEchartsData.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执
+			myChart.hideLoading();
+			option = getOption($.parseJSON(result.datas),$.parseJSON(result.links));
+			myChart.setOption(option);
+		}
+	});
+}
+
+function getOption(datas,links){
+	var option = {
+		    title: {
+		        text: '工艺路径图表展示'
+		    },
+		    tooltip: {
+		    	show:false
+		    },
+		    animationDurationUpdate: 1500,
+		    animationEasingUpdate: 'quinticInOut',
+		    series : [
+		        {
+		            type: 'graph',
+		            layout: 'none',
+		            symbolSize: 50,
+		            roam: true,
+		            focusNodeAdjacency: true,
+		            label: {
+		                normal: {
+		                    show: true
+		                }
+		            },
+			   	    edgeSymbol: ['circle','arrow'],
+			   	    draggable : true,
+		            data:datas,
+		            links:links,
+			        lineStyle: {
+		                normal: {
+		                    opacity: 0.9,
+		                    width: 2,
+		                    curveness: 0
+		                }
+		            }
+		        }
+		    ]
+		};
+	return option;
+}
+
+function showView(){
+	if($("#showOrHide").val() ==1){
+		$("#dataGrid").hide();
+		getEchartsData();
+		$("#echarts").show();
+		$("#showOrHide").val(0);
+	}else{
+		$("#dataGrid").show();
+		$("#echarts").hide();
+		$("#showOrHide").val(1);
+	}
+}
+
+$('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+    $.ajax({
+        url: "${baseUrl}/aviPath/mainListInput.do",
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {
+			"toPorderAviPathId":row.id,
+			"currentPageId":"AviPathDetailGridId"
+        },
+        success: function(html){
+        	$("#viewAviPath").show();
+        	$("#viewAviBom").show();
+            $("#aviPathDetailMain").html(html);
+        }
+    });
+});
+</script>
+<@p.body title="PATH_LIST_TITLE" permissionModule="AVI_PATH" noBreadcrumbs="true">	
+<input type="hidden" id="showOrHide" value="1">
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="AviPathAdd" iconCls="plus" url="${baseUrl}/aviPath/addInput.do?aviId="+"${aviId}" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="AviPathUpdate" iconCls="edit" url="${baseUrl}/aviPath/updateInput.do?aviId="+"${aviId}" type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="AviPathDelete" iconCls="trash" url="${baseUrl}/aviPath/delete.do" type="delete"></@p.button>
+<!-- 			<@p.button title="PATH_IMPORT" permissionCode="AviPathImport" downName="PATH_ULOC_IMPORT_NAME" onclick="importData();" iconCls="signin" /> -->
+			<@p.button title="PATH_EXPORT" permissionCode="AviPathExport" downName="PATH_ULOC_EXPORT_NAME" url="${baseUrl}/aviPath/exportData.do?aviId="+"${aviId}"  downName="PORDER_AVI_PATH_EXPORT_NAME" iconCls="upload-alt" type="down" />
+<!-- 			<@p.button title="PATH_EXPORT_TEMPLTE" permissionCode="AviPathImport" iconCls="upload-alt"  url="${baseUrl}/aviPath/exportTemplate.do" downName="PORDER_AVI_PATH_EXPORT_TEMPLATE_NAME" type="down"></@p.button> -->
+			<@p.button title="PATH_CHANGE_VIEW" permissionCode="AviPathView" iconCls="copy"  onclick="showView();" type="button"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<div id="dataGrid">
+	<@p.dataGrid url="${baseUrl}/aviPath/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_SEQ" field="seq" permissionCode="AVI_PATH_SEQ" ></@p.column>
+		<@p.column title="PATH_ULOC_ULOC" field="uloc.name" permissionCode="AVI_PATH_ULOC" formatter="renderUloc"></@p.column>
+		<@p.column title="PATH_ULOC_PARENT" field="parentId" permissionCode="AVI_PATH_PARENT" ></@p.column>
+		<@p.column title="PATH_ULOC_OPERATE_TIME" field="operateTime" permissionCode="AVI_PATH_OPERATE_TIME" formatter="renderNULL"></@p.column>
+		<@p.column title="PATH_ULOC_INTERVAL_TIME" field="intervalTime" permissionCode="AVI_PATH_INTERVAL_TIME" formatter="renderNULL"></@p.column>
+		<@p.column title="PATH_ULOC_IS_ONLINE" field="isOnline" permissionCode="AVI_PATH_IS_ONLINE" formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PATH_ULOC_IS_OFFLINE" field="isOffline" permissionCode="AVI_PATH_IS_OFFLINE" formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PATH_ULOC_IS_SIP" field="isSip" permissionCode="AVI_PATH_IS_SIP"  formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PATH_ULOC_IS_AUTO_INSTORAGE" field="isAutoInstorage" permissionCode="AVI_PATH_IS_AUTO_INSTORAGE" formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PATH_ULOC_INSTORAGE_TIME" field="instorageTime" permissionCode="AVI_PATH_INSTORAGE_TIME" formatter="renderNULL"></@p.column>
+		<@p.column title="PATH_ULOC_IS_REPORTED" field="isReported" permissionCode="AVI_PATH_IS_REPORTED" formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PATH_ULOC_ERP_ULOC_CODE" field="erpUlocCode" permissionCode="AVI_PATH_ERP_ULOC_CODE" ></@p.column>
+		<@p.column title="PATH_ULOC_NOTE" field="note" permissionCode="AVI_PATH_NOTE"></@p.column>
+	</@p.dataGrid>
+	</div>
+	<div id="echarts" style="width: 1000px;height:400px;"></div>
+	<div id="aviPathDetailMain"></div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+function renderNULL(value){
+	if(value){
+		return value;
+	}
+	return "";
+}
+function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+function renderUlocType(value){
+	return entryRenderer('ULOC_TYPE', value);
+}
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+function renderUloc(value,record){
+	if(record.uloc&&record.uloc.no){
+		return record.uloc.no+ " - " + record.uloc.name;
+	}
+}
+
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

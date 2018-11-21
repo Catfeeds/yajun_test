@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+
+</head>	
+
+<script type="text/javascript">
+
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/equipmentParam/update.do" class="form-horizontal" idValue=param.id    permissionModule="EQUIPMENT">
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_PARAMETER_NAME"  permissionCode="EQUIPMENT_PARAMETER_NAME">
+				<input class="inputxt"  name="parameterName"  maxlength='100' datatype="*" value="${param.parameterName!}"/>
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_PARAMETER_EXPLAIN"  permissionCode="EQUIPMENT_PARAMETER_EXPLAIN">
+				<input class="inputxt"  name="parameterExplain" maxlength='100' datatype="*" value="${param.parameterExplain!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT__NAME_PARAM" permissionCode="EQUIPMENT_IF_CNF_SCOPE">
+				<@p.input type="select"  field="tmEquipmentId"  value="${param.tmEquipmentId}" options=optionIfEquipment datatype="*"></@p.input>
+			</@p.formColmd> 
+			<@p.formColmd title="EQUIPMENT_PARAMETER_ULOC"  permissionCode="EQUIPMENT_PARAMETER_ULOC">
+				<input class="inputxt"  name="parameterUloc" maxlength='100' value="${param.parameterUloc!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+<!-- 			<@p.formColmd title="EQUIPMENT_REFERENCE_VALUE"  permissionCode="EQUIPMENT_IF_CNF_SCOPE"> -->
+<!-- 				<input class="inputxt"  name="referenceValue"  value="${param.referenceValue!}" maxlength='10' /> -->
+<!-- 			</@p.formColmd> -->
+			<@p.formColmd title="EQUIPMENT_IF_CNF_SCOPE" permissionCode="EQUIPMENT_IF_CNF_SCOPE">
+				<@p.input type="select" excludeSelectOption="true" value=param.ifCnfScope field="ifCnfScope" options=optionIfCnfScope datatype="*"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_PARAM_NOTE"  permissionCode="EQUIPMENT_CONTROL_POST_NAME">
+				<input class="inputxt"  name="note" maxlength='100' value="${param.note!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PorderMapper">
+	<!--删除工单下的生产序列信息  -->
+	<delete id="deleteAviByPorderId" parameterType="java.lang.Integer">
+		DELETE FROM to_porder_avi WHERE to_porder_id=#{toPorderId}
+	</delete>
+	<!-- 删除生产序列下的BOM和工艺路径信息 -->
+	<delete id="deleteAviBomAndPathByAviId" parameterType="java.lang.Integer">
+		DELETE FROM to_porder_avi_bom WHERE to_porder_avi_id=#{aviId};
+		DELETE FROM to_porder_avi_path WHERE to_porder_avi_id=#{aviId};
+	</delete>
+	<!-- 根据生产序列ID查询工单所在的工厂 -->
+	<select id="getPorderPlantIdByAviId" resultType="java.lang.Integer"  parameterType="java.lang.Integer" >
+		SELECT p.TM_PLANT_ID FROM to_porder p 
+		LEFT JOIN to_porder_avi a on a.TO_PORDER_ID = p.ID
+		WHERE a.ID=#{aviId};
+	</select>
+	<!-- 根据生产序列的工艺路径ID查询工单所在的工厂 -->
+	<select id="getPorderPlantIdByAviPathId" resultType="java.lang.Integer"  parameterType="java.lang.Integer" >
+		SELECT a.TM_PLANT_ID as tmPlantId  
+		FROM to_porder a
+		LEFT JOIN to_porder_avi b ON a.ID = b.TO_PORDER_ID
+		LEFT JOIN to_porder_avi_path c ON c.TO_PORDER_AVI_ID = b.ID
+		WHERE c.id=#{toPorderAviPathId}
+		GROUP BY a.TM_PLANT_ID
+	</select>	
+	
+	<!--删除生产序列下的工艺路径的信息  -->
+	<delete id="deleteAviPathDetailByAviId" parameterType="java.util.HashMap">
+		DELETE FROM to_porder_avi_path_parameter WHERE to_porder_avi_path_id IN 
+		<foreach item="item" index="index" collection="aviPathIds" open="(" separator="," close=")">  
+ 			#{item}
+		</foreach> ;
+		DELETE FROM to_porder_avi_path_part WHERE to_porder_avi_path_id IN 
+			<foreach item="item" index="index" collection="aviPathIds" open="(" separator="," close=")">  
+ 			#{item}
+		</foreach> ;
+		DELETE FROM to_porder_avi_path_sip WHERE to_porder_avi_path_id IN 	
+		<foreach item="item" index="index" collection="aviPathIds" open="(" separator="," close=")">  
+ 			#{item}
+		</foreach> ;
+	</delete>
+</mapper>

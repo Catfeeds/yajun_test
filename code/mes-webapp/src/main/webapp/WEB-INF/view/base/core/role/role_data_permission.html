@@ -1,0 +1,40 @@
+<#if hasDataPermission == 'true'>
+	<input type="hidden" id="dataPermissionId" value="${dataPermissionId}"/>
+	<#list dataPermissionTypeOptions as option>  
+		<span class="tree-icon tree-file role">&nbsp;</span>
+		<span >
+		<input style="vertical-align:middle;" onclick="permissionTypeChange(this.value)" type="radio" name="dataPermissionType" value='${option.code!}'
+		 <#if permissionType??&& option.code == permissionType>
+			checked="checked"
+		</#if>/>
+		</span><span style="vertical-align:middle;">${option.name!}</span>
+		<br>
+	</#list>
+	<div id="customizeScript">
+		<br/>
+		<span class="tree-icon tree-file role">&nbsp;</span>
+		<span >
+			<textarea id="script" name="script" class="inputxt" rows="10">${script!}</textarea>
+		</span>
+	</div>
+<script type="text/javascript">
+	function permissionTypeChange(param) {
+		if(param == '99_SCRIPT'){
+			$("#customizeScript").show();
+		}else{
+			$("#customizeScript").hide();
+		}
+	}
+	$(function() {
+		permissionTypeChange('${permissionType!}');
+		/* if('${permissionType!}' == '99_SCRIPT'){
+			$("#customizeScript").show();
+		}else{
+			$("#customizeScript").hide();
+		} */
+	});
+	
+</script>
+<#else>
+
+</#if>

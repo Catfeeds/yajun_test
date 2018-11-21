@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+
+</head>	
+
+<script type="text/javascript">
+$(function(){
+	var optionSize = $("#plantId_addPage option").size();
+	if(optionSize==2){
+		$('#plantId_addPage option:eq(1)').prop("selected",true);
+		plantUlocCascade_lisAdd($("#plantId_addPage").val());
+	}
+});
+
+/* 公司 工位 联动 */
+function plantUlocCascade_lisAdd(obj){
+	$.ajax({
+		data:{tmPlantId:obj},
+		url:"${baseUrl}/equipment/selectUlocNameOrID.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#Uloc").empty(); //清空下拉列表
+                $("#Uloc").append(" <option value=''>-----请选择----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#Uloc").append(" <option value='" + item.id + "'>"+item.no+"-"+item.name + "</option>");
+					});
+					var optionSize = $("#Uloc option").size();
+					if(optionSize==2){
+						$('#Uloc option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+$(function(){
+	var lang='${lang!}';
+	var params={};  
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#startDate').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd'});
+	});
+	
+});
+
+function checkNO(){
+	var no = $("#no").val();
+	$.ajax({
+		data:{"no":no},
+		url:"${baseUrl}/equipment/checkNO.do",
+		dataType : 'json', 
+		success : function(result) { 
+			if(result.message=="error"){
+				errorTip("该设备编号已存在!");
+			}
+		},
+	});
+}
+
+function validateIP(val){
+	var strRegex= /^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\./ ;
+	debugger;
+	if(strRegex.test(val)){
+	        return true;
+	}else{
+        document.getElementById("ipAddress").value="";
+        return false;
+	}
+}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/equipment/add.do?AUDIT.TYPE=0001&AUDIT.OPERATION=001" class="form-horizontal"   permissionModule="EQUIPMENT">
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_TM_PLANT_ID" permissionCode="EQUIPMENT_PLANT">
+				<@p.input type="select" id="plantId_addPage" datatype="*" onchange="plantUlocCascade_lisAdd(this.value);" field="tmPlantId" options=plant ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_NAME"  permissionCode="EQUIPMENT_NAME">
+				<input class="inputxt"  name="name"  datatype="s1-16"  maxlength='16'/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_NO"  permissionCode="EQUIPMENT_NO">
+				<input class="inputxt"  id="no" onblur="checkNO()"  name="no"   datatype="/^[\w\d-_\\\/]+$/" errormsg="<@s.m code='NO_ONLY'/>" nullmsg="<@s.m code='WORKSCHEDULE_NO_ONLY'/>"  maxlength='16'/>
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_STATUS"  permissionCode="EQUIPMENT_STATUS">
+				<@p.input type="select"  field="status" options=optionEquipmentStatus ></@p.input>
+			</@p.formColmd> 
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_IP_ADDRESS"  permissionCode="EQUIPMENT_IP_ADDRESS">
+				<input class="inputxt"  id="ipAddress" name="ipAddress" datatype="/^(?:(?:2[0-4][0-9]\.)|(?:25[0-5]\.)|(?:1[0-9][0-9]\.)|(?:[1-9][0-9]\.)|(?:[0-9]\.)){3}(?:(?:2[0-5][0-5])|(?:25[0-5])|(?:1[0-9][0-9])|(?:[1-9][0-9])|(?:[0-9]))$/" errormsg="<@s.m code='IP_ERROR_MSG'/>" ignore="ignore" />
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_PLC_TYP"  permissionCode="EQUIPMENT_PLC_TYP">
+				<input class="inputxt"  name="plcTyp" ignore="ignore"  />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_PLC_BRAND"  permissionCode="EQUIPMENT_PLC_BRAND">
+				<input class="inputxt"  name="plcBrand" ignore="ignore"  />
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_NETWORK_MODEL_TYP"  permissionCode="EQUIPMENT_NETWORK_MODEL_TYP">
+				<input class="inputxt"  name="networkModelTyp" ignore="ignore"  />
+			</@p.formColmd>
+		</@p.formRow>
+		 <@p.formRow>
+		 	<@p.formColmd title="EQUIPMENT_TM_ULOC_ID"  permissionCode="EQUIPMENT_ULOC">
+				<@p.input type="select"   id="Uloc"  field="tmUlocId" ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_EQUIPMENT_SUPPLIER"  permissionCode="EQUIPMENT_EQUIPMENT_SUPPLIER">
+				<input class="inputxt"  name="equipmentSupplier" ignore="ignore"  />
+			</@p.formColmd>
+		</@p.formRow>
+		 <@p.formRow>
+<!-- 		 	<@p.formColmd title="EQUIPMENT_WORKING_HOURS"  permissionCode="EQUIPMENT_WORKING_HOURS"> -->
+<!-- 				<input class="inputxt"  name="workingHours"  ignore="ignore"  /> -->
+<!-- 			</@p.formColmd> -->
+			<@p.formColmd title="EQUIPMENT_NOTE"  permissionCode="EQUIPMENT_NOTE">
+				<input class="inputxt"  name="note"  ignore="ignore"  maxlength="150"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

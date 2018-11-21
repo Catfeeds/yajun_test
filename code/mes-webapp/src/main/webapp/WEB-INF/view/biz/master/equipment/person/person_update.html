@@ -1,0 +1,56 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+
+</head>	
+<script type="text/javascript">
+$(function(){
+	$("#display_tsUserId").val("${responsiblePerson.user.name}");
+})
+
+function checkUserIdIsHave(id){
+	if($("#userIds").val()!=""){
+		var userIds=$("#userIds").val().split(",");
+		for(var i =0;i<userIds.length;i++){
+			if(userIds[i] == id){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+function clickUserCallback(dialog){
+	var rowsData = getSelectedRows('dgPersonGridId');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	$("#display_tsUserId").val(rowsData[0].name);
+	$("#tsUserIds").val(rowsData[0].id);
+	dialog.close();
+}
+
+function frame_cleanSelect(){
+	$("#userBody").empty();
+	$("#userIds").val("");
+	$("#display_tsUserId").val("");
+}
+
+</script>
+<body style="overflow-y: hidden" scroll="no">
+
+<@p.editForm url="${baseUrl}/equipmentResponsiblePerson/update.do" class="form-horizontal" idValue=responsiblePerson.id   permissionModule="EQUIPMENT_PERSON">
+		<input type="hidden" name="tsUserId" id="tsUserIds" value="${responsiblePerson.user.id}"/>
+		<input type ="hidden" name="tmEquipmentId" value="${tmEquipmentId}"/>
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_PERSON_SELECT"    permissionCode="EQUIPMENT_NAME"  checktip="EQUIPMENT_PERSON_SELECT"  >
+				<@p.magnify id="tsUserId" url="${baseUrl}/equipmentResponsiblePerson/userListInput.do?currentPageId=PersonGridId&singleSelect=true&tmEquipmentId="+'${tmEquipmentId}' callback="clickUserCallback" datatype="*"></@p.magnify>
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_PERSON_NOTE"  permissionCode="EQUIPMENT_PERSON_NOTE">
+				<input name="note"  class="inputxt"  value="${responsiblePerson.note!}" >
+			</@p.formColmd>
+		</@p.formRow>
+</@p.editForm>
+</body>
+</html>

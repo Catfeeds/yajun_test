@@ -1,0 +1,276 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+/* $(document).ready(function() {
+	  $(".js-example-basic-single").select2();
+	});  */
+$('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+    //点击画面行的时候显示对应的工序和物料信息
+    //document.getElementById("PATHDetail").style.display="block";
+    //工序信息的取得
+    $.ajax({
+        url: "${baseUrl}/pathUloc/listInput.do?currentPageId=pathUlocGridID&params=queryCondition[tmPathId]="+row.id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmPathId":row.id},
+        success: function(html){
+            $("#pathUloc").html(html);
+            $("#viewPart").show();
+    		$("#viewParameter").show();
+    		$("#viewSip").show();
+        }
+    });
+});
+
+
+function doDuplicate(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	 createwindow('<@s.m code="PATH_COPY_LIST_TITLE" />',"${baseUrl}/path/doDuplicateInput.do?id="+rowsData[0].id,'dg${currentPageId}',true);
+}
+	
+function openPathFlow() {
+	$.ajax({
+        url: "${baseUrl}/path/showGrapPath.do",
+        cache: false,
+        global: false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {},
+        success: function(html){
+        	var conLen = html.length;
+    		$(".main-content").html(html);
+        }
+    });
+	if($("#sidebar-collapse").children().attr("class")=="icon-double-angle-left"){
+		$("#sidebar-collapse").children().click();
+	}
+	if ($("#menu-toggler").hasClass("display")) {
+		$("#menu-toggler").removeClass("display")
+		$("#sidebar").removeClass("display");
+	}
+}
+function showPathFlow(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	$.ajax({
+        url: "${baseUrl}/path/showGrapPath.do",
+        cache: false,
+        global: false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {
+        	"tmPathId":rowsData[0].id
+        },
+        success: function(html){
+        	var conLen = html.length;
+    		$(".main-content").html(html);
+        }
+    });
+	if($("#sidebar-collapse").children().attr("class")=="icon-double-angle-left"){
+		$("#sidebar-collapse").children().click();
+	}
+	
+	if ($("#menu-toggler").hasClass("display")) {
+		$("#menu-toggler").removeClass("display")
+		$("#sidebar").removeClass("display");
+	}
+}
+</script>
+<@p.body title="PATH_LIST_TITLE" permissionModule="PATH" noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PATH_PLANT" id="list_plant" onchange="list_changePlant(this.value);" type="select"  field="tmPlantId" options=plantOptions  ></@p.input>
+			<@p.input title="PATH_LINE" id="list_line" field="tmLineId"  type="select" options=lineOptions></@p.input>
+			<@p.input title="PATH_BACK_NUMBER" field="backNumber"></@p.input>
+			<@p.input title="PATH_NO" field="no"></@p.input>
+			<@p.input title="PATH_NAME" field="name"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathAdd" iconCls="plus" url="${baseUrl}/path/addInput.do" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathUpdate" iconCls="edit" url="${baseUrl}/path/updateInput.do" type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathDelete" iconCls="trash" url="${baseUrl}/path/delete.do" type="delete"></@p.button>
+			<@p.button title="PATH_COPY" permissionCode="PathCopy" iconCls="copy"  onclick="doDuplicate();" type="button"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/path/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_PLANT" field="plant.no" permissionCode="PATH_PLANT"></@p.column>
+		<@p.column title="PATH_LINE" field="line.nameCn" permissionCode="PATH_LINE" ></@p.column>
+		<@p.column title="PATH_LINE_NO" field="line.no" permissionCode="PATH_LINE_NO" ></@p.column>
+		<@p.column title="PATH_NO" field="no" permissionCode="PATH_NO" ></@p.column>
+		<@p.column title="PATH_NAME" field="name" permissionCode="PATH_NAME"></@p.column>
+		<@p.column title="PATH_BACK_NUMBER" field="backNumber" permissionCode="PATH_BACK_NUMBER" formatter="renderIsNull"></@p.column>
+		<@p.column title="PATH_MACHINE_OF_NAME" field="machineOfName" permissionCode="PATH_MACHINE_OF_NAME" formatter="renderIsNull"></@p.column>
+		<@p.column title="PATH_REMARK" field="remark" permissionCode="PATH_REMARK"></@p.column>
+	</@p.dataGrid>
+	<div id ="pathUloc"></div>
+</@p.body>
+<script type="text/javascript">
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+function renderStatus(value){
+	return entryRenderer('MAINTAIN_STATUS', value);
+}
+function renderPart(value,record){
+	if(record.part&&record.part.no){
+		return record.part.no+ " - " + record.part.nameCn;
+	}
+	return "";
+}
+
+function renderPlant(value,record){
+	if(record.plant&&record.plant.no){
+		return record.plant.no+ " - " + record.plant.nameCn;
+	}
+	return "";
+}
+function renderIsNull(value){
+	if(value){
+		return value;
+	}
+	return "";
+}
+function renderWorkShop(value,record){
+	if(record.workshop&&record.workshop.no){
+		return record.workshop.no+ " - " + record.workshop.nameCn;
+	}
+	return "";
+}
+
+function renderLine(value,record){
+	if(record.line&&record.line.no){
+		return record.line.no+ " - " + record.line.nameCn;
+	}
+	return "";
+}
+
+function renderCopyPath(value,record){
+	if(record.copyPath&&record.copyPath.no){
+		return record.copyPath.no+ " - " + record.copyPath.name;
+	}
+	return "";
+}
+
+function list_changePlant(obj){
+	getPart(obj);
+	//getWorkShop(obj);
+	doGetLine(obj);
+	//getLine($("#list_plant").val(),$("#list_workshop").val());
+}
+function list_changeWorkshop(workShopId){
+	getLine($("#list_plant").val(),workShopId);
+}
+
+function getPart(obj){
+	$.ajax({
+		data:{
+			plantId:obj,
+			operate:"search"
+		},
+		url:"${baseUrl}/path/getPartByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			$("#list_part").empty(); //清空下拉列表
+			$("#list_part").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(
+				function(i, item) {
+					$("#list_part").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+				});
+			}
+	});
+}
+
+/* function getWorkShop(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/path/getWorkShopByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			$("#list_workshop").empty(); //清空下拉列表
+			$("#list_workshop").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(
+				function(i, item) {
+					$("#list_workshop").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+				});
+			}
+	});
+} */
+
+function doGetLine(obj){
+	if (obj == "" || null == obj) {
+		return false;
+	}else{
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/uloc/selectLintNameOrPlantId.do", //修改为通过公司id得到所属产线
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				$("#list_line").empty(); //清空下拉列表
+				$("#list_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#list_line").append(" <option  value='" + item.id + "'>"+item.nameCn + "</option>");
+					});
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+}
+
+/* 
+function getLine(plantId,workShopId){
+	$.ajax({
+		data:{
+			plantId:plantId,
+			workShopId:workShopId
+		},
+		url:"${baseUrl}/path/getLineByWorkShopIdAndPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			$("#list_line").empty(); //清空下拉列表
+			$("#list_line").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(
+				function(i, item) {
+					$("#list_line").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+				});
+			}
+	});
+}
+
+ */
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/path/exportTemplate.do";
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/path/importData.do", "dg${currentPageId}",obj);
+}
+function importDataAll(){
+	alert("path im all");
+	importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/path/importData.do", "dg${currentPageId}","");
+}
+
+</script>

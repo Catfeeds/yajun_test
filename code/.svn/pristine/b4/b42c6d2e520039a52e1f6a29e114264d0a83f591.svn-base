@@ -1,0 +1,60 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+ function toCheckNum(){
+	 var oldQty = $("#oldQty").val();
+	 var qty = $("#perlaceQty").val();
+	 if(Number(qty) > Number(oldQty)  ){
+		 $("#perlaceQty").val("");
+		 infoTip("替换数量不能大于原数量!");
+	 }	 
+	 
+ }
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/record/uloc/part/updateUntrated.do" class="form-horizontal"  permissionModule="RECORD"  >
+	<!-- 物料  -->
+	<@p.formRow>
+		<@p.formColmd title="PECORD_ULOC_PART_PART_NO"  permissionCode="UNTRATED_NC_SN">
+			<input  type="hidden" name="ordId" value="${bean.id}"  /> 
+			<input  type="hidden" name="tpRecordId" value="${bean.tpRecordId}"  /> 
+			<input  type="hidden" name="tpRecordUlocId" value="${bean.tpRecordUlocId}"  />
+			<input  type="hidden" name="tmPartId" value="${bean.tmPartId}"  />  
+			<input  type="hidden" name="partNo" value="${bean.partNo}"  />  
+			<input  type="hidden" name="partName" value="${bean.partName}"  />  
+			<input  type="hidden" name="barCode" value="${bean.barCode!}"  />  
+			<input  type="hidden" name="note" value="${bean.note!}"  />  
+			<input  type="hidden" id="oldQty" value="${bean.qty!}" /> 
+				${bean.partNo!}	
+		</@p.formColmd>
+		<@p.formColmd title="PECORD_ULOC_PART_PART_NAME"  permissionCode="UNTRATED_NC_SN">
+				${bean.partName!}	
+		</@p.formColmd>
+	</@p.formRow>
+	<!-- 条码 与 数量  -->
+	<@p.formRow>
+		<@p.formColmd title="PECORD_ULOC_PART_BAR_CODE"  permissionCode="UNTRATED_NC_SN">
+				${bean.barCode!}	
+		</@p.formColmd>
+		<@p.formColmd title="PECORD_ULOC_PART_QTY"  permissionCode="UNTRATED_NC_SN">
+			${bean.qty!}
+			<!-- <input  type="text" dataType="n"  name="qty" id="qty" value="${bean.qty!}" onblur="toCheckNum()"   /> --> 
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="PECORD_ULOC_PART_REPLACE_BAR_CODE"  permissionCode="UNTRATED_NC_SN">
+				<input  type="text" dataType="*"  name="replaceBarCode" id="replaceBarCode" />	
+		</@p.formColmd>
+		<@p.formColmd title="PECORD_ULOC_PART_REPLACE_QTY"  permissionCode="UNTRATED_NC_SN">
+			<input  type="text" dataType="n"  name="perlaceQty" id="perlaceQty" value="${bean.qty!}" onblur="toCheckNum()"   /> 
+		</@p.formColmd>
+	</@p.formRow>
+	 
+	
+</@p.editForm>
+   
+</body>
+</html>

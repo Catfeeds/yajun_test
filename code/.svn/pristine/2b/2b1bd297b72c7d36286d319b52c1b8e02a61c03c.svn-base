@@ -1,0 +1,286 @@
+<#include "../../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>钣金非故障明细 </title>
+<style>
+	.report-panel{
+		width:100%;
+		height:70rem;
+	}
+</style>
+
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<script type="text/javascript">
+
+var dataObj={
+	noFaultDetailsBar:{
+		chart:echarts.init(document.getElementById('noFaultDetailsBar')),
+		xAxisData:[],
+		seriesA:[],
+		seriesB:[],
+		seriesC:[]
+	},
+	noFaultDetailsPie:{
+		chart:echarts.init(document.getElementById('noFaultDetailsPie')),
+		series1:[],
+		series3:[],
+		series4:[],
+		series5:[],
+		series7:[]
+	}
+	
+};
+
+$(function(){
+	$("#createTimeStart").val(initDateTime('yyyy-MM-dd hh:mm',-1,false));
+	$("#createTimeEnd").val(initDateTime('yyyy-MM-dd hh:mm',false,false));
+	getFaultMachineData("noFaultDetailsBar");
+	getFaultMachineData("noFaultDetailsPie");
+});
+ 	
+	
+function getNoFaultDetailsBar(){
+	var	option = {
+		    title:{
+		       text:'非故障停机明细' ,
+		       x:'center',
+			   y:'top'
+		    },
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		        data:['A区域','B区域','C区域'],
+		        type: 'scroll',
+		        orient: 'vertical',
+		        right: 10,
+		        top: 30,
+		        bottom: 10
+		    },
+		     grid:{
+		        bottom:'10%',
+		        right:'10%'
+		     },
+		     toolbox: {
+		        show : true,
+		        feature : {
+		            dataView : {show: true, readOnly: false},
+		            magicType : {show: true, type: ['line', 'bar']},
+		            restore : {show: true},
+		            saveAsImage : {show: true}
+		        }
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : dataObj.noFaultDetailsBar.xAxisData
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            name:'/min',
+		            type : 'value',
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'A区域',
+		            type:'bar',
+		            itemStyle: {
+	                	normal: {
+                            color: '#9CC5B2' 
+		                }
+		            }, 
+		            data:dataObj.noFaultDetailsBar.seriesA 
+		        },
+		        {
+		            name:'B区域',
+		            type:'bar',
+		            itemStyle: {
+		            	normal: {
+                            color: '#D0917A' 
+		                }
+		            }, 
+		            data:dataObj.noFaultDetailsBar.seriesA
+		        },
+		        {
+		            name:'C区域',
+		            type:'bar',
+		            itemStyle: {
+		                normal: {
+                            color: '#51616D' 
+		                }
+		            }, 
+		            data:dataObj.noFaultDetailsBar.seriesC
+		        }
+		    ]
+		};
+	return option;
+}
+
+function getNoFaultDetailsPie(){
+    var centerxs= [20,50,80];
+	var centerys = [60,60,60];
+	var product = ['A区域','B区域','C区域'];
+	var option = {
+		    title:{
+		       text: '非故障停机明细',
+	           x:'center' 
+		    },
+		    legend:{
+		        orient:'vertical',
+		        right:2,
+		        top:'40'
+		     },
+		     tooltip: {
+		    	 trigger: 'item',
+		         formatter: "{a} {b} :{d}%",
+		         textStyle: {fontSize:14}
+		     },
+		     toolbox: {
+		        show : true,
+		        feature : {
+		            dataView : {show: true, readOnly: false},
+		            saveAsImage : {show: true}
+		        }
+		     },
+		     dataset: {
+		        source: [
+		            ['product', 'A区域','B区域','C区域'],
+		            dataObj.noFaultDetailsPie.series1,
+		            dataObj.noFaultDetailsPie.series3,
+		            dataObj.noFaultDetailsPie.series4,
+		            dataObj.noFaultDetailsPie.series5,
+		            dataObj.noFaultDetailsPie.series7
+		        ]
+		    },
+		    grid: [
+		        {x: '2%',y: '13%',width:'95%', height: '10%'}
+		    ],
+		    xAxis: [
+		        {
+		            gridIndex: 0,
+		            type: 'category',
+		            axisTick: { show: false },
+		            axisLine:{show:false},
+		            data: ['A区域','B区域','C区域']
+		        }
+		    ],
+		    yAxis: [
+		        {gridIndex: 0,name:'月份',show:false}
+		    ],
+		    series:centerxs.map(function (item, idx) {
+		         return{
+		            name: product[idx],
+		            type: 'pie',
+		            radius :'40%',
+		            center: [centerxs[idx]+'%', centerys[idx]+'%'],
+		            itemStyle: {
+		                emphasis: {
+		                    shadowBlur: 10,
+		                    shadowOffsetX: 0,
+		                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+		                },
+		                normal: {
+                            color: function(params) {
+                                var colorList = [
+                                  '#B0B0B0','#D8D405','#F87519','#843C0C','#3939FF'
+                                ];
+                                return colorList[params.dataIndex]
+                            } 
+		                }
+		            }, 
+		            encode: {
+		                itemName: 'product',
+		                value: product[idx]
+		            }
+		         }
+		    })
+		};
+	return option;
+}
+function getFaultMachineData(_id){
+	var	data = {
+		'queryCondition[createTimeStart]':$("#createTimeStart").val(),
+		'queryCondition[createTimeEnd]':$("#createTimeEnd").val(),
+		'queryCondition[type]':_id
+	}; 
+	ajaxRequest("${baseUrl}/metalplateFauletdReport/noFaultDetailsReportData.do", data, function(result){
+			var data = result.data;
+			dataObj.noFaultDetailsBar.seriesA = result.data.seriesA;
+			dataObj.noFaultDetailsBar.seriesB = result.data.seriesB;
+			dataObj.noFaultDetailsBar.seriesC = result.data.seriesC;
+			dataObj.noFaultDetailsBar.xAxisData = result.data.xAxisData;
+			dataObj.noFaultDetailsPie.series1 = result.data.series1;
+			dataObj.noFaultDetailsPie.series3 = result.data.series3;
+			dataObj.noFaultDetailsPie.series4 = result.data.series4;
+			dataObj.noFaultDetailsPie.series5 = result.data.series5;
+			dataObj.noFaultDetailsPie.series7 = result.data.series7;
+		
+			dataObj.noFaultDetailsBar.chart.showLoading();
+			var option = getNoFaultDetailsBar();
+			dataObj.noFaultDetailsBar.chart.hideLoading();
+			dataObj.noFaultDetailsBar.chart.setOption(option,true);
+			dataObj.noFaultDetailsPie.chart.showLoading();
+			var option = getNoFaultDetailsPie();
+			dataObj.noFaultDetailsPie.chart.hideLoading();
+			dataObj.noFaultDetailsPie.chart.setOption(option,true);
+	}, false);
+}
+</script>
+</head>
+<body>
+	<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>	
+	<div  class="report-panel">
+		<div style="width:80%;height:48%;" id="noFaultDetailsBar" ></div>
+		<div style="width:80%;height:48%;" id="noFaultDetailsPie" ></div>
+	</div>
+<script type="text/javascript">
+	function conditionalQuery(searchBtnObj){
+		getFaultMachineData("noFaultDetailsBar");
+		getFaultMachineData("noFaultDetailsPie");
+	}
+	$('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+	</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+<script type="text/javascript">
+	function renderDataPermission(value) {
+		return entryRenderer('DATA_PERMISSION_MODULE', value);
+	}
+</script>
+<script type="text/javascript">
+	function clickcallback(dialog){
+		var rowsData = getSelectedRows('dgDataPerSelectGrid');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		$('#permissionId').val(rowsData[0].id);
+		$('#permissionCode').val(rowsData[0].code);
+		$('#relationCode').val(rowsData[0].relationCode);
+		$('#module').val(renderDataPermission(rowsData[0].module));
+		$('#url').val(rowsData[0].url);
+		$('#description').val(rowsData[0].description);
+		dialog.close();
+	}
+	function openChooseValueWin(){
+		if($("#permissionId").val().length < 1){
+			infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+			return;
+		}
+		
+		BootstrapDialog.show({
+			size : BootstrapDialog.SIZE_WIDE,
+			title : '<@s.m code="PERMISSION_SELECT_VALUE" />【'+$("#module").val()+'】【'+$("#description").val()+'】',
+			message : function(dialog) {
+				var $message = $('<div></div>');
+				var pageToLoad = dialog.getData('pageToLoad');
+				$message.load(pageToLoad);
+
+				return $message;
+			},
+			buttons : [ {
+				label : commons_msg.btnConfirm,
+				cssClass : 'btn-primary',
+				action : function(dialogRef) {
+					
+					var selectedRows = getSelectedRows('dgdataPerSel');
+					if (!selectedRows || selectedRows.length == 0) {
+						infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+						return ;
+					}
+					 var str= $('#value').val();
+					 if(str.length > 0)str+=',';
+					 for(var i=0;i<selectedRows.length;i++){
+						 var selectedRow=selectedRows[i];
+						 str+=selectedRow[$("#relationCode").val()];
+						 str+=',';
+					 }
+					 if(str.length > 1)str=str.substring(0,str.length-1);
+					 $('#value').val(str);
+					 dialogRef.close();
+				}
+			}, {
+				label : commons_msg.btnClose,
+				cssClass : 'btn-default',
+				action : function(dialogRef) {
+					dialogRef.close();
+				}
+			} ],
+			data : {
+				'pageToLoad' : '${baseUrl}/dataPermissionRel/selectValue.do?pageId=dataPerSel&url='+$('#url').val()
+			}
+		});
+	}
+	function testSQL(){
+		if($("#permissionId").val().length < 1){
+			infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+			return;
+		}
+		if($("#sqlValue").val().length < 1){
+			infoTip('<@s.m code="PERMISSION_SQL_NULL" />');
+			return;
+		}
+		ajaxRequest('${baseUrl}/dataPermissionRel/testSQL.do',{'permissionId' : $("#permissionId").val(),'sql':$("#sqlValue").val()},function(){
+			grid.datagrid('reload');
+		});
+	}
+	function changeType(timeOut){
+		var type=$("#selType").val();
+		var showId='';
+		if('RANGE_DATE'==type){
+			showId="#divPermissionValueRangeDate";
+		}else if('RANGE_NORMAL'==type){
+			showId="#divPermissionValueRangeNormal";
+		}else if('SQL'==type){
+			showId="#divPermissionValueSQL";
+			infoTip('<@s.m code="PERMISSION_SQL" />');
+		}else {
+			showId="#divPermissionValueDefault";
+		}
+		$(showId).siblings().hide(timeOut);
+		$(showId).show(timeOut);
+	}
+	$(function(){
+		changeType(0);
+		var lang='${lang!}';
+		var params={};
+		if(lang=='en_US'){
+			params.lang='en';
+		}
+		$("#startTime,#endTime").focus(function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd'});
+		});
+	});
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/dataPermissionRel/add.do" class="form-horizontal"   permissionModule="DATA_PERMISSION">
+		<input type="hidden" name="permissionSetId" value="${permissionSetId}"/>
+	<@p.formRow  class="row rowDivTop">
+		<@p.formColmd class="col-md-4" title="PERMISSION_CODE"  permissionCode="PERMISSION_CODE">
+			 <input name="permissionId"  type="hidden" id="permissionId">
+			 <input name="code" readonly="readonly" class="inputxt" id="permissionCode"/>
+			 <@p.select  title="PERMISSION_SELECT"   url="${baseUrl}/dataPermission/listSelect.do?currentPageId=DataPerSelectGrid&singleSelect=true" callback="clickcallback"/>
+		</@p.formColmd>
+		<@p.formColmd class="col-md-4" title="PERMISSION_RELATION_CODE"  permissionCode="PERMISSION_RELATION_CODE">
+			 <input name="relationCode" id="relationCode" readonly="readonly" class="inputxt" />
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow  class="row rowDivTop">
+		<@p.formColmd class="col-md-4" title="PERMISSION_MODULE"  permissionCode="PERMISSION_MODULE">
+			  <input name="module" readonly="readonly" class="inputxt"  id="module"/>
+		</@p.formColmd>
+		<@p.formColmd class="col-md-4" title="PERMISSION_URL"  permissionCode="PERMISSION_URL">
+				 <input name="url" readonly="readonly" class="inputxt"  id="url"/>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow  class="row rowDivTop">
+		<@p.formColmd class="col-md-4" title="PERMISSION_DESCRIPTION"  permissionCode="PERMISSION_DESCRIPTION">
+			<textarea name="description" readonly="readonly" class="inputxt"   id="description" style="width:98%"></textarea>
+		</@p.formColmd>
+		<@p.formColmd class="col-md-4" title="PERMISSION_TYPE"  permissionCode="PERMISSION_TYPE">
+				<@p.input type="select" excludeSelectOption="true" style="width:210px" field="type" options=options id="selType" onchange="changeType(300)"></@p.input>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow  class="row rowDivTop">
+		<@p.formColmd class="col-md-4" title="PERMISSION_VALUE"  permissionCode="PERMISSION_VALUE">
+			<div id="divPermissionValueDefault" style="display: none;">
+			 <textarea name="value" datatype="*1-400"  ignore="ignore" id="value" class="inputxt" style="width:100%"></textarea>
+			  <a href="#"  plain="true" icon="magnifier" 	onClick="openChooseValueWin()" ><i class="icon-search"><@s.m code="FRAME_CHOOSE" /></i></a>
+			</div>
+			<div id="divPermissionValueRangeDate" style="display: none;">
+				<input type="text" name="startTime" id="startTime"/> <a plain="true">-&gt;</a>
+				<input type="text" name="endTime" id="endTime"/>
+			</div>
+			<div id="divPermissionValueRangeNormal" style="display: none;">
+				<input type="text" name="start" /> <a  plain="true">-&gt;</a>
+				<input type="text" name="end" />
+			</div>
+			<div id="divPermissionValueSQL" style="display: none;">
+				<textarea name="sql" datatype="*1-400" ignore="ignore" id="sqlValue" style="width:100%" class="inputxt"></textarea>
+			  <a href="#"  plain="true" icon="resultset_next" 	onClick="testSQL()" ><@s.m code="PERMISSION_SQL_TEST" /></a>
+			</div>
+		</@p.formColmd>
+	</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

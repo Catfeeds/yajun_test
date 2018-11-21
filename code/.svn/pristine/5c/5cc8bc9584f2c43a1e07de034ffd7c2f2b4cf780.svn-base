@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/porder/update.do" class="form-horizontal" idValue=bean.id permissionModule="PORDER">
+	<input type="hidden" name ="no" value="${bean.no!}">
+	<input type="hidden" name ="factStartTime" value="${bean.factStartTime!}">
+	<input type="hidden" name ="factEndTime" value="${bean.factEndTime!}">
+	<input type="hidden" name ="productStatus" value="${bean.productStatus!}">
+	<input type="hidden" name ="taskStatus" value="${bean.taskStatus!}">
+	<input type="hidden" name ="instorageStatus" value="${bean.instorageStatus!}">
+	<input type="hidden" name ="onlineQty" value="${bean.onlineQty!}">
+	<input type="hidden" name ="offlineQty" value="${bean.offlineQty!}">
+	<input type="hidden" name ="scrapQty" value="${bean.scrapQty!}">
+	<input type="hidden" name ="instorageQty" value="${bean.instorageQty!}">
+	<input type="hidden" name ="closeReason" value="${bean.closeReason!}">
+	<input type="hidden" name ="isErp" value="${bean.isErp!}">
+	<input type="hidden" name ="isHold" value="${bean.isHold!}">
+	<input type="hidden" name ="taskQty" value="${bean.taskQty!}">
+	<@p.formRow>
+			<@p.formColmd title="PORDER_PLANT" permissionCode="PORDER_PLANT">
+				<@p.input type="select" datatype="*"  disabled= "disabled" value="${bean.tmPlantId}" options=plantOptions ></@p.input>
+				<input type="hidden" name ="tmPlantId" id="porderUpdatePlant"value="${bean.tmPlantId!}">
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_PART" permissionCode="PORDER_PART">
+				 <@p.input type="select" datatype="*" disabled="disabled" value="${bean.tmPartId}" options=partOptions></@p.input>
+				<input type="hidden" name ="tmPartId" id="porderUpdatePart"  value="${bean.tmPartId!}">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PORDER_QTY" permissionCode="PORDER_QTY">
+				<input name="qty" class="inputxt" maxlength="36" datatype="n" value="${bean.qty!}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_PATH" permissionCode="PORDER_PATH">
+				<@p.input type="select" id="porderUpdatePath" field="tmPathId" options=pathOptions value="${bean.tmPathId!}"></@p.input>
+				<input type="hidden" id="porderUpdatePath_value" value="${bean.tmPathId!}">
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PORDER_BOM" permissionCode="PORDER_BOM">
+				<@p.input type="select" id="porderUpdateBom" field="tmBomId" options=bomOptions ></@p.input>
+				<input type="hidden" id="porderUpdateBom_value" value="${bean.tmBomId!}">
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_PRIORITY" permissionCode="PORDER_PRIORITY">
+				 <@p.input type="radio" excludeSelectOption="true" field="priority" options=priorityOptions value="${bean.priority!}"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PORDER_PLAN_START_TIME" permissionCode="PORDER_PLAN_START_TIME">
+				<input name="planStartTime" id="planStartTime" class="timepicker"  datatype="*" value="${bean.planStartTime!}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_PLAN_END_TIME" permissionCode="PORDER_PLAN_END_TIME">
+				<input name="planEndTime" id="planEndTime"class="timepicker"  datatype="*" value="${bean.planEndTime!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PORDER_NOTE" permissionCode="PORDER_NOTE">
+				<input name="note" class="inputxt" maxlength="150" value="${bean.note!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	var lang='${lang!}';
+	var params={};  
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#planStartTime').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'planEndTime\',{d:1})}'});
+	});
+	$('#planEndTime').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'planStartTime\',{d:-1})}'});
+	}); 
+	var porderUpdatePath = $("#porderUpdatePath_value").val();
+	var porderUpdateBom = $("#porderUpdateBom_value").val();
+	porderAddgetPath($("#porderUpdatePlant").val(),$("#porderUpdatePart").val(),porderUpdatePath);
+	porderAddGetBom($("#porderUpdatePlant").val(),$("#porderUpdatePart").val(),porderUpdateBom);
+});
+
+function porderAddgetPath(tmPlantId,tmPartId,path){
+	$.ajax({
+		url:"${baseUrl}/porder/getPaths.do",
+		type:"post",
+		dataType:"json",
+		data:{
+			tmPlantId:tmPlantId,
+			tmPartId:tmPartId
+		},
+		success:function(result){
+			$("#porderUpdatePath").empty();
+			$("#porderUpdatePath").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(function(i,item){
+				$("#porderUpdatePath").append(" <option value='" + item.id + "'>"+item.no+"-"+item.name + "</option>");
+			});
+			$("#porderUpdatePath").val(path);
+		}
+	});
+}
+function porderAddGetBom(tmPlantId,tmPartId,bom){
+	$.ajax({
+		url:"${baseUrl}/porder/getBoms.do",
+		type:"post",
+		dataType:"json",
+		data:{
+			tmPlantId:tmPlantId,
+			tmPartId:tmPartId
+		},
+		success:function(result){
+			$("#porderUpdateBom").empty();
+			$("#porderUpdateBom").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(function(i,item){
+				$("#porderUpdateBom").append(" <option value='" + item.id + "'>"+item.bomversion + "</option>");
+			});
+			$("#porderUpdateBom").val(bom);
+		}
+	});
+}
+</script>

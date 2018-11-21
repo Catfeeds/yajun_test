@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/path/uloc/part/graph_update.do" formId = "partUpdateFomId" class="form-horizontal" idValue=bean.id  permissionModule="PATH_ULOC_PART">
+		<input type ="hidden" id="pathUlocPartUpdatePathUlocId"name="tmPathUlocId" value="${tmPathUlocId!}"/>
+		<input type ="hidden" name="rectSeq" id="updateRectSeq" value="${rectSeq!}"/>
+		<input type="hidden" value="pathUlocPartUpdateCallBack" id="callback">
+		<input type="hidden" value="parhUlocPartUpdateCheckUniqueData" id="beforeSubmit">
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_PART" permissionCode="PATH_ULOC_PART_ULOC_PART">
+				 <@p.input type="select" id="update_ulocPartId" datatype="*" field="tmPartId" options=partOptions  value="${bean.tmPartId}"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_QTY" permissionCode="PATH_ULOC_PART_ULOC_QTY">
+				<input name="qty" class="inputxt" datatype="n" maxlength='16'  id="qty_add" value="${bean.qty}"/>
+			</@p.formColmd>
+			
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_SEQ" permissionCode="PATH_ULOC_PART_ULOC_SEQ">
+				<input name="seq" class="inputxt" datatype="n" maxlength='16' datatype="*" value="${bean.seq}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_ISBATCHTRAC" permissionCode="PATH_ULOC_PART_ULOC_ISBATCHTRAC">
+				 <@p.input type="select" id="update_isBatchTrac"  field="isBatchTrac" value="${bean.isBatchTrac!}" datatype="*" options=yesOrNoOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+function pathUlocPartUpdateCallBack(result){
+	if($("#pathUlocPartUpdatePathUlocId").val()!=""){
+		return;
+	}
+	var bean = result.data;
+	$(partArray).each(function(i,partObject){
+		if(partObject.key == bean.rectSeq){
+			$(partObject.value).each(function(j,item){
+				if(item.id == bean.id){
+					item = bean;
+					partObject.value.splice(j,1,bean);
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	
+	loadPartArray(bean.rectSeq);
+}
+
+function parhUlocPartUpdateCheckUniqueData(){
+	if($("#pathUlocPartUpdatePathUlocId").val()!=""){
+		return true;
+	}
+	var id = $("#partUpdateFomId").find("input[name = 'id']").attr("value");
+	var checkedData = true;
+	$(partArray).each(function(i,partObject){
+		if(partObject.key == $("#updateRectSeq").val()){
+			$(partObject.value).each(function(j,bean){
+				if(bean.id != id && bean.tmPartId == $("#update_ulocPartId").val()){
+					errorTip("该站点该关键件已经存在，请检查!");
+					checkedData = false;
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	return checkedData;
+}
+</script>
+

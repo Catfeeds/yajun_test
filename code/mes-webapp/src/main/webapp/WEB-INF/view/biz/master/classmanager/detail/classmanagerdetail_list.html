@@ -1,0 +1,111 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function importData(){
+	var obj = new Object();
+	obj.templateUrl = "${baseUrl}/classManagerDetail/exportTemplate.do?tmClassManagerId=${tmClassManagerId}";
+    importFile("<@s.m code="BOM_IMPORT" />", "${baseUrl}/classManagerDetail/importData.do?tmClassManagerId=${tmClassManagerId}", "classManagerDetailGridID",obj);
+}
+</script>
+<@p.body title="CLASS_MANAGER_LIST_TITLE" permissionModule="CLASS_MANAGER_DETAIL" noBreadcrumbs="true">	
+<div style="color: #428bca;text-align:center; margin:10px" >班组详情信息</div>
+	<@p.searchPanel gridId="classManagerDetailGridID">
+		<@p.toolbar id="tbclassManagerDetailGridID"> 
+			<@p.button title="CLASS_MANAGER_ADD" permissionCode="CLASSDETAILADD" iconCls="plus" url="${baseUrl}/classManagerDetail/addInput.do?tmClassManagerId="+"${tmClassManagerId}" type="add"  ></@p.button>
+			<@p.button title="CLASS_MANAGER_UPDATE" permissionCode="CLASSDETAILUPDATE" iconCls="edit" url="${baseUrl}/classManagerDetail/updateInput.do" type="update"></@p.button>
+			<@p.button title="CLASS_MANAGER_DELETE" permissionCode="CLASSDETAILDELTE" iconCls="trash" url="${baseUrl}/classManagerDetail/delete.do" type="delete"></@p.button>
+			<@p.button title="CLASS_MANAGER_IMPORT" permissionCode="CLASSDETAILIMPORT" iconCls="download-alt" onclick="importData()" ></@p.button>
+			<@p.button title="CLASS_MANAGER_EXPORT" downName="CLASS_MANAGER_EXPORT_NAME" permissionCode="CLASSDETAILEXPORT"  url="${baseUrl}/classManagerDetail/exportData.do?tmClassManagerId=${tmClassManagerId}" iconCls="upload-alt" type="down"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/classManagerDetail/list.do?${params!}" id="classManagerDetailGridID">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="CLASS_MANAGER_DETAIL_ULOC_NO" field="tmUloc.no" permissionCode="CLASS_MANAGER_DETAIL_ULOC_NO"></@p.column>
+		<@p.column title="CLASS_MANAGER_DETAIL_ULOC_NAME" field="tmUloc.name" permissionCode="CLASS_MANAGER_DETAIL_ULOC_NAME" ></@p.column>
+		<@p.column title="CLASS_MANAGER_DETAIL_USER_ACCOUNT" field="tmEmployeeNo.no" permissionCode="CLASS_MANAGER_DETAIL_USER_ACCOUNT" ></@p.column>
+		<@p.column title="CLASS_MANAGER_DETAIL_USER_NAEM" field="tmEmployeeNo.name" permissionCode="CLASS_MANAGER_DETAIL_USER_NAEM" ></@p.column>
+		<@p.column title="CLASS_MANAGER_DETAIL_REMARK" field="remark" permissionCode="CLASS_MANAGER_DETAIL_REMARK" ></@p.column>
+	</@p.dataGrid>
+	<div id ="pathUloc"></div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+function renderGenderClassOrder(value) {
+	return entryRenderer('CLASS_ORDER', value);
+}
+function renderGenderClassGroup(value) {
+	return entryRenderer('CLASS_GROUP', value);
+}
+function renderPlantNoOrName(value,record) {
+	if(value && record.tmPlant.no){
+		return record.tmPlant.no+ " - " + value;
+	}
+	return record.tmPlant.no+ " - ";
+}
+
+
+function renderPart(value,record){
+	if(record.part&&record.part.no){
+		return record.part.no+ " - " + record.part.nameCn;
+	}
+	return "";
+}
+
+function renderPlant(value,record){
+	if(record.plant&&record.plant.no){
+		return record.plant.no+ " - " + record.plant.nameCn;
+	}
+	return "";
+}
+
+function renderWorkShop(value,record){
+	if(record.workshop&&record.workshop.no){
+		return record.workshop.no+ " - " + record.workshop.nameCn;
+	}
+	return "";
+}
+
+function renderLine(value,record){
+	if(record.line&&record.line.no){
+		return record.line.no+ " - " + record.line.nameCn;
+	}
+	return "";
+}
+
+function renderCopyPath(value,record){
+	if(record.copyPath&&record.copyPath.no){
+		return record.copyPath.no+ " - " + record.copyPath.name;
+	}
+	return "";
+}
+
+function doGetLine(obj){
+	if (obj == "" || null == obj) {
+		return false;
+	}else{
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/uloc/selectLintNameOrPlantId.do", //修改为通过公司id得到所属产线
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				$("#list_line").empty(); //清空下拉列表
+				$("#list_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#list_line").append(" <option  value='" + item.id + "'>"+item.nameCn + "</option>");
+					});
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+}
+
+</script>

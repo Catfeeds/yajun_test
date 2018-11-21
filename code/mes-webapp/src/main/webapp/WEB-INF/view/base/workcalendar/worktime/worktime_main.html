@@ -1,0 +1,119 @@
+<script type="text/javascript">
+	$(".page-content").toggleClass("page-content");
+	var operateParam=new Object();
+	operateParam.id=0;
+	var operateParamRight=new Object();
+	operateParamRight.id=0;
+	var selectedOrg = 0;
+	var selectedNode = 0;
+	jQuery(function($) {
+		showWorktime();
+		$("#widget-collapse").click(function() {
+			if ($("#org_tab_left_body").is(":hidden")) {
+				$("#org_tab_right").removeClass("widget-box-max");
+				$("#org_tab_left_body").show();
+			} else {
+				$("#org_tab_right").addClass("widget-box-max");
+				$("#org_tab_left_body").hide();
+			}
+		});
+ 		$("#myTab li").click(function() {
+ 			reLoadTree(operateParam.id, $(this).index());
+ 		});
+	});
+	
+	//工作日历
+	function showWorktime(){
+		var url = '${baseUrl}/worktime/workTimelistInput.do';
+		var parameters = {currentPageId:"${currentPageId}"};
+		var tableId = "tbworktime";
+		ajaxResponseHtml(url,parameters,tableId);
+	}
+	//特殊日历
+	function showWorkspecialdate(){
+		var url = '${baseUrl}/workspecialdate/listInput.do';
+		var parameters = {currentPageId:"tbworkspecialdate"};
+		var tableId = "workspecialdate";
+		ajaxResponseHtml(url,parameters,tableId);
+	}
+	//班次
+	function showWorkspecialdate(){
+		var url = '${baseUrl}/workspecialdate/listInput.do';
+		var parameters = {currentPageId:"tbworkspecialdate"};
+		var tableId = "workspecialdate";
+		ajaxResponseHtml(url,parameters,tableId);
+	}
+	//班组管理
+	function showClassManage(){
+		var url = '${baseUrl}/classManager/listInput.do';
+		var parameters = {currentPageId:"classManagerId"};
+		var tableId = "classManage";
+		ajaxResponseHtml(url,parameters,tableId);
+	}
+	//作业员工号
+	function showEmployeeNo(){
+		var url = '${baseUrl}/tmEmployeeNo/listInput.do';
+		var parameters = {currentPageId:"pageEmployeeNoId"};
+		var tableId = "employeeNo";
+		ajaxResponseHtml(url,parameters,tableId);
+	}
+	//工作日历模板
+	function showWorkschedule(){
+		var url = '${baseUrl}/workschedule/listInput.do';
+		var parameters = {currentPageId:"pageWorkscheduleId"};
+		var tableId = "workschedule";
+		ajaxResponseHtml(url,parameters,tableId);
+	}
+	
+	function reLoadTree(orgId, lindex) {
+		console.log(lindex);
+		if (lindex == undefined) {
+			lindex = $("#myTab li.active").index();
+		}
+		operateParam.id = orgId;
+		switch (lindex) {
+		case 0: {
+			showWorktime(); 
+		}
+			break;
+		case 1: {
+			showWorkspecialdate();
+		}
+			break;
+		case 2: {
+			showClassManage();
+		}
+			break;
+		case 3: {
+			showEmployeeNo();
+			
+		}
+			break;
+		case 4: {
+			showWorkschedule();
+		}
+		break;
+		default:
+			break;
+		}
+	}
+	
+</script>
+<body>
+<div id="org_tab_right" style="width: 100%;margin-left: 0px;margin-top: 0px;"  class="tabbable org_tab_right" >
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue"	id="myTab" >
+		<li class="active"><a data-toggle="tab" href="#tbworktime">出勤时段</a></li>
+		<li><a data-toggle="tab" href="#workspecialdate">加班时段</a></li>
+		<li><a data-toggle="tab" href="#classManage">班组管理</a></li>
+		<li><a data-toggle="tab" href="#employeeNo">员工管理</a></li>
+		<li><a data-toggle="tab" href="#workschedule">出勤时段模板</a></li>
+	</ul>
+	<div class="tab-content" >
+		<div id="tbworktime" class="tab-pane in active"></div>
+		<div id="workspecialdate" class="tab-pane"></div>
+		<div id="classManage" class="tab-pane"></div>
+		<div id="employeeNo" class="tab-pane"></div>
+		<div id="workschedule" class="tab-pane"></div>
+	</div>
+</div>
+</body>

@@ -1,0 +1,357 @@
+package com.wis.mes.opc.service.impl;
+
+import java.net.UnknownHostException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jinterop.dcom.common.JIException;
+import org.openscada.opc.lib.common.NotConnectedException;
+import org.openscada.opc.lib.da.AddFailedException;
+import org.openscada.opc.lib.da.DuplicateGroupException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.alien.enterpriseRFID.reader.AlienClass1Reader;
+import com.wis.basis.common.utils.ConstantUtils;
+import com.wis.basis.common.utils.LogConstant;
+import com.wis.basis.common.web.model.JsonActionResult;
+import com.wis.core.context.WebContextHolder;
+import com.wis.core.framework.service.AuditLogService;
+import com.wis.core.framework.service.exception.BusinessException;
+import com.wis.mes.master.uloc.entity.TmUloc;
+import com.wis.mes.master.uloc.service.TmUlocService;
+import com.wis.mes.opc.group.entity.KsGroupItem;
+import com.wis.mes.opc.group.service.KsGroupItemService;
+import com.wis.mes.opc.group.service.RfidReadAndWriteService;
+import com.wis.mes.opc.service.OpcService;
+import com.wis.mes.opc.util.ConnectionUtil;
+import com.wis.mes.opc.util.OpcHelper;
+import com.wis.mes.opc.util.OpcServer;
+import com.wis.mes.production.stationqueuerecord.entity.TbStationQueueRecord;
+import com.wis.mes.production.stationqueuerecord.service.TbStationQueueRecordService;
+import com.wis.mes.push.WebSocket;
+import com.wis.mes.rfid.callback.IRfidCallBack;
+import com.wis.mes.rfid.entity.TbRfidLog;
+import com.wis.mes.rfid.service.RfidService;
+import com.wis.mes.rfid.service.TbRfidLogService;
+import com.wis.mes.rfid.util.RfidUtil;
+import com.wis.mes.rfid.vo.RfidReadVo;
+import com.wis.mes.rfid.vo.SnInfoObjVo;
+
+import net.sf.json.JSONObject;
+
+@Service
+public class OpcServiceImpl implements OpcService {
+	private Log logger = LogFactory.getLog(LogConstant.OPC_LOG);
+	private static final String ONLIEE_STATION = "STATION_7";
+	private static final String SCANNER_GROUP = "STATION_CHECK";
+	private final static String AT_THE_TABLE_SIGNAL = "AT_THE_TABLE_SIGNAL";
+	@Autowired
+	private RfidReadAndWriteService service;
+	@Autowired
+	private KsGroupItemService groupItemServer;
+	@Autowired
+	private AuditLogService logService;
+	@Autowired
+	private RfidService rfidService;
+	@Autowired
+	private TbStationQueueRecordService stationQueueRecordService;
+	@Autowired 
+	private TmUlocService tmUlocService;
+	@Autowired
+	private TbRfidLogService tbRfidLogService;
+
+	@Override
+	public JsonActionResult rfidStationWrite(String SN) {
+		logger.info(">>>>>>>>>>>>>>>>>>>rfidStation8Write>>>>>>Start>>>>>>>SN:" + SN);
+		List<KsGroupItem> itemList = groupItemServer.getRedisItemListByGroupCode(ONLIEE_STATION);
+		JsonActionResult result = getJsonActionResult();
+		OpcServer server = ConnectionUtil.longConnect();
+		if(null != server) {
+			try {
+				service.rfidStationWrite(result, server, SN, itemList);
+			} catch (Exception e) {
+				logService.doAddLog(ConstantUtils.AUDIT_TYPE_OPC_RFIDSTATION_8_WRITE, "OpcService.class:rfidStationWrite");
+				logger.error(ExceptionUtils.getStackTrace(e));
+				result.setData(false);
+				result.setSuccess(false);
+				result.setMessage(e.getMessage());
+			} finally {
+				// server.dispose();
+			}
+			logger.info(">>>>>>>>>>>>>>>>>>>rfidStation8Write>>>>>>End>>>>>>>>>>>>>>>>>>>>>>>");
+		}
+		logger.info(">>>>>>>>>>>>>>>>>>>rfidStation8Write>>>>>>server为空>>>>>>>>>>>>>>>>>>>>>>>");
+		return result;
+	}
+
+	@Override
+	public JsonActionResult stationWrite(String groupCode, String SN) {
+		logger.info(">>>>>>>stationWrite>>>>Start>>>>groupCode:" + groupCode + ">>>>>>>SN:" + SN);
+		List<KsGroupItem> itemList = groupItemServer.getRedisItemListByGroupCode(groupCode);
+		JsonActionResult result = getJsonActionResult();
+		OpcServer server = ConnectionUtil.longConnect();
+		if(null != server) {
+			try {
+				service.rfidStationWrite(result, server, SN, itemList);
+			} catch (Exception e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+				logService.doAddLog(ConstantUtils.AUDIT_TYPE_OPC_RFIDSTATION_WRITE, "OpcService.class:stationWrite");
+				result.setData(false);
+				result.setSuccess(false);
+				result.setMessage(e.getMessage());
+			} finally {
+				// server.dispose();
+			}
+			logger.info(">>>>>>>>>>>>>>>>>>>stationWrite>>>>End>>>>>>>>>>>>>>>>>>>>>>>");
+		}
+		logger.info(">>>>>>>>>>>>>>>>>>>stationWrite>>>>server为空>>>>>>>>>>>>>>>>>>>>>>>");
+		return result;
+	}
+
+	@Override
+	public JsonActionResult stationNgIn(String groupCode, String SN, boolean repairDone) {
+		logger.info(">>>>>>>stationWrite>>>>Start>>>>groupCode:" + groupCode + ">>>>>>>SN:" + SN);
+		List<KsGroupItem> itemList = groupItemServer.getRedisItemListByGroupCode(groupCode);
+		JsonActionResult result = getJsonActionResult();
+		OpcServer server = ConnectionUtil.longConnect();
+		if(null != server) {
+			try {
+				service.stationNgIn(result, server, SN, itemList, repairDone);
+			} catch (Exception e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+				logService.doAddLog(ConstantUtils.AUDIT_TYPE_OPC_RFIDSTATION_WRITE, "OpcService.class:stationNgIn");
+				result.setData(false);
+				result.setSuccess(false);
+				result.setMessage(e.getMessage());
+			} finally {
+				// server.dispose();
+			}
+			logger.info(">>>>>>>>>>>>>>>>>>>stationWrite>>>>End>>>>>>>>>>>>>>>>>>>>>>>");
+		}
+		logger.info(">>>>>>>>>>>>>>>>>>>stationWrite>>>>server为空>>>>>>>>>>>>>>>>>>>>>>>");
+		return result;
+	}
+
+	@Override
+	public JsonActionResult stationNgOut(String groupCode, String SN) {
+		return stationWrite(groupCode, SN);
+	}
+
+	@Override
+	public void plcRfidRead(String groupCode, String inOrOut) {
+		logger.info(">>>>>>>>>>groupCode:" + groupCode + ">>>>>inOrOut" + inOrOut + ">>>>>>>>>>>>");
+		logger.info("进入方法体：plcRfidRead。");
+		if (StringUtils.isNotBlank(groupCode)) {
+			String ulocNo = groupCode.replace("STATION_", "");
+			RfidReadVo rfidReadVo = rfidService.plcRfidRead(ulocNo);
+			if (StringUtils.isEmpty(rfidReadVo.getSn())) {
+				for (int i = 0; i < 2; i++) {
+					if (StringUtils.isEmpty(rfidReadVo.getSn())) {
+						try {
+							Thread.sleep(50);
+						} catch (Exception e) {}
+						rfidReadVo = rfidService.plcRfidRead(ulocNo);
+					} else {
+						break;
+					}
+				}
+			}
+			logger.info("SN：" + rfidReadVo.getSn());
+			rfidService.stationWrite(groupCode, rfidReadVo, inOrOut);
+		}
+		logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+	}
+
+	private JsonActionResult getJsonActionResult() {
+		JsonActionResult result = new JsonActionResult();
+		result.setSuccess(true);
+		result.setMessage("success");
+		return result;
+	}
+
+	@Override
+	public String getSnByUlocNo(String ulocNo) {
+		OpcServer server = ConnectionUtil.longConnect();
+		String sn = "";
+		if(null != server) {
+			List<KsGroupItem> redisItemListByGroupCode = groupItemServer.getRedisItemListByGroupCode(SCANNER_GROUP);
+			try {
+				ulocNo = "0000" + ulocNo;
+				ulocNo = ulocNo.substring(ulocNo.length() - 4, ulocNo.length());
+				sn = service.getSnByUlocNo(server, redisItemListByGroupCode, ulocNo);
+			} catch (IllegalArgumentException e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+				throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+			} catch (UnknownHostException e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+				throw new BusinessException("ERROR_OPC_UNKNOWNHOSTEXCEPTION");
+			} catch (JIException e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+				throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+			} catch (AddFailedException e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+				throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+			} catch (NotConnectedException e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+				throw new BusinessException("ERROR_OPC_NOTCONNECTEDEXCEPTION");
+			} catch (DuplicateGroupException e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+			} catch (Exception e) {
+				logger.error(ExceptionUtils.getStackTrace(e));
+				throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+			}
+		}
+		return sn;
+	}
+
+	@Override
+	public void writeByUlocAndSN(String ulocNo, String SN) {
+		OpcServer server = ConnectionUtil.longConnect();
+		List<KsGroupItem> redisItemListByGroupCode = groupItemServer.getRedisItemListByGroupCode(SCANNER_GROUP);
+		try {
+			ulocNo = "0000" + ulocNo;
+			ulocNo = ulocNo.substring(ulocNo.length() - 4, ulocNo.length());
+			service.writeSN(server, redisItemListByGroupCode, ulocNo, SN);
+		} catch (IllegalArgumentException e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+			throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+		} catch (UnknownHostException e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+			throw new BusinessException("ERROR_OPC_UNKNOWNHOSTEXCEPTION");
+		} catch (JIException e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+			throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+		} catch (AddFailedException e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+			throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+		} catch (NotConnectedException e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+			throw new BusinessException("ERROR_OPC_NOTCONNECTEDEXCEPTION");
+		} catch (DuplicateGroupException e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+		} catch (Exception e) {
+			logger.error(ExceptionUtils.getStackTrace(e));
+			throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+		}
+	}
+	
+	@Override
+	public void atTheTableSignal(boolean status, boolean writeFlag, boolean plcStatus) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("status", status);
+		map.put("writeFlag", writeFlag);
+		map.put("plcStatus", plcStatus);
+		WebSocket socket = new WebSocket();
+		socket.onMessage(AT_THE_TABLE_SIGNAL + JSONObject.fromObject(map).toString());
+	}
+	
+	@Override
+	public synchronized void  station62Queuerecord(String groupCode,String plcSn) {
+		if (StringUtils.isNotBlank(groupCode)) {
+			String ulocNo = groupCode.replace("STATION_", "");
+			RfidReadVo rfidReadVo = new RfidReadVo();
+			long startTime = System.currentTimeMillis();
+			int count = 0;
+			while(true) {
+				count++;
+				rfidReadVo = rfidService.plcRfidRead(ulocNo);
+				if(StringUtils.isNotBlank(rfidReadVo.getSn())) {
+					break;
+				}else {
+					long finisTime = System.currentTimeMillis();
+					if(finisTime-startTime > 10000){
+						break;
+					}
+				}
+			}
+			logger.info(plcSn+"--------------"+count);
+			String[] items = new String[] { "Channel1.L72.Station62_RFID.Station62_Flag","Channel1.L72.Station62_RFID.Station62_SN"};
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("Station62_Flag", false); // 写入标识
+			map.put("Station62_SN", StringUtils.isNotBlank(rfidReadVo.getSn())?rfidReadVo.getSn():"Unknownk"); // 读取到的SN
+			OpcHelper.sendDataToOpc(items, map);
+			TbStationQueueRecord bean = new TbStationQueueRecord();
+			bean.setPlcSn(plcSn);
+			bean.setReadTagSn(rfidReadVo.getSn());
+			bean.setUlocNo(ulocNo);
+			bean.setCreateTime(new Date());
+			bean.setFruit(plcSn.equals(rfidReadVo.getSn())?"OK":"NG");
+			bean.setRfidReadFruit(StringUtils.isNotBlank(rfidReadVo.getMessage())?rfidReadVo.getMessage():"成功");
+			stationQueueRecordService.doSave(bean);
+		}
+	}
+
+	@Override
+	public void station120ClearTag(String groupCode) {
+		TbRfidLog bean = new TbRfidLog();
+		if (StringUtils.isNotBlank(groupCode)) {
+			String ulocNo = groupCode.replace("STATION_", "");
+			TmUloc uloc = tmUlocService.getUloc(ulocNo);
+			bean.setUlocNo(ulocNo);
+			bean.setTbPlantId(uloc.getTmPlantId());
+			bean.setTmLineId(uloc.getTmLineId());
+			bean.setRfidIp(uloc.getRfidIP());
+			RfidReadVo rfidReadVo = new RfidReadVo();
+			long startTime = System.currentTimeMillis();
+			int count = 0;
+			while(true) {
+				count++;
+				rfidReadVo = rfidService.plcRfidRead(ulocNo);
+				if(StringUtils.isNotBlank(rfidReadVo.getSn())) {
+					break;
+				}else {
+					long finisTime = System.currentTimeMillis();
+					if(finisTime-startTime > 2000){
+						updateStation120Flag();
+						break;
+					}
+				}
+			}
+			logger.info(groupCode+"--------------"+count);
+			if(StringUtils.isNotBlank(rfidReadVo.getSn())) {
+				SnInfoObjVo snInfoObjVo = SnInfoObjVo.splitSn(rfidReadVo.getSn());
+				bean.setSn(snInfoObjVo.getNewSn());
+				bean.setBackNumber(snInfoObjVo.getBackNumber());
+				bean.setMachineName(snInfoObjVo.getMachineName());
+				bean.setEpcInfo(rfidReadVo.getEpcInfo());
+				AlienClass1Reader createConnection = null;
+				Object serverObj = null;
+				if(null != WebContextHolder.getWebAppContext() && StringUtils.isNotBlank(uloc.getServiceName())) {
+					serverObj = WebContextHolder.getWebAppContext().getBean(uloc.getServiceName());
+					if (null != serverObj) {
+						try {
+							IRfidCallBack callback = (IRfidCallBack) serverObj;
+							createConnection = callback.createConnection(uloc);
+							RfidUtil.writeUser(createConnection,ConstantUtils.DEFAULT_SN, 0);//写入USER区
+							updateStation120Flag();
+							bean.setFruit("成功");
+						}catch (BusinessException e) {
+							bean.setFruit(e.getMessage());
+						} catch(Exception e) {
+							bean.setFruit("未知异常");
+						} 
+					}
+				}else {
+					bean.setFruit("工位：" + ulocNo + " 没有维护servicename。");
+				}
+			}else {
+				bean.setFruit(rfidReadVo.getMessage());
+			}
+			tbRfidLogService.doSave(bean);
+		}
+	}
+	
+	private void updateStation120Flag() {
+		String[] items = new String[] { "Channel1.L72.Station120_RFID.Station120_Flag"};
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("Station120_Flag", false); // 写入标识
+		OpcHelper.sendDataToOpc(items, map);
+	}
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<script type="text/javascript">
+function deviceSelectCallBack(item) {
+    $("#deviceName").val(item.name);
+    $("#deviceCode").val(item.no);
+}
+function deviceCodeChange(val){
+	 ajaxRequest("${baseUrl}/maintenance/findNameInfo.do", {no:val}, function(res){
+		$("#deviceName").val(res.data.name);
+		}, false) 
+}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/maintenance/add.do" class="form-horizontal" permissionModule="DEVICE_MAINTENANCE">
+			<@p.formRow>
+			<@p.formColmd title="DEVICEMAINTENANCE_DEVICECODE" permissionCode="DEVICE_CODE">
+				<@p.input  type="select" field="deviceCode" options=equipmentOptions onchange="deviceCodeChange(this.value)"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="DEVICEMAINTENANCE_DEVICENAME" permissionCode="DEVICE_NAME">
+				<input name="deviceName" id="deviceName" class="inputxt" readonly="readonly"/>
+			</@p.formColmd>
+			
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="DEVICEMAINTENANCE_MAINTENANCEPROJECT" permissionCode="MAINTENANCE_PROJECT">
+				<input name="maintenanceProject" id="maintenanceProject" class="inputxt" datatype="*"/>
+				<!-- <@p.input type="select" datatype="*" field="maintenanceProject" options=smMaintenanceProject></@p.input> -->
+			</@p.formColmd>
+			<@p.formColmd title="DEVICEMAINTENANCE_MAINTENANCECODE" permissionCode="MAINTENANCE_PROJECT">
+				<input name="maintenanceCode" id="maintenanceCode" class="inputxt" datatype="*" errormsg="<@s.m code='ERROR_CHINESE'/>" maxlength='64'  ajaxurl="${baseUrl}/maintenance/checkMaintenanceCode.do"/>
+			</@p.formColmd>
+			
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="DEVICEMAINTENANCE_MAINTENANCEUNIT" permissionCode="MAINTENANCE_UNIT">
+				<@p.input type="select" field="maintenanceUnit" options=smMaintenanceUnit></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="DEVICEMAINTENANCE_MAINTENANCEVALUE" permissionCode="MAINTENANCE_VALUE">
+				<input id="maintenanceValue" name="maintenanceValue" class="inputxt" datatype="*" errormsg="<@s.m code='ERROR_NUMBER'/>" maxlength='9' onkeyup="value=value.replace(/[^\d]/g,'')"/>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="DEVICEMAINTENANCE_MAINTENANCENAME" permissionCode="REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="512"></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="DEVICEMAINTENANCE_REMARK" permissionCode="MAINTENANCE_REMARK">
+				 <textarea rows="2" cols="40" name="maintenanceRemark" style="width: 570px;" maxlength="512"></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+		
+	</@p.editForm>
+</body>
+</html>

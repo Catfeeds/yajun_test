@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/path/update.do" class="form-horizontal" idValue=bean.id permissionModule="PATH">
+		<@p.formRow>
+			<@p.formColmd title="PATH_PLANT" permissionCode="PATH_PLANT">
+				<@p.input type="select" disabled="disabled" value="${bean.tmPlantId}" excludeSelectOption="true"  options=plantOptions ></@p.input>
+				<input type="hidden"  id="update_plant" name="tmPlantId" value="${bean.tmPlantId}" >
+			</@p.formColmd>
+			<@p.formColmd title="PATH_LINE" permissionCode="PATH_LINE">
+				<@p.input type="select" id="update_line" disabled="disabled" excludeSelectOption="true"  value="${bean.tmLineId!}"></@p.input>
+				<input type="hidden" id="lineId" name="tmLineId" value="${bean.tmLineId!}">
+			</@p.formColmd>
+		</@p.formRow>
+		<#--
+			<@p.formColmd title="PATH_WORKSHOP" permissionCode="PATH_WORKSHOP">
+				<@p.input type="select" id="update_workShop"   disabled="disabled" onchange ="update_workShopChange(this.value);"></@p.input>
+				<input type="hidden" id="workshopId" name="tmWorkshopId" value="${bean.tmWorkshopId!}">
+			</@p.formColmd>
+			<@p.formColmd title="PATH_STATUS" permissionCode="PATH_STATUS">
+				 <@p.input type="select" excludeSelectOption="true" field="status" value="${bean.status!}"  options=statusOptions ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_PART" permissionCode="PATH_PART">
+				<@p.input type="select"  id="update_part" excludeSelectOption="true" field="tmPartId" value="${bean.tmPartId}"></@p.input>
+				<input type="hidden" id="partId" value="${bean.tmPartId!}">
+			</@p.formColmd>
+		-->
+		
+		
+		<@p.formRow>
+			<@p.formColmd title="PATH_NO" permissionCode="PATH_NO">
+				<input name="no" class="inputxt" readonly=readonly value="${bean.no}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_NAME" permissionCode="PATH_NAME">
+				<input name="name" class="inputxt" value="${bean.name!}" datatype="*" maxlength="150"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_BACK_NUMBER" permissionCode="PATH_BACK_NUMBER">
+				<input name="backNumber" class="inputxt" value="${bean.backNumber!}" datatype="no" maxlength='100' />
+			</@p.formColmd>
+			<@p.formColmd title="PATH_MACHINE_OF_NAME" permissionCode="PATH_MACHINE_OF_NAME">
+				<input name="machineOfName" class="inputxt"  value="${bean.machineOfName!}" datatype="*" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			
+			<@p.formColmd title="PATH_ENABLED" permissionCode="PATH_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" value="${bean.enabled!}"  options=enabledOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_REMARK" permissionCode="PATH_REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250">${bean.remark!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	//getWorkShop($("#workshopId").val());
+	doGetLine($("#update_plant").val(),$("#lineId").val());
+	getPart($("#update_plant").val(),$("#partId").val());
+	//getLine($("#workshopId").val(),$("#lineId").val());
+});
+
+/* function getWorkShop(obj){
+	$.ajax({
+		data:{plantId:$("#update_plant").val()},
+		url:"${baseUrl}/path/getWorkShopByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+				$("#update_workShop").empty(); //清空下拉列表
+				$("#update_workShop").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#update_workShop").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+				$("#update_workShop").val(obj);
+			}
+	});
+} */
+
+function doGetLine(obj,lineVal){
+	if (obj == "" || null == obj) {
+		return false;
+	}else{
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/uloc/selectLintNameOrPlantId.do", //修改为通过公司id得到所属产线
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				$("#update_line").empty(); //清空下拉列表
+				$("#update_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#update_line").append(" <option  value='" + item.id + "'>"+item.nameCn + "</option>");
+					});
+				$("#update_line").val(lineVal);
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+}
+function update_workShopChange(obj){
+	getLine(obj);
+}
+
+/* function getLine(workShopId,obj){
+	$.ajax({
+		data:{
+			plantId:$("#update_plant").val(),
+			workShopId:workShopId
+		},
+		url:"${baseUrl}/path/getLineByWorkShopIdAndPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+				$("#update_line").empty(); //清空下拉列表
+				$("#update_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#update_line").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+				$("#update_line").val(obj);
+	    	}
+		});
+} */
+
+function getPart(obj,partVal){
+	$.ajax({
+		data:{plantId:$("#update_plant").val()},
+		url:"${baseUrl}/path/getPartByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			$("#update_part").empty(); //清空下拉列表
+			$("#update_part").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(function(i, item) {
+					$("#update_part").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+			});
+			$("#update_part").val(partVal);
+			/* var optionSize = $("#update_part option").size();
+			if(optionSize==2){
+				$('#update_part option:eq(1)').prop("selected",true);
+			} */
+			
+		}
+	});
+}
+</script>

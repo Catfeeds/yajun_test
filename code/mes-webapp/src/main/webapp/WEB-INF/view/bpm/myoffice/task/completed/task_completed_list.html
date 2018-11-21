@@ -1,0 +1,71 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function showHistory(){
+    var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var id = rows[0].processInstanceId;
+    showProcHistory(id, 'dg${currentPageId}');
+}
+function taskRecall() {
+	var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    
+    ajaxRequest('${baseUrl}/bpm/task/tryRecall.do', {
+    	'processDefinitionId':rows[0].processDefinitionId,
+    	'taskDefinitionKey':rows[0].taskDefinitionKey,
+    	'processInstanceId':rows[0].processInstanceId
+    },function(result){
+        var url='${baseUrl}/bpm/task/prepareRecall.do?processDefinitionId='+rows[0].processDefinitionId+"&taskDefinitionKey="+rows[0].taskDefinitionKey+"&processInstanceId="+rows[0].processInstanceId;
+        createwindow('<@s.m code="BPM_TASK_RECALL" />',url,'dg${currentPageId}');
+    },false)
+    
+
+}
+$(function(){
+	$("#beginTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'});
+	});
+	$("#endTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'beginTime\')}'});
+	});
+});
+</script>
+<@p.body title="BPM_TASK_LIST_COMPLETED_TITLE"  permissionModule="TASK_COMPLETED">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="BPM_TASK_COL_NAME" field="taskNameLike"></@p.input>
+			<@p.input title="PROCESS_INSTANCE_PROCESS" field="processInstanceNameLike"></@p.input>
+			<@p.input title="PROCESS_INSTANCE_CREATEUSER" field="initiatorNameLike"></@p.input>
+			<@p.input title="DATETIME_START" field="taskCompletedAfter" id="beginTime"></@p.input>
+			<@p.input title="DATETIME_END" field="taskCompletedBefore" id="endTime"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar>
+			<@p.button title="PROCESS_VALUE_PICTURE" permissionCode="DoneTaskPicture" onclick="showHistory()" iconCls="h-sign"></@p.button>
+			<!-- 
+			<@p.button title="BTN_VIEW" onclick="showBuinessHistory()" iconCls="search"></@p.button>
+			 -->
+			 <@p.button title="BPM_TASK_RECALL" permissionCode="DoneTaskRecall" onclick="taskRecall()" iconCls="undo"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/task/completed/list.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="BPM_TASK_COL_NAME" permissionCode="NAME" field="name" ></@p.column>
+		<@p.column title="PROCESS_INSTANCE_PROCESS"   permissionCode="PROCESS_INSTANCE_NAME"  field="processInstanceName" width="300" ></@p.column>
+		<@p.column title="BPM_TASK_COL_ENDTIME" permissionCode="END_TIME" field="endTime" width="100"></@p.column>
+		<!-- 
+		<@p.column title="BPM_TASK_COL_ID" permissionCode="TASK_ID" field="id" ></@p.column>
+		<@p.column title="BPM_TASK_COL_INSTANCE" permissionCode="PROCESS_INSTANCE_ID" field="processInstanceId" ></@p.column>
+		<@p.column title="BPM_TASK_COL_OWNER" permissionCode="OWNER" field="assigneeName" ></@p.column>
+		 -->
+		<@p.column title="PROCESS_INSTANCE_CREATEUSER" permissionCode="START_USER_NAME" field="processInitiator" width="100"></@p.column>
+		<@p.column title="BPM_TASK_COL_DESCRIPTION" permissionCode="DESCRIPTION" field="description" width="300"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+

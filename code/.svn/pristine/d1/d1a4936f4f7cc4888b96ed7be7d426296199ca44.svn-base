@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="PLCReportMapper" >
+	<select id="energyReport" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select (max(t.ac_energy) - min(t.ac_energy)) AC_ENERGY,
+		       (max(t.device_energy) - min(t.device_energy)) as DEVICE_ENERGY,
+		       (max(t.light_energy) - min(t.light_energy)) as LIGHT_ENERGY
+		  from tks_energy t
+		 where t.create_time between
+		       to_date(#{startDateTime}, 'yyyy-MM-dd HH24:mi:ss') and
+		       to_date(#{endDateTime}, 'yyyy-MM-dd HH24:mi:ss')
+	</select>
+</mapper>  

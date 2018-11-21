@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="ReportMapper" >
+<!-- 故障机报表 – 明细    Start ========================================================================    -->
+<!-- 1-->
+<select id="queryNgGroupShiftnoRelation" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+select count(t.id) count, t.shiftno shiftNo, a.name name,to_char(t.create_time,'MM/dd') createTime,
+		to_char(tw.work_date,'MM/dd')  as workDate
+  from tb_quality_tracing t
+  left join tm_nc_group a
+    on t.tm_nc_group_id = a.id
+  left join tm_worktime tw on tw.id = t.tm_work_time_id
+ where 1=1 
+  and tw.work_date is not null
+  and t.MARK_FOR_DELETE != 1
+ <if test="createTimeStart!=null and createTimeStart!='' ">
+	 and t.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ </if>
+ <if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 	and t.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ </if>
+ group by a.name, t.shiftno,to_char(tw.work_date,'MM/dd'),to_char(t.create_time,'MM/dd') 
+ order by workDate
+</select>
+<!-- 2-->
+<select id="queryNgGroupCount" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+select count(t.id) count, a.name name
+  from tb_quality_tracing t
+  left join tm_nc_group a
+    on t.tm_nc_group_id = a.id
+ where 1=1  
+ and t.MARK_FOR_DELETE != 1
+ <if test="createTimeStart!=null and createTimeStart!='' ">
+	 and t.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ </if>
+ <if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 	and t.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ </if>
+ group by a.name
+ order by count desc
+</select>
+<!-- 3-->
+<select id="ngAndInfoOrigin" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+	select count(b.name) count, b.name name, max(info_sources) infoSources
+	  from tb_quality_tracing a
+	  left join tm_nc b
+	    on a.tm_nc_id = b.id
+	 where b.name is not null
+	   and info_sources is not null
+	   and a.MARK_FOR_DELETE != 1
+ <if test="createTimeStart!=null and createTimeStart!='' ">
+	 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ </if>
+ <if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 	and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ </if>
+	 group by b.name
+	 order by count desc
+</select>
+<!-- 故障机报表 – 明细    End==================================================================================== -->
+<!-- 工位异常报表  start==========================================   -->
+<!-- 1..工位异常 时间、次数、异常源分布 报表 -->
+<select id="ulocStatusTimeCount" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+select tab.minute MINUTE,tab.count COUNT,tab.abnormalSource ABNORMALSOURCE from (
+  select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+         count(t.id) count,
+         t.data_source abnormalSource
+    from tm_code_rule t, tb_uloc_status a, tm_uloc b
+   where a.tm_uloc_id = b.id
+     and t.plc_code = b.no || ' ' || a.status_code
+     and a.finish_time is not null
+     and t.data_source = 'L'
+     and a.is_rest='N'
+   	 <if test="createTimeStart!=null and createTimeStart!='' ">
+	 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+	</if>
+	<if test="createTimeEnd!=null and createTimeEnd!='' ">
+		and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+	</if>
+   group by t.data_source
+	union all
+	select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+	       count(t.id) count,
+	       t.data_source abnormalSource
+	  from tm_code_rule t, tb_equipment_status a, tm_equipment b
+	 where a.tm_equipment_id = b.id
+	   and t.plc_code = b.no || ' ' || a.status_number
+	   and a.finish_time is not null
+	   and t.data_source = 'E'
+	   and t.distinguish = 'Y'
+	   and a.is_rest='N'
+	 	<if test="createTimeStart!=null and createTimeStart!='' ">
+		 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+		</if>
+		<if test="createTimeEnd!=null and createTimeEnd!='' ">
+			and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+		</if>
+	 group by t.data_source
+	union all
+	  select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+	         count(t.id) count,
+	         t.data_source abnormalSource
+	    from tm_code_rule t, tb_uloc_status a
+	   where 
+	       t.plc_code = a.station_state
+	     and a.finish_time is not null
+	     and t.data_source = 'W'
+	     and a.is_rest='N'
+		 <if test="createTimeStart!=null and createTimeStart!='' ">
+		 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+		</if>
+		<if test="createTimeEnd!=null and createTimeEnd!='' ">
+			and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+		</if>
+	   group by t.data_source
+	)tab order by MINUTE desc
+</select>
+<!--2  工位状态 异常次数和异常原因关系 -->
+<select id="ulocStatusCountAndDetail" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+select tab.abnormalSource ABNORMALSOURCE,tab.codeDesc CODEDESC,tab.count COUNT,tab.minute MINUTE
+  from (select count(t.id) count,
+               t.data_source abnormalSource,
+            '线体源'||':'|| t.code_desc codeDesc,
+             TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute
+          from tm_code_rule t, tb_uloc_status a, tm_uloc b
+         where a.tm_uloc_id = b.id
+           and t.plc_code = b.no || ' ' || a.status_code
+           and a.finish_time is not null
+           and t.data_source = 'L'
+           and a.is_rest='N'
+               <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ 		</if>
+ 		<if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 			and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ 		</if>
+         group by t.data_source, t.code_desc
+        union all
+        select count(t.id) count,
+               t.data_source abnormalSource,
+               '设备源'||':'|| t.code_desc codeDesc,
+             TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute
+          from tm_code_rule t, tb_equipment_status a, tm_equipment b
+         where a.tm_equipment_id = b.id
+           and t.plc_code = b.no || ' ' || a.status_number
+           and a.finish_time is not null
+           and t.data_source = 'E'
+           and t.distinguish = 'Y'
+           and a.is_rest='N'
+        <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ 		</if>
+ 		<if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 			and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ 		</if>
+         group by t.data_source, t.code_desc
+        union all
+        select count(t.id) count,
+               t.data_source abnormalSource,
+               '作业源'||':'|| t.code_desc codeDesc,
+             TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute
+          from tm_code_rule t, tb_uloc_status a
+         where t.plc_code = a.station_state
+           and a.finish_time is not null
+           and t.data_source = 'W'
+           and a.is_rest='N'
+           <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ 		</if>
+ 		<if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 			and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ 		</if>
+         group by t.data_source, t.code_desc) tab
+</select>
+<!-- 不同异常源  时间 数量 详情 -->
+<select id="ulocStatusAbnormalSourceCountAndMintue_L" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+	select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+	         count(t.id) count,
+	         t.data_source abnormalSource,
+	         t.code_desc codeDesc
+	    from tm_code_rule t, tb_uloc_status a, tm_uloc b
+	   where a.tm_uloc_id = b.id
+	     and t.plc_code = b.no || ' ' || a.status_code
+	     and a.finish_time is not null
+	     and t.data_source = 'L'
+	     and a.is_rest='N'
+	     <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ 		</if>
+ 		<if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 			and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ 		</if>
+	   group by t.data_source, t.code_desc
+	   order by minute desc
+</select>
+<select id="ulocStatusAbnormalSourceCountAndMintue_E" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+	select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+       count(t.id) count,
+       t.data_source abnormalSource,
+       t.code_desc codeDesc
+  from tm_code_rule t, tb_equipment_status a, tm_equipment b
+ where a.tm_equipment_id = b.id
+   and t.plc_code = b.no || ' ' || a.status_number
+   and a.finish_time is not null
+   and t.data_source = 'E'
+   and t.distinguish = 'Y'
+   and a.is_rest ='N'
+    <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ 		</if>
+ 	<if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 			and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ 	</if>
+ group by t.data_source, t.code_desc
+ order by minute desc
+</select>
+
+<select id="ulocStatusAbnormalSourceCountAndMintue_W" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+	 select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+         count(t.id) count,
+         t.data_source abnormalSource,
+         t.code_desc codeDesc
+    from tm_code_rule t, tb_uloc_status a
+   where 
+       t.plc_code = a.station_state
+     and a.finish_time is not null
+     and t.data_source = 'W'
+     and a.is_rest ='N'
+     <if test="createTimeStart!=null and createTimeStart!='' ">
+			 and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+ 		</if>
+ 	<if test="createTimeEnd!=null and createTimeEnd!='' ">
+ 			and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+ 	</if>
+   group by t.data_source, t.code_desc
+   order by minute desc
+</select>
+
+<!-- 工位状态 年密度 统计报表 -->
+<select id="ulocStatusYearDensity" resultType="java.util.HashMap" parameterType="java.util.HashMap" >
+select sum(tab.minute) MINUTE,sum(tab.count)COUNT,tab.createTime from (
+  select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+         count(t.id) count, to_char(a.create_time, 'yyyy-MM-dd') createTime
+    from tm_code_rule t, tb_uloc_status a, tm_uloc b
+   where a.tm_uloc_id = b.id
+     and t.plc_code = b.no || ' ' || a.status_code
+     and a.finish_time is not null
+     and t.data_source = 'L'
+     and a.is_rest ='N'
+   <if test="createTimeStart!=null and createTimeStart!='' ">
+   and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+  </if>
+  <if test="createTimeEnd!=null and createTimeEnd!='' ">
+    and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+  </if>
+   group by to_char(a.create_time, 'yyyy-MM-dd')
+  union all
+  select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+         count(t.id) count, to_char(a.create_time, 'yyyy-MM-dd') createTime
+    from tm_code_rule t, tb_equipment_status a, tm_equipment b
+   where a.tm_equipment_id = b.id
+     and t.plc_code = b.no || ' ' || a.status_number
+     and a.finish_time is not null
+     and t.data_source = 'E'
+     and t.distinguish = 'Y'
+     and a.is_rest ='N'
+    <if test="createTimeStart!=null and createTimeStart!='' ">
+     and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+    </if>
+    <if test="createTimeEnd!=null and createTimeEnd!='' ">
+      and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+    </if>
+   group by to_char(a.create_time, 'yyyy-MM-dd')
+  union all
+    select TRUNC(SUM((a.update_time - a.create_time) * 24 * 60 * 60) / 60, 2) minute,
+           count(t.id) count,to_char(a.create_time, 'yyyy-MM-dd') createTime
+      from tm_code_rule t, tb_uloc_status a
+     where 
+         t.plc_code = a.station_state
+       and a.finish_time is not null
+       and t.data_source = 'W'
+       and a.is_rest ='N'
+     <if test="createTimeStart!=null and createTimeStart!='' ">
+     and a.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+    </if>
+    <if test="createTimeEnd!=null and createTimeEnd!='' ">
+      and a.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+    </if>
+     group by to_char(a.create_time, 'yyyy-MM-dd')
+  )tab group by tab.createTime
+</select>
+
+<!-- 工位异常报表  End==========================================   -->
+
+<!-- 工位数据分析报表 – 明细    Start==================================================================================== -->
+<select id="equalNumberWork" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    select 
+     tu.no as ULOC_NO,
+     count(*) as TIME_OFF,
+     TRUNC(sum(tps.front_wait_duration+tps.back_wait_duration)/60,2) as TIME_OUT
+    from 
+    TB_PRODUCT_STATION tps 
+    left join tm_uloc tu on tps.tm_uloc_id = tu.id
+    where    1=1
+    and( tps.front_wait_duration > 0 or tps.back_wait_duration > 0)
+      <if test="createTimeStart != null and createTimeStart != ''">
+		 and tps.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+	 </if>
+	 <if test="createTimeEnd != null and createTimeEnd  != ''">
+	 	and tps.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+	 </if>
+    group by tu.no
+    order by TIME_OUT desc
+</select>
+<select id="getUlocStatusReport" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+   select 
+		<!-- 岗位编号 -->
+         tu.no as ULOC_NO,
+		<!-- 总秒数 TCV(自定义函数，把时分秒转换为秒) -->
+         <!-- sum((TCV(tus.finish_time)-TCV(tus.begin_time))) as TIME_OUT, -->
+          TRUNC(sum(to_number(tus.update_time-tus.create_time)* 24 * 60 * 60)/60,2) as TIME_OUT,
+		<!-- 次数   -->
+         count(*) as TIME_OFF  
+      from tb_uloc_status tus
+      left join tm_uloc tu
+        on tus.tm_uloc_id = tu.id
+     where 1 = 1
+       and tus.tm_work_time_id is not null
+       and tus.create_time is not null
+       and tus.update_time is not null
+       and tus.is_rest ='N'  
+		<!--         checkBit校验位 -->
+	   and substr(tus.station_state,#{checkBit},1) = 1 
+     <if test="createTimeStart != null and createTimeStart != ''">
+		 and tus.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+	 </if>
+	 <if test="createTimeEnd != null and createTimeEnd  != ''">
+	 	and tus.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+	 </if>
+    group by tu.no
+    order by TIME_OUT desc
+</select>
+<!-- 工位数据分析报表 – 明细    End==================================================================================== -->
+<!-- 能耗报表 -->
+<select id="energReport" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+	select (max(t.ac_energy) - min(t.ac_energy)) AC_ENERGY,
+       max(t.device_energy) - min(t.device_energy) DEVICE_ENERGY,
+       max(t.light_energy) - min(t.light_energy) LIGHT_ENERGY,
+       to_char(t.create_time, '${timeFormate}') TIME
+  from TKS_ENERGY t where 1=1
+   <if test="createTimeStart != null and createTimeStart != ''">
+   	and to_date(to_char(t.create_time,'${timeFormate}'), '${timeFormate}') &gt;=
+       to_date(#{createTimeStart}, '${timeFormate}')
+   </if>
+   <if test="createTimeEnd != null and createTimeEnd  != ''">
+   and to_date(to_char(t.create_time, '${timeFormate}'), '${timeFormate}') &lt;=
+       to_date(#{createTimeEnd}, '${timeFormate}')
+  </if>
+ group by to_char(t.create_time, '${timeFormate}')
+ order by to_char(t.create_time, '${timeFormate}')
+</select>
+<!-- 能耗报表 -->
+</mapper>  

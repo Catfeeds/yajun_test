@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/ulocSip/add.do" class="form-horizontal"   permissionModule="ULOC_SIP">
+	<input type="hidden" name ="tmUlocId" value="${tmUlocId!}"/>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_SIP_TS_PARAMETER_ID" permissionCode="ULOC_SIP_TS_PARAMETER_ID">
+			 	<@p.input type="select" id="add_parameter" options=parameterOptions  datatype="*"  field="tsParameterId"  ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_SIP_DETAIL" permissionCode="ULOC_SIP_DETAIL">
+				 <input name="detail" class="inputxt" maxlength="150"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_SIP_ISEXAMINE" permissionCode="ULOC_SIP_ISEXAMINE">
+				 <@p.input type="select" id="add_isExamine" excludeSelectOption="true" field="isExamine" options=yesOrNoOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	var optionSize = $("#add_parameter option").size();
+	if(optionSize==2){
+		$('#add_parameter option:eq(1)').prop("selected",true);
+	}
+});
+</script>

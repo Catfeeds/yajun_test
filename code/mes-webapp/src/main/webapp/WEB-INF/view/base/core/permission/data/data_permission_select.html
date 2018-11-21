@@ -1,0 +1,25 @@
+<#include "../../../include/bootstrapTableCommons.html">
+
+<@p.body  permissionModule="DATA_PERMISSION" noBreadcrumbs="true">
+	<@p.searchPanel style="height:36px" >
+		<@p.searchColumns >
+				<@p.input title="PERMISSION_MODULE" type="select" field="module" options=moduleOptions permissionCode="PERMISSION_MODULE"></@p.input>
+			<@p.input title="PERMISSION_CODE" field="code"  permissionCode="PERMISSION_CODE"></@p.input>
+			<@p.input title="PERMISSION_URL" field="url"  permissionCode="PERMISSION_URL"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/dataPermission/list.do" singleSelect=singleSelect >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="PERMISSION_MODULE" field="module"  permissionCode="PERMISSION_MODULE" formatter="renderDataPermission" ></@p.column>
+		<@p.column title="PERMISSION_CODE" field="code"  permissionCode="PERMISSION_CODE" ></@p.column>
+		<@p.column title="PERMISSION_RELATION_CODE" field="relationCode"  permissionCode="PERMISSION_RELATION_CODE" ></@p.column>
+		<@p.column title="PERMISSION_URL" field="url"  permissionCode="PERMISSION_URL" ></@p.column>
+		<@p.column title="PERMISSION_DESCRIPTION" field="description"  permissionCode="PERMISSION_DESCRIPTION" ></@p.column>
+	</@p.dataGrid>
+</@p.body>	
+
+<script type="text/javascript">
+	function renderDataPermission(value) {
+		return entryRenderer('DATA_PERMISSION_MODULE', value);
+	}
+</script>

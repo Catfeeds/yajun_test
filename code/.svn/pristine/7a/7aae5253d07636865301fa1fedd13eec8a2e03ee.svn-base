@@ -1,0 +1,55 @@
+
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function renderPart(value,record) {
+	if(value && record.part.no){
+		return record.part.no+ " - " + value;
+	}
+	return value;
+}
+
+function renderUloc(value,record) {
+	if(value && record.uloc.no){
+		return record.uloc.no+ " - " + value;
+	}
+	return value;
+}
+</script>
+<@p.body title="BOM_LIST_TITLE" permissionModule="BOM_DETAIL" noBreadcrumbs="true">
+<div style="color: #428bca;text-align:center; margin:10px" >BOM明细</div>
+<input id="tmBomId" type="text" value="${tmBomId!}" hidden="true"/>
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="BOM_ADD" permissionCode="BomDetailAdd" iconCls="plus" url="${baseUrl}/bomDetail/addInput.do" type="add"  ></@p.button>
+			<@p.button title="BOM_UPDATE" permissionCode="BomDetailUpdate" iconCls="edit" url="${baseUrl}/bomDetail/updateInput.do" type="update"></@p.button>
+			<@p.button title="BOM_DELETE" permissionCode="BomDetailDelete" iconCls="trash" url="${baseUrl}/bomDetail/delete.do" type="delete"></@p.button>
+			<@p.button title="BOM_IMPORT" permissionCode="BomDetailImport" downName="BOM_IMPORT_NAME" onclick="importDataBomDetail();" iconCls="signin" />
+			<@p.button title="BOM_EXPORT" permissionCode="BomDetailExport" downName="BOM_DETAIL_EXPORT_NAME" url="${baseUrl}/bomDetail/exportData.do?tmBomId="+"${tmBomId!}"  iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/bomDetail/list.do?${params!}" >
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="BOM_DETAIL_ULOC" field="uloc.name" permissionCode="BOM_DETAIL_ULOC" formatter="renderUloc"></@p.column>
+		<@p.column title="BOM_DETAIL_PART" field="part.nameCn" permissionCode="BOM_DETAIL_PART" formatter="renderPart"></@p.column>
+		<@p.column title="BOM_DETAIL_QTY" field="qty" permissionCode="BOM_DETAIL_QTY" ></@p.column>
+		<@p.column title="BOM_DETAIL_SEQ" field="seq" permissionCode="BOM_DETAIL_SEQ" ></@p.column>
+		<@p.column title="BOM_DETAIL_ISTRAC" field="isTrac" permissionCode="BOM_DETAIL_ISTRAC" formatter="renderGender"></@p.column>
+		<@p.column title="BOM_DETAIL_ISBATCHTRAC" field="isBatchTrac" permissionCode="BOM_DETAIL_ISBATCHTRAC" formatter="renderGender"></@p.column>
+		<@p.column title="BOM_DETAIL_NOTE" field="note" permissionCode="BOM_DETAIL_NOTE" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+function renderGender(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+
+function importDataBomDetail(){ 
+	var obj = new Object();
+	obj.templateUrl = "${baseUrl}/bomDetail/exportTemplate.do";
+    importFile("<@s.m code="BOM_IMPORT" />", "${baseUrl}/bomDetail/importData.do?tmBomId="+"${tmBomId}", "dg${currentPageId}",obj);
+}
+</script>

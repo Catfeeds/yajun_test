@@ -1,0 +1,24 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/role/add.do" class="form-horizontal"  permissionModule="ROLE">
+		<@p.formRow class="row rowDivTop">
+			<@p.formColmd class="col-md-4" title="ROLE_CODE"  checktip="ROLE_CODE_CHECK_TIP"  permissionCode="ROLE_CODE">
+				<input name="code" ajaxurl="${baseUrl}/role/checkRole.do"  datatype="*2-30">
+			</@p.formColmd>
+			<@p.formColmd class="col-md-4" title="ROLE_NAME"  checktip="ROLE_NAME_CHECK_TIP"  permissionCode="ROLE_NAME">
+				  <input name="name"   datatype="*2-50">
+			</@p.formColmd>
+		</@p.formRow>
+		<input name="systemData"  type="hidden" value="N">
+		<@p.formRow class="row rowDivTop">
+			<@p.formColmd class="col-md-4" title="ROLE_DESC"   permissionCode="ROLE_DESC">
+				<textarea name="desc"  ignore="ignore" ></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

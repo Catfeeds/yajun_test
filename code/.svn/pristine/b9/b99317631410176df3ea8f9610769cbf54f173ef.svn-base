@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html">
+</head>	
+<style>
+.modal-dialog .modal-content .modal-body.edit-dialog-modal-body{
+	height:200px;
+}
+</style>
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/faultGrade/update.do" idValue=bean.id class="form-horizontal" permissionModule="NC_GROUP">
+		<@p.formRow>
+			<@p.formColmd title="FAULT_GRADE_LEVEL" permissionCode="TM_NC_GROUP_NO">
+				<@p.input  field="ngLevel" value="${bean.ngLevel!}" maxlength='100' datatype="*"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="FAULT_GRADE_ENTRANCE" permissionCode="TM_NC_GROUP_NO">
+				<@p.input type="multiple" id="ngEntranceId" field="ngEntrance" values=bean.ngEntrance options=optionNgEntrance datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="FAULT_GRADE_REMARKS" permissionCode="TM_NC_GROUP_NO">
+				<input name="remarks" class="inputxt" value="${bean.remarks!}" maxlength='100' ignore="ignore"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+</script>
+

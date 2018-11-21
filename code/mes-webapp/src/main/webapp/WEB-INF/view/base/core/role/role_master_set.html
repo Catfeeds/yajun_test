@@ -1,0 +1,352 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+	$(function() {
+		initTreeEvents();
+		loadPlant();
+		loadWorkshop();
+		loadLine();
+		loadUloc();
+	});
+	function initTreeEvents() {
+		$(".nav-role-set").children("li").children("a").click(function() {
+				var element = $(this).parent();
+				if ($(element).hasClass("open")) {
+					$(element).removeClass("open");
+					$(element).children("ul").hide("slow");
+				} else {
+					$(element).addClass("open");
+					$(element).children("ul").show("slow");
+				}
+		});
+		$(".checkAllSub").click(function(e) {
+			e.stopPropagation();
+			if (this.checked) {
+				$(this).parent().parent().find("input[type='checkbox']").prop("checked", true);
+			} else {
+				$(this).parent().parent().find("input[type='checkbox']").removeAttr("checked");
+			}
+		});
+		$(".subCheckbox").click(function(e) {
+			e.stopPropagation();
+			if (this.checked) {
+				var l = $(this).parent().parent().parent().parent().find("input.subCheckbox[type='checkbox']").length;
+				var ll = $(this).parent().parent().parent().parent().find("input.subCheckbox[type='checkbox']:checked").length;
+				if (l == ll) {
+					$(this).parent().parent().parent().parent().find("input.checkAllSub[type='checkbox']").prop("checked", true);
+				}
+			} else {
+				$(this).parent().parent().parent().parent().find("input.checkAllSub[type='checkbox']").removeAttr("checked");
+			}
+			loadPermission(this.value);
+		});
+	}
+	
+	function loadPlant() {
+		$.ajax({
+		    url: '${baseUrl}/roleMasgerSet/plantList.do?roleId=' + $("#roleId").val(),
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#plantId").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	function loadWorkshop() {
+		$.ajax({
+		    url: '${baseUrl}/roleMasgerSet/workshopList.do?roleId=' + $("#roleId").val(),
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#workshopId").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	function loadLine() {
+		$.ajax({
+		    url: '${baseUrl}/roleMasgerSet/lineList.do?roleId=' + $("#roleId").val(),
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#lineId").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	function loadUloc() {
+		$.ajax({
+		    url: '${baseUrl}/roleMasgerSet/ulocList.do?roleId=' + $("#roleId").val(),
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#ulocId").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	//工厂全选 重置
+	$("#plantSelectAllBtn").click(function(e) {
+		e.stopPropagation();
+		$(this).parent().parent().find("#plantId input[type='checkbox']").prop("checked", true);
+	});
+	$("#plantResetBtn").click(function() {
+		$(this).parent().parent().find("#plantId input[type='checkbox']").prop("checked", false);
+	});
+	
+	//车间全选 重置
+	$("#workshopSelectAllBtn").click(function(e) {
+		e.stopPropagation();
+		$(this).parent().parent().find("#workshopId input[type='checkbox']").prop("checked", true);
+	});
+	$("#workshopRessetBtn").click(function() {
+		$(this).parent().parent().find("#workshopId input[type='checkbox']").prop("checked", false);
+	});
+	
+	//产线全选 重置
+	$("#lineSelectAllBtn").click(function(e) {
+		e.stopPropagation();
+		$(this).parent().parent().find("#lineId input[type='checkbox']").prop("checked", true);
+	});
+	$("#lineRessetBtn").click(function() {
+		$(this).parent().parent().find("#lineId input[type='checkbox']").prop("checked", false);
+	});
+	
+	//工位全选 重置
+	$("#ulocSelectAllBtn").click(function(e) {
+		e.stopPropagation();
+		$(this).parent().parent().find("#ulocId input[type='checkbox']").prop("checked", true);
+	});
+	$("#ulocRessetBtn").click(function() {
+		$(this).parent().parent().find("#ulocId input[type='checkbox']").prop("checked", false);
+	});
+	
+	
+	function saveMenu(){
+		var plantIds = [];
+    	$("input[name='plantIds']").each(function(i){
+    		   if(this.checked){
+    			   plantIds.push(this.value);
+    		   }
+    	 });
+    	var workshopIds = [];
+    	$("input[name='workshopIds']").each(function(i){
+    		   if(this.checked){
+    			   workshopIds.push(this.value);
+    		   }
+    	 });
+    	var lineIds = [];
+    	$("input[name='lineIds']").each(function(i){
+    		   if(this.checked){
+    			   lineIds.push(this.value);
+    		   }
+    	 });
+    	var ulocIds = [];
+    	$("input[name='ulocIds']").each(function(i){
+    		   if(this.checked){
+    			   ulocIds.push(this.value);
+    		   }
+    	 });
+    	 ajaxRequest('${baseUrl}/roleMasgerSet/saveMenu.do',{
+    	 	 'roleId':$("#roleId").val(),				
+    		 'plantIds':JSON.stringify(plantIds),
+    		 'workshopIds':JSON.stringify(workshopIds),
+    		 'lineIds':JSON.stringify(lineIds),
+    		 'ulocIds':JSON.stringify(ulocIds)
+    	  });
+    	$(".close").click();
+    	
+	}
+	
+	/* 根据工厂名称查询 */
+	function getPlantDataByName(){
+		var roleId = $("#roleId").val();
+		var nameCn = $("#plantName ").val();
+		$.ajax({
+		    url: '${baseUrl}/roleMasgerSet/plantList.do',
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    data:{roleId:roleId,
+		    	  nameCn:nameCn},
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#plantId").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	
+	function getPlantDataByNameByEnter(){
+		if(event.keyCode==13){  
+			getPlantDataByName();
+		  }
+	}
+	
+	/* 根据车间名称查询 */
+	function getWorkshopDataByName(){
+		var roleId = $("#roleId").val();
+		var nameCn = $("#workshopName").val();
+		$.ajax({
+		    url: '${baseUrl}/roleMasgerSet/workshopList.do',
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    data:{roleId:roleId,
+		    	  nameCn:nameCn},
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#workshopId").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	
+	function getWorkshopDataByNameByEnter(){
+		if(event.keyCode==13){  
+			getWorkshopDataByName();
+		  }
+	}
+	
+	
+	/* 根据产线查询数据 */
+	function getLineDataByName(){
+		var roleId = $("#roleId").val();
+		var nameCn = $("#lineName").val();
+		$.ajax({
+		    url: '${baseUrl}/roleMasgerSet/lineList.do',
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    data:{roleId:roleId,
+		    	  nameCn:nameCn},
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#lineId").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	
+	function getLineDataByNameByEnter(){
+		if(event.keyCode==13){  
+			getLineDataByName();
+		  } 
+	}
+	
+
+	/* 根据工位名称查询 */
+	function getUlocDataByName(){
+		var roleId = $("#roleId").val();
+		var name = $("#ulocName").val();
+		$.ajax({
+		    url: '${baseUrl}/roleMasgerSet/ulocList.do',
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    data:{roleId:roleId,
+		    	  name:name},
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#ulocId").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	
+	function getUlocDataByNameByEnter(){
+		if(event.keyCode==13){  
+			getUlocDataByName();
+		  } 
+	}
+	
+</script>
+</head>
+<body style="overflow-y: hidden" scroll="no">
+    <input type="hidden" value="${id}" id="roleId" />
+	<div style="width: 100%;height: 367px;position: relative;">
+	   <div id="role_set_menu" class="widget-box role_set_menu">	
+		  	<div class="widget-header header-color-blue2">
+				<h4 class="lighter smaller"><@s.m code="PLANT_CATEGORY_LIST"/></h4>
+			</div>
+			<div class="widget-body" id="menuListPanel">
+				<input type="hidden" name="id" value="${id}" id="rid">
+				<a href="javascript:void(0);" id="plantSelectAllBtn"><@s.m code="SELECT_ALL"/></a> 
+				<a id="plantResetBtn" href="javascript:void(0);"><@s.m code="RESET_ALL"/></a>
+				<input type="text" placeholder="请输入工厂名称" id="plantName" style="width:120px;" onblur="getPlantDataByName()" onkeydown="getPlantDataByNameByEnter()">
+				<div id="plantId" class="role_set_menu_content" style="height:297px;">
+					
+				</div>
+			</div>
+	   </div>
+	   <div id="role_set_func" class="tabbable role_set_func">
+	   	  	<div class="widget-header header-color-blue2" >
+				<h4 class="lighter smaller"><@s.m code="WORK_SHOP_CATEGORY_LIST"/></h4>
+			</div>
+			<a href="javascript:void(0);" id="workshopSelectAllBtn"><@s.m code="SELECT_ALL"/></a> 
+			<a id="workshopRessetBtn" href="javascript:void(0);"><@s.m code="RESET_ALL"/></a>
+			<input type="text" placeholder="请输入车间名称" id="workshopName" style="width:120px;" onblur="getWorkshopDataByName()" onkeydown="getWorkshopDataByNameByEnter()">
+			<div id="workshopId" class="role_set_func_content" style="height:297px;">
+		
+			</div>
+	   </div>
+	   <div id="role_set_form" class="tabbable role_set_form">
+	   	  	<div class="widget-header header-color-blue2" >
+				<h4 class="lighter smaller"><@s.m code="LINE_CATEGORY_LIST"/></h4>
+			</div>
+			<a href="javascript:void(0);" id="lineSelectAllBtn"><@s.m code="SELECT_ALL"/></a> 
+			<a id="lineRessetBtn" href="javascript:void(0);"><@s.m code="RESET_ALL"/></a>
+			<input type="text" placeholder="请输入产线名称" id="lineName" style="width:120px;" onblur="getLineDataByName()" onkeydown="getLineDataByNameByEnter()">
+			<div id="lineId" class="role_set_form_content" style="height:297px;">
+		
+			</div>
+	   </div>
+	   <div id="role_set_data" class="tabbable role_set_data">
+	   	  	<div class="widget-header header-color-blue2" >
+				<h4 class="lighter smaller"><@s.m code="ULOC_CATEGORY_LIST"/></h4>
+				<a class="save-btn" href="javascript:saveMenu()"><i class="icon-save"></i></a>
+			</div>
+			<a href="javascript:void(0);" id="ulocSelectAllBtn"><@s.m code="SELECT_ALL"/></a> 
+			<a id="ulocRessetBtn" href="javascript:void(0);"><@s.m code="RESET_ALL"/></a>
+			<input type="text" placeholder="请输入工位名称" id="ulocName" style="width:120px;" onblur="getUlocDataByName()"  onkeydown="getUlocDataByNameByEnter()">
+			<div id="ulocId" class="role_set_data_content" style="height:297px;">
+		
+			</div>
+	   </div>
+	</div>
+</body>
+</html>

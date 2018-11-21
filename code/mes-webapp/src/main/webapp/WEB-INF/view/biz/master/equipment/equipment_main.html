@@ -1,0 +1,69 @@
+<script type="text/javascript">
+	$(".page-content").toggleClass("page-content");
+	var operateParam=new Object();
+	operateParam.id=0;
+	var operateParamRight=new Object();
+	operateParamRight.id=0;
+	var selectedOrg = 0;
+	var selectedNode = 0;
+	jQuery(function($) {
+		showEquipment();
+		$("#widget-collapse").click(function() {
+			if ($("#org_tab_left_body").is(":hidden")) {
+				$("#org_tab_right").removeClass("widget-box-max");
+				$("#org_tab_left_body").show();
+			} else {
+				$("#org_tab_right").addClass("widget-box-max");
+				$("#org_tab_left_body").hide();
+			}
+		});
+ 		$("#myTab li").click(function() {
+ 			reLoadTree(operateParam.id, $(this).index());
+ 		});
+	});
+	
+	function showEquipment(){
+		var url = '${baseUrl}/equipment/equipmentListInput.do';
+		var parameters = {currentPageId:"${currentPageId}"};
+		var tableId = "tabEquipment";
+		ajaxResponseHtml(url,parameters,tableId);
+	}
+	function showParam(){
+		var url = '${baseUrl}/equipmentParam/listInput.do';
+		var parameters = {currentPageId:"paramGridId"};
+		var tableId = "tabParam";
+		ajaxResponseHtml(url,parameters,tableId);
+		
+	}
+	function reLoadTree(orgId, lindex) {
+		if (lindex == undefined) {
+			lindex = $("#myTab li.active").index();
+		}
+		operateParam.id = orgId;
+		switch (lindex) {
+		case 0: {
+			showEquipment();
+		}
+			break;
+		case 1: {
+			showParam();
+		}
+			break;
+		default:
+			break;
+		}
+	}
+	
+</script>
+<@p.body title="EQUIPMENT_LIST_TITLE" noBreadcrumbs="true" permissionModule="EQUIPMENT">
+<div id="org_tab_right" style="width: 100%;margin-left: 0px;margin-top: 0px;"  class="tabbable org_tab_right" >
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue"	id="myTab" >
+		<li class="active"><a data-toggle="tab" href="#tabEquipment">设备信息</a></li>
+		<li><a data-toggle="tab" href="#tabParam"id="viewParam">设备工艺参数</a></li>
+	</ul>
+	<div class="tab-content" >
+		<div id="tabEquipment" class="tab-pane in active"></div>
+		<div id="tabParam" class="tab-pane"></div>
+	</div>
+</div>
+</@p.body>

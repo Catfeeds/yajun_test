@@ -1,0 +1,12 @@
+package com.wis.mes.dakin.report.service;
+import java.util.Map;
+
+/**
+ * @author caixia
+ *
+ */
+public interface MetalPlateFaultedDetailReportService {
+	public Map<String, String> getMetalPlateFaultedDetailPieReportInfo(String whitOrNight,String shiftNo, String beginTime, String endTime);
+	public Map<String, String> getMetalPlateFaultedDetailReport(String whitOrNight,String shiftNo, String beginTime, String endTime);
+	public Map<String, String> getfaultedDetailsInfo(String beginTime, String endTime);
+}

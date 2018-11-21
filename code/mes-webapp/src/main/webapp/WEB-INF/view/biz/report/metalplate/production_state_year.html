@@ -1,0 +1,292 @@
+<#include "../../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>钣金-生产状态年报</title>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<style type="text/css">
+	.report-panel{
+		width:100%;
+		height:80rem;
+		overflow: auto;
+		padding-top: 10px;
+	}
+</style>
+<script type="text/javascript">
+
+var dataObj={
+	yearBar:{
+		chart:echarts.init(document.getElementById('yearBar')),
+		xAxisData:[],
+		seriesNoNg:[],
+		seriesNg:[],
+		seriesHandling:[]
+	},
+	monthBar:{
+		chart:echarts.init(document.getElementById('monthBar')),
+		xAxisData:[],
+		seriesNoNg:[],
+		seriesNg:[],
+		seriesHandling:[]
+	}	
+};
+
+function getYearBarData(){
+	dataObj.yearBar.chart.on('click', function (params) { 
+		var creteTime = $("#createTime").val();
+		if(creteTime){
+			$('#createTime').val(creteTime.split('-')[0]+'-'+params.name);
+			getReportData('monthBar');
+		}
+	});
+  var  option = {
+	    title:{
+	        text:'区域状态年报',
+	        left:'center'
+	    },
+	    tooltip : {
+	        trigger: 'axis',
+	        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+	            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+	        }
+	    },
+	    legend: {
+	        data:['非故障停机时间','故障停机时间','加工时间'],
+	        type: 'scroll',
+	        orient: 'vertical',
+	        right: 10,
+	        top: 30,
+	        bottom: 10
+	    },
+	    toolbox: {
+	        show : true,
+	        feature : {
+	            dataView : {show: true, readOnly: false},
+	            magicType : {show: true, type: ['line', 'bar']},
+	            restore : {show: true},
+	            saveAsImage : {show: true}
+	        }
+	    },
+	    grid: {
+	        right: '10%',
+	        top: "20%",
+	        bottom: "5%",
+	        containLabel: true
+	    },
+	    xAxis : [
+	        {
+	            type : 'category',
+	            data : dataObj.yearBar.xAxisData,
+	            axisLabel:{
+	                formatter:function(params){
+	                	return dayNumChar[params];
+	                }
+	            }
+	            
+	        }
+	    ],
+	    yAxis : [
+	        {
+	        	name:'时间/min',
+	            type : 'value',
+	            max:function(value) {
+	                return parseInt(value.max*1.1)+1;
+	            },
+	            axisLabel: {
+	                formatter: '{value}'
+	            },
+	            splitLine:{  
+	                show:false
+	            }
+	        }
+	    ],
+	    series : [
+	    	 	{
+		            name:'非故障停机时间',
+		            type:'bar',
+		            stack: '广告',
+		            barWidth:'50%',
+		            color:'#74350A',
+		            data:dataObj.yearBar.seriesNoNg
+		        },
+		        {
+		            name:'故障停机时间',
+		            type:'bar',
+		            stack: '广告',
+		            barWidth:'50%',
+		            color:'#FF0505',
+		            data:dataObj.yearBar.seriesNg
+		        },
+		        {
+		            name:'加工时间',
+		            type:'bar',
+		            stack: '广告',
+		            barWidth:'50%',
+		            color:'#00B050',
+		            data:dataObj.yearBar.seriesHandling
+		        }
+	    ]
+	};
+	return option;
+}
+
+function getMonthBarData(){
+ var  option = {
+	    title:{
+	        text:'区域状态月报',
+	        left:'center'
+	    },
+	    tooltip : {
+	        trigger: 'axis',
+	        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+	            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+	        }
+	    },
+	    legend: {
+	        data:['非故障停机时间','故障停机时间','加工时间'],
+	        type: 'scroll',
+	        orient: 'vertical',
+	        right: 10,
+	        top: 30,
+	        bottom: 10
+	    },
+	    grid: {
+	        right: '10%',
+	        top: "20%",
+	        bottom: "5%",
+	        containLabel: true
+	    },
+	    toolbox: {
+	        show : true,
+	        feature : {
+	            dataView : {show: true, readOnly: false},
+	            magicType : {show: true, type: ['line', 'bar']},
+	            restore : {show: true},
+	            saveAsImage : {show: true}
+	        }
+	    },
+	    xAxis : [
+	        {
+	            type : 'category',
+	            data : dataObj.monthBar.xAxisData
+	        }
+	    ],
+	    yAxis : [
+	        {
+	            name:'时间/min',
+	            type : 'value',
+	            max:function(value) {
+	                return parseInt(value.max*1.1)+1;
+	            },
+	            axisLabel: {
+	                formatter: '{value}'
+	            },
+	            splitLine:{  
+	                show:false
+	            }
+	        }
+	    ],
+	    series : [
+	        {
+	            name:'非故障停机时间',
+	            type:'bar',
+	            stack: '广告',
+	            barWidth:'50%',
+	            color:'#74350A',
+	            data:dataObj.monthBar.seriesNoNg
+	        },
+	        {
+	            name:'故障停机时间',
+	            type:'bar',
+	            stack: '广告',
+	            barWidth:'50%',
+	            color:'#FF0505',
+	            data:dataObj.monthBar.seriesNg
+	        },
+	        {
+	            name:'加工时间',
+	            type:'bar',
+	            stack: '广告',
+	            barWidth:'50%',
+	            color:'#00B050',
+	            data:dataObj.monthBar.seriesHandling
+	        }
+	    ]
+	};
+
+	return option;
+}
+
+function getReportData(_id){
+	var	data = {
+		'queryCondition[createTime]':$("#createTime").val(),
+		'queryCondition[regionNo]':$("#regionMarks").val(),
+		'queryCondition[type]':_id
+	}; 
+ 	ajaxRequest("${baseUrl}/metalplateFauletdReport/productionStateYearData.do", data, function(result){
+ 		var data = result.data;
+ 		if(_id == "yearBar"){
+ 			dataObj.yearBar.xAxisData = result.data.xAxisDataMY
+ 	 		dataObj.yearBar.seriesNoNg = result.data.seriesNoNg
+ 	 		dataObj.yearBar.seriesNg = result.data.seriesNg
+ 	 		dataObj.yearBar.seriesHandling = result.data.seriesHandling
+			dataObj.yearBar.chart.showLoading();
+			var option = getYearBarData();
+			dataObj.yearBar.chart.hideLoading();
+			dataObj.yearBar.chart.setOption(option,true);
+		}else if (_id == 'monthBar'){
+			dataObj.monthBar.xAxisData = result.data.xAxisDataM
+	 		dataObj.monthBar.seriesNoNg = result.data.seriesNoNg
+	 		dataObj.monthBar.seriesNg = result.data.seriesNg
+	 		dataObj.monthBar.seriesHandling = result.data.seriesHandling
+			dataObj.monthBar.chart.showLoading();
+			var option = getMonthBarData();
+			dataObj.monthBar.chart.hideLoading();
+			dataObj.monthBar.chart.setOption(option,true);
+		}
+ 	}, false);
+}
+</script>
+</head>
+<body>
+<div class="page-content" >
+<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTime" field="createTime"></@p.input>
+			<@p.input title="TM_CODE_RULE_LINE" id="regionMarks" field="regionMarks" type="select" value="A" options=regionMarks></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	
+	<div class="report-panel">
+		<div style="width:100%;height:100%;">
+			<div id="yearBar" style="width: 85%;height: 50%;"></div>
+			<div id="monthBar" style="width: 85%;height: 50%;"></div>
+		</div>
+	</div>
+</div>
+</body>
+<script type="text/javascript">
+	$(function(){
+		$('#createTime').click(function(){
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM'
+			})
+		});
+		$("#createTime").val(initDateTime('yyyy-MM',false,false));
+		getReportData("yearBar");
+		getReportData("monthBar");
+	});
+	
+	function conditionalQuery(searchBtnObj){
+		getReportData("yearBar");
+		getReportData("monthBar");
+	}
+	
+</script>
+</html>

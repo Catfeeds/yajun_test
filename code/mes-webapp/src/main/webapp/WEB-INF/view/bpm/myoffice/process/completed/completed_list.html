@@ -1,0 +1,46 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/bootstrapTableCommons.html">	
+<script type="text/javascript">
+$(function(){
+	$("#start").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'end\')}'});
+	});
+	$("#end").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'start\')}'});
+	});
+});
+function operatorHistory(){
+	var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var id = rows[0].id;
+    showProcHistory(id, 'dg${currentPageId}');
+}
+</script>
+<@p.body title="HISTORIC_PROCESS_INSTANCE_LIST_TITLE" permissionModule="PROCESS_COMPELETED_LIST">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="HISTORIC_PROCESS_PROCESSDEFINITION_NAME"  permissionCode="HISTORIC_PROCESS_INSTANCE_NAME"   field="processInstanceNameLike"></@p.input>
+            <@p.input title="START_TIME"  permissionCode="HISTORIC_PROCESS_STARTTIME"   field="startedAfter" id="start"  ></@p.input>
+			<@p.input title="END_TIME"  permissionCode="HISTORIC_PROCESS_ENDTIME"  field="finishedBefore"   id="end"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar>
+			<@p.button title="PROCESS_VALUE_PICTURE"  permissionCode="EndProcessPicture" onclick="operatorHistory()" iconCls="h-sign"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/hisinstance/personal/listHistoricProcess.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="HISTORIC_PROCESS_PROCESSDEFINITION_NAME" permissionCode="HISTORIC_PROCESS_INSTANCE_NAME" field="name" width="300"></@p.column>
+		<!-- 
+		<@p.column title="BPM_TASK_COL_DESCRIPTION" permissionCode="BPM_TASK_COL_DESCRIPTION" field="description" width="250"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_ID" permissionCode="PROCESS_INSTANCE_ID" field="processInstanceId"></@p.column>
+		<@p.column title="HISTORIC_PROCESS_PROCESSDEFINITIONID" permissionCode="HISTORIC_PROCESS_PROCESSDEFINITIONID_" field="processDefinitionId"></@p.column>
+		 -->
+		<@p.column title="HISTORIC_PROCESS_STARTTIME"  permissionCode="HISTORIC_PROCESS_STARTTIME" field="startTime"></@p.column>
+		<@p.column title="HISTORIC_PROCESS_ENDTIME" permissionCode="HISTORIC_PROCESS_ENDTIME" field="endTime"  ></@p.column>
+		<@p.column title="PROCESS_COLUMN_DESC"  permissionCode="HISTORIC_PROCESS_DESC"  width="200" field="deleteReason"  ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+

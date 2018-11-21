@@ -1,0 +1,40 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../include/editorCommons.html"> 
+</head>
+<script type="text/javascript">
+$(function(){
+	$("#leaveDateFrom").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'leaveDateTo\')}'});
+	});
+	$("#leaveDateTo").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'leaveDateFrom\')}'});
+	});
+});
+</script>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/leaveDemo/reApply.do"  class="form-horizontal" idValue=leave.id  noPermissionModule="true">
+	<input name="processInstanceId"  type="hidden" value="${processInstanceId!}">
+	<input name="taskId"  type="hidden" value="${taskId!}">
+	<@p.formRow>
+		<@p.formColmd title="DATETIME_START">
+			  <input name="leaveDateFrom" id="leaveDateFrom" value="${(leave.leaveDateFrom?date)!}" class="inputxt" datatype="*">
+		</@p.formColmd>
+		<@p.formColmd title="DATETIME_END" >
+			  <input name="leaveDateTo" id="leaveDateTo" value="${(leave.leaveDateTo?date)!}" class="inputxt" datatype="*">
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd class="col-md-8" title="LEAVE_REASON">
+			 <textarea name="leaveReason"  datatype="s1-200" >${leave.leaveReason!}</textarea>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="RE_APPLY">
+			  <@p.input type="select"  excludeSelectOption="true" field="opinion" options=options></@p.input>
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+</body>
+</html>

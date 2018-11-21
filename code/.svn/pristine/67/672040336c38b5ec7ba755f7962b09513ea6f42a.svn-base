@@ -1,0 +1,46 @@
+ 
+<#include "../include/bootstrapTableCommons.html">
+
+<@p.body title="WIP_LIST_TITLE" permissionModule="WIP">
+	 <@p.searchPanel > 
+   		<@p.searchColumns>
+			<@p.input title="RECORD_SN" field="sn"  permissionCode="RECORD_SN"></@p.input>
+			<@p.input title="WIP_ULOC_NO" field="ulocNo"  permissionCode="WIP_ULOC_NO"></@p.input>
+			<@p.input title="WIP_ULOC_NAME" field="ulocName"  permissionCode="WIP_ULOC_NAME"></@p.input>
+			<@p.input title="WIP_PORDER_NO" field="porderNo"  permissionCode="WIP_PORDER_NO"></@p.input>
+			<@p.input title="WIP_AVI_NO" field="aviNo"  permissionCode="WIP_AVI_NO"></@p.input>
+			<@p.input title="WIP_PART_NO" field="partNo"  permissionCode="WIP_PART_NO"></@p.input>
+			<@p.input title="WIP_PART_NAME" field="partName"  permissionCode="WIP_PART_NAME"></@p.input>
+			<@p.input title="WIP_IS_HOLD" type="select" options=isHolds  field="isHold"  permissionCode="WIP_IS_HOLD"></@p.input>
+			<@p.input title="WIP_STATUS" type="select" options=status  field="status"  permissionCode="WIP_STATUS"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/wip/list.do" >
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="WIP_SN" field="sn" permissionCode="WIP_SN"> </@p.column>
+		<@p.column title="WIP_ROUTING_SEQ" field="routingSeq" permissionCode="WIP_ROUTING_SEQ"> </@p.column>
+		<@p.column title="WIP_ULOC_NO" field="ulocNo" permissionCode="WIP_ULOC_NO"> </@p.column>
+		<@p.column title="WIP_ULOC_NAME" field="ulocName" permissionCode="WIP_ULOC_NAME" formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_PORDER_NO" field="porderNo" permissionCode="WIP_PORDER_NO" formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_AVI_NO" field="aviNo" permissionCode="WIP_AVI_NO" formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_QTY" field="qty" permissionCode="WIP_QTY"formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_PART_NO" field="partNo" permissionCode="WIP_PART_NO" formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_PART_NAME" field="partName" permissionCode="WIP_PART_NAME" formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_SCAN_DATE" field="scanDate" permissionCode="WIP_SCAN_DATE" formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_NEXT_ULOC" field="nextUloc" permissionCode="WIP_NEXT_ULOC" formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_NOTE" field="note" permissionCode="WIP_NOTE" formatter="renderNullValue"> </@p.column>
+		<@p.column title="WIP_IS_HOLD" field="isHold" permissionCode="WIP_IS_HOLD" formatter="renderYesOrNo"> </@p.column>
+		<@p.column title="WIP_STATUS" field="status" permissionCode="WIP_STATUS" formatter="renderStatus"> </@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+	function renderNullValue(value){
+		return value == null ? "" : value;
+	}
+	function renderYesOrNo(value){
+		return entryRenderer('YES_OR_NO', value);
+	}
+	function renderStatus(value){
+		return entryRenderer('PRODUCT_WIP_STATUS', value);
+	}
+</script>

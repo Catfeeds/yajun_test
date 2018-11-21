@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/ulocSip/update.do" class="form-horizontal" idValue=ulocSip.id  permissionModule="ULOC_SIP">
+	<input type="hidden" name ="tmUlocId" value="${tmUlocId!}"/>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_SIP_TS_PARAMETER_ID" permissionCode="ULOC_SIP_TS_PARAMETER_ID">
+			 	<@p.input type="select" excludeSelectOption="true" datatype="*" value="${ulocSip.tsParameterId}" field="tsParameterId" options=parameters ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_SIP_DETAIL" permissionCode="ULOC_SIP_DETAIL">
+				 <input name="detail" class="inputxt" maxlength="150" value="${ulocSip.detail}" />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_SIP_ISEXAMINE" permissionCode="ULOC_SIP_ISEXAMINE">
+				 <@p.input type="select" id="add_isExamine" value="${ulocSip.isExamine}" field="isExamine" options=yesOrNoOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+</script>

@@ -1,0 +1,50 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	function toAffirmParam(){
+		var rowsData = getSelectedRows('dg${currentPageId}');
+	 	if (!rowsData || rowsData.length == 0) {
+	 		  infoTip("请先选择数据!");
+	 		   return;
+	 	}
+	 	if (rowsData.length > 1) {
+	 		infoTip(commons_msg.plsSelOne);
+	 		return;
+	 	}
+	 	if(rowsData[0].isReplace =='YES'){
+	 		infoTip("已替换的数据不能再次替换!");
+	 		   return;
+	 	}
+	 	
+		var url = "${baseUrl}/record/uloc/parameter/updateUntratedInput.do?id="+rowsData[0].id;
+		createwindow("替换参数", url, 'dg${currentPageId}');
+
+		
+	}
+
+function renderGender(value) {
+		return entryRenderer('YES_OR_NO', value);
+}
+</script>
+
+<@p.body  permissionModule="RECORD" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="recordParameterGrid">
+		<!--  <@p.searchColumns>
+			<@p.input title="PECORD_ULOC_PARAMETER_PARAMETER_CODE" field="parameterCode"  permissionCode="PECORD_ULOC_PARAMETER_PARAMETER_CODE"></@p.input>
+			<@p.input title="PECORD_ULOC_PARAMETER_PARAMETER_VALUE" field="parameterValue"  permissionCode="PECORD_ULOC_PARAMETER_PARAMETER_VALUE"></@p.input>
+		</@p.searchColumns> -->
+		<@p.toolbar id="toolbar">
+			<@p.button title="UNTRATED_PARAM"  permissionCode="ReplaceParam" onclick="toAffirmParam()" iconCls="gear"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>   
+	<div style="color: #428bca;text-align:left; margin:10px" >产品档案参数信息</div>
+	<@p.dataGrid url="${baseUrl}/record/uloc/parameter/list.do?${params}&currentPageId=${currentPageId}" >
+			<@p.column checkbox="true" ></@p.column>
+			<@p.column title="PECORD_ULOC_PARAMETER_PARAMETER_CODE" field="parameterCode" permissionCode="UNTRATED_NC_SN" ></@p.column>
+			<@p.column title="PECORD_ULOC_PARAMETER_PARAMETER_VALUE" field="parameterValue" permissionCode="UNTRATED_NC_SN" ></@p.column>
+			<@p.column title="PECORD_ULOC_PARAMETER_PARAMETER_TYPE" field="parameterType" permissionCode="UNTRATED_NC_SN" ></@p.column>
+			<@p.column title="PECORD_ULOC_PART_IS_REPLACE" field="isReplace"  formatter="renderGender"  permissionCode="UNTRATED_NC_SN" ></@p.column>
+			<@p.column title="PECORD_ULOC_PARAMETER_NOTE" field="note" permissionCode="UNTRATED_NC_SN" ></@p.column>
+		</@p.dataGrid>
+</@p.body>	
+

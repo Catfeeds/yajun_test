@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm class="inputxtDisabled" permissionModule="PRODUCTION_RECORD">
+	<#list list as bean>
+		<@p.formRow>
+			<@p.formColmd title="METALPLATEPRODUCTIONRECORD_BADTYPE" permissionCode="PRODUCTIONDATE">
+				${bean.defectiveProject!}
+<!-- 				<@p.input type="text" value="${bean.defectiveProject!}"  disabled="disabled" field="defectiveProject" ></@p.input>-->			
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATEPRODUCTIONRECORD_BADNUMBER" permissionCode="PRODUCTIONDATE" >
+				${bean.defectiveNumber!}
+			</@p.formColmd>
+		</@p.formRow>
+	</#list>
+</@p.editForm>
+</body>
+</html>

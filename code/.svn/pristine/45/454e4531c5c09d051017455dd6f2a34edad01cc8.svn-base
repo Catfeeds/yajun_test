@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<script type="text/javascript">
+$(function(){
+	var optionSize = $("#plantSelect option").size();
+	if(optionSize==2){
+		$('#plantSelect option:eq(1)').prop("selected",true);
+	}
+});
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/part/add.do" class="form-horizontal"   permissionModule="PART">
+		<@p.formRow>
+			<@p.formColmd title="PART_PLANT" permissionCode="PART_PLANT">
+				<@p.input type="select" datatype="*" id="plantSelect" field="tmPlantId" options=plantOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PART_NO" permissionCode="PART_NO">
+				<input name="no" class="inputxt" datatype="no" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PART_NAME_CN" permissionCode="PART_NAME_CN">
+				<input name="nameCn" class="inputxt" datatype="*" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="PART_TYPE" permissionCode="PART_TYPE">
+				<@p.input type="select" excludeSelectOption="true" field="type" options=typeOptions datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PART_BASE_UNIT" permissionCode="PART_BASE_UNIT">
+			<@p.input type="select"  field="baseUnit" options=baseUnitOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PART_SPECTYP" permissionCode="PART_SPECTYP">
+				<input name="spectyp" class="inputxt" maxlength='50' />
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PART_UKUNIT" permissionCode="PART_UKUNIT">
+				<@p.input type="select" field="ukunit" options=uKUnitOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PART_UKTIME" permissionCode="PART_UKTIME">
+				<input name="uktime" class="inputxt" class="timepicker" onClick="WdatePicker({dateFmt: 'yyyy-MM-dd'})"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PART_ENABLED" permissionCode="PART_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" options=enabledOptions  datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+		     <@p.formColmd title="PART_REMARKS"  permissionCode="PART_REMARKS">
+		        <textarea rows="2" cols="40" name="remarks" style="width: 570px;" maxlength="250"></textarea>
+		     </@p.formColmd>
+		</@p.formRow>
+		
+	</@p.editForm>
+</body>
+</html>

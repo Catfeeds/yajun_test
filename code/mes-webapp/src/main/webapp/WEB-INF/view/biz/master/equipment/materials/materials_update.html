@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"/> 
+</head>	
+<script type="text/javascript">
+ $(function(){
+	$("#display_tmPartId").val("${materials.part.no}-${materials.part.nameCn}");
+})
+
+function checkPartIdIsHave(id){
+	if($("#partIds").val()!=""){
+		var partIds=$("#partIds").val().split(",");
+		for(var i =0;i<partIds.length;i++){
+			if(partIds[i] == id){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+function clickPartCallback(dialog){
+	var rowsData = getSelectedRows('dgPartGridId');
+	debugger;
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	$("#display_tmPartId").val(rowsData[0].nameCn);
+	$("#tmPartIds").val(rowsData[0].id);
+	dialog.close();
+}
+
+
+function frame_cleanSelect(){
+	$("#partBody").empty();
+	$("#partIds").val("");
+	$("#display_tmPartId").val("");
+}
+
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/equipmentMaterials/update.do" class="form-horizontal" idValue=materials.id  permissionModule="EQUIPMENT_MATERIALS">
+		<input type ="hidden" name="tmEquipmentId" value="${tmEquipmentId}"/>
+		<input type="hidden" name="tmPartId" id="tmPartIds" value="${materials.part.id}"/>
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_MATERIALS_NOTE"  permissionCode="EQUIPMENT_MATERIALS_NOTE">
+				<input name="note"  class="inputxt"  value="${materials.note!}" >
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_MATERIALS_SELECT"    permissionCode="EQUIPMENT_PART"  checktip="EQUIPMENT_MATERIALS_SELECT"  >
+				<@p.magnify id="tmPartId" url="${baseUrl}/equipmentMaterials/partListInput.do?currentPageId=PartGridId&singleSelect=true&tmEquipmentId="+"${tmEquipmentId}" callback="clickPartCallback" datatype="*"></@p.magnify>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+

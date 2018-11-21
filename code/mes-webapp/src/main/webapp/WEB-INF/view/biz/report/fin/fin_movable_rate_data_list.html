@@ -1,0 +1,63 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body title="FIN_MOVATE_RATE" noBreadcrumbs="true"  permissionModule="FIN_REPORT_EXPORT">
+	<@p.searchPanel >
+		<@p.searchColumns>
+		   <@p.input title="FIN_START" field="createTimeStart" id="createTimeStart" class="timepicker"></@p.input>
+		   <@p.input title="FIN_END" field="createTimeEnd" id="createTimeEnd" class="timepicker"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="FIN_RATE_EXPORT" permissionCode="FinExport" downName="FIN_RATE_EXPORT_NAME" url="${baseUrl}/finMovableRate/exportData.do" iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid  url="${baseUrl}/finMovableRate/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="FIN_MOVATE_RATE_DATE"  field="createDate" permissionCode="FIN_EXPORT_DATE" ></@p.column>
+		<@p.column title="FIN_MOVATE_RATE_SHIFT" field="shiftNo" permissionCode="FIN_EXPORT_SHIFT_NO" formatter="renderShiftNo" ></@p.column>
+		<@p.column title="FIN_MOVATE_RATE_TIME"  field="createTime" permissionCode="FIN_EXPORT_BEGIN_TIME"></@p.column>
+		<@p.column title="FIN_MOVATE_RATE_REAL"  field="realRunRate" permissionCode="FIN_EXPORT_DATE" formatter="renderNullValue"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	initTime();
+});
+function renderShiftNo(value){
+	if(value=="1"){
+		return "白班";
+	}else if(value =="2"){
+		return "晚班";
+	}else{
+		return "";
+	}
+}
+function initTime(){
+	var date = new Date();
+	var year=date.getFullYear();
+	var month = date.getMonth()+1;
+	var day = date.getDate();
+	var hour = date.getHours();
+	var minutes = date.getMinutes();
+	$("#createTimeEnd").val(year+"-"+caseLessTen(month)+"-"+caseLessTen(day)+" "+caseLessTen(hour)+":"+caseLessTen(minutes));
+	date = new Date(date.getTime()-1000*60*60*24*30);
+	year=date.getFullYear();
+	month = date.getMonth()+1;
+	day = date.getDate();
+	$("#createTimeStart").val(year+"-"+caseLessTen(month)+"-"+caseLessTen(day)+" "+caseLessTen(hour)+":"+caseLessTen(minutes));
+}
+$('#createTimeStart').focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm'});
+	WdatePicker({
+		maxDate : '#F{$dp.$D(\'settingEnd\',{d:-1})}'
+	});
+});
+$('#createTimeEnd').focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm'});
+	WdatePicker({
+		maxDate : '#F{$dp.$D(\'settingEnd\',{d:-1})}'
+	});
+});
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+</script>

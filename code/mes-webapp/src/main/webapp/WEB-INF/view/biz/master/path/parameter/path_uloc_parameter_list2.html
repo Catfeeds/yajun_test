@@ -1,0 +1,57 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<<@p.body title="PATH_LIST_TITLE" permissionModule="PATH" noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PATH_PLANT" id="list_plant" onchange="list_changePlant(this.value);" type="select"  field="tmPlantId" options=plantOptions  ></@p.input>
+			<#--
+				<@p.input title="PATH_WORKSHOP" id="list_workshop" onchange="list_changeWorkshop(this.value);"  field="tmWorkshopId"  type="select" options=workShopOptions></@p.input>
+			-->
+			<@p.input title="PATH_LINE" id="list_line" field="tmLineId"  type="select" options=lineOptions></@p.input>
+			<@p.input title="PATH_PART" id="list_part" type="select"class="js-example-basic-single" field="tmPartId" options=partOptions ></@p.input>
+			<@p.input title="PATH_NO" field="no"></@p.input>
+			<@p.input title="PATH_NAME" field="name"></@p.input>
+			<@p.input title="PATH_ENABLED" field="enabled"  type="select" options=enabledOptions></@p.input>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+		<#--
+			<@p.button title="PATH_SHOW_GRAPH" permissionCode="PathGrapShow"iconCls="eye-open" onclick="showPathFlow();"  ></@p.button>
+			<@p.button title="PATH_ADD_GRAPH" permissionCode="PathAddGraph" iconCls="plus" onclick="openPathFlow();"  ></@p.button>
+		-->
+			<@p.button title="PATH_ADD" permissionCode="PathAdd" iconCls="plus" url="${baseUrl}/path/addInput.do" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathUpdate" iconCls="edit" url="${baseUrl}/path/updateInput.do" type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathDelete" iconCls="trash" url="${baseUrl}/path/delete.do" type="delete"></@p.button>
+			<@p.button title="PATH_COPY" permissionCode="PathCopy" iconCls="copy"  onclick="doDuplicate();" type="button"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/path/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_PLANT" field="plant.nameCn" permissionCode="PATH_PLANT" formatter="renderPlant"></@p.column>
+	<#--
+		<@p.column title="PATH_WORKSHOP" field="workshop.nameCn" permissionCode="PATH_WORKSHOP" formatter="renderWorkShop"></@p.column>
+		<@p.column title="PATH_COPY_PATH" field="copyPath.name" permissionCode="PATH_COPY_PATH"  formatter="renderCopyPath"></@p.column>
+		<@p.column title="PATH_STATUS" field="status" permissionCode="PATH_STATUS" formatter="renderStatus"></@p.column>
+	-->
+		
+		<@p.column title="PATH_LINE" field="line.nameCn" permissionCode="PATH_LINE" formatter="renderLine"></@p.column>
+		<@p.column title="PATH_PART" field="part.nameCn" permissionCode="PATH_PART" formatter="renderPart"></@p.column>
+		<@p.column title="PATH_NO" field="no" permissionCode="PATH_NO" ></@p.column>
+		<@p.column title="PATH_NAME" field="name" permissionCode="PATH_NAME"></@p.column>
+		<@p.column title="PATH_ENABLED" field="enabled" permissionCode="PATH_ENABLED" formatter="renderGenderEnabled"></@p.column>
+		<@p.column title="PATH_REMARK" field="remark" permissionCode="PATH_REMARK"></@p.column>
+	</@p.dataGrid>
+	<div id ="pathUloc"></div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+/* function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+} */
+
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="FactoryFormMapper" >
+  <resultMap id="FactoryFormResult" type="FactoryForm" >
+    <result column="ID" property="id" />
+    <result column="APPLICATIONFORM_ID" property="applicationFormID" />
+    <result column="MATERIALFORM_ID" property="materialFormID" />
+    <result column="FACOTRY" property="factory" />
+    <result column="PURCHASE_GROUP" property="purchaseGroup" />
+    <result column="BASIC_UNIT_VALUE" property="basicUnitValue" />
+    <result column="BASIC_UNIT" property="basicUnit" />
+    <result column="FD_DELIVERY_UNIT" property="fdDeliveryUnit" />
+    <result column="DELIVERY_UNIT_VALUE" property="deliveryUnitValue" />
+    <result column="ATTACH_DELIVERY_UNIT" property="attachDeliveryUnit" />
+    <result column="MRP_TYPE" property="mrpType" />
+    <result column="MRP_CONTROLLER" property="mrpController" />
+    <result column="BATCH" property="batch" />
+    <result column="MINIMUM_VOLUME" property="minimumVolume" />
+    <result column="FIXED_BATCH_SIZE" property="fixedBatchSize" />
+    <result column="MAXMUM_INVERTORY_LEVEL" property="maxmumInventoryLevel" />
+    <result column="ROUNDING_VALUE" property="roundingValue" />
+    <result column="PROCURE_TYPE" property="procurementType" />
+    <result column="SPECIAL_PROCURE_TYPE" property="specialProcurementType" />
+    <result column="PLAN_MARGIN_CODE" property="planMarginalCode" />
+    <result column="HOMEMADE_PRODUCTION" property="homeMadeProduction" />
+    <result column="OUTSOURCE_WAREHOUSE" property="outsourcingWarehousing" />
+    <result column="RECEIPT_PROCESS_TIME" property="receiptProcessTime" />
+    <result column="PLAN_DELIVERY_TIME" property="planDeliveryTime" />
+    <result column="RECOIL" property="recoil" />
+    <result column="SAFETY_STOCK" property="safetyStock" />
+    <result column="CHECK_AVAILABILITY" property="checkAvailability" />
+    <result column="POLICY_GROUP" property="policyGroup" />
+    <result column="CONSUMPTION_PATTERN" property="consumptionPattern" />
+    <result column="FOWARD_CONSUMPTION" property="fowarkConsumption" />
+    <result column="BACKWARD_CONSUMPTION" property="backwarkConsumption" />
+    <result column="SELECT_MODE" property="selectMode" />
+    <result column="REPETI_MANUFACT" property="repetiManufact" />
+    <result column="REPETI_MANUFACT_PARAMFILE" property="repetiManufactParameterFile" />
+    <result column="LOAD_GROUP" property="loadGroup" />
+    <result column="ASSESS_LEVEL" property="assessLevel" />
+    <result column="PRICE_UNIT" property="priceUnit" />
+    <result column="STANDARD_PRICE" property="standardPrice" />
+    <result column="CYCLE_UNIT_PRICE" property="cycleUnitPrice" />
+    <result column="QS_COST_ESTIMATE" property="qsCostEstimate" />
+    <result column="SOURCE_MATERIAL" property="sourceMaterial" />
+    <result column="PROFIT_CENTER" property="profitCenter" />
+    <result column="MATERIAL_PRICE_DETERMINATION" property="materialPriceDetermination" />
+    <result column="SORT" property="sort" />
+    <result column="ML_WORK" property="mlWork" />
+  </resultMap>
+    
+</mapper>

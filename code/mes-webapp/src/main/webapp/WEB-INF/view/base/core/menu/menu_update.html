@@ -1,0 +1,27 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/menu/add.do" class="form-horizontal"  permissionModule="MENU">
+		<@p.formRow class="row rowDivTop">
+			<@p.formColmd class="col-md-4" title="MENU_NAME_CODE"  checktip="ROLE_NAME_CHECK_TIP"  permissionCode="MENU_NAME_CODE">
+				  <input name="menu.name"   datatype="*2-50">
+			</@p.formColmd>
+			<@p.formColmd class="col-md-4" title="MENU_NAME_CN"  checktip="ROLE_CODE_CHECK_TIP"  permissionCode="MENU_NAME_CN">
+				<input name="language.descZh"  datatype="*2-30">
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow class="row rowDivTop">
+			<@p.formColmd class="col-md-4" title="MENU_NAME_EN"  checktip="ROLE_NAME_CHECK_TIP"  permissionCode="MENU_NAME_EN">
+				  <input name="language.descEn"   datatype="*2-50">
+			</@p.formColmd>
+			<@p.formColmd class="col-md-4" title="MENU_ICON_CLS"  checktip="ROLE_CODE_CHECK_TIP"  permissionCode="MENU_ICON_CLS">
+				<input name="menu.iconCls"  datatype="*2-30">
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

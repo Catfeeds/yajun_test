@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/part/update.do" class="form-horizontal" idValue=bean.id permissionModule="PART">
+		<@p.formRow>
+			<@p.formColmd title="PART_PLANT" permissionCode="PART_PLANT">
+				<@p.input type="select" disabled="disabled" value="${bean.tmPlantId!}" excludeSelectOption="true"  options=plantOptions ></@p.input>
+				<input type="hidden"   name="tmPlantId" value="${bean.tmPlantId}" >
+			</@p.formColmd>
+			<@p.formColmd title="PART_NO" permissionCode="PART_NO">
+				<input name="no"  class="inputxt" readonly="readonly" value="${bean.no!}" >
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PART_NAME_CN" permissionCode="PART_NAME_CN">
+				<input name="nameCn" class="inputxt"  value="${bean.nameCn!}" maxlength='150' datatype="*"/>
+			</@p.formColmd>
+			<@p.formColmd title="PART_TYPE" permissionCode="PART_TYPE">
+				<@p.input type="select" excludeSelectOption="true" field="type" value="${bean.type!}" options=typeOptions datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PART_BASE_UNIT" permissionCode="PART_BASE_UNIT">
+			<@p.input type="select"  field="baseUnit" value="${bean.baseUnit!}" options=baseUnitOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PART_SPECTYP" permissionCode="PART_SPECTYP">
+				<input name="spectyp" class="inputxt" value="${bean.spectyp!}" maxlength='50' />
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PART_UKUNIT" permissionCode="PART_UKUNIT">
+				<@p.input type="select" field="ukunit" value="${bean.ukunit!}" options=uKUnitOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PART_UKTIME" permissionCode="PART_UKTIME">
+				<input name="uktime" class="timepicker" class="inputxt" <#if bean.uktime??>value="${bean.uktime?string('yyyy-MM-dd')}"</#if>  onClick="WdatePicker({dateFmt: 'yyyy-MM-dd'})"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PART_ENABLED" permissionCode="PART_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" value="${bean.enabled!}" options=enabledOptions  datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+		     <@p.formColmd title="PART_REMARKS"  permissionCode="PART_REMARKS">
+		        <textarea rows="2" cols="40" name="remarks" style="width: 570px;" maxlength="250">${bean.remarks!}</textarea>
+		     </@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

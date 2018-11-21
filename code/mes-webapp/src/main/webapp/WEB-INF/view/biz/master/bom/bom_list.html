@@ -1,0 +1,216 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+
+$('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+    //点击画面行的时候显示对应的工序和物料信息
+    //document.getElementById("bomDetail").style.display="block";
+    //工序信息的取得
+    $.ajax({
+        url: "${baseUrl}/bomDetail/listInput.do?currentPageId=bomDetailGrid&params=queryCondition[tmBomId]="+row.id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmBomId":row.id},
+        success: function(html){
+            $("#bomDetail").html(html);
+        }
+    });
+});
+
+
+function doDuplicate(){
+	var rowsData = getSelectedRows($('#dg${currentPageId}').selector.replace("#",""));
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	ajaxRequest("${baseUrl}/bom/doDuplicate.do", {
+		id:rowsData[0].id
+	}, function(result){
+		reloadTable('dg${currentPageId}');
+	});
+}
+
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+
+</script>
+<@p.body title="BOM_LIST_TITLE" permissionModule="BOM">	
+	<@p.searchPanel >
+		<@p.searchColumns >
+			<@p.input title="BOM_PLANT" id="list_plant" onchange="list_changePlant(this.value);" type="select"  field="tmPlantId" options=plantOptions  ></@p.input>
+			<@p.input title="BOM_LINE" id="list_line" field="tmLineId"  type="select" options=lineOptions></@p.input>
+			<@p.input title="BOM_BACK_NUMBER" id="backNumber" field="backNumber" ></@p.input>
+			<@p.input title="BOM_MACHINE_OF_NAME" id="machineOfName" field="machineOfName" ></@p.input>
+			<@p.input title="BOM_MACHINE_NAME" id="machineName" field="machineName" ></@p.input>
+			<@p.input title="BOM_ENABLED" field="enabled"  type="select" options=enabledOptions></@p.input>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="BOM_ADD" permissionCode="BomAdd" iconCls="plus" url="${baseUrl}/bom/addInput.do" type="add"  ></@p.button>
+			<@p.button title="BOM_UPDATE" permissionCode="BomUpdate" iconCls="edit" url="${baseUrl}/bom/updateInput.do" type="update"></@p.button>
+			<@p.button title="BOM_DELETE" permissionCode="BomDelete" iconCls="trash" url="${baseUrl}/bom/delete.do" type="delete"></@p.button>
+			<@p.button title="BOM_COPY" permissionCode="BomCopy" iconCls="copy"  url="${baseUrl}/bom/copyaddInput.do" type="update"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/bom/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="BOM_PLANT" field="plant.no" permissionCode="BOM_PLANT"></@p.column>
+		<@p.column title="BOM_LINE" field="line.nameCn" permissionCode="BOM_LINE" formatter="renderLine"></@p.column>
+		
+		<@p.column title="BOM_BACK_NUMBER" field="backNumber" permissionCode="BOM_BACK_NUMBER" formatter="renderNullValue"></@p.column>
+		<@p.column title="BOM_MACHINE_OF_NAME" field="machineOfName" permissionCode="BOM_MACHINE_OF_NAME" formatter="renderNullValue"></@p.column>
+		<@p.column title="BOM_MACHINE_NAME" field="machineName" permissionCode="BOM_MACHINE_NAME" formatter="renderNullValue"></@p.column>
+		
+		<@p.column title="BOM_ENABLED" field="enabled" permissionCode="BOM_ENABLED" formatter="renderGenderEnabled"></@p.column>
+		<@p.column title="BOM_REMARK" field="remark" permissionCode="BOM_REMARK" formatter="renderNullValue"></@p.column>
+	</@p.dataGrid>
+	<div id ="bomDetail"></div>
+</@p.body>
+<script type="text/javascript">
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+function renderPart(value,record){
+	if(value && record.part.no){
+		return record.part.no+ " - " + value;
+	}
+}
+
+function renderPlant(value,record){
+	if(value && record.plant.no){
+		return record.plant.no+ " - " + value;
+	}
+}
+
+function renderWorkShop(value,record){
+	if(value && record.workShop.no){
+		return record.workShop.no+ " - " + value;
+	}
+}
+
+function renderLine(value,record){
+	if(value && record.line.no){
+		return record.line.no+ " - " + value;
+	}
+}
+
+function renderMaxFlag(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+
+function renderStatus(value){
+	return entryRenderer('MAINTAIN_STATUS', value);
+}
+
+function list_changePlant(obj){
+	getPart(obj);
+	getWorkShop(obj);
+	getLine($("#list_plant").val(),$("#list_workshop").val());
+}
+function list_changeWorkshop(workShopId){
+	getLine($("#list_plant").val(),workShopId);
+}
+
+function getPart(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/bom/selectPartByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#list_part").empty(); //清空下拉列表
+				$("#list_part").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#list_part").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function getWorkShop(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/bom/selectWorkShopByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#list_workshop").empty(); //清空下拉列表
+				$("#list_workshop").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#list_workshop").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function getLine(plantId,workShopId){
+	$.ajax({
+		data:{
+			plantId:plantId,
+			workShopId:workShopId
+		},
+		url:"${baseUrl}/bom/selectLineByWorkShopIdAndPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#list_line").empty(); //清空下拉列表
+				$("#list_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#list_line").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/bom/exportTemplate.do";
+    importFile("<@s.m code="BOM_IMPORT" />", "${baseUrl}/bom/importData.do", "dg${currentPageId}",obj);
+}
+
+function importDataAll(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/bom/exportTemplateAll.do";
+    importFile("<@s.m code="BOM_IMPORT" />", "${baseUrl}/bom/importDataAll.do", "dg${currentPageId}",obj);
+}
+</script>

@@ -1,0 +1,18 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body permissionModule="POSITION" noBreadcrumbs="true">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="POSITION_PARENT" field="parent.name"    permissionCode="POSITION_PARENT"></@p.input>
+			<@p.input title="POSITION_NAME" field="name"    permissionCode="POSITION_NAME"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+    <@p.dataGrid url="${baseUrl}/position/list.do?queryCondition[orgnizationId]=${orgnizationId}">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="POSITION_PARENT" field="parentName"   permissionCode="POSITION_PARENT"  width="100"></@p.column>
+		<@p.column title="POSITION_CODE" field="code"     permissionCode="POSITION_CODE" width="100"></@p.column>
+		<@p.column title="POSITION_NAME" field="name"    permissionCode="POSITION_NAME"  width="100"></@p.column>
+		<@p.column title="POSITION_DESCRIPTION"   permissionCode="POSITION_DESCRIPTION"  field="description" width="100"></@p.column>
+	</@p.dataGrid>
+</@p.body>

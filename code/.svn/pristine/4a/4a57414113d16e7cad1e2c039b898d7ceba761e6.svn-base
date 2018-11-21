@@ -1,0 +1,189 @@
+<#include "../../../../include/bootstrapTableCommons.html">
+<@p.body title="PATH_LIST_TITLE" permissionModule="PATH_ULOC_PARAMETER" noBreadcrumbs="true">	
+<!-- <div style="color: #428bca;text-align:center; margin:10px" >参数信息</div> -->
+<input id="parameter_pathUlocId" type="hidden" value="${tmPathUlocId!}" />
+<input id="parameter_rectSeq" type="hidden" value="${rectSeq!}" />
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathUlocParameterAdd" iconCls="plus"  type="button"  onclick="parameterAdd();"></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathUlocParameterUpdate" iconCls="edit"onclick="parameterUpdate();" type="button"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathUlocParameterDelete" iconCls="trash" onclick="parameterDelete();" type="button"></@p.button>
+<!-- 			<@p.button title="PATH_IMPORT" permissionCode="PathUlocParameterImport" downName="PATH_ULOC_PARAMETER_IMPORT_NAME" onclick="importData();" iconCls="signin" /> -->
+<!-- 			<@p.button title="PATH_EXPORT" permissionCode="PathUlocParameterExport" downName="PATH_ULOC_PARAMETER_EXPORT_NAME" url="${baseUrl}/path/uloc/parameter/exportData.do?tmPathUlocId=${tmPathUlocId!}"  iconCls="upload-alt" type="down" /> -->
+<!-- 			<@p.button title="PATH_EXPORT_TEMPLTE" permissionCode="PathUlocParameterImport" iconCls="upload-alt"  url="${baseUrl}/path/uloc/parameter/exportTemplate.do" type="down"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	
+	<div id="div_parameter" style="display: none">
+		<table class="table table-bordered table-hover table-condensed">
+			<thead><tr><th style="text-align: center"><input type="checkbox" id="parameterAllChecked" onclick="parameterAllChecked(this);"></th><th>参数编号</th><th>参数名称</th><th>参数变量</th><th>参数默认值</th><th>参数说明</th><th>备注</th><th>是否必填</th><th>启用</th></tr></thead>
+			<tbody id="table_parameter">	</tbody>
+		</table>
+	</div>
+	<div id="div_parameterDataGrid"style="display: none">
+	<@p.dataGrid url="${baseUrl}/path/uloc/parameter/graph_list.do?tmPathUlocId=${tmPathUlocId!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_CODE" field="parameter.code" permissionCode="PATH_ULOC_PART_ULOC_PARAMETER"></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_NAME" field="parameter.name" permissionCode="PATH_ULOC_PART_ULOC_PARAMETER"></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_VARIUABLE_NAME" field="parameter.variuableName" permissionCode="PATH_ULOC_PART_ULOC_PARAMETER"></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_DEFAULT_VALUE" field="parameter.defaultValue" permissionCode="PATH_ULOC_PART_ULOC_PARAMETER"></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_NOTE" field="parameter.note" permissionCode="PATH_ULOC_PART_ULOC_PARAMETER"></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_NOTE" field="note" permissionCode="PATH_ULOC_PART_ULOC_NOTE" ></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_IS_REQUIRED" field="isRequired" permissionCode="PATH_ULOC_PART_ULOC_IS_REQUIRED"  formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_ENABLED" field="enabled" permissionCode="PATH_ULOC_PART_ULOC_ENABLED" formatter="renderGenderEnabled"></@p.column>
+	</@p.dataGrid>
+	</div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+	if($("#parameter_pathUlocId").val()!=""){
+		$("#div_parameterDataGrid").show();
+	}else{
+		loadParameterArray($("#parameter_rectSeq").val());
+		$("#div_parameter").show();
+	}
+});
+ 
+function loadParameterArray(rectSeq){
+	$(parameterArray).each(function(i,parameterObject){
+		if(parameterObject.key ==rectSeq){
+			var tableStr = "";
+			$(parameterObject.value).each(function(j,bean){
+				var parameter  = bean.parameter;
+				tableStr += "<tr id="+bean.id+"><td style='text-align: center'><input type='checkbox' id="+bean.id+" value="+bean.tsParameterId+" name='parameterCheckbox'></td><td>"+parameter.code+"</td><td>"
+									+parameter.name+"</td><td>"+parameter.variuableName+"</td><td>"+parameter.defaultValue+"</td><td>"+parameter.note+"</td><td>"
+									+bean.note+"</td><td>"+parameterRenderYesOrNo(bean.isRequired)+"</td><td>"+parameterRenderEnabled(bean.enabled)+"</td></tr>";
+			});
+			$("#table_parameter").html(tableStr);
+			$("#table_parameter").find("tr td").not("tr td:first-child").bind('click',function(){
+				clickParameterTr($(this).parent("tr").attr("id"));
+			});
+			return false;
+		}
+	});
+}
+function clickParameterTr(checkId){
+	$("#parameterAllChecked").attr("checked",false);
+	$("input[name='parameterCheckbox']").each(function(){
+		if(this.id == checkId){
+			this.checked=true;
+		}else{
+			this.checked =false;
+		}
+	});
+}
+function parameterAllChecked(obj){
+	if(obj.checked){
+		$("input[name='parameterCheckbox']").each(function(){
+			this.checked =true;
+		});
+	}else{
+		$("input[name='parameterCheckbox']").each(function(){
+			this.checked =false;
+		});
+	}
+}
+
+function parameterAdd(){
+	if($("#parameter_pathUlocId").val()!=""){
+		var url="${baseUrl}/path/uloc/parameter/graph_addInput.do?tmPathUlocId=${tmPathUlocId!}";
+		add("<@s.m code="PATH_ADD" />", url, "dg${currentPageId}");
+	}else{
+		var id="";
+		$("input[name='parameterCheckbox']").each(function(){
+				id = id==""?this.value:(id+","+this.value);
+		});
+		var url="${baseUrl}/path/uloc/parameter/graph_addInput.do?&rectSeq=${rectSeq!}&tmUlocId=${tmUlocId!}&tsParameterIds="+id;
+		createwindow("<@s.m code="PATH_ADD" />", url, "dg${currentPageId}");
+	}
+}
+
+function parameterUpdate(){
+	if($("#parameter_pathUlocId").val()!=""){
+		var url="${baseUrl}/path/uloc/parameter/graph_updateInput.do?tmPathUlocId=${tmPathUlocId!}";
+		update("<@s.m code="PATH_UPDATE" />", url, "dg${currentPageId}");
+	} else {
+		var checkdCount = 0;
+		var id;
+		$("input[name='parameterCheckbox']").each(function(){
+			if(this.checked){
+				checkdCount++;
+				id= this.id;
+			}
+		});
+		if(checkdCount == 0){
+			infoTip("请选择数据!");
+			return;
+		}
+		if(checkdCount >1){
+			infoTip("请选择一条数据!");
+			return;
+		}
+		var parameterObj="";
+		var tsParameterIds = "";
+		$(parameterArray).each(function(i,obj){
+			if(obj.key ==$("#parameter_rectSeq").val()){
+				$(obj.value).each(function(j,bean){
+					if(bean.id == id){
+						parameterObj = bean;
+					}
+					tsParameterIds = tsParameterIds==""?bean.tsParameterId:(tsParameterIds+","+bean.tsParameterId);
+				});
+				return false;
+			}
+		});
+		var url="${baseUrl}/path/uloc/parameter/graph_updateInput.do?tmUlocId=${tmUlocId!}&tsParameterIds="+tsParameterIds+"&rectSeq=${rectSeq!}&id="+parameterObj.id+"&tsParameterId="
+						+parameterObj.tsParameterId+"&note="+parameterObj.note+"&enabled="+parameterObj.enabled+"&isRequired="+parameterObj.isRequired;
+		createwindow("<@s.m code="PATH_UPDATE" />", url, "dg${currentPageId}");
+	}
+}		
+
+function parameterDelete(){
+		if($("#parameter_pathUlocId").val()!=""){
+			frame_grid_remove("${baseUrl}/path/uloc/parameter/delete.do","dg${currentPageId}");
+		} else {
+			var checkdCount = 0;
+			var ids = new Array();
+			$("input[name='parameterCheckbox']").each(function(){
+				if(this.checked){
+					checkdCount++;
+					ids.push(this.id);
+				}
+			});
+			if(checkdCount == 0){
+				infoTip("请选择数据!");
+				return;
+			}
+			if(confirm("确认要删除吗?")){
+				$(parameterArray).each(function(i,item){
+					if(item.key == $("#parameter_rectSeq").val()){
+						$(ids).each(function(k,id){
+							$(item.value).each(function(j,bean){
+								if(bean.id == id){
+									item.value.splice(j,1);
+									return false;
+								}
+							});
+						});
+						return false;
+					}
+				});
+				$("#parameterAllChecked").attr("checked",false);
+				loadParameterArray($("#parameter_rectSeq").val());
+			}
+		}
+}
+
+function parameterRenderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+} 
+
+ function parameterRenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+ 
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

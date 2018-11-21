@@ -1,0 +1,1036 @@
+<#include "../../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>钣金-非故障明细</title>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<style type="text/css">
+	.report-panel{
+		width:100%;
+		height:100rem;
+		overflow: auto;
+		padding-top: 10px;
+	}
+	#dateShiftShowDetails tr{
+	    text-align:center;
+	    word-wrap:break-word
+	    
+	}
+	.trC{
+		font-weight: 800;
+		text-align:center;
+		border-collapse:collapse;
+	}
+	.trC td{
+		width:60px;
+	}
+	.tdC{
+		font-weight: 800;
+		text-align:center;
+		border-collapse:collapse;
+	}
+	.divC{
+		background-color: f3f3f3;
+		width: 50%;
+		height: 500px;
+	}
+</style>
+<script type="text/javascript">
+$('#createTimeStart').click(function(){
+	var createTimeEnd=$dp.$('createTimeEnd');
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm',
+		onpicked:function(){
+			createTimeEnd.click();
+		},
+		maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+	})
+});
+$('#createTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm',
+		minDate:'#F{$dp.$D(\'createTimeStart\')}'
+	})
+});
+function initTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#createTimeEnd").val(endTime+" 23:59");
+	date = new Date(date.getTime()-1000*60*60*24*30);
+	month = date.getMonth()+1;
+	var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#createTimeStart").val(startTime+" 00:00");
+}
+function caseLessTen(num){
+	if(num<10){
+		return '0'+num;
+	}else {
+		return num;
+	}
+}
+$(function(){
+	initTime();
+	showReport();
+	changeShift($("#shiftSelect").val());
+	noFaultedYearDesintyShow();
+});
+
+function changeShift(value){
+	if(value=='M'){//白班
+		//showReport();
+		/* document.getElementById("nightShift").style.display="none";
+		document.getElementById("nightShiftMin").style.display="none"; */
+		$("#whiteShift").show();
+		$("#whiteShiftMin").show();
+	}
+	if(value=='N'){//晚班
+		//showReport();
+		/* $("#whiteShift").hide();
+		$("#whiteShiftMin").hide(); */
+		$("#nightShift").show();
+		$("#nightShiftMin").show();
+	}
+}
+function showReport(){
+	var startTime = $("#createTimeStart").val();
+	var date = new Date();
+	if (startTime == null || startTime == "") {
+		startTime = date.getFullYear() + "-" +date.getMonth() + "-" + date.getDate();
+	}
+	var endTime = $("#createTimeEnd").val();
+	if (endTime == null || endTime == "") {
+		endTime = date.getFullYear() + "-" + (parseInt(date.getMonth()) + parseInt(1)) + "-" + date.getDate();
+	}
+	$.ajax({
+		url:"${baseUrl}/tb_no_fault_details/getTbNoFaultDetailsInfo.do",
+		type:"GET",
+		data:{
+			"createTimeStart": startTime,
+			"createTimeEnd":endTime
+		},
+		dataType:"json",
+		success:function(result){
+			//白班
+			whiteShiftShow('whiteShift',JSON.parse(result.whiteShiftNoFailStopData),JSON.parse(result.whiteShiftNoFailStopMinData),
+					JSON.parse(result.whiteShiftSwitchStopData), JSON.parse(result.whiteShiftSwitchStopDurationData), 
+					JSON.parse(result.whiteShiftChangeMaterialStopData), JSON.parse(result.whiteShiftChangeMaterialStopDurationData),
+					JSON.parse(result.whiteShiftAddOilStopData), JSON.parse(result.whiteShiftAddOilStopDurationData), JSON.parse(result.dateShow));
+			//白班
+			// whiteShiftShowMin('whiteShiftMin',JSON.parse(result.whiteShiftNoFailStopData),JSON.parse(result.whiteShiftNoFailStopMinData),
+			// 		JSON.parse(result.whiteShiftSwitchStopData), JSON.parse(result.whiteShiftSwitchStopDurationData),
+			// 		JSON.parse(result.whiteShiftChangeMaterialStopData), JSON.parse(result.whiteShiftChangeMaterialStopDurationData),
+			// 		JSON.parse(result.whiteShiftAddOilStopData), JSON.parse(result.whiteShiftAddOilStopDurationData), JSON.parse(result.dateShow));
+			//晚班
+			nightShiftShow('nightShift',JSON.parse(result.nightShiftNoFailStopData),JSON.parse(result.nightShiftNoFailStopMinData),
+					JSON.parse(result.nightShiftSwitchStopData),JSON.parse(result.nightShiftSwitchStopDurationData), 
+					JSON.parse(result.nightShiftChangeMaterialStopData), JSON.parse(result.nightShiftChangeMaterialStopDurationData),
+					JSON.parse(result.nightShiftAddOilStopData), JSON.parse(result.nightShiftAddOilStopDurationData), JSON.parse(result.dateShow));
+			//晚班
+			// nightShiftShowMin('nightShiftMin',JSON.parse(result.nightShiftNoFailStopData),JSON.parse(result.nightShiftNoFailStopMinData),
+			// 		JSON.parse(result.nightShiftSwitchStopData),JSON.parse(result.nightShiftSwitchStopDurationData),
+			// 		JSON.parse(result.nightShiftChangeMaterialStopData), JSON.parse(result.nightShiftChangeMaterialStopDurationData),
+			// 		JSON.parse(result.nightShiftAddOilStopData), JSON.parse(result.nightShiftAddOilStopDurationData), JSON.parse(result.dateShow));
+			
+			dateShiftShowDetails(JSON.parse(result.weekShow),JSON.parse(result.dateShow), JSON.parse(result.whiteShiftSwitchStopData), 
+					JSON.parse(result.whiteShiftChangeMaterialStopData), JSON.parse(result.whiteShiftAddOilStopData),
+					JSON.parse(result.nightShiftSwitchStopData), JSON.parse(result.nightShiftChangeMaterialStopData), JSON.parse(result.nightShiftAddOilStopData),
+					JSON.parse(result.whiteShiftSwitchStopDurationData), JSON.parse(result.whiteShiftChangeMaterialStopDurationData), JSON.parse(result.whiteShiftAddOilStopDurationData),
+					JSON.parse(result.nightShiftSwitchStopDurationData), JSON.parse(result.nightShiftChangeMaterialStopDurationData), JSON.parse(result.nightShiftAddOilStopDurationData));
+			
+			weekShowDetails(JSON.parse(result.whiteShiftSwitchStopData), JSON.parse(result.whiteShiftChangeMaterialStopData), 
+							JSON.parse(result.whiteShiftAddOilStopData),JSON.parse(result.nightShiftSwitchStopData), 
+							JSON.parse(result.nightShiftChangeMaterialStopData), JSON.parse(result.nightShiftAddOilStopData));
+		 }
+	});
+}
+
+function whiteShiftShow(id,whiteShiftData,whiteShiftMinData,whiteShiftSwitchStopData,whiteShiftSwitchStopMinData, 
+		whiteShiftChangeMaterialStopData, whiteShiftChangeMaterialStopMinData, whiteShiftAddOilStopData, whiteShiftAddOilStopMinData,dateShow) {
+	var myChart = echarts.init(document.getElementById(id));
+	myChart.showLoading();
+	option = {
+		    title : {
+		        text: '白班',
+		        left:'left' 
+		    },
+			//color:['#ffc000','#333f50','#2f5597','#548235'],
+			tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		    	/* orient: 'vertical',
+		    	left: 'right', */
+		        data:['非故障停机次数','切换停机次数','换料停机次数',,'加油停机次数']
+		    },
+		    toolbox: {
+		    	orient: 'vertical',
+		    	left: 'right',
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        },
+		        top:10
+		    },
+		    dataZoom: [
+               { show: true, realtime: true, start: 1,end: 100},
+               {type: 'inside',realtime: true, start: 1,end: 100}
+           	],
+		    grid: {
+		        left: 'auto',
+		        right: '12%',
+		        bottom: '5%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : dateShow
+		        }
+		    ],
+		    yAxis : [
+		    	  {
+		        	    
+			             type : 'value',
+			             min:0,
+			             splitLine: {
+				                lineStyle: {
+				                    type: 'dashed'
+				                }
+				          }
+			        },
+			        {
+		        	    
+			             type : 'value',
+			             minInterval:20,
+			             min:0,
+			             splitLine: {
+				                lineStyle: {
+				                    type: 'dashed'
+				                }
+				          }
+			        }
+		    ],
+		    series : [
+		        {
+		            name:'非故障停机次数',
+		            type:'bar',
+		            data:whiteShiftData
+		        },
+		        {
+		            name:'切换停机次数',
+		            type:'bar',
+		            stack: '广告',
+		            data:whiteShiftSwitchStopData
+		        },
+		        {
+		            name:'换料停机次数',
+		            type:'bar',
+		            stack: '广告',
+		            data:whiteShiftChangeMaterialStopData
+		        },
+		        {
+		            name:'加油停机次数',
+		            type:'bar',
+		            stack: '广告',
+		            data: whiteShiftAddOilStopData
+		        }
+		    ]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+function whiteShiftShowMin(id,whiteShiftData,whiteShiftMinData,whiteShiftSwitchStopData,whiteShiftSwitchStopMinData, 
+		whiteShiftChangeMaterialStopData, whiteShiftChangeMaterialStopMinData, whiteShiftAddOilStopData, whiteShiftAddOilStopMinData,dateShow) {
+	var myChart = echarts.init(document.getElementById(id));
+	myChart.showLoading();
+	option = {
+		    title : {
+		        text: '白班',
+		        left:'left' 
+		    },
+			//color:['#ffc000','#333f50','#2f5597','#548235'],
+			tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		    	/* orient: 'vertical',
+		    	left: 'right', */
+		        data:['非故障停机时间','切换停机时间','换料停机时间','加油停机时间']
+		    },
+		    toolbox: {
+		    	orient: 'vertical',
+		    	left: 'right',
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        },
+		        top:10
+		    },
+		    dataZoom: [
+               { show: true, realtime: true, start: 1,end: 100},
+               {type: 'inside',realtime: true, start: 1,end: 100}
+           	],
+		    grid: {
+		        left: 'auto',
+		        right: '12%',
+		        bottom: '5%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : dateShow
+		        }
+		    ],
+		    yAxis : [
+		    	  {
+		        	    
+			             type : 'value',
+			             min:0,
+			             splitLine: {
+				                lineStyle: {
+				                    type: 'dashed'
+				                }
+				          }
+			        },
+			        {
+		        	    
+			             type : 'value',
+			             minInterval:20,
+			             min:0,
+			             splitLine: {
+				                lineStyle: {
+				                    type: 'dashed'
+				                }
+				          }
+			        }
+		    ],
+		    series : [
+		        {
+		            name:'非故障停机时间',
+		            type:'bar',
+		            data:whiteShiftMinData
+		        },
+		        {
+		            name:'切换停机时间',
+		            type:'bar',
+		            stack: '广告',
+		            data:whiteShiftSwitchStopMinData
+		        },
+		        {
+		            name:'换料停机时间',
+		            type:'bar',
+		            stack: '广告',
+		            data:whiteShiftChangeMaterialStopMinData
+		        },
+		        {
+		            name:'加油停机时间',
+		            type:'bar',
+		            stack: '广告',
+		            data: whiteShiftAddOilStopMinData
+		        }
+		    ]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+//晚班
+function nightShiftShow(id,nightShiftData,nightShiftMinData,nightShiftSwitchStopData,nightShiftSwitchStopMinData,
+		nightShiftChangeMaterialStopData,nightShiftChangeMaterialStopMinData,nightShiftAddOilStopData,nightShiftAddOilStopMinData,dateShow) {
+	var myChart = echarts.init(document.getElementById(id));
+	myChart.showLoading();
+	option = {
+			title : {
+			        text: '晚班',
+			        left:'left' 
+			},
+			//color:['#ffc000','#333f50','#2f5597','#548235','#c00000'],
+			tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		    /* 	orient: 'vertical',
+		    	left: 'right', */
+		        data:['非故障停机次数','切换停机次数','换料停机次数','加油停机次数','故障次数']
+		    },
+		    toolbox: {
+		    	orient: 'vertical',
+		    	left: 'right',
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        },
+		        top:10
+		    },
+		    dataZoom: [
+               { show: true, realtime: true, start: 1,end: 100},
+               {type: 'inside',realtime: true, start: 1,end: 100}
+           	],
+		    grid: {
+		        left: 'auto',
+		        right: '12%',
+		        bottom: '5%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : dateShow
+		        }
+		    ],
+		    yAxis : [
+		        {
+		        	    
+		             type : 'value',
+		             min:0,
+		             splitLine: {
+			                lineStyle: {
+			                    type: 'dashed'
+			                }
+			          }
+		        },
+		        {
+	        	    
+		             type : 'value',
+		             minInterval:20,
+		             min:0,
+		             splitLine: {
+			                lineStyle: {
+			                    type: 'dashed'
+			                }
+			          }
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'非故障停机次数',
+		            type:'bar',
+		            data:nightShiftData
+		        },
+		        {
+		            name:'切换停机次数',
+		            type:'bar',
+		            stack: '广告',
+		            data:nightShiftSwitchStopData
+		        },
+		        {
+		            name:'换料停机次数',
+		            type:'bar',
+		            stack: '广告',
+		            data:nightShiftChangeMaterialStopData
+		        },
+		        {
+		            name:'加油停机次数',
+		            type:'bar',
+		            stack: '广告',
+		            data: nightShiftAddOilStopData
+		        }
+		    ]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+function nightShiftShowMin(id,nightShiftData,nightShiftMinData,nightShiftSwitchStopData,nightShiftSwitchStopMinData,
+		nightShiftChangeMaterialStopData,nightShiftChangeMaterialStopMinData,nightShiftAddOilStopData,nightShiftAddOilStopMinData,dateShow) {
+	var myChart = echarts.init(document.getElementById(id));
+	myChart.showLoading();
+	option = {
+			title : {
+			        text: '晚班',
+			        left:'left' 
+			},
+			//color:['#ffc000','#333f50','#2f5597','#548235','#c00000'],
+			tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		    /* 	orient: 'vertical',
+		    	left: 'right', */
+		        data:['非故障停机时间','切换停机时间','换料停机时间','加油停机时间','故障时间']
+		    },
+		    toolbox: {
+		    	orient: 'vertical',
+		    	left: 'right',
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        },
+		        top:10
+		    },
+		    dataZoom: [
+               { show: true, realtime: true, start: 1,end: 100},
+               {type: 'inside',realtime: true, start: 1,end: 100}
+           	],
+		    grid: {
+		        left: 'auto',
+		        right: '12%',
+		        bottom: '5%',
+		        containLabel: true
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : dateShow
+		        }
+		    ],
+		    yAxis : [
+		        {
+		        	    
+		             type : 'value',
+		             min:0,
+		             splitLine: {
+			                lineStyle: {
+			                    type: 'dashed'
+			                }
+			          }
+		        },
+		        {
+	        	    
+		             type : 'value',
+		             minInterval:20,
+		             min:0,
+		             splitLine: {
+			                lineStyle: {
+			                    type: 'dashed'
+			                }
+			          }
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'非故障停机时间',
+		            type:'bar',
+		            data:nightShiftMinData
+		        },
+		        {
+		            name:'切换停机时间',
+		            type:'bar',
+		            stack: '广告',
+		            data:nightShiftSwitchStopMinData
+		        },
+		        {
+		            name:'换料停机时间',
+		            type:'bar',
+		            stack: '广告',
+		            data:nightShiftChangeMaterialStopMinData
+		        },
+		        {
+		            name:'加油停机时间',
+		            type:'bar',
+		            stack: '广告',
+		            data: nightShiftAddOilStopMinData
+		        }
+		    ]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+function addDate(days){ 
+	var d=new Date(); 
+	d.setDate(d.getDate()+days); 
+	var month=d.getMonth()+1; 
+	var day = d.getDate(); 
+	if(month<10){ 
+		month = "0"+month; 
+	} 
+	if(day<10){ 
+		day = "0"+day; 
+	} 
+	var val = d.getFullYear()+"-"+month+"-"+day; 
+	return val; 
+}
+function dateShiftShowDetails(weekShow, dateShow, whiteShiftSwitchStopData, whiteShiftChangeMaterialStopData, whiteShiftAddOilStopData,
+				   nightShiftSwitchStopData, nightShiftChangeMaterialStopData, nightShiftAddOilStopData,
+				   whiteShiftSwitchStopDurationData, whiteShiftChangeMaterialStopDurationData, whiteShiftAddOilStopDurationData,
+				   nightShiftSwitchStopDurationData, nightShiftChangeMaterialStopDurationData, nightShiftAddOilStopDurationData) {
+	var tableShow = "<tr class='trC'><td colspan='2' style='width:20px;'>星期</td><td id='0' colspan='2' width='40px'>星期日</td><td id='1' colspan='2' width='40px'>星期一</td>"
+				+"<td id='2' colspan='2' width='40px'>星期二</td><td id='3' colspan='2'>星期三</td><td id='4' colspan='2'>星期四</td><td id='5' colspan='2'>星期五</td>"
+				+"<td id='6' colspan='2' >星期六</td></tr>";
+	var dateTr="";
+	var shiftTr="";
+	var addOilTr="";
+	var switchTr="";
+	var changeTr="";
+	var addOilTd="";
+	var switchTd="";
+	var changeTd="";
+	var trCount = 1;
+	var spiltTd=0;
+	if (dateShow.length > 0) {
+		//计算出前面隔几个td
+		if(weekShow[0] == "星期日") {
+			spiltTd = 0;
+		} else if (weekShow[0] == "星期一") {
+			spiltTd = 1;
+		} else if (weekShow[0] == "星期二") {
+			spiltTd = 2;
+		} else if (weekShow[0] == "星期三") {
+			spiltTd = 3;
+		} else if (weekShow[0] == "星期四") {
+			spiltTd = 4;
+		} else if (weekShow[0] == "星期五") {
+			spiltTd = 5;
+		} else if (weekShow[0] == "星期六") {
+			spiltTd = 6;
+		}
+		//根据日期显示所有tr
+		for(var i=0; i<dateShow.length; i++) {
+			if(parseInt(spiltTd) < 7 && spiltTd != 0 && i==0) {
+				for(var j=0; j<spiltTd; j++) {
+					dateTr+="<td colspan='2'></td>";
+					shiftTr+="<td colspan='2'></td>";
+					addOilTr+="<td colspan='2'></td>";
+					switchTr+="<td colspan='2'></td>";
+					changeTr+="<td colspan='2'></td>";
+				}
+			} 
+			var lastDate = dateShow[i].replace("-","月");
+			dateTr+="<td class='tdC' colspan='2' >" + lastDate + "日</td>";
+			shiftTr+="<td class='tdC'>"+"白</td><td class='tdC'>晚"+"</td>";
+			if (undefined == whiteShiftAddOilStopDurationData[i]) {
+				whiteShiftAddOilStopDurationData[i] = 0;
+			}
+			if (undefined == whiteShiftAddOilStopData[i]) {
+				whiteShiftAddOilStopData[i] = 0;
+			}
+			if (undefined == nightShiftAddOilStopDurationData[i]) {
+				nightShiftAddOilStopDurationData[i] = 0;
+			}
+			if (undefined == nightShiftAddOilStopData[i]) {
+				nightShiftAddOilStopData[i] = 0;
+			}
+			if (undefined == whiteShiftSwitchStopDurationData[i]) {
+				whiteShiftSwitchStopDurationData[i] = 0;
+			}
+			if (undefined == whiteShiftSwitchStopData[i]) {
+				whiteShiftSwitchStopData[i] = 0;
+			}
+			if (undefined == nightShiftSwitchStopDurationData[i]) {
+				nightShiftSwitchStopDurationData[i] = 0;
+			}
+			if (undefined == nightShiftSwitchStopData[i]) {
+				nightShiftSwitchStopData[i] = 0;
+			}
+			if (undefined == whiteShiftChangeMaterialStopDurationData[i]) {
+				whiteShiftChangeMaterialStopDurationData[i] = 0;
+			}
+			if (undefined == whiteShiftChangeMaterialStopData[i]) {
+				whiteShiftChangeMaterialStopData[i] = 0;
+			}
+			if (undefined == nightShiftChangeMaterialStopDurationData[i]) {
+				nightShiftChangeMaterialStopDurationData[i] = 0;
+			}
+			if (undefined == nightShiftChangeMaterialStopData[i]) {
+				nightShiftChangeMaterialStopData[i] = 0;
+			}
+			addOilTd+="<td>"+whiteShiftAddOilStopDurationData[i]+ "/" + whiteShiftAddOilStopData[i] + " </td><td> " + nightShiftAddOilStopDurationData[i] + "/" + nightShiftAddOilStopData[i] + "</td>";
+			switchTd+="<td>"+whiteShiftSwitchStopDurationData[i]+ "/" + whiteShiftSwitchStopData[i] + " </td><td> " + nightShiftSwitchStopDurationData[i] + "/" + nightShiftSwitchStopData[i] + "</td>";
+			changeTd+="<td>"+whiteShiftChangeMaterialStopDurationData[i]+ "/" + whiteShiftChangeMaterialStopData[i] + " </td><td> " + nightShiftChangeMaterialStopDurationData[i] + "/" + nightShiftChangeMaterialStopData[i] + "</td>";
+			if ((parseInt(spiltTd) + parseInt(1) + parseInt(i))%7 == 0) {
+				tableShow+= "<tr><td colspan='2' class='tdC'>日期</td>" + dateTr +"</tr>" + "<tr><td colspan='2'>班次</td>" + shiftTr + "</tr>" + "<tr><td rowspan='3'>非故障停机时间/次数</td>"
+							+ "<td>加油</td>" + addOilTr + addOilTd + "</tr>" + "<tr><td>切换</td>" + switchTr + switchTd + "</tr>" + "<tr><td>换料</td>" + changeTr + changeTd + "</tr>";
+					dateTr="";
+					shiftTr="";
+					addOilTr="";
+					switchTr="";
+					changeTr="";
+					addOilTd="";
+					switchTd ="";
+					changeTd = "";
+				    spiltTd = parseInt(spiltTd) + parseInt(7);
+			}
+			if(((i == (parseInt(dateShow.length) - parseInt(1))) && ((parseInt(spiltTd) + parseInt(1) + parseInt(i))%7 != 0))  || ((i == (parseInt(dateShow.length) - parseInt(1))) && dateShow.length < 7)) {
+				tableShow+= "<tr><td colspan='2' class='tdC'>日期</td>" + dateTr +"</tr>" + "<tr><td colspan='2'>班次</td>" + shiftTr + "</tr>" + "<tr><td rowspan='3'>非故障停机时间/次数</td>"
+				+ "<td>加油</td>" + addOilTr + addOilTd + "</tr>" + "<tr><td>切换</td>" + switchTr + switchTd + "</tr>" + "<tr><td>换料</td>" + changeTr + changeTd + "</tr>";
+				dateTr="";
+				shiftTr="";
+				addOilTr="";
+				switchTr="";
+				changeTr="";
+				addOilTd="";
+				switchTd ="";
+				changeTd = "";
+			}
+ 		}
+	}
+	$("#dateShiftShowDetails").html(tableShow);
+}
+
+function weekShowDetails (whiteShiftSwitchStopData, whiteShiftChangeMaterialStopData, 
+		whiteShiftAddOilStopData,nightShiftSwitchStopData, 
+		nightShiftChangeMaterialStopData, nightShiftAddOilStopData) {
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById("weekShowDetails"));
+		var cellSize = [80, 80];//每一小格大小
+		var pieRadius = 30;//大小
+		//此处应该是从数据库默认读取当天的数据格式
+		var switchStopObj = new Object();
+		var changeMaterialStopObj = new Object();
+		var addOilStopObj = new Object();
+		var objArr = new Array();
+		var allObjArr = [];
+		if (whiteShiftSwitchStopData.length > 0) {
+			for(var i=0; i< whiteShiftSwitchStopData.length; i++) {
+				var switchStopObj = new Object();
+				var changeMaterialStopObj = new Object();
+				var addOilStopObj = new Object();
+				var objArr = new Array();
+				
+				switchStopObj.name="切换停机";
+				switchStopObj.value=parseInt(whiteShiftSwitchStopData[i]) + parseInt(nightShiftSwitchStopData[i]);
+				
+				changeMaterialStopObj.name="换料停机";
+				changeMaterialStopObj.value=parseInt(whiteShiftChangeMaterialStopData[i]) + parseInt(nightShiftChangeMaterialStopData[i]);
+				
+				addOilStopObj.name="加油停机";
+				addOilStopObj.value=parseInt(whiteShiftAddOilStopData[i]) + parseInt(nightShiftAddOilStopData[i]);
+				
+				objArr.push(switchStopObj);
+				objArr.push(changeMaterialStopObj);
+				objArr.push(addOilStopObj);
+				allObjArr.push(objArr);
+			}
+		}
+		var startDate = "";
+		var endDate = "";
+		var startTime = $("#createTimeStart").val();
+		var date = new Date();
+		if (startTime == null || startTime == "") {
+			startDate = date.getFullYear() + "-" +date.getMonth();
+		} else {
+			startDate = startTime.substr(0,7);
+		}
+		var endTime = $("#createTimeEnd").val();
+		if (endTime == null || endTime == "") {
+			endDate = date.getFullYear() + "-" + (parseInt(date.getMonth()) + parseInt(1));
+		} else {
+			endDate = endTime.substr(0,7);
+		}
+		if (startDate.substr(5,2) == endDate.substr(5,2)) {
+			endDate = endDate.substr(0,5) + (parseInt(endDate.substr(5,2)) + parseInt(1));
+		}
+		var options = calendar(cellSize,pieRadius,startDate,endDate,allObjArr);
+		myChart.setOption(options);
+		//cellSize-----日历整体宽高
+		//pieRadius----日历饼图大小
+		//startDate----开始月份
+		//endDate------结束月份
+		//data---------数据集
+		//data_name----数据描述名称
+		function calendar(cellSize,pieRadius,startDate,endDate,allObjArr){
+		    function getVirtulData() {
+		        var date = +echarts.number.parseDate(startDate);
+		        var end = +echarts.number.parseDate(endDate);
+		        var dayTime = 3600 * 24 * 1000;
+		        var data = [];
+		        for(var time = date; time < end; time += dayTime) {
+		            data.push([
+		                echarts.format.formatTime('yyyy-MM-dd', time),
+		                Math.floor(Math.random() * 10000)
+		            ]);
+		        }
+		        return data;
+		    }
+		    function getPieSeries(scatterData, chart) {
+		        return echarts.util.map(scatterData, function(item, index) {
+		            var center = chart.convertToPixel('calendar', item);
+		
+		            return {
+		                id: index + 'pie',
+		                type: 'pie',
+		                center: center,
+		                label: {
+		                    normal: {
+		                        formatter: '{c}',
+		                        position: 'inside'
+		                    }
+		                },
+		                radius: pieRadius,
+		                data: allObjArr[index]
+		            };
+		        });
+		    }
+		
+		
+		
+		// 使用刚指定的配置项和数据显示图表。
+		
+		    function getPieSeriesUpdate(scatterData, chart) {
+		        return echarts.util.map(scatterData, function(item, index) {
+		            var center = chart.convertToPixel('calendar', item);
+		            return {
+		                id: index + 'pie',
+		                center: center
+		            };
+		        });
+		    }
+		
+		    var scatterData = getVirtulData();
+		
+		    var option = {
+	    		title: {
+			        text: '非故障明细占比',
+			        x: 'center'
+			    },
+		    	tooltip: {},
+		        legend: {
+				     	orient: 'vertical',
+				    	left: 'right', 
+				        data:['加油停机','换料停机','切换停机']
+				},
+		        calendar: {
+		            top: 'middle',
+		            left: 'center',
+		            orient: 'vertical',
+		            cellSize: cellSize,
+		            yearLabel: {
+		                show: false,
+		                textStyle: {
+		                    fontSize: 30
+		                }
+		            },
+		            dayLabel: {
+		                margin: 20,
+		                firstDay: 1,
+		                nameMap: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+		            },
+		            monthLabel: {
+		                show: false
+		            },
+		            range: [startDate]
+		        },
+		        series: [{
+		            id: 'label',
+		            type: 'scatter',
+		            coordinateSystem: 'calendar',
+		            symbolSize: 1,
+		            label: {
+		                normal: {
+		                    show: true,
+		                    formatter: function(params) {
+		                        return echarts.format.formatTime('dd', params.value[0]);
+		                    },
+		                    offset: [-cellSize[0] / 2 + 10, -cellSize[1] / 2 + 10],
+		                    textStyle: {
+		                        color: '#000',
+		                        fontSize: 14
+		                    }
+		                }
+		            },
+		            data: scatterData
+		        }]
+		    };
+		    if(!myChart.inNode) {
+		        var pieInitialized;
+		        setTimeout(function() {
+		            pieInitialized = true;
+		            myChart.setOption({
+		                series: getPieSeries(scatterData, myChart)
+		            });
+		        }, 10);
+		
+		        myChart.onresize = function() {
+		            if(pieInitialized) {
+		                myChart.setOption({
+		                    series: getPieSeriesUpdate(scatterData, myChart)
+		                });
+		            }
+		        };
+		    }
+		    return option;
+		}
+}
+
+function getVirtulData(year) {
+	var startTime = $("#createTimeStart").val();
+	var yearShow = "";
+	if (startTime == "" || startTime == null) {
+		var date = new Date();
+		yearShow = date.getFullYear();
+	} else {
+		yearShow = startTime.substr(0,4);
+	}
+    year = year || yearShow;
+    var date = +echarts.number.parseDate(year + '-01-01');
+    var end = +echarts.number.parseDate((+year + 1) + '-01-01');
+    var dayTime = 3600 * 24 * 1000;
+    var data = [];
+    for (var time = date; time < end; time += dayTime) {
+        data.push([
+            echarts.format.formatTime('yyyy-MM-dd', time),
+            Math.floor(Math.random() * 1000)
+        ]);
+    }
+    return data;
+}
+function noFaultedYearDesintyShow() {
+	ajaxRequest("${baseUrl}/finNoFaultDetails/noFaultedDetailsYearShow.do", {
+		"createTimeStart":$("#createTimeStart").val(),
+		"createTimeEnd":$("#createTimeEnd").val()
+	}, function(result){
+		var data = result.data;
+		if(data){
+			noFaultedYearMinuteDensity(data.year,JSON.parse(data.minute),data.countMax,data.minuteMax);
+			noFaultedYearCountDensity(data.year,JSON.parse(data.count),data.countMax,data.minuteMax);
+		}
+	}, false);
+}
+function noFaultedYearMinuteDensity(year,minute,countMax,minuteMax) {
+	var myChart = echarts.init(document.getElementById("NO_FAULTED_YEAR_MINUTE_DENSITY"));
+	myChart.showLoading();
+	var option = {
+			title: {
+		        text: '故障年历(时间/min)'		       
+		    },
+			tooltip: {
+		        position: 'top',
+		        formatter: function (p) {
+		            var format = echarts.format.formatTime('yyyy-MM-dd', p.data[0]);
+		            return format + ': ' + p.data[1];
+		        }
+		    },
+		    visualMap: {
+		    	 min: 0,
+		         max:parseInt(minuteMax),
+		         calculable: true,
+		         orient: 'vertical',
+		         top: '30%'
+		    },
+		    calendar: [
+		    {
+		    	
+		    	cellSize: [15,15, 'auto'],
+		        orient: 'vertical',
+		        range: year
+		    }
+		    ],
+
+		    series: [{
+		        type: 'heatmap',
+		        coordinateSystem: 'calendar',
+		        calendarIndex: 0,
+		        data: minute
+		    }]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+function noFaultedYearCountDensity(year,count,countMax,minuteMax) {
+	var myChart = echarts.init(document.getElementById("NO_FAULTED_YEAR_COUNT_DENSITY"));
+	myChart.showLoading();
+	var option = {
+			title: {
+		        text: '故障年历(次数/次)'		       
+		    },
+			tooltip: {
+		        position: 'top',
+		        formatter: function (p) {
+		            var format = echarts.format.formatTime('yyyy-MM-dd', p.data[0]);
+		            return format + ': ' + p.data[1];
+		        }
+		    },
+		    visualMap: {
+		    	 min: 0,
+		         max:parseInt(countMax),
+		         calculable: true,
+		         orient: 'vertical',
+		         top: '30%'
+		    },
+		    calendar: [
+		    {
+		    	
+		    	cellSize: [15,15, 'auto'],
+		        orient: 'vertical',
+		        range: year
+		    }],
+
+		    series: [ {
+		        type: 'heatmap',
+		        coordinateSystem: 'calendar',
+		        calendarIndex: 0,
+		        data: count
+		    }]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+function deviceSelectCallBack(item) {
+    $("#equipmentName").val(item.name);
+    $("#equipmentNo").val(item.no);
+    // refreshTotal(item);
+}
+</script>
+</head>
+<body>
+<div class="page-content" >
+<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+        <span class="frameInputSpan" style="position: relative;">
+             <label class="control-label">设备 ：</label>
+            <input type="hidden"  id="equipmentId" name="equipmentId" >
+            <input maxlength="128" class="" type="text" style="" id="equipmentName" name="equipmentName" readonly="readonly" style="width:75%">
+            <a href="javascript:void(0);"  class="linkbutton" plain="true" icon="magnifier" style="position: absolute;top:3px;right: 10px;"
+               onclick="openSelector({title:'选择设备',url:'${baseUrl}/equipment/equipmentListInput.do?currentPageId=1&operation=select',callback:deviceSelectCallBack})" >
+                <i class="icon-search">选择</i>
+            </a>
+        </span>
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<!-- <select id="shiftSelect" onchange="changeShift(this.value)">
+				<option value='M'>白班</option>
+				<option value='N'>晚班</option>
+			</select> -->
+			<span  style="margin-left: 10px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="showReport(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<!--<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>-->
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div class="report-panel">
+		<div style="width:165rem;height:100%;">
+			<div style="width:70%;float: left;height:100%;">
+				<div id="whiteShift" style="width: 50%;height: 28rem;float: left;"></div>
+				<!--<div id="whiteShiftMin" style="width: 50%;height: 28rem;float: left;"></div>-->
+				<div id="nightShift"  style="width: 50%;height: 28rem;float: left;"></div>
+				<!--<div id="nightShiftMin"  style="width: 50%;height: 28rem;float: left;"></div>-->
+				<div  style="width: 48%;height: 50rem;float: left;overflow: auto">
+				  <div style="font-size:12pt;font-weight: bold;text-align:center;">非故障停机明细表</div>
+					<table id="dateShiftShowDetails" cellpadding="0" cellspacing="0"  border="1" style="table-layout: fixed;border-collapse:collapse;width:100%"></table>
+				</div>
+				<div id="weekShowDetails" style="width:50%;height: 50rem;float: left;"></div>
+			</div>
+			<div style="width:30%;float: left;height:100%;">
+				<div id="NO_FAULTED_YEAR_MINUTE_DENSITY" style="width:50%;height:100%;float: left;"></div>
+				<div id="NO_FAULTED_YEAR_COUNT_DENSITY" style="width:50%;height:100%;float: left;"></div>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</body>
+</html>

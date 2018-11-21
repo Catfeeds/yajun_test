@@ -1,0 +1,31 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+	<script src="././res/js/echarts.min.js"></script>
+<script type="text/javascript">
+function renderYesOrNo(value){
+	 return entryRenderer('YES_OR_NO', value);
+}
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+</script>
+<@p.body title="PECORD_ULOC_PART_TP_RECORD_ULOC_ID" permissionModule="RECORD" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="recordPartGrid">
+		<@p.searchColumns>
+			<@p.input title="PECORD_ULOC_PART_PART_NO" field="partNo"  permissionCode="PECORD_ULOC_PART_PART_NO"></@p.input>
+			<@p.input title="PECORD_ULOC_PART_PART_NAME" field="partName"  permissionCode="PECORD_ULOC_PART_PART_NAME"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div style="color: #428bca;text-align:center; margin:10px" >产品档案装配物料详情</div>
+	<@p.dataGrid url="${baseUrl}/record/uloc/part/getPartDate.do?tpRecordId=${tpRecordId}" id="recordPartGrid">
+			<@p.column checkbox="true" ></@p.column>
+			<@p.column title="PECORD_ULOC_PART_TM_PART_ID" field="tmPartId" permissionCode="PECORD_ULOC_PART_TM_PART_ID" ></@p.column>
+			<@p.column title="PECORD_ULOC_PART_PART_NO" field="partNo" permissionCode="PECORD_ULOC_PART_PART_NO" ></@p.column>
+			<@p.column title="PECORD_ULOC_PART_PART_NAME" field="partName" permissionCode="PECORD_ULOC_PART_PART_NAME" ></@p.column>
+			<@p.column title="PECORD_ULOC_PART_QTY" field="qty" permissionCode="PECORD_ULOC_PART_QTY" ></@p.column>
+			<@p.column title="PECORD_ULOC_PART_BAR_CODE" field="barCode" permissionCode="PECORD_ULOC_PART_BAR_CODE" ></@p.column>
+			<@p.column title="PECORD_ULOC_PART_NOTE" field="note" permissionCode="PECORD_ULOC_PART_NOTE" formatter="renderNullValue"></@p.column>
+			<@p.column title="PECORD_ULOC_PART_IS_REPLACE" field="isReplace" permissionCode="PECORD_ULOC_PART_IS_REPLACE" formatter="renderYesOrNo"></@p.column>
+		</@p.dataGrid>
+</@p.body>	
+

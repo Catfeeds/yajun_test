@@ -1,0 +1,83 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+function toCheckParamValue(){
+	var value = $("#parameterValue").val();
+	var paramCode = $("#parameterCode").val();
+	$.ajax({
+		data:{
+			"paramCode":paramCode,"paramValue":value
+		},
+		url:"${baseUrl}/untratedNc/getParamValueByCode.do",
+		dataType : 'json', 
+		success : function(result) { 
+			if(result.status != "y") {
+				// infoTip("无法校验改参数类型！");
+				errorTip("输入的参数值不合理 !");
+				$("#parameterValue").val("");
+				return;
+				/* var expression =  new RegExp(result.expression);
+				if(!expression.test(value)){
+					//$("#parameterValue").val("");
+					infoTip("友情提示：输入参数值不正确!");
+				} */
+			}/* else {
+				infoTip("友情提示：输入参数值不正确!");
+				//$("#parameterValue").val("");
+				return ;
+			} */
+		},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/record/uloc/parameter/updateUntrated.do" class="form-horizontal"   permissionModule="RECORD"  >
+	<!-- 工位  -->
+	<@p.formRow>
+		<@p.formColmd title="UNTRATED_NC_NO"  permissionCode="UNTRATED_NC_SN">
+			<input  type="hidden" name="ordId" value="${bean.id}"  /> 
+			<input  type="hidden" name="tpRecordId" value="${bean.tpRecordId}"  /> 
+			<input  type="hidden" name="tpRecordUlocId" value="${bean.tpRecordUlocId}"  /> 
+			<input  type="hidden" name="parameterType" value="${bean.parameterType}"  />
+			
+			<#if bean.tpRecordUloc??>
+				${bean.tpRecordUloc.ulocNo!}	
+			</#if>
+		</@p.formColmd>
+		<@p.formColmd title="UNTRATED_NC_NAME"  permissionCode="UNTRATED_NC_SN">
+			<#if bean.tpRecordUloc??>
+				${bean.tpRecordUloc.ulocName!}	
+			</#if>
+		</@p.formColmd>
+	</@p.formRow>
+	<!-- 参数值  -->
+	<@p.formRow>
+		<@p.formColmd title="PECORD_ULOC_PARAMETER_PARAMETER_CODE"  permissionCode="UNTRATED_NC_SN">
+			<input type="text" id="parameterCode" name="parameterCode"  value="${bean.parameterCode}" readonly="readonly"/> 
+		</@p.formColmd>
+		<@p.formColmd title="PECORD_ULOC_PARAMETER_PARAMETER_VALUE"  permissionCode="UNTRATED_NC_SN">
+			 ${bean.parameterValue}
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="PECORD_ULOC_PARAMETER_NOTE"  permissionCode="UNTRATED_NC_SN">
+			<input type="text" id="note" name="note"  value="${bean.note!}" /> 
+		</@p.formColmd>
+		<@p.formColmd title="PECORD_ULOC_PARAMETER_PARAMETER_REPLACE_VALUE"  permissionCode="UNTRATED_NC_SN">
+			 <input type="text" id="parameterValue" name="parameterValue" value="${bean.parameterValue}" onchange="toCheckParamValue()" dataType="*" /> 
+		</@p.formColmd>
+	</@p.formRow>
+	
+</@p.editForm>
+   
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>翅片-可动率明细</title>
+<script type="text/javascript" src="${baseUrl}/res/js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/highcharts.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/annotations.js"></script>
+</head>
+<body>
+	<div class="page-content">
+		<div class="report-panel">
+			<div id="movableRateDayDetailsDiv"
+				style="width: 90%; height: 25rem;"></div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(function() {
+			var date = new Date();
+			var month = date.getMonth()+1;
+			var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+			report("",endTime,5);
+		});
+		function caseLessTen(num){
+			if(num<10){
+				return '0'+num;
+			}else {
+				return num;
+			}
+		}
+		function report(shiftNo,date,firgure){
+			$.ajax({
+			     url:'${baseUrl}/finMovableRateDetails/getFaultAndNoFaultInfo.do',
+			     type:"GET",
+			     dateType:"json",
+			     data:{
+			    	 "shiftNo":shiftNo,
+			    	 "date":date,
+			    	 "firgure":firgure
+			     },
+			     success:function(result){
+			    	 if(result){
+			    		 movableRateDayDetails(JSON.parse(result.elevationData),JSON.parse(result.labels),result.subtitle);
+					}
+			     }
+			});
+		}
+		
+		function movableRateDayDetails(elevationData,labels,subtitle) {
+			// 初始化图标
+			Highcharts.setOptions({ global: { useUTC: false } }); 
+			var chart = Highcharts.chart('movableRateDayDetailsDiv', {
+				chart : {
+					type : 'line',
+					zoomType : 'x',
+					panKey : 'shift'
+				},
+				credits: { enabled:false }, 
+				title : {
+					text : '实时可动率'
+				},
+				subtitle: {
+					text: subtitle
+				},
+				annotations : [ {
+					labelOptions : {
+						backgroundColor : 'rgba(255,255,255,0.5)',
+						verticalAlign : 'top',
+						y : 15
+					},
+					labels : labels
+				}],
+				xAxis : {
+					type: 'datetime',
+					dateTimeLabelFormats: {
+							millisecond: '%H:%M:%S',
+							second: '%H:%M:%S',
+							minute: '%H:%M',
+							hour: '%H:%M',
+							day: '%m-%d',
+							week: '%m-%d',
+							month: '%Y-%m',
+							year: '%Y'
+					},
+					title : {
+						text : '时间'
+					}
+				},
+				yAxis : {
+					maxPadding : 0.35,
+					labels : {
+						format : '{value}%'
+					},
+					title : {
+						text : '可动率'
+					}
+				},
+				tooltip: {
+					dateTimeLabelFormats: {
+							millisecond: '%H:%M:%S.%L',
+							second: '%H:%M:%S',
+							minute: '%H:%M',
+							hour: '%H:%M',
+							day: '%Y-%m-%d',
+							week: '%m-%d',
+							month: '%Y-%m',
+							year: '%Y'
+					},
+					shared : true
+				},
+				legend : {
+					enabled : false
+				},
+				series : [{
+					data : elevationData,
+					//lineColor : Highcharts.getOptions().colors[1],
+					//color : Highcharts.getOptions().colors[2],
+					fillOpacity : 0.5,
+					name : '可动率',
+					marker : {
+						enabled : false
+					}, 
+					threshold : null
+				}]
+			});
+		}
+	</script>
+</body>
+</html>

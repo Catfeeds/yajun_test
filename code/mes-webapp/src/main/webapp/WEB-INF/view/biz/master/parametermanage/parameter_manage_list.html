@@ -1,0 +1,194 @@
+<style>
+.diagonal{
+	transform: rotate(8deg);
+    border-bottom: 1px solid #ccc;
+}
+.diagona2{
+border-bottom: 1px solid #ccc;
+    transform: rotate(17deg);
+}
+.diagona3{
+    transform: rotate(8deg);
+}
+.fixed-table-container thead th .th-inner, .fixed-table-container tbody td .th-inner{
+	padding: 0px;
+}
+ .fixed-table-toolbar{
+ 	height:0px;
+ } 
+</style>
+
+
+<div class="breadcrumbs">
+	<ul class="breadcrumb">
+		<li><i class="icon-home home-icon"></i>主数据管理&emsp;>&emsp;参数管理</li>
+		<li class="active">参数</li>
+	</ul>
+</div>
+<div class="page-content" fit="true">
+	<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="PRODUCT_TRACING_BACK_NUMBER" id="backNumber" field="backNumber"></@p.input>
+			<@p.input title="PRODUCT_TRACING_MACHINE_OF_NAME" id="machineOfName" field="machineOfName"></@p.input>
+			<div class="search_btn_box">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</div>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.toolbar> 
+		<span class="btn btn-white" onclick="parameterAdd('新增','${baseUrl}/parameterManage/addInput.do','parameter_manage')"><i class="icon-plus"></i>新增</span>
+		<span class="btn btn-white" onclick="parameterUpdate('编辑','${baseUrl}/parameterManage/updateInput.do','parameter_manage')"><i class="icon-edit"></i>编辑</span>
+		<span class="btn btn-white" onclick="frame_grid_remove('${baseUrl}/parameterManage/delete.do','parameter_manage')"><i class="icon-trash"></i>删除</span>
+	</@p.toolbar>
+	<table class="table table-striped" id="parameter_manage" align="center" striped="true"  data-click-to-select="true"></table>
+</div>
+
+<script type="text/javascript">
+	$(function(){
+		getQuery();
+      });
+	   function queryParams(params){
+	        return{limit: params.limit,offset:params.offset};
+	   } 
+	   function conditionalQuery(searchBtnObj){
+		   /* var searchColumns = $(searchBtnObj).parents(".searchColumns").find(
+			"input,select");
+		   for (var i = 0; i < searchColumns.length; i++) {
+				var element = $(searchColumns[i]);
+				if(!element.attr("name")){
+					continue;
+				}
+				var queryParams = {};
+				var value = textValid(element.val());
+				if (value) {
+					queryParams['queryCondition[' + element.attr("name") + ']'] = value;
+				}
+			} */
+			var queryParams = {};
+			queryParams['queryCondition[backNumber]'] = $('#backNumber').val();
+			queryParams['queryCondition[machineOfName]'] = $('#machineOfName').val();
+		    var param = { 
+	            url: '${baseUrl!}/parameterManage/list.do', 
+	            query: queryParams
+		   } 
+		   $('#parameter_manage').bootstrapTable('refresh', param);
+	   }
+	   function getQuery(){
+		   var questionColumns = [
+		       [
+   				{
+   					title:'全选',
+   					field:'select',
+   					checkbox:true,
+   					width:25,
+   					align:'center',
+   					valign:'middle',
+   					rowspan:2
+   				},
+   				{
+					title:'id',
+					field:'id',
+					visible:false,
+					rowspan:2
+				},
+  				{
+				 title:"<div style='width:100%;'><div class='diagonal'>参数描述(单位)</div><div class='diagona2'>参数范围</div></div>",
+				 field:"productModel",
+				 align:"center",
+				 rowspan:1,
+				 colspan:2
+         		}
+		 	  ]
+	       ];
+           		var parameterColumn = ${parameterColumn!};
+           		questionColumns[1]= [];
+           		questionColumns[1].push({
+   					title:"背番号",
+   					field:'backNumber',
+   					valign:"middle",
+	                    align:"center"
+       			});
+           		questionColumns[1].push({
+   					title:"机种名",
+   					field:'machineOfName',
+   					valign:"middle",
+	                    align:"center"
+       			});
+           		for(var i in parameterColumn){
+           			var parameterSets = parameterColumn[i].parameterSet.split(',');
+           			 questionColumns[0].push({
+       					title:parameterColumn[i].equipmentName,
+       					valign:"middle",
+	                    align:"center",
+	                    rowspan:1,
+	                    colspan:parameterSets.length
+           			}); 
+           			for(var j in parameterSets){
+           				var parameterItems = parameterSets[j].split(':');
+           				questionColumns[1].push({
+           					title:parameterItems[1]+"("+parameterItems[2]+")",
+           					field:parameterItems[3]+'-'+parameterItems[0],
+           					valign:"middle",
+   		                    align:"center",
+   		                 	formatter:"verifyNull"
+               			});
+           			} 
+           		};
+		       $('#parameter_manage').bootstrapTable('destroy');
+            		$('#parameter_manage').bootstrapTable({
+            			 url: "${baseUrl!}/parameterManage/list.do",         //请求后台的URL（*）
+                         method: 'post',                      //请求方式（*）
+                         classes: 'table table-hdgw',
+                         contentType: 'application/x-www-form-urlencoded',
+                         queryParams: queryParams,//传递参数（*） 
+            			 columns: questionColumns,
+            			  /* columns: columns,  */
+            			 pageNumber: 1, //初始化加载第一页，默认第一页
+        	   		     pagination:true,//是否分页
+        	   		     queryParamsType:'limit',//查询参数组织方式
+        	   		     sidePagination:'server',//指定服务器端分页
+         	   		   	 pageSize:10,//单页记录数
+         	   		     pageList:[5,10,20,30],//分页步进值
+//           	   		     showRefresh:true,//刷新按钮
+//           	   		     showColumns:true,
+         	   		     clickToSelect: true,//是否启用点击选中行
+         	   		     toolbarAlign:'right',//工具栏对齐方式
+         	   		     buttonsAlign:'right',//按钮对齐方式
+         	   		     toolbar:'#toolbar',//指定工作栏
+         	   		     responseHandler:function(res){
+            		             //在ajax获取到数据，渲染表格之前，修改数据源
+            		          	return {
+            		        	"rows": res.rows,
+            		        	"total":res.total
+            		        	};
+            		         }
+             		});
+	   }
+	 function verifyNull(value){
+		 if(value && value !='~'){
+			 return value;
+		 }
+		 return '-';
+	 }
+	 function   parameterAdd(title, addurl, gridId){
+			createwindow(title, addurl, gridId,'','parameterAddSubmit');
+	   }
+	 function  parameterUpdate(title, url, gridId){
+		    var rowsData = getSelectedRows(gridId);
+			if (!rowsData || rowsData.length == 0) {
+				infoTip(commons_msg.plsSelData);
+				return;
+			}
+			if (rowsData.length > 1) {
+				infoTip(commons_msg.plsSelOne);
+				return;
+			}
+			if (url.indexOf('?') != -1) {
+				url += '&id=' + rowsData[0].id;
+			} else {
+				url += '?id=' + rowsData[0].id;
+			}
+			createwindow(title, url, gridId,'','parameterUpdateSubmit');
+	   }
+</script>

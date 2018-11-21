@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>公告</title>
+</head>
+<body style="margin: 0;overflow: hidden;">
+	 <div style="background-color: #011B40;height:427px;">
+	 	 ${bean.content!}	
+	 </div>		
+</body>
+</html>

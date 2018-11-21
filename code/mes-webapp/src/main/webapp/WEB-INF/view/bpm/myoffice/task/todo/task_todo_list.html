@@ -1,0 +1,57 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+$(function(){
+	$("#beginTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'});
+	});
+	$("#endTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'beginTime\')}'});
+	});
+});
+function showDoingProcessDialog(){
+    var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var url = "";
+    var taskName = rows[0].name;
+    var taskId = rows[0].id;
+    var processInstanceId = rows[0].processInstanceId;
+    ajaxRequest('${baseUrl}/bpm/task/claim.do', {
+    	'taskId':taskId
+    },function(result){
+    	createwindow('<@s.m code="BPM_TASK_COMPLETE_NAME" />：'+taskName,'${baseUrl}/bpm/task/todo/taskFormInput.do?processInstanceId='+processInstanceId+'&taskId='+taskId ,'dg${currentPageId}'); 
+    },false)
+}
+
+</script>
+<@p.body title="BPM_TASK_LIST_TODO_TITLE" permissionModule="TASK_TODO">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="BPM_TASK_COL_NAME" field="taskNameLike"></@p.input>
+			<@p.input title="PROCESS_INSTANCE_PROCESS" field="processInstanceNameLike"></@p.input>
+			<@p.input title="PROCESS_INSTANCE_CREATEUSER" field="initiatorNameLike"></@p.input>
+			<@p.input title="DATETIME_START" field="taskCreatedAfter" id="beginTime"></@p.input>
+			<@p.input title="DATETIME_END" field="taskCreatedBefore" id="endTime"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar>
+			<@p.button title="BPM_TASK_BUT_DO" permissionCode="TodoTaskDo" onclick="showDoingProcessDialog()" iconCls="play"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/task/todo/list.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="BPM_TASK_COL_NAME" permissionCode="NAME" field="name" width="200"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_PROCESS"   permissionCode="PROCESS_INSTANCE_NAME" width="300" field="processInstanceName" ></@p.column>
+		<!-- 
+		<@p.column title="BPM_TASK_COL_ID" permissionCode="TASK_ID" field="id" width="120" ></@p.column>
+		<@p.column title="PROCESS_TASK_ASSIGNE" permissionCode="OWNER" field="assignee" width="100"></@p.column>
+		<@p.column title="BPM_TASK_COL_INSTANCE" permissionCode="PROCESS_INSTANCE_ID" width="120" field="processInstanceId" ></@p.column>
+		 -->
+		<@p.column title="BPM_TASK_COL_CREATETIME" permissionCode="CREATE_TIME" field="createTime" width="150"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_CREATEUSER" permissionCode="START_USER_NAME" field="processInitiator" width="100"></@p.column>
+		<@p.column title="BPM_TASK_COL_DESCRIPTION" permissionCode="DESCRIPTION" field="description" width="300"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+

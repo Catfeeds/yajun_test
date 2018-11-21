@@ -1,0 +1,351 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+$("#viewAviPath").hide();
+$("#viewAviBom").hide();
+$('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+    $.ajax({
+        url: "${baseUrl}/avi/listInput.do?currentPageId=aviGridId&params=queryCondition[toPorderId]="+row.id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"toPorderId":row.id},
+        success: function(html){
+        	$("#viewAviPath").show();
+        	$("#viewAviBom").show();
+            $("#toPorderAvi").html(html);
+        }
+    });
+});
+/**
+ * 派工
+ */
+function doTask(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	if(rowsData[0].productStatus=="CLOSE"){
+		infoTip("该工单已关闭，不能派工!");
+		return;
+	}
+	if(rowsData[0].taskStatus=="ALL_TASK"){
+		infoTip("该工单已全部派工!");
+		return;
+	}
+	if(rowsData[0].isHold=="YES"){
+		infoTip("该工单已HOLD，不能派工!");
+		return;
+	}
+	if(rowsData[0].productStatus=="FINSH"){
+		infoTip("该工单已经生产完成，不能派工!");
+		return;
+	}
+	var url = "${baseUrl}/porder/taskInput.do?toPorderId="+rowsData[0].id;
+	createwindow("派工", url, 'dg${currentPageId}');
+}
+/**
+ * 取消派工
+ */
+function doCancelTask(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	if(rowsData[0].isHold=="YES"){
+		errorTip("该工单已HOLD，不能取消派工!");
+		return;
+	}
+	if(rowsData[0].productStatus=="FINSH"){
+		errorTip("该工单已经生产完成，不能取消派工!");
+		return;
+	}
+	if(rowsData[0].productStatus=="CLOSE"){
+		errorTip("该工单已经关闭，不能取消派工!");
+		return;
+	}
+	if(rowsData[0].productStatus=="PRODUCTING"){
+		errorTip("该工单正在生产不能取消派工，可以到生产序列中撤回未上线的生产序列!");
+		return;
+	}
+	
+	var url = "${baseUrl}/porder/doCancelTask.do?toPorderId="+rowsData[0].id;
+	createConfirmWindow("取消派工","确认要取消派工吗？",url, 'dg${currentPageId}');
+}
+
+/**
+ * HOLD/解HOLD
+ */
+function doHoldOrNotHold(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	if(rowsData[0].isHold=="YES"){
+		var url = "${baseUrl}/porder/doCancelHold.do?id="+rowsData[0].id;
+		createConfirmWindow("解HOLD","确认要解HOLD吗？",url, 'dg${currentPageId}');
+	}else{
+		var url = "${baseUrl}/porder/doHoldInput.do?id="+rowsData[0].id;
+		createwindow("请输入HOLD理由", url, 'dg${currentPageId}');
+	}
+}
+
+function porderDoUpdate(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	var porder = rowsData[0];
+	if(porder.productStatus=="PRODUCTING"){
+		infoTip("该工单正在生产中，不能修改!");
+		return;
+	}else if(porder.productStatus=="FINSH"){
+		infoTip("该工单已生产完成，不能修改!");
+		return;
+	}
+	if(porder.instorageStatus!="NOT_INSTORAGE"){
+		infoTip("该工单已经入库,不能修改!");
+		return;
+	}
+	var url="${baseUrl}/porder/updateInput.do";
+	update("修改",url,'dg${currentPageId}');
+}
+function doClose(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	var url = "${baseUrl}/porder/doCloseInput.do?id="+rowsData[0].id;
+	createwindow("请输入关闭理由", url, 'dg${currentPageId}');
+}
+
+function porderPrintCard(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+ 	if (!rowsData || rowsData.length == 0) {
+ 		infoTip(commons_msg.plsSelData);
+ 		return;
+ 	}
+ 	if (rowsData.length > 1) {
+ 		infoTip(commons_msg.plsSelOne);
+ 		return;
+ 	}
+ 	var isHavePath = true;
+ 	$.ajax({
+ 		url:"${baseUrl}/porder/checkPorderIsHavePath.do",
+ 		type:"POST",
+ 		dataType:"json",
+ 		data:{
+ 			"id":rowsData[0].id
+ 		},
+        async:false,
+ 		success:function(result){
+ 			if(!result){
+ 				errorTip("该工单没有维护工艺路径，不能打印流转卡!");
+ 				isHavePath = false;
+ 			}
+ 		}
+ 	});
+ 	if(isHavePath){
+ 		var url="${baseUrl}/porder/printTransferCard.do?id="+rowsData[0].id;
+ 	 	window.open(url,"打印预览");
+ 	}
+}
+function printByWindowOpen(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+ 	if (!rowsData || rowsData.length == 0) {
+ 		infoTip(commons_msg.plsSelData);
+ 		return;
+ 	}
+ 	if (rowsData.length > 1) {
+ 		infoTip(commons_msg.plsSelOne);
+ 		return;
+ 	}
+ 	var url="${baseUrl}/porder/printTransferCardHtml.do?id="+rowsData[0].id;
+ 	window.open(url,"_blank"," width=800, height=700,left=300px");
+}
+</script>
+<@p.body title="PORDER_LIST_TITLE" permissionModule="PORDER"noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PORDER_PLANT" onchange="porderListChange(this.value);" type="select"  field="tmPlantId" options=plantOptions  ></@p.input>
+			<@p.input title="PORDER_PART" id="porderListpart" type="select" field="tmPartId" options=partOptions ></@p.input>
+			<@p.input title="PORDER_NO" field="no"></@p.input>
+			<@p.input title="PORDER_PRODUCT_STATUS" field="productStatus"  type="select" options=productStatusOptions></@p.input>
+			<@p.input title="PORDER_TASK_STATUS" field="taskStatus"  type="select" options=taskStatusOptions></@p.input>
+			<@p.input title="PORDER_INSTORAGE_STATUS" field="instorageStatus"  type="select" options=instorageOptions></@p.input>
+			<@p.input title="PORDER_PRIORITY" field="priority"  type="select" options=prioirtyOptions></@p.input>
+			<@p.input title="PORDER_FACT_START_TIME_START" field="planStartTime"  id="settingStart"></@p.input>
+			<@p.input title="PORDER_FACT_START_TIME_END" field="planStartTimeEnd" id="settingEnd"></@p.input>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="PORDER_ADD" permissionCode="PorderAdd" iconCls="plus" url="${baseUrl}/porder/addInput.do" type="add"  ></@p.button>
+			<@p.button title="PORDER_UPDATE" permissionCode="PorderUpdate" iconCls="edit" onclick="porderDoUpdate()"></@p.button>
+			<@p.button title="PORDER_DELETE" permissionCode="PorderDelete" iconCls="trash" url="${baseUrl}/porder/delete.do" type="delete"></@p.button>
+			<@p.button title="PORDER_CLOSE" permissionCode="PorderClose" iconCls="off"  onclick="doClose();" type="button"></@p.button>
+			<@p.button title="PORDER_PRINT_CARD" permissionCode="PorderPrintCard"  onclick="porderPrintCard();" iconCls="print" />
+			<@p.button title="PORDER_TASK" permissionCode="PorderSendJob"  iconCls="edit" onclick="doTask()" />
+			<@p.button title="PORDER_CANCEL_TASK" permissionCode="PorderCancelSendJob" iconCls="edit"onclick="doCancelTask()"></@p.button>
+			<@p.button title="PORDER_HOLD" permissionCode="PorderHold" iconCls="edit"onclick="doHoldOrNotHold()"></@p.button>
+			<@p.button title="PORDER_EXPORT" permissionCode="PorderExport" iconCls="upload-alt"  url="${baseUrl}/porder/exportData.do" downName="PORDER_EXPORT_NAME" type="down"></@p.button>
+			<@p.button title="PORDER_IMPORT" permissionCode="PorderImport" iconCls="upload-alt"  url="${baseUrl}/porder/exportTemplate.do"downName="PORDER_EXPORT_TEMPLATE_NAME" type="down"></@p.button>
+			<@p.button title="PORDER_EXPORT_TEMPLATE" permissionCode="PorderImport"  onclick="importData();" iconCls="signin" />
+			<span title="打印html" class="btn btn-white" onclick="printByWindowOpen()"><i class="icon-edit"></i>打印html</span>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/porder/list.do" singleSelect="true">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PORDER_NO" field="no" permissionCode="PORDER_NO" style="changePorderColor"></@p.column>
+		<@p.column title="PORDER_PLANT" field="plant.no" permissionCode="PORDER_PLANT" formatter="renderPlant"></@p.column>
+		<@p.column title="PORDER_PART" field="part.no" permissionCode="PORDER_PART" formatter="renderPart"></@p.column>
+		<@p.column title="PORDER_QTY" field="qty" permissionCode="PORDER_QTY"></@p.column>
+		<@p.column title="PORDER_TASK_QTY" field="taskQty" permissionCode="PORDER_QTY"></@p.column>
+		<@p.column title="PORDER_PATH" field="path.no" permissionCode="PORDER_PATH" formatter="renderPath"></@p.column>
+		<@p.column title="PORDER_BOM" field="bom.bomversion" permissionCode="PORDER_BOM"></@p.column>
+		<@p.column title="PORDER_PLAN_START_TIME" field="planStartTime" permissionCode="PORDER_PLAN_START_TIME"></@p.column>
+		<@p.column title="PORDER_PLAN_END_TIME" field="planEndTime" permissionCode="PORDER_PLAN_END_TIME"></@p.column>
+		<@p.column title="PORDER_FACT_START_TIME" field="factStartTime" permissionCode="PORDER_FACT_START_TIME"></@p.column>
+		<@p.column title="PORDER_FACT_END_TIME" field="factEndTime" permissionCode="PORDER_FACT_END_TIME"></@p.column>
+		<@p.column title="PORDER_PRODUCT_STATUS" field="productStatus" permissionCode="PORDER_PRODUCT_STATUS"  formatter="renderProductStatus"></@p.column>
+		<@p.column title="PORDER_TASK_STATUS" field="taskStatus" permissionCode="PORDER_TASK_STATUS" formatter="renderTaskStatus"></@p.column>
+		<@p.column title="PORDER_INSTORAGE_STATUS" field="instorageStatus" permissionCode="PORDER_INSTORAGE_STATUS"  formatter="renderInstorageStatus"></@p.column>
+		<@p.column title="PORDER_ONLINE_QTY" field="onlineQty" permissionCode="PORDER_ONLINE_QTY"></@p.column>
+		<@p.column title="PORDER_OFFLINE_QTY" field="offlineQty" permissionCode="PORDER_OFFLINE_QTY"></@p.column>
+		<@p.column title="PORDER_SCRAP_QTY" field="scrapQty" permissionCode="PORDER_SCRAP_QTY"></@p.column>
+		<@p.column title="PORDER_INSTORAGE_QTY" field="instorageQty" permissionCode="PORDER_INSTORAGE_QTY"></@p.column>
+		<@p.column title="PORDER_PRIORITY" field="priority" permissionCode="PORDER_PRIORITY" formatter="renderPriority"></@p.column>
+		<@p.column title="PORDER_IS_ERP" field="isErp" permissionCode="PORDER_IS_ERP" formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PORDER_IS_HOLD" field="isHold" permissionCode="PORDER_IS_HOLD" formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PORDER_NOTE" field="note" permissionCode="PORDER_NOTE"></@p.column>
+		<@p.column title="PORDER_CLOSE_REASON" field="closeReason" permissionCode="PORDER_CLOSE_REASON"></@p.column>
+	</@p.dataGrid>
+	<div id ="toPorderAvi"></div>
+</@p.body>
+<script type="text/javascript">
+function changePorderColor(value, row, index, field){
+	var color="";
+	if(row.priority == "EMERGENCY"){
+		color="red";
+	}else if(row.priority == "SECONDARY"){
+		color="yellow";
+	}else if(row.priority == "NORMAL"){
+		color="green";
+	}else{
+		color="white";
+	}
+	 return {
+		    classes: 'text-nowrap another-class',
+		    css: {"background-color": color}
+		  };
+}
+$(function(){	
+	//设置当前日期
+	//document.getElementById("settingStart").value = getDate(0);
+	//设置间隔天数后的日期
+	//document.getElementById("settingEnd").value = getDate(7);
+	var lang='${lang!}';
+	var params={};  
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#settingStart').focus(function(){
+		/* WdatePicker({dateFmt:'yyyy-MM-dd'}); */
+		/* WdatePicker({maxDate:'#F{$dp.$D(\'settingEnd\')||\'2020-10-01\'}'}); */
+		WdatePicker({maxDate:'#F{$dp.$D(\'settingEnd\',{d:-1})}'});
+	});
+	$('#settingEnd').focus(function(){
+		/* WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'%y-%M-{%d}'}); */
+		/* WdatePicker({minDate:'#F{$dp.$D(\'settingStart\')}',maxDate:'2020-10-01'}); */
+		WdatePicker({minDate:'#F{$dp.$D(\'settingStart\',{d:0})}'});
+	}); 
+});
+
+function renderPlant(value,record){
+	if(record.plant.nameCn){
+		return record.plant.no+"-"+record.plant.nameCn;
+	}
+	return "";
+}
+function renderPart(value,record){
+	if(record.part.no){
+		return record.part.no + " - " + record.part.nameCn;
+	}
+	return "";
+}
+
+function renderPath(value,record){
+	if(record.path.no){
+		return record.path.no +"-"+ record.path.name;
+	}
+	return "";
+}
+
+function renderProductStatus(value){
+	return entryRenderer('PORDER_PRODUCT_STATUS', value);
+}
+
+function renderTaskStatus(value){
+	return entryRenderer('PORDER_TASK_STATUS', value);
+}
+
+function renderInstorageStatus(value){
+	return entryRenderer('PORDER_INSTORAGE_STATUS', value);
+}
+
+function renderPriority(value){
+	return entryRenderer("PORDER_PRIORITY",value);
+}
+
+function renderYesOrNo(value){
+	return entryRenderer("YES_OR_NO",value);
+}
+
+function porderListChange(tmPlantId){
+	$.ajax({
+		url:"${baseUrl}/porder/getPartsByPlantId.do",
+		dataType:"json",
+		data:{
+			tmPlantId:tmPlantId
+		},
+		type:"get",
+		success:function(result){
+			$("#porderListpart").empty();
+			$("#porderListpart").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(function(i,item){
+				$("#porderListpart").append(" <option value='" + item.code + "'>"+item.name+ "</option>");
+			});
+		}
+	});
+}
+
+function importData(){ 
+    importFile("<@s.m code="BOM_IMPORT" />", "${baseUrl}/BOM/importData.do", "dg${currentPageId}","${baseUrl}/BOM/exportTemplate.do");
+}
+</script>

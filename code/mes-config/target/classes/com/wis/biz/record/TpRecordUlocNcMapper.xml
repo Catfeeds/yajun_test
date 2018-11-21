@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TpRecordUlocNcMapper">
+	<!-- 查询不合格记录 -->
+	<select id="findByCondition" resultType="java.util.Map" parameterType="java.util.HashMap">
+		SELECT
+			c.SN AS SN,
+			d. NO AS PART_NO,
+			d.NAME_CN AS PART_NAME,
+			e. NAME AS NC_NAME,
+			f. NAME AS NC_GROUP_NAME,
+			CASE
+		WHEN a.NOTE IS NULL THEN
+			''
+		ELSE
+			a.NOTE
+		END  AS NC_NOTE,
+			a.CREATE_TIME AS CREATE_TIME,
+			g.USER_NAME AS CREATE_USER,
+			c.AVI_NO AS AVI_NO,
+			c.PORDER_NO AS PORDER_NO,
+			CASE
+		WHEN h.ID IS NULL THEN
+			'是'
+		ELSE
+			'否'
+		END AS IS_END
+		FROM
+			TP_RECORD_ULOC_NC a
+		LEFT JOIN TP_RECORD_ULOC b ON a.TP_RECORD_ULOC_ID = b.ID
+		LEFT JOIN TP_RECORD c ON b.TP_RECORD_ID = c.ID
+		LEFT JOIN TM_PART d ON c.TM_PART_ID = d.ID
+		LEFT JOIN TM_NC e ON a.TM_NC_ID = e.ID
+		LEFT JOIN TM_NC_GROUP f ON e.TM_NC_GROUP_ID = f.ID
+		LEFT JOIN TS_USER g ON a.CREATE_USER = g.ID
+		LEFT JOIN TP_UNTREATED_NC h ON h.SN = c.SN
+		WHERE c.SN IS NOT NULL 
+			<if test="sn != null and sn != ''">
+				AND c.SN LIKE CONCAT('%',#{sn},'%')
+		    </if>
+			<if test="ncGroupId != null and ncGroupId != 0">
+				AND a.TM_NC_GROUP_ID = #{ncGroupId}
+		    </if>
+			<if test="ncId != null and ncId != 0">
+				AND a.TM_NC_ID = #{ncId}
+		    </if>
+			<if test="startTime != null and startTime != ''">
+				AND a.CREATE_TIME &gt;= #{startTime}
+		    </if>
+			<if test="endTime != null and endTime != ''">
+				AND a.CREATE_TIME &lt;= #{endTime}
+		    </if>
+		    <if test="isAll == '0'">
+				AND (
+					b.TM_ULOC_ID IN (
+						SELECT
+							TM_ULOC_ID
+						FROM
+							TS_ROLE_MASTER_SET
+						WHERE
+							TM_ULOC_ID IS NOT NULL
+						AND ROLE_ID IN (
+							SELECT
+								ROLE_ID
+							FROM
+								TR_ROLE_USER
+							WHERE
+								USER_ID = #{currUser}
+						)
+					)
+					OR b.TM_ULOC_ID IN (
+						SELECT
+							TM_ULOC_ID
+						FROM
+							TM_ULOC
+						WHERE
+							TM_LINE_ID IN (
+								SELECT
+									TM_LINE_ID
+								FROM
+									TS_ROLE_MASTER_SET
+								WHERE
+									TM_LINE_ID IS NOT NULL
+								AND TM_ULOC_ID IS NULL
+								AND ROLE_ID IN (
+									SELECT
+										ROLE_ID
+									FROM
+										TR_ROLE_USER
+									WHERE
+										USER_ID = #{currUser}
+								)
+							)
+					)
+					OR b.TM_ULOC_ID IN (
+						SELECT
+							TM_ULOC_ID
+						FROM
+							TM_ULOC
+						WHERE
+							TM_WORKSHOP_ID IN (
+								SELECT
+									TM_WORKSHOP_ID
+								FROM
+									TS_ROLE_MASTER_SET
+								WHERE
+									TM_WORKSHOP_ID IS NOT NULL
+								AND TM_LINE_ID IS NULL
+								AND TM_ULOC_ID IS NULL
+								AND ROLE_ID IN (
+									SELECT
+										ROLE_ID
+									FROM
+										TR_ROLE_USER
+									WHERE
+										USER_ID = #{currUser}
+								)
+							)
+					)
+					OR b.TM_ULOC_ID IN (
+						SELECT
+							TM_ULOC_ID
+						FROM
+							TM_ULOC
+						WHERE
+							TM_PLANT_ID IN (
+								SELECT
+									TM_PLANT_ID
+								FROM
+									TS_ROLE_MASTER_SET
+								WHERE
+									TM_PLANT_ID IS NOT NULL
+								AND TM_WORKSHOP_ID IS NULL
+								AND TM_LINE_ID IS NULL
+								AND TM_ULOC_ID IS NULL
+								AND ROLE_ID IN (
+									SELECT
+										ROLE_ID
+									FROM
+										TR_ROLE_USER
+									WHERE
+										USER_ID = #{currUser}
+								)
+							)
+					)
+				)
+		    </if>
+		;
+	</select>
+	<select id="StatisticByCondition" resultType="java.util.Map" parameterType="java.util.HashMap">
+		SELECT
+			DATE_FORMAT(
+				a.CREATE_TIME,
+				CASE
+			WHEN #{time} = 'month' THEN
+				'%Y-%m'
+			ELSE
+				'%Y-%m-%d'
+			END
+			) AS COL,
+			COUNT(*) AS VAL
+		FROM
+			TP_RECORD_ULOC_NC a
+		LEFT JOIN TP_RECORD_ULOC b ON a.TP_RECORD_ULOC_ID = b.ID
+		LEFT JOIN TP_RECORD c ON b.TP_RECORD_ID = c.ID
+		WHERE
+			c.SN IS NOT NULL
+		AND CASE
+		WHEN #{type} = 'ncGroup' THEN
+			a.TM_NC_GROUP_ID = #{ncId}
+		ELSE
+			a.TM_NC_ID = #{ncId}
+		END 
+		<if test="sn != null and sn != ''">
+			AND c.SN LIKE CONCAT('%',#{sn},'%') 
+	    </if>
+		<if test="startTime != null and startTime != ''">
+			AND a.CREATE_TIME &gt;= #{startTime}
+	    </if>
+		<if test="endTime != null and endTime != ''">
+			AND a.CREATE_TIME &lt;= #{endTime}
+	    </if>
+	    <if test="isAll == '0'">
+			AND (
+				b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TS_ROLE_MASTER_SET
+					WHERE
+						TM_ULOC_ID IS NOT NULL
+					AND ROLE_ID IN (
+						SELECT
+							ROLE_ID
+						FROM
+							TR_ROLE_USER
+						WHERE
+							USER_ID = #{currUser}
+					)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_LINE_ID IN (
+							SELECT
+								TM_LINE_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_LINE_ID IS NOT NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_WORKSHOP_ID IN (
+							SELECT
+								TM_WORKSHOP_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_WORKSHOP_ID IS NOT NULL
+							AND TM_LINE_ID IS NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_PLANT_ID IN (
+							SELECT
+								TM_PLANT_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_PLANT_ID IS NOT NULL
+							AND TM_WORKSHOP_ID IS NULL
+							AND TM_LINE_ID IS NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+			)
+	    </if>
+		GROUP BY
+			DATE_FORMAT(
+				a.CREATE_TIME,
+				CASE
+			WHEN 1 = 1 THEN
+				'%Y-%m'
+			ELSE
+				'%Y-%m-%d'
+			END
+			);
+	</select>
+	<select id="StatisticByShift" resultType="java.util.Map" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*) AS VAL
+		FROM
+			TP_RECORD_ULOC_NC a
+		LEFT JOIN TP_RECORD_ULOC b ON a.TP_RECORD_ULOC_ID = b.ID
+		LEFT JOIN TP_RECORD c ON b.TP_RECORD_ID = c.ID
+		WHERE
+			c.SN IS NOT NULL
+		AND CASE
+		WHEN #{type} = 'ncGroup' THEN
+			a.TM_NC_GROUP_ID = #{ncId}
+		ELSE
+			a.TM_NC_ID = #{ncId}
+		END 
+		AND (a.CREATE_TIME &lt;= #{shiftEnd} AND a.CREATE_TIME &gt;= #{shiftStart})
+		<if test="sn != null and sn != ''">
+			AND c.SN LIKE CONCAT('%',#{sn},'%') 
+	    </if>
+		<if test="startTime != null and startTime != ''">
+			AND a.CREATE_TIME &gt; #{startTime}
+	    </if>
+		<if test="endTime != null and endTime != ''">
+			AND a.CREATE_TIME &lt; #{endTime}
+	    </if>
+	    <if test="isAll == '0'">
+			AND (
+				b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TS_ROLE_MASTER_SET
+					WHERE
+						TM_ULOC_ID IS NOT NULL
+					AND ROLE_ID IN (
+						SELECT
+							ROLE_ID
+						FROM
+							TR_ROLE_USER
+						WHERE
+							USER_ID = #{currUser}
+					)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_LINE_ID IN (
+							SELECT
+								TM_LINE_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_LINE_ID IS NOT NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_WORKSHOP_ID IN (
+							SELECT
+								TM_WORKSHOP_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_WORKSHOP_ID IS NOT NULL
+							AND TM_LINE_ID IS NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_PLANT_ID IN (
+							SELECT
+								TM_PLANT_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_PLANT_ID IS NOT NULL
+							AND TM_WORKSHOP_ID IS NULL
+							AND TM_LINE_ID IS NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+			)
+	    </if>
+		;
+	</select>
+	<select id="StatisticByWeek" resultType="java.util.Map" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*) AS VAL
+		FROM
+			TP_RECORD_ULOC_NC a
+		LEFT JOIN TP_RECORD_ULOC b ON a.TP_RECORD_ULOC_ID = b.ID
+		LEFT JOIN TP_RECORD c ON b.TP_RECORD_ID = c.ID
+		WHERE
+			c.SN IS NOT NULL
+		AND CASE
+		WHEN #{type} = 'ncGroup' THEN
+			a.TM_NC_GROUP_ID = #{ncId}
+		ELSE
+			a.TM_NC_ID = #{ncId}
+		END 
+		AND a.CREATE_TIME BETWEEN #{weekStart} AND #{weekEnd} 
+		<if test="sn != null and sn != ''">
+			AND c.SN LIKE CONCAT('%',#{sn},'%') 
+	    </if>
+		<if test="startTime != null and startTime != ''">
+			AND a.CREATE_TIME &gt; #{startTime}
+	    </if>
+		<if test="endTime != null and endTime != ''">
+			AND a.CREATE_TIME &lt; #{endTime}
+	    </if>
+	    <if test="isAll == '0'">
+			AND (
+				b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TS_ROLE_MASTER_SET
+					WHERE
+						TM_ULOC_ID IS NOT NULL
+					AND ROLE_ID IN (
+						SELECT
+							ROLE_ID
+						FROM
+							TR_ROLE_USER
+						WHERE
+							USER_ID = #{currUser}
+					)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_LINE_ID IN (
+							SELECT
+								TM_LINE_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_LINE_ID IS NOT NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_WORKSHOP_ID IN (
+							SELECT
+								TM_WORKSHOP_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_WORKSHOP_ID IS NOT NULL
+							AND TM_LINE_ID IS NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+				OR b.TM_ULOC_ID IN (
+					SELECT
+						TM_ULOC_ID
+					FROM
+						TM_ULOC
+					WHERE
+						TM_PLANT_ID IN (
+							SELECT
+								TM_PLANT_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_PLANT_ID IS NOT NULL
+							AND TM_WORKSHOP_ID IS NULL
+							AND TM_LINE_ID IS NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+			)
+	    </if>
+		;
+	</select>
+</mapper>  

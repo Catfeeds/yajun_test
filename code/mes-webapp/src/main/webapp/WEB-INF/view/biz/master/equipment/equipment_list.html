@@ -1,0 +1,100 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body title="EQUIPMENT_LIST_TITLE" permissionModule="EQUIPMENT" noBreadcrumbs="true">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EQUIPMENT_TM_PLANT" type="select" field="tmPlantId" options=optionsPlant permissionCode="EQUIPMENT_PLANT" class="select2"></@p.input>
+			<@p.input title="EQUIPMENT_NO" field="no" permissionCode="EQUIPMENT_NO"></@p.input>
+			<@p.input title="EQUIPMENT_NAME" field="name"  permissionCode="EQUIPMENT_NAME"></@p.input>
+			<@p.input title="EQUIPMENT_STATUS" type="select" field="status" options=optionEquipmentStatus  permissionCode="EQUIPMENT_STATUS" class="select2"></@p.input>          
+		</@p.searchColumns>
+        <#if !operation?? >
+		<@p.toolbar> 
+			<@p.button title="EQUIPMENT_ADD" permissionCode="EquipmentAdd" iconCls="plus" url="${baseUrl}/equipment/addInput.do" type="add"  ></@p.button>
+			<@p.button title="EQUIPMENT_UPDATE" permissionCode="EquipmentUpdate" iconCls="edit" url="${baseUrl}/equipment/updateInput.do" type="update"></@p.button>
+			<@p.button title="EQUIPMENT_DELETE" permissionCode="EquipmentDelete"  iconCls="trash" url="${baseUrl}/equipment/delete.do"  type="delete"></@p.button>
+			<@p.button title="EQUIPMENT_IMPORT" permissionCode="EquipmentImport" downName="EQUIPMENT_EXIST_NAME" onclick="importData()" iconCls="signin" ></@p.button>
+			<@p.button title="EQUIPMENT_EXPORT" permissionCode="EquipmentExport" downName="EQUIPMENT_EXIST_NAME" url="${baseUrl}/equipment/exportData.do" iconCls="download-alt" type="down" ></@p.button>
+		</@p.toolbar>
+        </#if>
+	</@p.searchPanel>
+	<@p.dataGrid  url="${baseUrl}/equipment/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="EQUIPMENT_TM_PLANT" field="plant.no" permissionCode="EQUIPMENT_PLANT" ></@p.column>
+		<@p.column title="EQUIPMENT_NO" field="no"   permissionCode="EQUIPMENT_NO"></@p.column>
+		<@p.column title="EQUIPMENT_NAME" field="name"   permissionCode="EQUIPMENT_NAME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS" field="status" formatter="rendEquipmentStatus" permissionCode="EQUIPMENT_STATUS"></@p.column>
+		<@p.column title="EQUIPMENT_IP_ADDRESS" field="ipAddress"   permissionCode="EQUIPMENT_IP_ADDRESS"></@p.column>
+		<@p.column title="EQUIPMENT_PLC_TYP" field="plcTyp"   permissionCode="EQUIPMENT_PLC_TYP"></@p.column>
+		<@p.column title="EQUIPMENT_PLC_BRAND" field="plcBrand"   permissionCode="EQUIPMENT_PLC_BRAND"></@p.column>
+		<@p.column title="EQUIPMENT_NETWORK_MODEL_TYP" field="networkModelTyp"   permissionCode="EQUIPMENT_NETWORK_MODEL_TYP"></@p.column>
+		<@p.column title="EQUIPMENT_TM_ULOC_ID"  field="uloc.name"    permissionCode="EQUIPMENT_ULOC" formatter="renderUloc" ></@p.column>
+		<@p.column title="EQUIPMENT_EQUIPMENT_SUPPLIER" field="equipmentSupplier"   permissionCode="EQUIPMENT_EQUIPMENT_SUPPLIER"></@p.column>
+ 		<@p.column title="EQUIPMENT_PROPERTY_NUMBER" field="propertyNumber"   permissionCode="EQUIPMENT_EQUIPMENT_SUPPLIER"></@p.column> 
+		<@p.column title="EQUIPMENT_NOTE"  field="note"    permissionCode="EQUIPMENT_NOTE"></@p.column>
+<!-- 		<@p.column title="EQUIPMENT_ENABLED" field="enabled"  permissionCode="EQUIPMENT_ENABLED" formatter="renderGenderEnabled"></@p.column> -->
+	</@p.dataGrid>
+</@p.body>
+
+<script type="text/javascript">
+function importData(){
+	var obj = new Object();
+	obj.templateUrl = "${baseUrl}/equipment/exportTemplate.do";
+	importFile("<@s.m code="EQUIPMENT_IMPORT" />", "${baseUrl}/equipment/importData.do", "dg${currentPageId}",obj);
+}
+
+
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+function renderPlant(value,record){
+	if(record.plant&&record.plant.no){
+		return record.plant.no+ " - " + record.plant.nameCn;
+	}
+	return "";
+}
+
+function renderShowImage(value){
+	if(value){
+	return "<img src='${baseUrl}"+value+"' height='40' width='40'></img>"
+	}
+	return "";
+}
+
+function renderWorkShop(value,record){
+	if(record.workshop&&record.workshop.no){
+		return record.workshop.no+ " - " + record.workshop.nameCn;
+	}
+	return "";
+}
+
+function rendEquipmentType(value) {
+	if(value){
+		return entryRenderer('EQUIPMENT_TYPE', value);
+	}
+	return "";
+}
+function rendEquipmentStatus(value) {
+	if(value){
+		return entryRenderer('EQUIPMENT_STATUS', value);
+	}
+	return "";
+}
+function rendEquipmentProductStatus(value){
+	return entryRenderer('EQUIPMENT_STATUS_PRODUCT', value);
+}
+function renderUloc(value,row){
+	if(value&&row.uloc.name){
+		return row.uloc.no+"-"+value;
+	}
+	return "";
+}
+function importImages(){ 
+	var rowsData = getSelectedRows('dg${currentPageId}');
+ 	if (!rowsData || rowsData.length == 0) {
+ 		infoTip("请先选择设备数据!");
+ 		return;
+ 	}
+    importImage("<@s.m code="PLANT_IMPORT_ALL" />", "${baseUrl}/equipment/importImage.do?tmEquipmentId="+rowsData[0].id, "dg${currentPageId}","");
+}
+</script>

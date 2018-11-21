@@ -1,0 +1,349 @@
+<#include "../../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>翅片-可动率明细</title>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<style type="text/css">
+	.panel-div{
+		width: 300px;
+	    max-height: 120px;
+	    z-index: 100;
+	    position: fixed;
+	    right: 40px;
+	}
+</style>
+<script type="text/javascript">
+$('#createTimeStart').click(function(){
+	var createTimeEnd=$dp.$('createTimeEnd');
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd',
+		onpicked:function(){
+			createTimeEnd.click();
+		},
+		maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+	})
+});
+$('#createTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd',
+		minDate:'#F{$dp.$D(\'createTimeStart\')}'
+	})
+});
+
+function initTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#createTimeEnd").val(endTime);
+	date = new Date(date.getTime()-1000*60*60*24*30);
+	month = date.getMonth()+1;
+	var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#createTimeStart").val(startTime);
+}
+
+function caseLessTen(num){
+	if(num<10){
+		return '0'+num;
+	}else {
+		return num;
+	}
+}
+
+	var detailTitleShow = [];
+	var detailTitleName = null;
+	var shiftNo = "1";
+	var globalTime = null;
+	$(function(){
+		initTime()
+		showReport("1", "白班");
+		var myDate = new Date();
+		var year = myDate.getFullYear();
+		var month = myDate.getMonth() + 1;
+		var day = myDate.getDate();
+		var titleShow = "可动率  " + year + "年" + month + "月" + day + "日" + " " + "白班";
+		detailTitleName = titleShow;
+	    if (month < 10) {
+	    	month = "0" + month;
+	    }
+		detailTitleShow.push(titleShow);
+		var chooseTime = year + "-" + month + "-" + day;
+		//queryDayDetails("1",chooseTime, detailTitleShow, detailTitleName);
+	}); 
+	function showReport(shiftNo, name) {
+		$.ajax({
+			url:"${baseUrl}/finMovableRateDetails/getFinMovableRateDetailsInfo.do",
+			type:"GET",
+			data:{
+				"shiftNo":shiftNo,
+				"createTimeStart":$("#createTimeStart").val(),
+				"createTimeEnd":$("#createTimeEnd").val()
+			},
+			dataType:"json",
+			success:function(result){
+				whiteNightShow(JSON.parse(result.dateShow),JSON.parse(result.showValue),JSON.parse(result.avgValue), JSON.parse(result.targetValue), name,JSON.parse(result.avgValueMap));
+			 }
+		});
+	}
+	var shiftName ="";
+	var whiteNightEventChart = echarts.init(document.getElementById("movableRateDetailsDiv"));
+	whiteNightEventChart.on("click", barClickEvent);
+	function barClickEvent(param) {
+		detailTitleShow = [];
+		var chooseTime = $("#createTimeStart").val();
+		var year = chooseTime.substr(0,4);
+		var monthsAndDay = param.name;
+		var monthsDay = monthsAndDay.replace("/","月")
+		var titleShow = "可动率  " + year + "年" + monthsDay + " " + param.seriesName;
+		detailTitleName = titleShow;
+		detailTitleShow.push(titleShow);
+		if (param.seriesName == "晚班") {
+			shiftNo = "2";
+		}
+		shiftName = param.seriesName;
+		var dateParam = year + "-" + monthsAndDay.replace("/","-");
+		globalTime = dateParam;
+		//queryDayDetails(shiftNo,dateParam,detailTitleShow,detailTitleName);
+		myFrame.window.report(shiftNo,globalTime,$("#figureText").val());
+	}
+	function whiteNightShow(dateShow,showValue,avgValue, targetValue, name,avgValueMap) {
+		var myChart = echarts.init(document.getElementById("movableRateDetailsDiv"));
+		myChart.showLoading();
+		var title = [];
+		title.push(name);
+		title.push("当天可动率");
+		var option = {
+				 title: {
+				        text: '历史可动率',
+				        x: 'center'
+				},
+			     tooltip: {
+			        trigger: 'axis',
+			        axisPointer: {type: 'cross'},
+			        formatter: function(params){
+			            return '<div><p>'+ params[0].axisValue +':</p ><p>'+ params[0].seriesName +'</p ><p>最小值:'+ params[0].data[3] +'</p ><p>最大值:'+ params[0].data[4] +'</p ><p>当天可动率:'+ avgValueMap[params[0].axisValue] +'</p ></div>';
+			        }
+			    },
+			    color:'#3398db',
+			    legend: {
+			    	top:25,
+			        data: title
+			    },
+			    dataZoom: [{
+			            type: 'inside',
+			        },
+			        {
+			            show: true,
+			            type: 'slider'
+			        }
+			    ],
+			    grid: {
+			        left: '10%',
+			        right: '10%',
+			        bottom: '15%'
+			    },
+			    xAxis: {
+			        type: 'category',
+			        scale: true,
+			        boundaryGap: false,
+			        axisLine: {
+			            onZero: false
+			        },
+			        splitLine: {
+			            show: false
+			        },
+			        splitNumber: 20,
+			        data:dateShow
+			    },
+			    yAxis: [{
+			            type: 'value',
+			            name: '可动率',
+			            position: 'left',
+			            axisLabel: {
+			                formatter: '{value}'
+			            }
+			        }
+			    ],
+			    series: [{
+		            name: name,
+		            type: 'candlestick',
+		            data:showValue,
+		            barWidth: 20,
+		            color:'#3398db',
+		            markLine : {
+		                symbol : 'none',
+		                itemStyle : {
+		                    normal : {
+		                        color:'red',
+		                        label : {
+		                            show:true,
+		                            formatter:"    目标值：" + targetValue
+		                        }
+		                    }
+		                },
+		                data : [
+		                    {yAxis: targetValue}
+		                ]
+		            }
+		        },
+			        {
+			            name: '当天可动率',
+			            type: 'line',
+			            smooth: false,
+			            data: avgValue,
+			            /* markPoint : {
+			                data : [
+			                    {type : 'max', name : '最大值'},
+			                     {type : 'min', name : '最小值'}
+			                ]
+			            }, */
+			            lineStyle: {
+			                normal: {
+			                    opacity: 0.5
+			                }
+			            }
+			        }
+			    ]
+			};
+		myChart.hideLoading();
+		myChart.setOption(option);
+	}
+	function queryDayDetails(shiftNo,dateParam,title,name) {
+		$.ajax({
+			url:"${baseUrl}/finMovableRateDetails/getDetailsTimeInfo.do",
+			type:"GET",
+			data:{
+				"shiftNo":shiftNo,
+				"createTime":dateParam
+			},
+			dataType:"json",
+			success:function(result){
+				movableRateDayDetailsDiv(JSON.parse(result.timeShow),JSON.parse(result.realRunRate), title, name);
+			 }
+		});
+	}
+	var getFaultAndNoFaultEvent = echarts.init(document.getElementById("movableRateDayDetailsDiv"));
+	getFaultAndNoFaultEvent.on("click", getFaultedDetailInfo);
+	function getFaultedDetailInfo(param) {
+		var dateParam = globalTime + " " + param.name;
+		$.ajax({
+			url:"${baseUrl}/finMovableRateDetails/getFaultAndNoFaultInfo.do",
+			type:"GET",
+			data:{
+				"shiftNo":shiftNo,
+				"beginTime":dateParam
+			},
+			dataType:"json",
+			success:function(result){
+				document.getElementById("faultInfo").innerHTML = "非故障停机：" + result.noFaultDuration + "  " + "故障停机：" + result.faultedDuration;
+			 }
+		}); 
+	}
+	function movableRateDayDetailsDiv(detailsTime,realRunRate, title, name) {
+		var myChart = echarts.init(document.getElementById("movableRateDayDetailsDiv"));
+		myChart.showLoading();
+		option = {
+				 title: {
+				        text: '历史可动率',
+				        x: 'center'
+				},
+			    tooltip: {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			        data:title
+			    },
+			    toolbox: {
+			        feature: {
+			            saveAsImage: {}
+			        }
+			    },
+			    dataZoom: [
+		               { show: true, realtime: true},
+		               {type: 'inside',realtime: true}
+			    ],
+			    xAxis: {
+			        type: 'category',
+			        data: detailsTime
+			    },
+			    yAxis: {
+			        type: 'value'
+			    },
+			    series: [
+			        {
+			            name:name,
+			            type:'line',
+			            symbol: 'circle',
+			            color:'#3398db',
+			            step: 'start',
+			            data:realRunRate
+			        }
+			    ]
+			};
+		myChart.hideLoading();
+		myChart.setOption(option);
+	}
+	
+	function whiteSearch() {
+		showReport("1","白班");
+		
+	}
+	function nightSearch() {
+		showReport("2", "晚班");
+	}
+	function searchRateLine(){
+		var date = new Date();
+		var month = date.getMonth()+1;
+		var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		if(globalTime){
+			myFrame.window.report("",globalTime,$("#figureText").val());	
+		}else{
+			myFrame.window.report("",endTime,$("#figureText").val());	
+		}
+	}
+	function caseLessTen(num){
+		if(num<10){
+			return '0'+num;
+		}else {
+			return num;
+		}
+	}
+</script>
+</head>
+<body>
+ 	<div class="page-content">
+ 	<div class="panel panel-default panel-div">
+		<a data-toggle="collapse" data-parent="#accordion" 
+				   href="#collapseThree">
+			<div class="panel-heading" style="background-color: #f5f5f5;">可动率下降参数值</div>
+		</a>
+		<div id="collapseThree" class="panel-collapse collapse">
+			<div class="panel-body">
+				<div><label>参数值：</label><input id="figureText" value="5" onChange="searchRateLine()"/></div>
+			</div>
+		</div>
+	</div>
+ 	<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				 <a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="whiteSearch();"><span class="icon-search">白班</a>
+				 &nbsp;&nbsp;<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="nightSearch();"><span class="icon-search">晚班</a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div class="report-panel">
+		<div id="movableRateDetailsDiv" style="width: 90%;height: 30rem;"></div>
+		<div id = "faultInfo" style="text-align:center;"></div>
+		<div style="width: 90%;height: 45rem;margin-left: 5%;">
+			<iframe name="myFrame" src="${baseUrl}/finMovableRateDetails/getMovateRateDetails.do" style="width:100%;height:100%" frameborder="no"></iframe>
+		</div>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<#include "../include/bootstrapTableCommons.html">
+<style type="text/css">
+    .total_td{
+        font-size: 13px; text-align: left;
+    }
+</style>
+<script type="text/javascript">
+    function renderDevice(value,row){
+        return (row['NO']||"") + "-" + (row['EQUIPMENT_NAME']||"");
+    }
+    function renderBatchQty(value,row){
+    	return value == null ? "" : value;
+    }
+$(document).ready(function(){
+    $('#createTimeStart').click(function(){
+        var createTimeEnd=$dp.$('createTimeEnd');
+        WdatePicker({
+            autoPickDate:true,
+            dateFmt:'yyyy-MM-dd',
+            onpicked:function(){
+                createTimeEnd.click();
+            },
+            maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+        })
+    });
+    $('#createTimeEnd').click(function(){
+        WdatePicker({
+            autoPickDate:true,
+            dateFmt:'yyyy-MM-dd',
+            minDate:'#F{$dp.$D(\'createTimeStart\')}'
+        })
+    });
+
+});
+</Script>
+<@p.body title="MAINTENANCE_REPORT_TITLE" noPermissionModule="true" noBreadcrumbs="false">
+<@p.searchPanel >
+    <@p.searchColumns showSeachButton="false">
+    <@p.input title="EQUIPMENT_NO" type="multiple" multipleSelect="false" id="equipmentNo" field="equipmentNo" options=equipmentOptions></@p.input>
+    <@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart" value="${from!}"></@p.input>
+    <@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd" value="${to!}"></@p.input>
+    <span class="frameInputSpan" style="margin-left: 30px;">
+        <a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="refreshTable('datagrid',this,'${baseUrl}/maintenance_report/warn_report_list.do');"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+        <a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+    </span>
+    </@p.searchColumns>
+</@p.searchPanel>
+
+<div class="page-content" fit="true">
+    <@p.dataGrid url="${baseUrl}/maintenance_report/warn_report_list.do" id="datagrid">
+        <@p.column title="DEVICEMAINTENANCE_DEVICECODE" field="NO"    formatter="renderDevice"></@p.column>
+        <@p.column stitle="类型" field="RUNNING_STATE"   ></@p.column>
+        <@p.column stitle="内容" field="CODE_DESC"   ></@p.column>
+        <@p.column stitle="最后发生时间" field="LST_TIME"></@p.column>
+        <@p.column stitle="累计发生回数" field="CNT"    formatter="renderBatchQty"></@p.column>
+    </@p.dataGrid>
+</div>
+</@p.body>
+

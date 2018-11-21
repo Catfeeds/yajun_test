@@ -1,0 +1,151 @@
+package com.wis.mes.opc.util.metalplate;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.jaxws.endpoint.dynamic.JaxWsDynamicClientFactory;
+import org.jinterop.dcom.common.JIException;
+import org.jinterop.dcom.core.JIVariant;
+import org.openscada.opc.lib.da.AddFailedException;
+import org.openscada.opc.lib.da.Group;
+import org.openscada.opc.lib.da.Item;
+
+import com.wis.basis.common.utils.LogConstant;
+import com.wis.basis.common.utils.SystemConfig;
+import com.wis.core.framework.service.exception.BusinessException;
+import com.wis.mes.opc.callback.ReadCallBack;
+import com.wis.mes.opc.util.OpcServer;
+
+public class OpcMetalPlateHelper {
+	private final static String opc_to_app_webservice = SystemConfig
+			.getPropertyByKey("opc.rfid.webservice.ScanningGunServiceImpl.atTheTableSignal");
+	private static Log logger = LogFactory.getLog(LogConstant.OPC_LOG);
+
+	public static void startOpc(String groupCode, List<Item> itemList, ReadCallBack callBack) throws JIException {
+		callBack.doChanged(itemList, groupCode);
+	}
+
+	public static List<Item> getOpcData(String[] items, Group group) throws JIException, AddFailedException {
+		Map<String, Item> addItems = group.addItems(items);
+		List<Item> list = new ArrayList<Item>();
+		for (Map.Entry<String, Item> temp : addItems.entrySet()) {
+			list.add(temp.getValue());
+		}
+		return list;
+	}
+
+	public synchronized static Map<String, Object> getOpcDataMap(String[] items) throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		OpcServer server = ConnectionMetalPlateUtil.longConnect();
+		if(null != server) {
+			Group group = server.addGroup();
+			Map<String, Item> addItems = group.addItems(items);
+			for (Map.Entry<String, Item> temp : addItems.entrySet()) {
+				Item item = temp.getValue();
+				JIVariant value = item.read(false).getValue();
+				map.put(item.getId(), value.getObject());
+			}
+		}else {
+			getOpcDataMap(items);
+		}
+		return map;
+	}
+
+	public static void sendDataToOpc(String[] items, Map<String, Object> map) {
+		OpcServer server = ConnectionMetalPlateUtil.longConnect();
+		if(null != server) {
+			try {
+				Group group = server.addGroup();
+				List<Item> opcData = getOpcData(items, group);
+				for (Item item : opcData) {
+					String[] split = item.getId().split("\\.");
+					String key = split[split.length - 1];
+					if (map.containsKey(key)) {
+						Object object = map.get(key);
+						if (object instanceof Float) {
+							item.write(new JIVariant(Float.valueOf(object.toString())));
+						} else if (object instanceof String) {
+							item.write(new JIVariant(map.get(key).toString()));
+						} else if (object instanceof Integer) {
+							item.write(new JIVariant(Integer.valueOf(object.toString())));
+						} else if (object instanceof Boolean) {
+							item.write(new JIVariant((Boolean) object));
+						}
+					}
+				}
+				/*for (Item item : opcData) {
+				for (int i = 0; i < 5; i++) {
+					ItemState read = item.read(false);
+					if (read.getQuality() == 192) {
+						JIVariant value = read.getValue();
+						Object object = value.getObject();
+						if (object.toString().contains("EMPTY")) {
+							continue;
+						}
+						if (object instanceof JIUnsignedShort) {
+							object = ((JIUnsignedShort) object).getValue().intValue();
+						} else if (object instanceof JIString) {
+							object = ((JIString) object).getString();
+						} else if (object instanceof Boolean) {
+							object = (Boolean) object;
+						} else if (object instanceof Float) {
+							object = (Float) object;
+						} else if (object instanceof Character) {
+							object = (int) value.getObjectAsChar();
+						}
+						String[] split = item.getId().split("\\.");
+						String key = split[split.length - 1];
+						if (map.containsKey(key)) {
+							Object preValue = map.get(key);
+							if (!preValue.toString().equals(object.toString())) {
+								throw new BusinessException("ERROR_OPC_WRITE_EXCEPTION");
+							}
+						}
+						break;
+					}
+				}
+			}*/
+			} catch (BusinessException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new BusinessException("ERROR_OPC_JIEXCEPTION");
+			}
+		}else {
+			sendDataToOpc(items,map);
+		}
+	}
+
+	private static Client client = null;
+	static {
+		createWebserviceClient();
+	}
+
+	private static void createWebserviceClient() {
+		try {
+			JaxWsDynamicClientFactory factory = JaxWsDynamicClientFactory.newInstance();
+			client = factory.createClient(opc_to_app_webservice);
+		} catch (Exception e) {
+			client = null;
+			logger.error("createWebserviceClient:" + ExceptionUtils.getFullStackTrace(e));
+		}
+	}
+
+	public static void sendDataToApp(String operationName, Object... params) {
+		try {
+			if (client == null) {
+				createWebserviceClient();
+			}
+			if (client != null) {
+				client.invoke(operationName, params);
+			}
+		} catch (Exception e) {
+			logger.error("sendDataToApp:" + ExceptionUtils.getFullStackTrace(e));
+		}
+	}
+}

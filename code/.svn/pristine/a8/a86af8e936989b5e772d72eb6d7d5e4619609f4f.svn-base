@@ -1,0 +1,18 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/dataPermissionSet/update.do" class="form-horizontal" idValue=bean.id  permissionModule="DATA_PERMISSION_SET">
+		<@p.formRow>
+		<@p.formColmd title="PERMISSION_CODE"  permissionCode="PERMISSION_SET_CODE">
+				 <input name="code" class="inputxt"  datatype="s2-50" value="${bean.code!}"/>
+			</@p.formColmd>
+		<@p.formColmd title="PERMISSION_DESCRIPTION"  permissionCode="PERMISSION_SET_DESCRIPTION">
+			<textarea name="description" class="inputxt" ignore="ignore" style="width:100%" >${bean.description!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

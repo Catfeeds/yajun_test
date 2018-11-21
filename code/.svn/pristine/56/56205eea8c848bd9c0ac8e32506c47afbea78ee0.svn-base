@@ -1,0 +1,155 @@
+<#include "../phone_main/head.html"/>
+<style>
+	.custom-search{ 
+		background:url(../res/mui/images/sweep_code.png) no-repeat left center;
+		background-color: #F2F2F2F2 !important;
+		border-radius: 5px !important;
+		text-indent: 20px;
+	}
+	.mui-card .mui-input-group .mui-input-row label{
+	    font-size: 14px;
+   		font-family: 微软雅黑;
+	}
+</style>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">队列较正</h1>
+	</header>
+	<div class="mui-content">
+		<div class="mui-card">
+			 <div class="mui-input-group">
+				<div class="mui-input-row">
+					<label>工位选择：</label>
+					<select id="ulocs" onchange="ulocToPlcSn(this.value)"></select>
+				</div>
+				<div class="mui-input-row">
+					<label>SN号：</label>
+					<input type="text"  id="ulocSN" readonly="readonly" >
+				</div>
+				<div class="mui-input-row">
+					<label>背番号：</label>
+					<input type="text"  id="ulocBFH" readonly="readonly" >
+				</div>
+				<div class="mui-input-row">
+					<label>机种名：</label>
+					<input type="text"  id="ulocJZM" readonly="readonly" >
+				</div>
+				<div class="mui-input-row">
+					<label>机&nbsp;&nbsp;号：</label>
+					<input type="text"  id="ulocJH"  readonly="readonly" >
+				</div>
+			 </div>
+		</div>
+		<div class="mui-card">
+			<div class="mui-input-row">
+				<input type="text" onkeydown='if(event.keyCode==13)getSnInfo(this.value);' class="mui-input-clear custom-search" placeholder="">
+			</div> 
+			<div class="mui-input-group">
+				<div class="mui-input-row">
+					<label>SN号：</label>
+					<input type="text"  id="tabSN" readonly="readonly" >
+				</div>
+				<div class="mui-input-row">
+					<label>背番号：</label>
+					<input type="text"  id="tabBFH" readonly="readonly" >
+				</div>
+				<div class="mui-input-row">
+					<label>机种名：</label>
+					<input type="text"  id="tabJZM" readonly="readonly" >
+				</div>
+				<div class="mui-input-row">
+					<label>机&nbsp;&nbsp;号：</label>
+					<input type="text"  id="tabJH"  readonly="readonly" >
+				</div>
+			 </div>
+		</div>
+		<div class="mui-button-row">
+			<button type="button" class="mui-btn mui-btn-primary" onclick="checkoutSn();">校验</button>&nbsp;&nbsp;
+			<button type="button" class="mui-btn mui-btn-primary" onclick="plcWrite();">写入</button>
+		</div>
+	</div>
+<#include "../phone_main/footer.html"/>
+
+<script>
+(function($, doc) {
+	$.init();
+	$.ready(function() {
+		initSelect('ulocs','',eval('('+ '${optionUloc!}' +')'));
+	});
+})(mui, document);
+
+function ulocToPlcSn(ulocNo){
+	 mui.ajax({
+	   	    type: "post",
+	        dataType: "json",
+	        contentType:'application/x-www-form-urlencoded',//ajax submit 编码
+	    	url:'${baseUrl}/faultMachine/ulocToPlcSn.do',
+			data:{
+				'ulocNo':ulocNo
+			},
+			success:function(r){
+					$('#ulocSN').val(r.sn);
+					$('#ulocBFH').val(r.backNumber);
+					$('#ulocJZM').val(r.machineOfName);
+					$('#ulocJH').val(r.machineName);
+			}
+		})
+}
+
+function getSnInfo(sn){
+	 mui.ajax({
+	   	    type: "post",
+	        dataType: "json",
+	        contentType:'application/x-www-form-urlencoded',//ajax submit 编码
+	    	url:'${baseUrl}/faultMachine/getSnInfo.do',
+			data:{
+				'sn':sn
+			},
+			success:function(r){
+				$('#tabSN').val(r.sn);
+				$('#tabBFH').val(r.backNumber);
+				$('#tabJZM').val(r.machineOfName);
+				$('#tabJH').val(r.machineName);
+			}
+		})
+}
+function checkoutSn(){
+	var tab_sn = $('#tabSN').val();
+	var uloc_sn = $('#ulocSN').val();
+	if(tab_sn && uloc_sn){
+		if(tab_sn == uloc_sn){
+			mui.toast("PLC与标签序列号一致。",{ duration:'short', type:'div' });
+		}else{
+			mui.toast("PLC与标签序列号不一致。",{ duration:'short', type:'div' });
+		}
+	}
+}
+
+function plcWrite(){
+	var tab_sn = $('#tabSN').val();
+	var uloc_sn = $('#ulocSN').val();
+	var uloc_no = $('#ulocs').val();
+	if(tab_sn && uloc_sn){
+		if(tab_sn == uloc_sn){
+			mui.toast("PLC与标签序列号一致不需要矫正。",{ duration:'short', type:'div' });
+		}else{
+			 mui.ajax({
+			   	    type: "post",
+			        dataType: "json",
+			    	url:'${baseUrl}/faultMachine/plcWrite.do',
+					data:{
+						'sn':tab_sn,
+						'ulocNo':uloc_no
+					},
+					success:function(r){
+						if(r.success){
+							mui.toast("写入成功。",{ duration:'short', type:'div' });
+						}else{
+							mui.confirm(r.message, null, ['取消','确认'],'');
+						}
+					}
+				})
+		}
+	}
+}
+</script>

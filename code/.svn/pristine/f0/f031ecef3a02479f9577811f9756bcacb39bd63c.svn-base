@@ -1,0 +1,25 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body  permissionModule="PRODUCT_PART"  noBreadcrumbs="true">	
+	<@p.searchPanel gridId="product_part_sett_gridid">
+		<@p.searchColumns>
+			<@p.input title="PRODUCT_PART_BBFID" field="bbfid" ></@p.input>
+			<@p.input title="PRODUCT_PART_BJZNAME" field="bjzName"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/dkDisZhTbl/list.do?${params!}" id="product_part_sett_gridid">
+		<@p.column title="PRODUCT_PART_NO" field="part.no" permissionCode="PRODUCT_PART_NO" ></@p.column>
+		<@p.column title="PRODUCT_PART_NAME" field="part.nameCn" permissionCode="PRODUCT_PART_NO" ></@p.column>
+		<@p.column title="PRODUCT_PART_BBFID" field="bbfid" permissionCode="PRODUCT_PART_NO" ></@p.column>
+		<@p.column title="PRODUCT_PART_BJZNAME" field="bjzName" permissionCode="PRODUCT_PART_NAME_CN"></@p.column>
+		<@p.column title="PRODUCT_PART_JH" field="jh" permissionCode="PRODUCT_PART_TYPE" ></@p.column>
+		<@p.column title="PRODUCT_PART_TZH" field="tzh" permissionCode="PRODUCT_PART_SPECTYP"  ></@p.column>
+		<@p.column title="PRODUCT_PART_TZHRESULT" field="partNumber" permissionCode="PRODUCT_PART_NUMBER" formatter="renderTzhResult"></@p.column>
+		<@p.column title="PRODUCT_PART_ULOC" field="bzl" permissionCode="PRODUCT_PART_REMARK" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderTzhResult(value) {
+	return "OK";
+}
+</script>

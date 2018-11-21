@@ -1,0 +1,87 @@
+<script type="text/javascript">
+	$(".page-content").toggleClass("page-content");
+	var operateParam=new Object();
+	operateParam.id=0;
+	var operateParamRight=new Object();
+	operateParamRight.id=0;
+	var selectedOrg = 0;
+	var selectedNode = 0;
+	jQuery(function($) {
+		finExportDiv();
+		$("#widget-collapse").click(function() {
+			if ($("#org_tab_left_body").is(":hidden")) {
+				$("#org_tab_right").removeClass("widget-box-max");
+				$("#org_tab_left_body").show();
+			} else {
+				$("#org_tab_right").addClass("widget-box-max");
+				$("#org_tab_left_body").hide();
+			}
+		});
+ 		$("#finExportTab li").click(function() {
+ 			reLoadTree(operateParam.id, $(this).index());
+ 		});
+	});
+	
+	function finExportDiv(){
+		$.ajax({
+	        url: '${baseUrl}/finExport/exportListInput.do?',
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:false,
+	        data : {
+	        	currentPageId:"${currentPageId}"
+	        },
+	        success: function(html){
+        		$("#deviceStatusInfo").html(html);
+	        }
+	    });
+	}
+	function reLoadTree(orgId, lindex) {
+		if (lindex == undefined) {
+			lindex = $("#faultFradeTab li.active").index();
+		}
+		operateParam.id = orgId;
+	 	switch (lindex) {
+		case 0: {
+				$("#deviceStatusInfo").show();
+				$("#moveRateInfo").hide();
+			}
+			break;
+		case 1: {
+			$("#deviceStatusInfo").hide();
+			$("#moveRateInfo").show();
+			movableRateDiv();
+		}
+		default:
+			break;
+		} 
+	}
+	function movableRateDiv(){
+		$.ajax({
+	        url: '${baseUrl}/finMovableRate/movableRateListInput.do',
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:false,
+	        success: function(html){
+        		$("#moveRateInfo").html(html);
+	        }
+	    });
+	}
+	
+</script>
+<@p.body title="FIN_REPORT_LIST_TITLE" noBreadcrumbs="true" permissionModule="FIN_REPORT_EXPORT">
+<div id="org_tab_right" style="width: 100%;margin-left: 0px;margin-top: 0px;"  class="tabbable org_tab_right" >
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue"	id="finExportTab" >
+		<li class="active"><a data-toggle="tab" href="#deviceStatusInfo">设备状态信息</a></li>
+		<li><a data-toggle="tab" id="viewNcLevel" href="#moveRateInfo">可动率信息</a></li>
+	</ul>
+	<div class="tab-content" >
+		<div id="deviceStatusInfo" class="tab-pane in active"></div>
+		<div id="moveRateInfo" class="tab-pane"></div>
+	</div>
+</div>
+</@p.body>

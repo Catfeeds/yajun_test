@@ -1,0 +1,560 @@
+<#include "../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>工位数据分析报表 </title>
+<style>
+	.report-panel{
+		width:100%;
+		height:70rem;
+	}
+	.report-panel div{
+		width: 48%;
+		height: 48%;
+		float: left
+	}
+</style>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<script type="text/javascript">
+
+$(function(){
+	initTime();
+ 	setUlocDataReport('frequencyStatistics');
+ 	setUlocDataReport('tightStopTimes');
+ 	setUlocDataReport('numberRequestsHelp');
+	setUlocDataReport('equalNumberWork');
+});
+function initTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#createTimeEnd").val(endTime+" 23:59");
+	date = new Date(date.getTime()-1000*60*60*24*30);
+	month = date.getMonth()+1;
+	var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#createTimeStart").val(startTime+" 00:00");
+}
+function caseLessTen(num){
+	if(num<10){
+		return '0'+num;
+	}else {
+		return num;
+	}
+}
+var compareInt = function (x, y) {//比较函数
+    if (parseInt(x) < parseInt(y)) {
+        return -1;
+    } else if (x > y) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+function getMaxData(countData){
+	var sortArray = [];
+	sortArray = Array.from(countData);
+	sortArray = sortArray.sort(compareInt);
+	return parseInt(parseInt(sortArray[sortArray.length - 1])*1.1)+1;
+}
+
+//岗位暂停时间/次数统计
+//stationData 岗位编号
+//timeOutData 暂停时间
+//timeOffData 暂停次数
+function getFrequencyStatistics(stationData,timeOutData,timeOffData){
+	option = {
+		  title: {
+		        text: '工位暂停时间/次数统计',
+		        x:'center',
+		        y:'top'
+		    },
+		    tooltip: {
+		        trigger: 'axis',
+		        axisPointer: {
+		            type: 'cross',
+		            crossStyle: {
+		                color: '#999'
+		            }
+		        }
+		    },
+		    toolbox: {
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        }
+		    },
+		    legend: {
+		        data:['暂停时间(min)','暂停次数(次)'],
+		        top:30
+		    },
+		    dataZoom: [
+		               { show: true, realtime: true, start: 1,end: 100},
+		               {type: 'inside',realtime: true, start: 1,end: 100}
+		    ],
+		    xAxis: [
+		        {
+		            type: 'category',
+		            data: stationData,
+		            axisPointer: {
+		                type: 'shadow'
+		            }
+		        }
+		    ],
+		    yAxis: [
+		        {
+		            type: 'value',
+		            name: '暂停时间(min)',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        },
+		        {
+		            type: 'value',
+		            name: '暂停次数(次)',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        }
+		    ],
+		    series: [
+		        {
+		            name:'暂停时间(min)',
+		            type:'bar',
+		            itemStyle:{
+		                normal: {
+		                    color: '#64BD3D'
+		                }
+		            },
+		            data:timeOutData
+		        },
+		        {
+		            name:'暂停次数(次)',
+		            type:'line',
+		            yAxisIndex: 1,
+		            itemStyle:{
+		                normal: {
+		                    color: '#3498DB'
+		                }
+		            },
+		            data:timeOffData
+		        }
+		    ]
+		};
+	return option;
+}
+
+//工位紧停时间/次数统计
+//stationData 岗位编号
+//timeOutData 紧停时间
+//timeOffData 紧停次数
+function getTightStopTimes(stationData,timeOutData,timeOffData){
+	option = {
+			  title: {
+			        text: "工位紧停时间/次数统计",
+			        x:'center',
+			        y:'top'
+			    },
+		    tooltip: {
+		        trigger: 'axis',
+		        axisPointer: {
+		            type: 'cross',
+		            crossStyle: {
+		                color: '#999'
+		            }
+		        }
+		    },
+		    toolbox: {
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        }
+		    },
+		    legend: {
+		        data:['紧停时间(min)','紧停次数(次)'],
+		        top:30
+		    }, dataZoom: [
+               { show: true, realtime: true, start: 1,end: 100},
+               {type: 'inside',realtime: true, start: 1,end: 100}
+           	],
+		    xAxis: [
+		        {
+		            type: 'category',
+		            data: stationData,
+		            axisPointer: {
+		                type: 'shadow'
+		            }
+			       /*  ,axisLabel: {
+			            interval:0,
+			            rotate:50
+		            } */
+		        }
+		    ],
+		    yAxis: [
+		        {
+		            type: 'value',
+		            name: '紧停时间(min)',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        },
+		        {
+		            type: 'value',
+		            name: '紧停次数(次)',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        }
+		    ],
+		    series: [
+		        {
+		            name:'紧停时间(min)',
+		            type:'bar',
+		            itemStyle:{
+		                normal: {
+		                    color: '#64BD3D'
+		                }
+		            },
+		            data:timeOutData
+		        },
+		        {
+		            name:'紧停次数(次)',
+		            type:'line',
+		            yAxisIndex: 1,
+		            itemStyle:{
+		                normal: {
+		                    color: '#3498DB'
+		                }
+		            },
+		            data:timeOffData
+		        }
+		    ]
+		};
+	return option;
+}
+//岗位求助时间/次数统计
+//stationData 岗位编号
+//timeOutData 紧停时间
+//timeOffData 紧停次数
+function getNumberRequestsHelp(stationData,timeOutData,timeOffData){
+	option = {
+			  title: {
+			        text: "工位求助时间/次数统计",
+			        x:'center',
+			        y:'top'
+			    },
+		    tooltip: {
+		        trigger: 'axis',
+		        axisPointer: {
+		            type: 'cross',
+		            crossStyle: {
+		                color: '#999'
+		            }
+		        }
+		    },
+		    toolbox: {
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        }
+		    },
+		    legend: {
+		        data:['求助时间(min)','求助次数(次)'],
+		        top:30
+		    },
+		    dataZoom: [
+               { show: true, realtime: true, start: 1,end: 100},
+               {type: 'inside',realtime: true, start: 1,end: 100}
+           	],
+		    xAxis: [
+		        {
+		            type: 'category',
+		            data: stationData,
+		            axisPointer: {
+		                type: 'shadow'
+		            }
+			        /* ,axisLabel: {
+			            interval:0,
+			            rotate:50
+		            } */
+		        }
+		    ],
+		    yAxis: [
+		        {
+		            type: 'value',
+		            name: '求助时间(min)',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        },
+		        {
+		            type: 'value',
+		            name: '求助次数(次)',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        }
+		    ],
+		    series: [
+		        {
+		            name:'求助时间(min)',
+		            type:'bar',
+		            itemStyle:{
+		                normal: {
+		                    color: '#64BD3D'
+		                }
+		            },
+		            data:timeOutData
+		        },
+		        {
+		            name:'求助次数(次)',
+		            type:'line',
+		            yAxisIndex: 1,
+		            itemStyle:{
+		                normal: {
+		                    color: '#3498DB'
+		                }
+		            },
+		            data:timeOffData
+		        }
+		    ]
+		};
+	return option;
+}
+//等工求助时间/次数统计
+//stationData 岗位编号
+//timeOutData 紧停时间
+//timeOffData 紧停次数
+function getEqualNumberWork(stationData,timeOutData,timeOffData){
+// 	stationData = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+// 	timeOutData = [2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3];
+// 	timeOffData = [2.0, 2.2, 3.3, 4.5, 6.3, 10.2, 20.3, 23.4, 23.0, 16.5, 12.0, 6.2];
+	option = {
+			title: {
+		        text: "工位等工时间/次数统计",
+		        x:'center',
+		        y:'top'
+		    },
+		    tooltip: {
+		        trigger: 'axis',
+		        axisPointer: {
+		            type: 'cross',
+		            crossStyle: {
+		                color: '#999'
+		            }
+		        }
+		    },
+		    toolbox: {
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        }
+		    },
+		    legend: {
+		        data:['等工时间(min)','等工次数(次)'],
+		        top:30
+		    },
+		    dataZoom: [
+               { show: true, realtime: true, start: 1,end: 100},
+               {type: 'inside',realtime: true, start: 1,end: 100}
+           	],
+		    xAxis: [
+		        {
+		            type: 'category',
+		            data: stationData,
+		            axisPointer: {
+		                type: 'shadow'
+		            }
+			       /*  ,axisLabel: {
+			            interval:0,
+			            rotate:50
+		            } */
+		        }
+		    ],
+		    yAxis: [
+		        {
+		            type: 'value',
+		            name: '等工时间(min)',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        },
+		        {
+		            type: 'value',
+		            name: '等工次数(次)',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        }
+		    ],
+		    series: [
+		        {
+		            name:'等工时间(min)',
+		            type:'bar',
+		            itemStyle:{
+		                normal: {
+		                    color: '#64BD3D'
+		                }
+		            },
+		            data:timeOutData
+		        },
+		        {
+		            name:'等工次数(次)',
+		            type:'line',
+		            yAxisIndex: 1,
+		            itemStyle:{
+		                normal: {
+		                    color: '#3498DB'
+		                }
+		            },
+		            data:timeOffData
+		        }
+		    ]
+		};
+	return option;
+}
+
+function setUlocDataReport(id){
+	var myChart = echarts.init(document.getElementById(id));
+	ajaxRequest("${baseUrl}/report/getUlocData.do", {
+		"type":id,
+		"createTimeStart":$("#createTimeStart").val(),
+		"createTimeEnd":$("#createTimeEnd").val(),
+	}, function(result){
+		if(result.success){
+			if(id=="frequencyStatistics"){
+				myChart.showLoading();
+				var option = getFrequencyStatistics(result.data.stationDatas,result.data.timeOutData,result.data.timeOffData);
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(id == "tightStopTimes"){
+				myChart.showLoading();
+				var option = getTightStopTimes(result.data.stationDatas,result.data.timeOutData,result.data.timeOffData);
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(id == "numberRequestsHelp"){
+				myChart.showLoading();
+				var option = getNumberRequestsHelp(result.data.stationDatas,result.data.timeOutData,result.data.timeOffData);
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(id == "equalNumberWork"){
+				myChart.showLoading();
+				var option = getEqualNumberWork(result.data.stationDatas,result.data.timeOutData,result.data.timeOffData);
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}
+		}
+	}, false);
+}
+
+</script>
+</head>
+<body>
+ 	  <@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div class="report-panel">
+		<div id="frequencyStatistics"></div><!-- 岗位暂停时间/次数统计 -->
+		<div id="tightStopTimes" ></div><!-- 工位紧停次数统计 -->
+		<div id="numberRequestsHelp"></div><!-- 岗位求助时间/次数统计 -->
+		<div id="equalNumberWork" ></div><!-- 岗位等工时间/次数统计 -->
+	</div>
+<script type="text/javascript">
+  function conditionalQuery(searchBtnObj){
+	    setUlocDataReport('frequencyStatistics');
+	 	setUlocDataReport('tightStopTimes');
+	 	setUlocDataReport('numberRequestsHelp');
+		setUlocDataReport('equalNumberWork'); 
+ }
+  $('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<style type="text/css">
+#myTable{
+width: 100%;
+}
+#myTable tr{
+ height:40px;
+}
+#myTable tr td{
+ width:33%;text-align: center;
+}
+</style>
+<script type="text/javascript">
+var model = ${models!};
+function checkValue(){
+	var leftVal = 0;
+	var rightVal = 0;
+	for(var i=0;i<model.length;i++){
+		if($("#"+model[i]).val()==""){
+			$("#"+model[i]).val(0);
+		}
+		if(i<=1){
+			leftVal+=parseInt($("#"+model[i]).val());
+		}else{
+			rightVal+=parseInt($("#"+model[i]).val());
+		}
+	}
+	if(leftVal!=rightVal){
+		errorTip('<@s.m code='PRODUCTIONSCHEDULE_LEFTRIGHTNOTEQUAL'/>');
+		return false;
+	}
+	return true;
+}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/mpSourceData/updateMulti.do" class="form-horizontal" permissionModule="PRODUCTION_SCHEDULE">
+	<input type="hidden" id="beforeSubmit" value="checkValue">
+	<table id="myTable">
+		<tr>
+			<td><@s.m code='METALPLATE_MACHININGSURFACE'/></td>
+			<td><@s.m code='PRODUCTIONSCHEDULE_APCTOTALNUMBER'/></td>
+			<td><@s.m code='PRODUCTIONSCHEDULE_PLANNEDPRODUCTION'/></td>
+		</tr>
+		<#list beans as bean>
+			<tr>
+				<td>${bean.model!}</td>
+				<td>${bean.apcTotalNumber!}</td>
+				<td>
+					<input type="text" id="${bean.model!}" name="${bean.model!}" value="${bean.plannedProduction!0}"  datatype="*" style="text-align: center;" ajaxurl="${baseUrl}/mpSourceData/checkPlannedProduction.do?model=${bean.model!}" maxlength='10' onkeyup="value=value.replace(/[^\d]/g,'')">
+					<input type="hidden" id="${bean.model!}_id" name="${bean.model!}_id" value="${bean.id!0}">
+				</td>
+			</tr>
+		</#list>
+	</table>
+</@p.editForm>
+</body>
+</html>

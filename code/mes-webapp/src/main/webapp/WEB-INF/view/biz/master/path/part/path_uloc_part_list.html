@@ -1,0 +1,41 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body title="PATH_LIST_TITLE" permissionModule="PATH_ULOC_PART" noBreadcrumbs="true">	
+<!-- <div style="color: #428bca;text-align:center; margin:10px" >关键件信息</div> -->
+<input id="tmPathUlocId" type="hidden" value="${tmPathUlocId!}" />
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathUlocPartAdd" iconCls="plus" url="${baseUrl}/path/uloc/part/addInput.do?tmPathUlocId="+"${tmPathUlocId}" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathUlocPartEdit" iconCls="edit" url="${baseUrl}/path/uloc/part/updateInput.do?tmPathUlocId="+"${tmPathUlocId}" type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathUlocPartDelete" iconCls="trash" url="${baseUrl}/path/uloc/part/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/path/uloc/part/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_PART" field="part.nameCn" permissionCode="PATH_ULOC_PART_ULOC_PART" formatter="renderPart"></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_QTY" field="qty" permissionCode="PATH_ULOC_PART_ULOC_QTY" ></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_SEQ" field="seq" permissionCode="PATH_ULOC_PART_ULOC_SEQ" ></@p.column>
+<!-- 		<@p.column title="PATH_ULOC_PART_ULOC_ISTRAC" field="isTrac" permissionCode="PATH_ULOC_PART_ULOC_ISTRAC" formatter="renderYesOrNo"></@p.column> -->
+		<@p.column title="PATH_ULOC_PART_ULOC_ISBATCHTRAC" field="isBatchTrac" permissionCode="PATH_ULOC_PART_ULOC_ISBATCHTRAC" formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_NOTE" field="note" permissionCode="PATH_ULOC_PART_NOTE" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+function renderUlocType(value){
+	return entryRenderer('ULOC_TYPE', value);
+}
+function renderPart(value,record){
+	if(record.part&&record.part.no){
+		return record.part.no+ " - " + record.part.nameCn;
+	}
+}
+
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

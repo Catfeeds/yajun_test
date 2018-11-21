@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="FinNoFaultDetailsMapper" >
+	<select id="getFinNoFaultStopDetails" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			  select   a.dt                 as dateShow,
+				       a.dayofweek          as weekShow,
+				      sum(decode(b.whiteShift,null,0,b.whiteShift)) as whiteShift,
+	               	  sum( decode(b.nightShift,null,0,b.nightShift)) as nightShift,
+	                  sum( decode(b.whiteDurationCount,null,0,b.whiteDurationCount) )as whiteDurationCount,
+	                  sum(decode(b.nightDurationCount,null,0,b.nightDurationCount)) as nightDurationCount
+			  from (select to_char(everyDay, 'MM-dd') as dt,
+			               to_char(everyday, 'dy') as dayofweek
+			          from (select to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd') - 1 + level as everyDay
+			                  from dual
+			                connect by level &lt;= ((to_date(substr(#{createTimeEnd},0,10), 'yyyy-mm-dd') + 1) -
+			                           to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd')))) a
+			  left join (select to_char(f.work_calendar_begin, 'day') as weekShow,
+			                    to_char(f.work_calendar_begin, 'MM-DD') as dateShow,
+			                    sum(decode(f.shift_no, '1', 1, 0)) as whiteShift,
+			                    sum(decode(f.shift_no, '2', 1, 0)) as nightShift,
+			                    sum(decode(f.shift_no, '1', f.duration, 0)) as whiteDurationCount,
+			                    sum(decode(f.shift_no, '2', f.duration, 0)) as nightDurationCount
+			               from fin_no_fault_stop f
+			              where f.shift_no != '0'
+			                and f.work_calendar_begin is not null
+			                and f.is_rest = 'N'
+			               <if test="createTimeStart!=null and createTimeStart!='' ">
+							 and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+						 </if>
+						 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+						 	and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+						 </if>   
+			              group by f.work_calendar_begin
+			              order by f.work_calendar_begin) b
+			    on a.dt = b.dateShow
+			   and a.dayofweek = b.weekShow
+			 group by a.dt ,a.dayofweek
+			 order by a.dt
+	</select>
+	<!-- 切换停机详情 -->
+	<select id="getFinSwitchStopDetails" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		  select   a.dt                 as dateShow,
+				       a.dayofweek          as weekShow,
+				       decode(b.whiteShift,null,0,b.whiteShift) as whiteShift,
+		 			   decode(b.nightShift,null,0,b.nightShift) as nightShift,
+				       decode(b.whiteDurationCount,null,0,b.whiteDurationCount) as whiteDurationCount,
+			 		   decode(b.nightDurationCount,null,0,b.nightDurationCount) as nightDurationCount
+			  from (select to_char(everyDay, 'MM-dd') as dt,
+			               to_char(everyday, 'dy') as dayofweek
+			          from (select to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd') - 1 + level as everyDay
+			                  from dual
+			                connect by level &lt;= ((to_date(substr(#{createTimeEnd},0,10), 'yyyy-mm-dd') + 1) -
+			                           to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd')))) a
+			  left join (select to_char(f.work_calendar_begin, 'day') as weekShow,
+			                    to_char(f.work_calendar_begin, 'MM-DD') as dateShow,
+			                    sum(decode(f.shift_no, '1', 1, 0)) as whiteShift,
+			                    sum(decode(f.shift_no, '2', 1, 0)) as nightShift,
+			                    sum(decode(f.shift_no, '1', f.duration, 0)) as whiteDurationCount,
+			                    sum(decode(f.shift_no, '2', f.duration, 0)) as nightDurationCount
+			               from FIN_SWITCH_STOP f
+			              where f.shift_no != '0'
+			                and f.work_calendar_begin is not null
+			                and f.is_rest = 'N'
+			               <if test="createTimeStart!=null and createTimeStart!='' ">
+							 and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+						 </if>
+						 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+						 	and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+						 </if>   
+			              group by f.work_calendar_begin
+			              order by f.work_calendar_begin) b
+			    on a.dt = b.dateShow
+			   and a.dayofweek = b.weekShow
+			 order by a.dt
+	</select>
+	
+	<!-- 换料停机详情 -->
+	<select id="getFinChangeMaterialStopDetails" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		 select   a.dt                 as dateShow,
+				       a.dayofweek          as weekShow,
+				      decode(b.whiteShift,null,0,b.whiteShift) as whiteShift,
+		 			   decode(b.nightShift,null,0,b.nightShift) as nightShift,
+				       decode(b.whiteDurationCount,null,0,b.whiteDurationCount) as whiteDurationCount,
+			 		   decode(b.nightDurationCount,null,0,b.nightDurationCount) as nightDurationCount
+			  from (select to_char(everyDay, 'MM-dd') as dt,
+			               to_char(everyday, 'dy') as dayofweek
+			          from (select to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd') - 1 + level as everyDay
+			                  from dual
+			                connect by level &lt;= ((to_date(substr(#{createTimeEnd},0,10), 'yyyy-mm-dd') + 1) -
+			                           to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd')))) a
+			  left join (select to_char(f.work_calendar_begin, 'day') as weekShow,
+			                    to_char(f.work_calendar_begin, 'MM-DD') as dateShow,
+			                    sum(decode(f.shift_no, '1', 1, 0)) as whiteShift,
+			                    sum(decode(f.shift_no, '2', 1, 0)) as nightShift,
+			                    sum(decode(f.shift_no, '1', f.duration, 0)) as whiteDurationCount,
+			                    sum(decode(f.shift_no, '2', f.duration, 0)) as nightDurationCount
+			               from FIN_CHANGE_MATERIAL_STOP f
+			              where f.shift_no != '0'
+			                and f.work_calendar_begin is not null
+			                and f.is_rest = 'N'
+			               <if test="createTimeStart!=null and createTimeStart!='' ">
+							 and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+						 </if>
+						 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+						 	and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+						 </if>   
+			              group by f.work_calendar_begin
+			              order by f.work_calendar_begin) b
+			    on a.dt = b.dateShow
+			   and a.dayofweek = b.weekShow
+			 order by a.dt
+	</select>
+	<!-- 加油停机详情 -->
+	<select id="getFinAddOilStopDetails" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+	
+		 select   a.dt  as dateShow,
+					       a.dayofweek          as weekShow,
+					       decode(b.whiteShift,null,0,b.whiteShift) as whiteShift,
+			 			   decode(b.nightShift,null,0,b.nightShift) as nightShift,
+					       decode(b.whiteDurationCount,null,0,b.whiteDurationCount) as whiteDurationCount,
+				 		   decode(b.nightDurationCount,null,0,b.nightDurationCount) as nightDurationCount
+				  from (select to_char(everyDay, 'MM-dd') as dt,
+				               to_char(everyday, 'dy') as dayofweek
+				          from (select to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd') - 1 + level as everyDay
+				                  from dual
+				                connect by level &lt;= ((to_date(substr(#{createTimeEnd},0,10), 'yyyy-mm-dd') + 1) -
+				                           to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd')))) a
+				  left join (select to_char(f.work_calendar_begin, 'day') as weekShow,
+				                    to_char(f.work_calendar_begin, 'MM-DD') as dateShow,
+				                    sum(decode(f.shift_no, '1', 1, 0)) as whiteShift,
+				                    sum(decode(f.shift_no, '2', 1, 0)) as nightShift,
+				                    sum(decode(f.shift_no, '1', f.duration, 0)) as whiteDurationCount,
+				                    sum(decode(f.shift_no, '2', f.duration, 0)) as nightDurationCount
+				               from FIN_ADD_OIL_STOP f
+				              where f.shift_no != '0'
+				                and f.work_calendar_begin is not null
+				                and f.is_rest = 'N'
+				               <if test="createTimeStart!=null and createTimeStart!='' ">
+								 and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+							 </if>
+							 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+							 	and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+							 </if>   
+				              group by f.work_calendar_begin
+				              order by f.work_calendar_begin) b
+				    on a.dt = b.dateShow
+				   and a.dayofweek = b.weekShow
+				 order by a.dt
+	</select>
+	<select id="noFaultedDetailsYearShow" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			   select TRUNC(SUM(f.duration) / 60, 2) as minute,
+            to_char(f.work_calendar_begin, 'yyyy-MM-dd') createTime,
+            count(f.id) as count
+       from fin_no_fault_stop f
+      where f.shift_no != '0' and f.work_calendar_begin is not null
+      and f.is_rest = 'N'
+       <if test="createTimeStart!=null and createTimeStart!='' ">
+	   and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+	  </if>
+	  <if test="createTimeEnd!=null and createTimeEnd!='' ">
+	    and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+  </if>
+      group by to_char(f.work_calendar_begin, 'yyyy-MM-dd')
+	</select>
+</mapper>  

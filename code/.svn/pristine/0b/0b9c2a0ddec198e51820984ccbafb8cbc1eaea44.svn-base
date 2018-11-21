@@ -1,0 +1,3 @@
+<@p.body title="DATA_SOURCE_TITLE" noPermissionModule="true">
+	<iframe src="${baseUrl}/druid/index.html" frameborder="0" style="border:0;width:100%;height:710px;"></iframe>
+</@p.body>

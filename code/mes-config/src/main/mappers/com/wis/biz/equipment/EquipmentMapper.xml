@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="EquipmentMapper">
+	<select id="getParamPageResult" resultType="com.wis.basis.configuration.entity.TsParameter" parameterType="java.util.HashMap">
+		SELECT
+		  *
+		FROM
+		  (
+		    SELECT
+		      ROW_.*,
+		      ROWNUM ROWNUM_
+		    FROM
+		      (
+		       select t.ID as id,
+		         t.CODE as code,
+		         t.NAME as name,
+		         t.REGULAR_EXPRESSION as regularExpression,
+		         t.VARIUABLE_NAME as variuableName,
+		         t.NOTE as note
+		      from ts_parameter t where 
+		      t.ID not in (select p.TS_PARAMETER_ID from tm_equipment_param p where p.TM_EQUIPMENT_ID=#{tmEquipmentId})
+		      <if test="code !=null and code!='' ">
+				AND t.CODE LIKE '%'|| #{code} || '%' 
+			  </if>
+	  		  <if test="name !=null and name!='' ">
+					AND t.NAME LIKE '%'|| #{name} || '%'
+			  </if>
+			  order by t.ID desc
+		      ) ROW_
+		  )
+		WHERE
+		  ROWNUM_ > #{firstRow}
+		AND #{pageSize} >= ROWNUM_
+	</select>
+	
+	
+	 <select id="getParamCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+	 	select  COUNT(*)
+		from ts_parameter t where 
+		t.ID not in (select p.TS_PARAMETER_ID from tm_equipment_param p where p.TM_EQUIPMENT_ID=#{tmEquipmentId})
+		<if test="code !=null and code!='' ">
+				AND t.CODE LIKE '%'|| #{code} || '%' 
+		</if>
+  		<if test="name !=null and name!='' ">
+				AND t.NAME LIKE '%'|| #{name} || '%'
+		</if>
+	 </select>
+
+
+	<select id="getPartPageResult" resultType="com.wis.mes.master.part.entity.TmPart" parameterType="java.util.HashMap">
+  		select t.ID as id,
+  			   t.NO as no,
+  			   t.NAME_CN as nameCn,
+  			   t.NAME_CN_S as nameCnS,
+  			   t.NAME_EN as nameEn,
+  			   t.NAME_EN_S as nameEnS,
+  			   t.TYPE as type,
+  			   t.BATCH_QTY as batchQty,
+  			   t.BASE_UNIT as baseUnit,
+  			   t.ENABLED as enabled
+  		from tm_part t where t.TM_PLANT_ID =#{tmPlantId}  and t.TYPE=#{type} 
+  		and t.ID not in (select m.TM_PART_ID from tm_equipment_materials m where m.TM_EQUIPMENT_ID=#{tmEquipmentId})
+  		<if test="no !=null and no!='' ">
+				AND t.NO LIKE CONCAT('%',#{no},'%')
+		</if>
+  		<if test="enabled !=null and enabled!='' ">
+				AND t.ENABLED LIKE CONCAT('%',#{enabled},'%')
+		</if>
+  		<if test="nameCn !=null and nameCn!='' ">
+				AND t.NAME_CN LIKE CONCAT('%',#{nameCn},'%')
+		</if>
+  		LIMIT #{firstRow}, #{pageSize}
+  </select>
+  
+   <select id="getPartCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+  	select  COUNT(*)
+  		from tm_part t where  t.TM_PLANT_ID =#{tmPlantId}  and t.TYPE=#{type} 
+  		and t.ID not in (select m.TM_PART_ID from tm_equipment_materials m where m.TM_EQUIPMENT_ID=#{tmEquipmentId})
+  		<if test="no !=null and no!='' ">
+				AND t.NO LIKE CONCAT('%',#{no},'%')
+		</if>
+  		<if test="enabled !=null and enabled!='' ">
+				AND t.ENABLED LIKE CONCAT('%',#{enabled},'%')
+		</if>
+  		<if test="nameCn !=null and nameCn!='' ">
+				AND t.NAME_CN LIKE CONCAT('%',#{nameCn},'%')
+		</if>
+  </select>
+
+
+   <select id="getUserPageResult" resultType="com.wis.basis.systemadmin.entity.User" parameterType="java.util.HashMap">
+  	select t.ID as id,
+  		   t.USER_NAME as name,
+  		   t.PHONE as phone,
+  		   t.EMAIL as email,
+  		   t.ACCOUNT as account
+  	from ts_user t where t.ID  not in (select p.TS_USER_ID from tm_equipment_responsible_person p where p.TM_EQUIPMENT_ID = #{tmEquipmentId}) 
+  	<if test="name !=null and name!='' ">
+				AND t.USER_NAME LIKE CONCAT('%',#{name},'%')
+	</if> 
+  	<if test="account !=null and account!='' ">
+				AND t.ACCOUNT LIKE CONCAT('%',#{account},'%')
+	</if> 
+  	LIMIT #{firstRow}, #{pageSize}
+  </select>
+  
+   <select id="getUserCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+  	select COUNT(*)
+  	from ts_user t where t.ID  not in (select p.TS_USER_ID from tm_equipment_responsible_person p where p.TM_EQUIPMENT_ID = #{tmEquipmentId}) 
+  	<if test="name !=null and name!='' ">
+				AND t.USER_NAME LIKE CONCAT('%',#{name},'%')
+	</if> 
+  	<if test="account !=null and account!='' ">
+				AND t.ACCOUNT LIKE CONCAT('%',#{account},'%')
+	</if> 
+  </select>
+  
+   <select id="findByPropertyNumber" resultType="com.wis.mes.master.equipment.entity.TmEquipment" parameterType="java.lang.String">
+  	 select t.* from tm_equipment t where t.PROPERTY_NUMBER =#{value}
+  </select>
+   <select id="findNameByNo" resultType="com.wis.mes.master.equipment.entity.TmEquipment" parameterType="java.lang.String">
+  	 select t.* from tm_equipment t where t.NO =#{no}
+  </select>
+   <select id="findMouldNameById" resultType="com.wis.mes.master.equipment.entity.TmEquipment" parameterType="java.lang.String">
+  	 select t.* from tm_equipment t where t.id =#{mouldArray}
+  </select>
+  
+</mapper>

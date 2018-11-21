@@ -1,0 +1,75 @@
+ 
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+
+$('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+    //工位检查参数信息的取得
+    $.ajax({
+        url: "${baseUrl}/supplierPart/listInput.do?currentPageId=supplierPartGrid&params=queryCondition[tmSupplierId]="+row.id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmSupplierId":row.id},
+        success: function(html){
+            $("#supplierPart").html(html);
+        }
+    });
+});
+</script>
+
+<@p.body title="SUPPLIER_LIST_TITLE" permissionModule="SUPPLIER">
+	<@p.searchPanel >
+		<@p.searchColumns>
+		    <@p.input title="SUPPLIER_NO" field="no"  ></@p.input>
+			<@p.input title="SUPPLIER_NAME" field="name"  ></@p.input>
+			<@p.input title="SUPPLIER_NOTES" field="notes" ></@p.input>
+			<@p.input title="SUPPLIER_ENABLED"  field="enabled"  type="select" options=optionEnab ></@p.input>
+			<@p.input title="SUPPLIER_PART_TYPE"  field="type"  type="select" options=typeOptions ></@p.input>
+	    </@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="SUPPLIER_ADD" permissionCode="SupplierAdd" iconCls="plus" url="${baseUrl}/supplier/addInput.do" type="add"  ></@p.button>
+			<@p.button title="SUPPLIER_UPDATE" permissionCode="SupplierUpdate" iconCls="edit" url="${baseUrl}/supplier/updateInput.do" type="update"></@p.button>
+			<@p.button title="SUPPLIER_DELETE" permissionCode="SupplierDelete" iconCls="trash" url="${baseUrl}/supplier/delete.do" type="delete"></@p.button>
+			<@p.button title="SUPPLIER_EXPORT" downName="SUPPLIER_EXPORT_FILE_NAME" permissionCode="SupplierExport" iconCls="upload-alt"  url="${baseUrl}/supplier/exportData.do" type="down"></@p.button>
+			<@p.button title="SUPPLIER_IMPORT" permissionCode="SupplierImport" iconCls="signin" onclick="importData()" ></@p.button>
+			<@p.button title="SUPPLIER_AND_PART_EXPORT" downName="SUPPLIER_AND_PART_EXPORT_FILE_NAME" permissionCode="SupplierExportAll" iconCls="upload-alt"  url="${baseUrl}/supplier/exportDataAll.do" type="down"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/supplier/list.do" >
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="SUPPLIER_NO" field="no" permissionCode="SUPPLIER_NO" > </@p.column>
+		<@p.column title="SUPPLIER_NAME" field="name" permissionCode="SUPPLIER_NAME" ></@p.column>
+		<@p.column title="SUPPLIER_ADDR" field="addr" permissionCode="SUPPLIER_ADDR" > </@p.column>
+		<@p.column title="SUPPLIER_CONTACT1" field="contact1" permissionCode="SUPPLIER_CONTACT1" ></@p.column>
+		<@p.column title="SUPPLIER_TEL_NO1" field="telNo1" permissionCode="SUPPLIER_TEL_NO1" ></@p.column>
+		<@p.column title="SUPPLIER_FAX_NO1" field="faxNo1" permissionCode="SUPPLIER_FAX_NO1" ></@p.column>
+		<@p.column title="SUPPLIER_MOBILE_NO1" field="mobileNo1" permissionCode="SUPPLIER_MOBILE_NO1" ></@p.column>
+		<@p.column title="SUPPLIER_EMAIL1" field="emaile1" permissionCode="SUPPLIER_EMAIL1" ></@p.column>
+		<@p.column title="SUPPLIER_CONTACT2" field="contact2" permissionCode="SUPPLIER_CONTACT2" ></@p.column>
+		<@p.column title="SUPPLIER_TEL_NO2" field="telNo2" permissionCode="SUPPLIER_TEL_NO2" ></@p.column>
+		<@p.column title="SUPPLIER_FAX_NO2" field="faxNo2" permissionCode="SUPPLIER_FAX_NO2" ></@p.column>
+		<@p.column title="SUPPLIER_MOBILE_NO2" field="mobileNo2" permissionCode="SUPPLIER_MOBILE_NO2" ></@p.column>
+		<@p.column title="SUPPLIER_EMAIL2" field="emaile2" permissionCode="SUPPLIER_EMAIL2" ></@p.column>
+		<@p.column title="SUPPLIER_NOTES" field="notes" permissionCode="SUPPLIER_NOTES" ></@p.column>
+		<@p.column title="SUPPLIER_ENABLED" field="enabled" permissionCode="SUPPLIER_ENABLED"  formatter="renderEnabled"></@p.column>
+	</@p.dataGrid>
+	<div id ="supplierPart"></div>
+</@p.body>
+<script type="text/javascript">
+
+function renderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/supplier/exportTemplate.do";
+    importFile("<@s.m code="SUPPLIER_IMPORT" />", "${baseUrl}/supplier/importData.do", "dg${currentPageId}",obj);
+}
+
+</script>

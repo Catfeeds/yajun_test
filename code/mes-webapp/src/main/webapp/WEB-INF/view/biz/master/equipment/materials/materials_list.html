@@ -1,0 +1,45 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	function renderEquipmentNoOrName(value,equipment) {
+		if(value && equipment.equipment.no){
+			return equipment.equipment.no+ " - " + value;
+		}
+		return value;
+	}
+	function renderPartNoOrName(value,part) {
+		if(value && part.part.no){
+			return part.part.no+ " - " + value;
+		}
+		return value;
+	}
+	function renderType(value){
+		return entryRenderer('PART_TYPE', value);
+	}
+	
+</script>
+<@p.body title="EQUIPMENT_LIST_TITLE" permissionModule="EQUIPMENT_MATERIALS" noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EQUIPMENT_MATERIALS_NAME" field="part.nameCn"  permissionCode="EQUIPMENT_NAME"></@p.input>
+			<@p.input title="EQUIPMENT_MATERIALS_NOTE" field="note" permissionCode="EQUIPMENT_NO"></@p.input> 
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="EQUIPMENT_MATERIALS_ADD" permissionCode="EquipmentMaterialsAdd" iconCls="plus" url="${baseUrl}/equipmentMaterials/addInput.do?tmEquipmentId="+"${tmEquipmentId}" type="add"  ></@p.button>
+			<@p.button title="EQUIPMENT_MATERIALS_UPDATE" permissionCode="EquipmentMaterialsUpdate" iconCls="edit" url="${baseUrl}/equipmentMaterials/updateInput.do?tmEquipmentId="+"${tmEquipmentId}" type="update"></@p.button>
+			<@p.button title="EQUIPMENT_MATERIALS_DELETE" permissionCode="EquipmentMaterialsDelete" iconCls="trash" url="${baseUrl}/equipmentMaterials/delete.do" type="delete"></@p.button>
+			<@p.button title="EQUIPMENT_MATERIALS_EXPORT" permissionCode="EquipmentMaterialsExport" downName="EQUIPMENT_MATERIALS_EXPORT_NAME" url="${baseUrl}/equipmentMaterials/exportData.do?tmEquipmentId="+"${tmEquipmentId}" iconCls="upload-alt" type="down" ></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid  url="${baseUrl}/equipmentMaterials/list.do?tmEquipmentId="+"${tmEquipmentId}">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="EQUIPMENT_MATERIALS_NAME" field="part.nameCn"   permissionCode="EQUIPMENT_PART"  formatter="renderPartNoOrName"  ></@p.column>
+		<@p.column title="PART_NO" field="part.no" permissionCode="EQUIPMENT_PART"></@p.column>
+		<@p.column title="PART_NAME_CN_S" field="part.nameCnS" permissionCode="EQUIPMENT_PART"></@p.column>
+		<@p.column title="PART_NAME_EN_S" field="part.nameEnS" permissionCode="EQUIPMENT_PART"></@p.column>
+		<@p.column title="PART_TYPE" field="part.type" permissionCode="EQUIPMENT_PART"  formatter="renderType"></@p.column>
+		<@p.column title="PART_BATCH_QTY" field="part.batchQty" permissionCode="EQUIPMENT_PART"></@p.column>
+		<@p.column title="EQUIPMENT_MATERIALS_NOTE" field="note"   permissionCode="EQUIPMENT_PART"></@p.column>
+	</@p.dataGrid>
+</@p.body>

@@ -1,0 +1,34 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function render(value) {
+	if(value){
+		return value;
+	}
+	return "";
+}
+</script>
+<@p.body title="WORK_TIME_REST_LIST_TITLE"  permissionModule="WORKTIMEREST" noBreadcrumbs="true">
+   <div style="color: #428bca;text-align:center; margin:10px" >出勤时段-休息时间</div>
+	<@p.searchPanel >
+		<@p.toolbar id="toolbar">
+			<@p.button title="WORK_TIME_REST_ADD"  permissionCode="WorkTimeRestAdd" iconCls="plus" url="${baseUrl}/worktimerest/addInput.do?tmWorktimeId=${tmWorktimeId!}" type="add"  ></@p.button>
+			<@p.button title="WORK_TIME_REST_UPDATE" permissionCode="WorkTimeRestUpdate" iconCls="edit" url="${baseUrl}/worktimerest/updateInput.do" type="update"></@p.button>
+			<@p.button title="WORK_TIME_REST_DELETE" permissionCode="WorkTimeRestDelete" iconCls="trash" url="${baseUrl}/worktimerest/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	  <@p.dataGrid url="${baseUrl}/worktimerest/list.do?${params!}">
+     		<@p.column checkbox="true"></@p.column>
+			<@p.column title="WORK_TIME_REST_START_TIME" field="startTime" permissionCode="WORK_TIME_REST_START_TIME"></@p.column>
+			<@p.column title="WORK_TIME_REST_END_TIME" field="endTime" permissionCode="WORK_TIME_REST_END_TIME"></@p.column>
+			<@p.column title="WORK_TIME_REST_REMARK" field="remark" permissionCode="WORK_TIME_REST_REMARK" formatter="render"></@p.column>
+    </@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+</script>
+
+
+	

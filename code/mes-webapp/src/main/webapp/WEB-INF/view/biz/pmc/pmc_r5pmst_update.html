@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/tbPmcPmst/pmstr5Update.do" class="form-horizontal" idValue=bean.id>
+		<@p.formRow>
+			<@p.formColmd title="PMC_PMST_TIME_FRAME">
+				<input name="modelType" type="hidden" value="${bean.modelType!}" >
+				<input name="timeFrame" class="inputxt" readonly="readonly" value="${bean.timeFrame!}" >
+			</@p.formColmd>
+			<@p.formColmd title="PMC_PMST_TARGET_MOBILITY">
+				<input name="targetMobility" class="inputxt" value="${bean.targetMobility!}" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PMC_PMST_AIR_CONDITIONER_EC">
+				<input name="airConditionerEc" class="inputxt" value="${bean.airConditionerEc!}" >
+			</@p.formColmd>
+			<@p.formColmd title="PMC_PMST_EQUIPMENT_EC">
+				<input name="equipmentEc" class="inputxt" value="${bean.equipmentEc!}" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PMC_PMST_LIGHTING_EC">
+				<input name="lightingEc" class="inputxt" value="${bean.lightingEc!}" >
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<#include "../../include/bootstrapTableCommons.html">
+<style>
+.width{
+	width: 256px;
+	text-align: left;
+}
+.right{
+	text-align: right;
+}
+</style>
+
+<script type="text/javascript">
+$.fn.serializeObject = function()
+{
+	var o = {};
+	var a = this.serializeArray();
+	$.each(a, function() {
+		if (o[this.name] !== undefined) {
+			if (!o[this.name].push) {
+				o[this.name] = [o[this.name]];
+			}
+			o[this.name].push(this.value || '');
+		} else {
+			o[this.name] = this.value || '';
+		}
+	});
+	return o;
+};
+	
+	
+	function chageType(type) {
+		$.ajax({
+	        url: "${baseUrl}/numRule/listInput.do",
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:true,
+	        data : {"type":type},
+	        success: function(html){
+	        	infoTip("操作执行成功!");
+        		$("#numRule").html(html);
+	        }
+	    });
+	}
+	
+	function doUpdate(){
+		$.ajax({
+	        url: "${baseUrl}/numRule/saveOrUpdate.do",
+	        cache: false,
+	        global: false,
+	        type: "POST",
+	        data : {"beans":JSON.stringify($("form").serializeObject())},
+	        success: function(result){
+	        	console.log(result);
+	        	if(result.success == true){
+	        		chageType($("#type").val());
+	        	}else{
+	        		errorTip(result.message);
+	        	}
+	        }
+	    });
+	}
+	
+	function reset(){
+		chageType($("#type").val());
+	}
+</script>
+<div id="numRule">
+<@p.body title="NUMRULE_LIST_TITILE" permissionModule="NUMRULE">
+<center>
+<form>
+<table >
+<input type="hidden" name ="id" value="${ruleRum.id!}"/>
+	<tr>
+		<td class ="right">编号类型：</td>
+		 <td>
+		<select name ="type" onchange="chageType(this.value)" id ="type" class="width">
+				<#if typeList??>
+					 <#list typeList as entry>
+					 	   <option  value="${entry.code}"  <#if type?? && type =='${entry.code}'>selected="selected"</#if>>${entry.name}</option>
+					 </#list>
+				</#if>
+		</select>
+	   </td>
+	   <td>是否重置</td>
+	</tr>
+	<tr>
+		<td class ="right">前缀：</td>
+	    <td><input type="text" name ="prefix" value ="${ruleRum.prefix!}" class="width"></td>
+	    <td><input type="checkbox" name="prefixReset"  <#if '${ruleRum.prefixReset!}'?? && '${ruleRum.prefixReset!}' =="YES">checked ="true"</#if>/></td>
+	</tr>
+	<tr>
+		<td class ="right">中缀：</td>
+	    <td><input type="text" name ="infix" value ="${ruleRum.infix!}" class="width"></td>
+	    <td><input type="checkbox" name="infixReset" <#if '${ruleRum.infixReset!}'?? && '${ruleRum.infixReset!}' =="YES">checked ="true"</#if>/></td>
+	</tr>
+	<tr>
+		<td class ="right">后缀：</td>
+	    <td><input type="text" name ="suffix" value ="${ruleRum.suffix!}" class="width"></td>
+	     <td><input type="checkbox" name="suffixReset" <#if '${ruleRum.suffixReset!}'?? && '${ruleRum.suffixReset!}' =="YES">checked ="true"</#if>/></td>
+	</tr>
+	<tr>
+		<td class ="right">长度：</td>
+	    <td><input type="text" name="length" value ="${ruleRum.length!}"class="width" datatype="n"/></td>
+	    <td></td>
+	</tr>
+	<tr>
+		<td class ="right">序列：</td>
+	    <td><input type="text" name="currentValue" value ="${ruleRum.currentValue!}"class="width"></td>
+	    <td></td>
+	</tr>
+	</table>
+	</form>
+</center>	
+<div class="hr dotted"></div>
+<center>
+		<@p.button title="FRAME_SAVE" permissionCode="NumRuleEdit" iconCls="plus" type="button" onclick="doUpdate()" class="btn btn-sm btn-info"></@p.button>
+		<@p.button title="FRAME_RESTORE" permissionCode="NumRuleEdit" iconCls="retweet" type="button" onclick="reset()" class="btn btn-sm btn-info"></@p.button>
+</center>
+	
+</@p.body>
+</div>

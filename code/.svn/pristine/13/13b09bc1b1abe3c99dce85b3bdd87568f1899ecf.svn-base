@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="${baseUrl}/res/ckeditor/ckeditor.js"></script> 
+<link rel="stylesheet" href="${baseUrl}/res/ckeditor/samples/toolbarconfigurator/lib/codemirror/neo.css"></script> 
+</head>	
+<script type="text/javascript">
+$(function(){
+	CKEDITOR.replace( 'txtContent', { toolbar: 'basic',height:window.screen.availHeight*0.6*0.4} );
+	$("#txtReleased").val(releasedRenderer('${bean.released!}'));
+	initValidForm(function(){
+		$("#txtContent").val(CKEDITOR.instances.txtContent.getData());
+	});
+	$(".form-horizontal input").attr("class","col-xs-10 col-sm-5 form-control");
+	$(".form-horizontal textarea").attr("class","col-xs-10 col-sm-5 form-control");
+	$(".form-horizontal input[type='radio']").attr("class","");
+});
+function releasedRenderer(value){
+	if(value){
+		return '<@s.m code="TASK_REMIND_RELEASED" />';
+	}
+	return '<@s.m code="TASK_REMIND_NOT_RELEASED" />';
+}
+function nodeSelect(dialog){
+	var selectedRows = $('#dgNodeSelectGrid').bootstrapTable('getSelections');
+	if (!selectedRows || selectedRows.length == 0) {
+		infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+	$('#txtNodeName').val(selectedRows[0].name);
+	$('#nodeDescription').val(selectedRows[0].description);
+	$('#processNodeId').val(selectedRows[0].id);
+	$('#processName').val(selectedRows[0].processName);
+	$('#processDescription').val(selectedRows[0].processDescription);
+	$('#reminderName').val(selectedRows[0].userName);
+	$('#reminderAccount').val(selectedRows[0].reminderAccount);
+	dialog.close();
+}
+function reminderSelect(dialog){
+	var selectedRows = $('#orgnization_principal_list').bootstrapTable('getSelections');
+	if (!selectedRows || selectedRows.length == 0) {
+		infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+	$('#reminderName').val(selectedRows[0].name);
+	$('#reminderAccount').val(selectedRows[0].account);
+	dialog.close();
+}
+</script>
+<body> 
+<@p.editForm url="${baseUrl}/bpm/manage/remind/update.do" idValue=bean.id class="form-horizontal"  permissionModule="TASK_REMIND" noPermissionModule="true">
+			<@p.formRow>
+				<@p.formColmd title="TASK_REMIND_NODE_NAME"    permissionCode="NODE_NAME">
+					<input name="processNodeId"  type="hidden" value="${bean.processNodeId}" id="processNodeId" >
+				 	<input type="text" name="myNodeName" id="txtNodeName" value="${bean.myNodeName!}" class="readonlyText" readonly="readonly" datatype="*2-100" />
+			 	  <@p.select  title="TASK_REMIND_SELECT_NODE"    url="${baseUrl}/bpm/manage/remind/nodeSelect.do?currentPageId=NodeSelectGrid&singleSelect=true" callback="nodeSelect"/>
+				</@p.formColmd>
+				<@p.formColmd title="TASK_REMIND_NODE_DESCRIPTION"    permissionCode="NODE_DESCRIPTION">
+					 	<input name="nodeDescription" id="nodeDescription" value="${bean.nodeDescription}" class="readonlyText" readonly="readonly"  />
+				</@p.formColmd>
+			</@p.formRow>
+			<@p.formRow>
+				<@p.formColmd title="TASK_REMIND_PROCESS_NAME"    permissionCode="PROCESS_NAME">
+					 	<input name="processName" id="processName" value="${bean.processName!}" class="readonlyText" readonly="readonly"  />
+				</@p.formColmd>
+				<@p.formColmd title="TASK_REMIND_PROCESS_DESCRIPTION"    permissionCode="PROCESS_DESCRIPTION">
+					 	<input name="processDescription" id="processDescription" value="${bean.processDescription!}" class="readonlyText" readonly="readonly"  />
+				</@p.formColmd>
+			</@p.formRow>
+			<@p.formRow>
+				<@p.formColmd title="TASK_REMIND_REMINDER_TYPE"    permissionCode="REMINDER_TYPE">
+				 		<@p.input  type="select" id="reminderType" excludeSelectOption="true" value="${bean.reminderType!}"  field="reminderType" options=reminderTypes></@p.input>
+				</@p.formColmd>
+				<@p.formColmd title="TASK_REMIND_EXPRESSION"    permissionCode="EXPRESSION">
+					 	<input name="expression" datatype="*1-100" value="${bean.expression!}"/>
+				</@p.formColmd>
+			</@p.formRow>
+			<@p.formRow>
+				<@p.formColmd title="TASK_REMIND_REMINDER_ACCOUNT"    permissionCode="REMINDER_ACCOUNT">
+					<input name="reminder" id="reminder" type="hidden" value="${bean.reminder!}"  />
+				 	<input name="reminderAccount" id="reminderAccount" value="${bean.reminderAccount!}" class="readonlyText" readonly="readonly"  />
+		 		    <@p.select  title="TASK_REMIND_SELECT_REMINDER"    url="${baseUrl}/user/listSelect.do?currentPageId=UserSelectGrid&singleSelect=true" callback="reminderSelect"/>
+				</@p.formColmd>
+				<@p.formColmd title="TASK_REMIND_REMINDER_NAME"    permissionCode="REMINDER_NAME">
+					 	<input name="reminderName" id="reminderName" value="${bean.reminderName!}" class="readonlyText" readonly="readonly"  />
+				</@p.formColmd>
+			</@p.formRow>
+			<@p.formRow>
+				<@p.formColmd title="TASK_REMIND_IS_RELEASED"    permissionCode="RELEASED">
+					 	<input name="released" id="txtReleased" value='<@s.m code="TASK_REMIND_NOT_RELEASED" />' class="readonlyText" readonly="readonly"  />
+				</@p.formColmd>
+			</@p.formRow>
+			<@p.formRow>
+				<@p.formColmd title="TASK_REMIND_TITLE"    permissionCode="TITLE" >
+					 	<input name="title"  value="${bean.title!}" value='<@s.m code="TASK_REMIND_DEFAULT_TITLE" />' datatype="*1-300" />
+				</@p.formColmd>
+				<@p.formColmd title="TASK_REMIND_CONTENT"   permissionCode="CONTENT">
+					 	<textarea id="txtContent" name="content" style="height: 500px;">${bean.content!}</textarea>
+				</@p.formColmd>
+			</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,34 @@
+ <#include "../../../include/bootstrapTableCommons.html">
+
+<@p.body title="EQUIPMENT_LIST_TITLE" permissionModule="EQUIPMENT" noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EQUIPMENT__NAME_PARAM" type="select" field="tmEquipmentId"  options=optionIfEquipment  permissionCode="EQUIPMENT_PARAMETER_NAME"></@p.input>
+			<@p.input title="EQUIPMENT_PARAMETER_NAME" field="parameterName"  permissionCode="EQUIPMENT_PARAMETER_NAME"></@p.input>
+			<@p.input title="EQUIPMENT_PARAMETER_EXPLAIN" field="parameterExplain"  permissionCode="EQUIPMENT_PARAMETER_EXPLAIN"></@p.input>
+			<@p.input title="EQUIPMENT_IF_CNF_SCOPE" type="select" field="ifCnfScope" options=optionIfCnfScope  permissionCode="EQUIPMENT_PARAMETER_EXPLAIN"></@p.input>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="EQUIPMENT_PARAM_ADD" permissionCode="EquipmentCraftworkAdd" iconCls="plus" url="${baseUrl}/equipmentParam/addInput.do" type="add"  ></@p.button>
+			<@p.button title="EQUIPMENT_PARAM_UPDATE" permissionCode="EquipmentCraftworkUpdate"  iconCls="edit" url="${baseUrl}/equipmentParam/updateInput.do" type="update"></@p.button>
+			<@p.button title="EQUIPMENT_PARAM_DELETE" permissionCode="EquipmentCraftworkDelete" iconCls="trash" url="${baseUrl}/equipmentParam/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid  url="${baseUrl}/equipmentParam/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="EQUIPMENT_PARAMETER_NAME" field="parameterName"   permissionCode="EQUIPMENT_PARAMETER_NAME" ></@p.column>
+		<@p.column title="EQUIPMENT_PARAMETER_EXPLAIN" field="parameterExplain"   permissionCode="EQUIPMENT_PARAMETER_EXPLAIN" ></@p.column>
+		<@p.column title="EQUIPMENT_NAME" field="equipment.name"   permissionCode="EQUIPMENT_PARAMETER_ULOC" ></@p.column>
+		<@p.column title="EQUIPMENT_PARAMETER_ULOC" field="parameterUloc"   permissionCode="EQUIPMENT_PARAMETER_ULOC" ></@p.column>
+<!-- 		<@p.column title="EQUIPMENT_REFERENCE_VALUE" field="referenceValue"   permissionCode="EQUIPMENT_IF_CNF_SCOPE"></@p.column> -->
+		<@p.column title="EQUIPMENT_IF_CNF_SCOPE" field="ifCnfScope"   permissionCode="EQUIPMENT_IF_CNF_SCOPE" formatter="renderIfCnfScope"></@p.column>
+		<@p.column title="EQUIPMENT_PARAM_NOTE" field="note"   permissionCode="EQUIPMENT_CONTROL_POST_NAME"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+
+<script type="text/javascript">
+function renderIfCnfScope(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+</script>

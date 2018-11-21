@@ -1,0 +1,1 @@
+INSERT INTO ts_job(ID, JOB_NAME, JOB_TYPE, CRON_EXPRESSION, JOB_CLASS, JOB_METHOD, JOB_OBJECT) VALUES (SEQ_JOB_ID.NEXTVAL, '测试', '测试', '0 0/5 * * * ?', 'com.wis.basis.job.system.TestJob', 'test', 'testJob');

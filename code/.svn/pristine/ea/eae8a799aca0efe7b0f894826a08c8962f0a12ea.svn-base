@@ -1,0 +1,116 @@
+<#include "../include/bootstrapTableCommons.html">
+<style type="text/css">
+    .total_td{
+        font-size: 13px; text-align: left;
+    }
+</style>
+<script type="text/javascript">
+    function renderDevice(value,row){
+        return (row['deviceCode']||"") + "-" + (row['deviceName']||"");
+    }
+    function renderBatchQty(value){return value == null ? "" : value;}
+    function renderMaintenanceUnit(value,row){
+        return renderBatchQty(row['maintenanceValue']) +"("+ entryRenderer('SM_MAINTENANCE_UNIT', value)+")";
+    }
+    function renderRemark(value,row) {
+        return parseInt(row['maintenanceValue']||0) - parseInt(row["currentValue"] || 0);
+    }
+    function warnCancel(){
+    	var url = '${baseUrl}/maintenance/warnCancel.do';
+    	wisConfirm({
+    		message:"确认取消报警",
+    		callback:function(res){
+    			if(res){
+    				ajaxRequest(url,function(){},true);
+    			}
+    		}
+    	});
+    }
+
+    function resetMaintenance(){
+    	var gridId = "datagrid";
+    	var url = '${baseUrl}/maintenance/resetMaintenance.do';
+        var rowsData = getSelectedRows(gridId);
+    	if (!rowsData || rowsData.length == 0) {
+    		infoTip(commons_msg.plsSelData);
+    		return;
+    	}
+    	var ids = [];
+    	for(var i=0;i<rowsData.length;i++){
+    		ids.push(rowsData[i].id);
+    	}
+    	wisConfirm({
+    		message:"请确认保养完毕",
+    		callback:function(res){
+    			if(res){
+    				ajaxRequest(url,{'ids':JSON.stringify(ids)},function(){
+    					var currentPage = 1;
+    					var totalPage = 1;
+    					var deleteRows = ids.length;
+    					var currentPageRows = $('#' + gridId).bootstrapTable('getData', true).length;
+    					totalPage = $(".pagination").find('.page-number').length;
+    					currentPage = $(".pagination .page-number.active a").html() * 1;
+    					if (currentPage > 1 && currentPage == totalPage && deleteRows == currentPageRows) {
+    						$('#' + gridId).bootstrapTable('prevPage');
+    					} else {
+    						reloadTable(gridId);
+    					}
+    				},true) ;	
+    			}			
+    		}
+    	});
+    }    
+    
+$(document).ready(function(){
+    $('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+});
+</Script>
+<@p.body title="MAINTENANCE_REPORT_TITLE" noPermissionModule="true" noBreadcrumbs="false">
+<@p.searchPanel >
+    <@p.searchColumns showSeachButton="false">
+	    <@p.input title="EQUIPMENT_NO" type="multiple" multipleSelect="false" id="deviceCode" field="deviceCode" options=equipmentOptions></@p.input>
+	    <@p.input title="METALPLATE_MAINTAINLIST" field="maintenanceList" type="select" excludeSelectOption="true" value="NO" options=optionMaintenances></@p.input>
+	    </br>
+	    <@p.input title="DATETIME_START" id="createTimeStart" field="lastCollectTimeStart"></@p.input>
+	    <@p.input title="DATETIME_END" id="createTimeEnd" field="lastCollectTimeEnd"></@p.input>
+	    <span class="frameInputSpan" style="margin-left: 30px;">
+	        <a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="refreshTable('datagrid',this,'${baseUrl}/maintenance/list.do');"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+	        <a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+	    </span>
+    </@p.searchColumns>
+</@p.searchPanel>
+
+<div class="page-content" fit="true">
+	<@p.toolbar> 
+    	<@p.button title="METALPLATE_RESET" permissionCode="MaintenanceReset" onclick="resetMaintenance();" iconCls="edit" type="button" />
+		<@p.button title="METALPLATE_WARN_CANCEL" permissionCode="MaintenanceCancel" onclick="warnCancel();" iconCls="edit" type="button" />
+	</@p.toolbar>
+    <@p.dataGrid url="${baseUrl}/maintenance/list.do" id="datagrid">
+    	<@p.column checkbox="true" ></@p.column>
+        <@p.column title="DEVICEMAINTENANCE_DEVICECODE" field="deviceCode"    formatter="renderDevice"></@p.column>
+        <@p.column title="DEVICEMAINTENANCE_MAINTENANCEPROJECT" field="maintenanceProject"></@p.column>
+        <@p.column title="DEVICEMAINTENANCE_MAINTENANCEVALUE_1" field="maintenanceUnit"   formatter="renderMaintenanceUnit"></@p.column>
+        <@p.column title="DEVICEMAINTENANCE_CURRENT_VALUE" field="currentValue"    formatter="renderBatchQty"></@p.column>
+        <@p.column title="DEVICEMAINTENANCE_LAST_COLLECT_TIME" field="lastCollectTime"></@p.column>
+        <@p.column title="DEVICEMAINTENANCE_MAINTENANCEVALUE_2" field="remark"  formatter="renderRemark" ></@p.column>
+    </@p.dataGrid>
+</div>
+</@p.body>
+

@@ -1,0 +1,16 @@
+/**
+ * 
+ */
+package com.wis.mes.dakin.report.dao;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author caixia
+ *
+ */
+public interface ProductMrgDao {
+	public List<Map<String,Object>> getShiftEvery(String pressName,String startTime);
+    public List<Map<String,Object>> getShiftEveryCount(String pressName,String startTime);
+}

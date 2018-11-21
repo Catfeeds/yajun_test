@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/supplier/add.do" class="form-horizontal"   permissionModule="SUPPLIER">
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_NO" permissionCode="SUPPLIER_NO">
+				<@p.input   datatype="*"  field="no" options=plant ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_NAME" permissionCode="SUPPLIER_NAME">
+				<@p.input   datatype="*"  field="name" options=workshop   ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_ADDR" permissionCode="SUPPLIER_ADDR">
+				<@p.input  field="addr"  ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_ENABLED" permissionCode="SUPPLIER_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_CONTACT1" permissionCode="SUPPLIER_CONTACT1">
+				<@p.input     field="contact1"    ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_TEL_NO1" permissionCode="SUPPLIER_TEL_NO1">
+				<input type="text" ignore="ignore"  name="telNo1" datatype="/^(\(\d{3,4}\)|\d{3,4}-|\s)?[1-9]\d{5,8}(\(\d{1,5}\)|-\d{1,5}|\s)?$/" errormsg="<@s.m code='PLS_INPUT_CORRECT_TEL_NO'/>" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_FAX_NO1" permissionCode="SUPPLIER_FAX_NO1">
+				<input type="text" ignore="ignore"  name="faxNo1" datatype="/^(\(\d{3,4}\)|\d{3,4}-|\s)?[1-9]\d{5,8}(\(\d{1,5}\)|-\d{1,5}|\s)?$/" errormsg="<@s.m code='PLS_INPUT_CORRECT_FAX_NO'/>" >
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_MOBILE_NO1" permissionCode="SUPPLIER_MOBILE_NO1">
+				<@p.input   datatype="m"  ignore="ignore" field="mobileNo1" errormsg="PLS_INPUT_CORRECT_MOBILE_NO" ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_EMAIL1" permissionCode="SUPPLIER_EMAIL1">
+				<@p.input   datatype="e"  ignore="ignore" field="emaile1" errormsg="PLS_INPUT_CORRECT_EMAIL_NO" ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_CONTACT2" permissionCode="SUPPLIER_CONTACT2">
+				<@p.input     field="contact2"    ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_TEL_NO2" permissionCode="SUPPLIER_TEL_NO2">
+				<input type="text" ignore="ignore"  name="telNo2" datatype="/^(\(\d{3,4}\)|\d{3,4}-|\s)?[1-9]\d{5,8}(\(\d{1,5}\)|-\d{1,5}|\s)?$/" errormsg="<@s.m code='PLS_INPUT_CORRECT_TEL_NO'/>" >
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_FAX_NO2" permissionCode="SUPPLIER_FAX_NO2">
+				<input type="text" ignore="ignore"  name="faxNo2" datatype="/^(\(\d{3,4}\)|\d{3,4}-|\s)?[1-9]\d{5,8}(\(\d{1,5}\)|-\d{1,5}|\s)?$/" errormsg="<@s.m code='PLS_INPUT_CORRECT_FAX_NO'/>" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_MOBILE_NO2" permissionCode="SUPPLIER_MOBILE_NO2">
+				<@p.input     field="mobileNo2"  datatype="m"  ignore="ignore"  errormsg="PLS_INPUT_CORRECT_MOBILE_NO" ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_EMAIL2" permissionCode="SUPPLIER_EMAIL2">
+				<@p.input     field="emaile2" datatype="e"  ignore="ignore" errormsg="PLS_INPUT_CORRECT_EMAIL_NO" ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_NOTES" permissionCode="SUPPLIER_NOTES">
+				 <@p.input   field="notes"  ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+
+//工厂车间 联动 
+function plantWorkshopCascade_lisAdd(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/line/selectWShopNameOrID.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#workshopId_addPage").empty(); //清空下拉列表
+				$("#workshopId_addPage").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#workshopId_addPage").append(" <option value='" + item.id + "'>"+item.no+" - " +item.nameCn+ "</option>");
+					});
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { // 出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function workshopLineCascade_listAdd(obj){
+	$.ajax({
+		data:{workShopId:obj,
+			  plantId: $("#plantId_addPage").val()},
+		url:"${baseUrl}/line/selectLineNameOrId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#lineId_addPage").empty(); //清空下拉列表
+				$("#lineId_addPage").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#lineId_addPage").append(" <option value='" + item.id + "'>"+item.no+" - " +item.nameCn+ "</option>");
+					});
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+</script>

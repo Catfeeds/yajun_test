@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+var workTimeStartTime ="2017-01-01 " + $("#workTimeStartTime").val();
+var workTimeEndTime = "2017-01-01 " + $("#workTimeEndTime").val();
+function checkRestStartTime(obj) {
+	var restStartTime ="2017-01-01 " + obj.value;
+	if(restStartTime != "2017-01-01 "){
+		if(Date.parse(workTimeStartTime)>Date.parse(workTimeEndTime)){
+			if(Date.parse(restStartTime)<Date.parse(workTimeStartTime)&&Date.parse(restStartTime)>Date.parse(workTimeEndTime)){
+				infoTip('休息开始时间不在工作时间内！');
+				obj.value="";
+		    	obj.focus();
+				return ;	
+			}
+		}else{
+			if (Date.parse(restStartTime) < Date.parse(workTimeStartTime) || Date.parse(restStartTime) > Date.parse(workTimeEndTime)) {
+				infoTip('休息开始时间不在工作时间内！');	
+				obj.value="";
+		    	obj.focus();
+		        return false;
+	   		}
+		}
+	}
+}
+function checkRestEndTime() {
+	debugger
+	 var restEndTime ="2017-01-01 " + $("#restEnd").val() ;
+	var restStartTime ="2017-01-01 " + $("#restStart").val();
+	if (restEndTime != "2017-01-01 ") {
+		if(Date.parse(workTimeStartTime)>Date.parse(workTimeEndTime)){
+			if(Date.parse(restEndTime)<Date.parse(workTimeStartTime)&&Date.parse(restEndTime)>Date.parse(workTimeEndTime)){
+				infoTip('休息结束时间不在工作时间内！');
+    			$("#restEnd").focus();
+    			$("#restEnd").val('');
+				return false;	
+			}
+		
+		}else{
+			if (Date.parse(restEndTime) < Date.parse(workTimeStartTime) || Date.parse(restEndTime) > Date.parse(workTimeEndTime)) {
+		    	infoTip('休息结束时间不在工作时间内！');	
+		    	$("#restEnd").focus();
+		    	$("#restEnd").val('');
+		        return false;
+		  	 }
+		}
+	
+		 if (Date.parse(workTimeStartTime) < Date.parse(workTimeEndTime) && Date.parse(restStartTime) > Date.parse(restEndTime)) {
+			    errorTip('开始时间不能大于结束时间！');	
+		   	   $("#restEnd").focus();
+		   		$("#restEnd").val('');
+		       return false;
+		   }
+	} 
+}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url = "${baseUrl}/worktimerest/add.do" permissionModule="WORKTIMEREST" class="form-horizontal">
+	<input id="beforeSubmit" type="hidden" value="checkRestEndTime">
+		<@p.formRow>
+			<@p.formColmd title="WORK_TIME_REST_START_TIME"   permissionCode="WORK_TIME_REST_START_TIME">
+			      <input type="hidden"  name="tmWorktimeId"  value="${workTime.id}">
+			      <input type="hidden" id="workTimeStartTime" value="${workTime.startTime}">
+				  <input  class="inputxt" name="startTime" id="restStart" datatype="*" class="timepicker"  onblur="checkRestStartTime(this);"> 
+			</@p.formColmd>
+			<@p.formColmd title="WORK_TIME_REST_END_TIME"   permissionCode="WORK_TIME_REST_END_TIME">
+			      <input type="hidden" id="workTimeEndTime" value="${workTime.endTime}"/>
+				  <input  class="inputxt" name="endTime" id="restEnd" datatype="*" class="timepicker"   onblur="checkRestEndTime(this);" />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_TIME_REST_REMARK" permissionCode="WORK_TIME_REST_REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250"></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+
+$(function(){
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#restStart,#restEnd').focus(function(){
+		WdatePicker({dateFmt:'HH:mm',minDate:'00:00',maxDate:'24:00'});
+	});
+});
+
+</script>

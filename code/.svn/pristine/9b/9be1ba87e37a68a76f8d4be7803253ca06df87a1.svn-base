@@ -1,0 +1,63 @@
+package com.wis.mes.dakin.report.controller;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.wis.basis.common.utils.DateUtils;
+import com.wis.mes.dakin.report.service.MetalPlateFaultedDetailReportService;
+
+/**
+ * @author caixia
+ *
+ */
+@Controller
+@RequestMapping("/metalplateFauletdReport")
+public class MetalplateFauletdReportController {
+	@Autowired
+	MetalPlateFaultedDetailReportService detailReportService;
+	@RequestMapping("/fauletdReport")
+	public ModelAndView productMrgReport() {
+		return new ModelAndView("/report/metalplate/fauletd_report");
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/getFaultedBarInfo")
+	public Map<String, String> getFinAnnualReportInfo(String whitOrNight,String shiftNo, String beginTime, String endTime) {
+		Map<String, String> returnMap = new HashMap<String, String>();
+		returnMap = detailReportService.getMetalPlateFaultedDetailReport(whitOrNight,shiftNo, beginTime, endTime);
+		return returnMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/getFaultedPieInfo")
+	public Map<String, String> getFinFaultedPieInfo(String whitOrNight,String shiftNo, String beginTime, String endTime) {
+		Map<String, String> returnMap = new HashMap<String, String>();
+		if(StringUtils.isEmpty(beginTime) && StringUtils.isEmpty(endTime)) {
+			Date date = new Date();
+			Calendar rightNow = Calendar.getInstance();
+			rightNow.setTime(date);
+			rightNow.add(Calendar.MONTH, -1);
+			beginTime = DateUtils.formatDate(rightNow.getTime(), DateUtils.FORMAT_DATETIME_YYYY_MM_DD_HH_MM);
+			endTime = DateUtils.formatDate(date, DateUtils.FORMAT_DATETIME_YYYY_MM_DD_HH_MM);
+		}
+		returnMap = detailReportService.getMetalPlateFaultedDetailPieReportInfo(whitOrNight,shiftNo, beginTime, endTime);
+		return returnMap;
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/getfaultedDetailsInfo")
+	public Map<String, String> getfaultedDetailsInfo(String whitOrNight,String shiftNo, String beginTime, String endTime) {
+		Map<String, String> returnMap = new HashMap<String, String>();
+		returnMap = detailReportService.getfaultedDetailsInfo(beginTime, endTime);
+		return returnMap;
+	}
+}

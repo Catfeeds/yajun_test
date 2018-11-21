@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UserMapper">
+    <resultMap id="UserResult" type="com.wis.basis.systemadmin.entity.User" extends="com.wis.core.framework.mapper.CommonMapper.CommonResult">
+        <id column="ID" property="id" />
+        <result column="USER_NAME" property="name" />
+        <result column="ACCOUNT" property="account" />
+        <result column="PASSWORD" property="password" />
+        <result column="STATUS" property="status" />
+        <result column="LAST_LOGIN_DATE" property="lastLoginDate" />
+        <result column="MARK_FOR_DELETE" property="removed" />
+     </resultMap>
+  <delete id="deleteRoleRelation" parameterType="java.lang.Integer">
+        delete from TR_ROLE_USER where USER_ID=#{userId}  AND ROLE_ID IN
+          <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+   </delete>
+   <insert id="updateRole" parameterType="java.util.Map">
+   	INSERT INTO TR_ROLE_USER(ROLE_ID,USER_ID)VALUES(#{roleId,jdbcType=INTEGER},#{userId,jdbcType=INTEGER})
+   </insert>
+   
+    <insert id="saveFormPermissionSetRelation" parameterType="java.util.Map">
+    	INSERT INTO TR_USER_FORM_PERMISSION(PERMISSION_SET_ID,USER_ID)VALUES(#{setId,jdbcType=INTEGER},#{userId,jdbcType=INTEGER})
+   </insert>
+   
+     <delete id="deleteFormPermissionSetRelation" parameterType="java.util.Map">
+    	DELETE FROM TR_USER_FORM_PERMISSION WHERE  USER_ID=#{userId,jdbcType=INTEGER}  AND PERMISSION_SET_ID IN 
+    	  <foreach item="item" index="index" collection="setIds" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+    </delete>
+    <insert id="saveDataPermissionSetRelation" parameterType="java.util.Map">
+    	INSERT INTO TR_USER_DATA_PERMISSION(PERMISSION_SET_ID,USER_ID)VALUES(#{setId,jdbcType=INTEGER},#{userId,jdbcType=INTEGER})
+   </insert>
+   
+     <delete id="deleteDataPermissionSetRelation" parameterType="java.util.Map">
+    	DELETE FROM TR_USER_DATA_PERMISSION WHERE USER_ID=#{userId,jdbcType=INTEGER}  AND PERMISSION_SET_ID IN 
+    	  <foreach item="item" index="index" collection="setIds" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+    </delete>
+    <select id="getUserByRoleId" resultMap="UserResult"  parameterType="java.lang.Integer" >
+    <![CDATA[ select t1.* from ts_user t1 left join TR_ROLE_USER t2 on t1.id = t2.USER_ID where t2.role_id = #{id} ]]>
+  </select>
+  <select id="getUserByRoleCode" resultMap="UserResult"  parameterType="java.lang.String" >
+    <![CDATA[ select t1.* from ts_user t1 left join TR_ROLE_USER t2 on t1.id = t2.USER_ID left join TS_ROLE t3 on t3.ID = t2.ROLE_ID where t3.role_code = #{code} ]]>
+  </select>
+    <select id="queryUserByIds" resultMap="UserResult" parameterType="java.util.Map">
+       select * from ts_user t where t.mark_for_delete=0 and t.id in 
+       <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+  </select>
+  <select id="queryUserByPermission" resultMap="UserResult" parameterType="java.util.Map">
+      select ur.* from TS_PERMISSION p left join tr_role_permission rp on rp.permission_id=p.id
+	  left join tr_role_user us on us.role_id=rp.role_id left join ts_user ur on ur.id=us.user_id
+	  where ur.mark_for_delete=0 and p.PERMISSION_CODE=#{permission}
+  </select>
+  <select id="queryUserByOrgnizationId" resultMap="UserResult" parameterType="java.util.Map">
+      select us.* from ts_user us left join tr_user_position up on up.user_id=us.id left join ts_position po on po.id=up.position_id
+		where us.mark_for_delete=0 and po.orgnization_id=#{orgnizationId}
+  </select>
+  <select id="getUserOrgnizationCodes" resultType="string" parameterType="java.lang.Integer">
+      select t1.system_code from TS_ORGNIZATION t1 left join TR_USER_ORGNIZATION t2 on t1.id=t2.orgnization_id left join TS_USER t3 on
+      t2.user_id=t3.id where t3.id=#{userId,jdbcType=INTEGER}
+  </select>
+  <select id="queryPlantPermissionByUserId" resultType="string" parameterType="java.lang.Integer">
+  	select  tm.TM_PLANT_ID from tr_role_user t left join
+   		ts_role_master_set tm on t.ROLE_ID = tm.ROLE_ID where  t.USER_ID = #{userId,jdbcType=INTEGER}
+   <!-- 	select   wm_concat(tm.TM_PLANT_ID) from tr_role_user t left join
+   		ts_role_master_set tm on t.ROLE_ID = tm.ROLE_ID where  t.USER_ID = #{userId,jdbcType=INTEGER}
+   		group by tm.TM_PLANT_ID -->
+  </select>
+  <select id="queryWorkshopPermissionByUserId" resultType="string" parameterType="java.lang.Integer">
+   select  tm.TM_WORKSHOP_ID from tr_role_user t left join
+   ts_role_master_set tm on t.ROLE_ID = tm.ROLE_ID where  t.USER_ID = #{userId,jdbcType=INTEGER}
+  </select>
+  <select id="queryLinePermissionByUserId" resultType="string" parameterType="java.lang.Integer">
+   select  tm.TM_LINE_ID  from tr_role_user t left join
+   ts_role_master_set tm on t.ROLE_ID = tm.ROLE_ID where  t.USER_ID = #{userId,jdbcType=INTEGER}
+  </select>
+  <select id="queryUlocPermissionByUserId" resultType="string" parameterType="java.lang.Integer">
+    select tm.TM_ULOC_ID from tr_role_user t left join
+   ts_role_master_set tm on t.ROLE_ID = tm.ROLE_ID where  t.USER_ID = #{userId,jdbcType=INTEGER}
+  </select>
+  <select id="getLines" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  	select id as id,NO as no ,NAME_CN as name  from tm_line where enabled = 'ON'
+  </select>
+</mapper>

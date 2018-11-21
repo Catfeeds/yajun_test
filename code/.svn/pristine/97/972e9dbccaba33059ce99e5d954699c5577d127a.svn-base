@@ -1,0 +1,126 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script src="${baseUrl}/res/js/echarts.js"></script>
+<script type="text/javascript">
+	$(function(){
+		getData("DAY");
+	});		
+	
+	function getData(){
+		var startDate = $("#startDate").val();
+		var endDate = $("#endDate").val();
+		var type = $('#type option:selected').val();
+		var viewGroup = $("#viewGroup option:selected").val();
+		if(startDate==""||endDate==""){
+			return;
+		}
+		$.ajax({
+			url:"${baseUrl}/onepassRate/findDataByType.do",
+			type:"GET",
+			data:{
+				type:type,
+				startDateStr:startDate,
+				endDateStr:endDate,
+				viewGroup:viewGroup
+			},
+			dataType:"json",
+			success:function(result){
+				onePassRate(JSON.parse(result.legend),JSON.parse(result.xData),JSON.parse(result.yData));
+			}
+		});
+	}
+	
+	function getSeriesData(yData,legend){
+		debugger;
+		 var serie = [];
+		 var legendArr= new Array(); 
+		 legendArr=legend[0].split(","); 
+		    for(var i = 0; i < yData.length; i++){
+		        var item = {
+		            name:legendArr[i],
+		            type: 'bar',
+		            data: yData[i],
+		            markPoint: {
+		                data: [
+		                    {type: 'max', name: '最大值'},
+		                    {type: 'min', name: '最小值'}
+		                ]
+		            },
+		        }
+		        serie.push(item );
+		    };
+		     return serie;
+	}
+	
+	function onePassRate(legend,xData,yData){
+		var myChart = echarts.init(document.getElementById("dataDiv"));
+		myChart.showLoading();
+		debugger;
+		option = {
+			    title: {
+			        text: '',
+			        subtext: ''
+			    },
+			    tooltip: {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			    	 data:legend
+			    },
+			    toolbox: {
+			        show : true,
+			        feature : {
+			            dataView : {show: true, readOnly: false},
+			            magicType : {show: true, type: ['line', 'bar']},
+			            restore : {show: true},
+			            saveAsImage : {show: true}
+			        }
+			    },
+			    xAxis:  {
+			        type: 'category',
+			        data: xData
+			    },
+			    yAxis: {
+			            type : 'value',
+			            name : '合格率%',
+			    },
+			    series:getSeriesData(yData,legend)
+			};
+
+		myChart.hideLoading();
+		myChart.setOption(option);
+	}
+</script>
+<@p.body title="PECORD_ONEPASS_RATE" permissionModule="ONEPASS" >
+<div id="mainDiv" style="margin-left: 10px;margin-top: 10px;margin-right: 10px;height: 600px;">
+	<div style="height: 500px;">
+			<div id="leftDiv" style="height:40px;float:left;margin-left: 30px" >
+			请选择查询周期:<select onchange="getData()" id="type" style="width: 100px;margin-top: 10px;margin-left: 20px;">
+				<option value="DAY">日</option>
+				<option value="WEEK">周</option>
+				<option value="MONTH">月</option>
+				<option value="SHIFT">班次</option>
+			</select> 
+			</div>
+			<div id="groupDiv" style="height:40px;float:left;padding-left:20px" >
+				请选择查看类别:<select onchange="getData()" id="viewGroup" style="width: 100px;margin-top: 10px;margin-left: 20px;">
+				<option value="PART">产品</option>
+				<option value="LINE">产线</option>
+				<option value="PORDER">订单</option>
+				<option value="ULOC">工位</option>
+			</select> 
+			</div>
+			<div id="centerDiv" style="height:40px;float:left;padding:10px">
+			开始时间:
+			<input type="text" id="startDate" name="startDate"  onchange="getData()"  class="width"  onClick="WdatePicker({maxDate:'%y-%M-%d',dateFmt: 'yyyy-MM-dd'})"/>
+			</div>
+			<div id="rightDiv" style="height:40px;float:left;padding:10px">
+			结束时间:
+			<input type="text" id="endDate" name="endDate" onchange="getData()"  class="width"  onClick="WdatePicker({maxDate:'%y-%M-%d',dateFmt: 'yyyy-MM-dd'})"/>
+			</div>
+			<div id="muitipleDiv">
+			</div>
+		<div id="dataDiv" style="height: 100%;width: 100%;float: right;"></div>
+	</div>
+</div>
+<@p.button title="FRAME_RESTORE" permissionCode="ONEPASS_VIEW" iconCls="retweet" type="button"  class="btn btn-sm btn-info"></@p.button>
+</@p.body>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<cache:annotation-driven />
+
+	<!-- jedis 连接池配置 -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="${redis.maxIdle}"></property>
+		<property name="minEvictableIdleTimeMillis" value="${redis.minEvictableIdleTimeMillis}"></property>
+		<property name="numTestsPerEvictionRun" value="${redis.numTestsPerEvictionRun}"></property>
+		<property name="timeBetweenEvictionRunsMillis" value="${redis.timeBetweenEvictionRunsMillis}"></property>
+	</bean>
+	<!-- jedis 多个服务器配置 <bean id="jedisShardInfo1" class="redis.clients.jedis.JedisShardInfo"> 
+		<constructor-arg index="0" value="${redis2.ip}" /> <constructor-arg index="1" 
+		value="${redis.port}" type="int" /> </bean> -->
+
+	<bean id="jedisShardInfo" class="redis.clients.jedis.JedisShardInfo">
+		<constructor-arg index="0" value="${redis.ip}" />
+		<constructor-arg index="1" value="${redis.port}" type="int" />
+	</bean>
+
+	<bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool">
+		<constructor-arg index="0" ref="jedisPoolConfig" />
+		<constructor-arg index="1">
+			<list>
+				<ref bean="jedisShardInfo" />
+				<!-- <ref bean="jedisShardInfo2" /> -->
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="jedisConnectionFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+		destroy-method="destroy">
+		<property name="poolConfig" ref="jedisPoolConfig"></property>
+		<property name="hostName" value="${redis.ip}"></property>
+		<property name="port" value="${redis.port}"></property>
+		<property name="timeout" value="${redis.timeout}"></property>
+		<property name="usePool" value="${redis.usePool}"></property>
+	</bean>
+
+	<!-- 由于每个bean的序列化参数不一样，因此使用prototype -->
+	<bean id="jedisTemplate" class="org.springframework.data.redis.core.RedisTemplate" scope="prototype">
+		<property name="connectionFactory" ref="jedisConnectionFactory"></property>
+		<property name="keySerializer" ref="stringRedisSerializer"></property>
+		<property name="hashKeySerializer" ref="stringRedisSerializer"></property>
+	</bean>
+	<!-- cache manager -->
+	<bean id="cacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
+		<constructor-arg name="redisOperations">
+			<bean id="springDataJedisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+				<property name="connectionFactory" ref="jedisConnectionFactory"></property>
+				<property name="keySerializer" ref="stringRedisSerializer"></property>
+				<property name="hashKeySerializer" ref="stringRedisSerializer"></property>
+				<property name="valueSerializer" ref="jdkSerializationRedisSerializer"></property>
+			</bean>
+		</constructor-arg>
+		<!-- 默认有效期1天 60*60*24 -->
+		<property name="defaultExpiration" value="${redis.defaultExpiration}" />
+	</bean>
+	<bean class="org.springframework.data.redis.serializer.StringRedisSerializer"
+		id="stringRedisSerializer" />
+	<bean
+		class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"
+		id="jdkSerializationRedisSerializer" />
+		
+	<!-- 基于Redis的Message Queue -->
+	<!-- 定义消息监听器 -->
+	<!-- <bean id="messageListener1"
+		class="org.springframework.data.redis.listener.adapter.MessageListenerAdapter">
+		<property name="delegate" ref="testListener1" />
+		<property name="serializer" ref="jdkSerializationRedisSerializer" />
+	</bean> -->
+
+	<!--注册消息监听 -->
+	<!-- <redis:listener-container connection-factory="jedisConnectionFactory">
+		指定消息处理方法，序列化方式及主题名称
+		<redis:listener ref="messageListener1" method="handleMessage"
+			serializer="jdkSerializationRedisSerializer" topic="testTopic" />
+	</redis:listener-container> -->
+	<bean id="redisHttpSessionConfiguration" class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration">  
+	    <property name="maxInactiveIntervalInSeconds" value="6000" />
+	   </bean>
+	   
+</beans>

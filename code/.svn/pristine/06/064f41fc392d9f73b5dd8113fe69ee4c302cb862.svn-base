@@ -1,0 +1,38 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body title="PATH_LIST_TITLE" permissionModule="PATH_ULOC_SIP" noBreadcrumbs="true">	
+<!-- <div style="color: #428bca;text-align:center; margin:10px" >参数信息</div> -->
+<input id="tmPathUlocId" type="hidden" value="${tmPathUlocId!}" />
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathUlocSipAdd" iconCls="plus" url="${baseUrl}/path/uloc/sip/addInput.do?tmPathUlocId="+"${tmPathUlocId}" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathUlocSipUpdate" iconCls="edit" url="${baseUrl}/path/uloc/sip/updateInput.do?tmPathUlocId="+"${tmPathUlocId}" type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathUlocSipDelete" iconCls="trash" url="${baseUrl}/path/uloc/sip/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/path/uloc/sip/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_NO" field="parameter.code" permissionCode="PATH_ULOC_SIP_PARAMETER_NO"></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_NAME" field="parameter.name" permissionCode="PATH_ULOC_SIP_PARAMETER_NAME" ></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_REGULAREXRESSION" field="parameter.regularExpression" permissionCode="PATH_ULOC_SIP_PARAMETER_REGULAREXRESSION" ></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_VARIUABLE_NAME" field="parameter.variuableName" permissionCode="PATH_ULOC_SIP_PARAMETER_VARIUABLE_NAME"></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_NOTE" field="parameter.note" permissionCode="PATH_ULOC_SIP_PARAMETER_NOTE"></@p.column>
+		<@p.column title="PATH_ULOC_SIP_NOTE" field="note" permissionCode="PATH_ULOC_SIP_NOTE"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+/* function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+} */
+/* function renderParameterNo(value){
+	if(record.part&&record.part.no){
+		return record.part.no+ " - " + record.part.nameCn;
+	}
+} */
+
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

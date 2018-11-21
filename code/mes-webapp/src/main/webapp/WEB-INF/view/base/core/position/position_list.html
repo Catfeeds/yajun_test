@@ -1,0 +1,40 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/bootstrapTableCommons.html">
+	
+<@p.body permissionModule="POSITION" noBreadcrumbs="true">
+	<@p.searchPanel gridId="dgPosition">
+		<@p.searchColumns>
+			<@p.input title="POSITION_NAME" field="name"    permissionCode="POSITION_NAME"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="dtPosition">
+			<@p.button title="BTN_ADD" permissionCode="PositionAdd" iconCls="plus" url="${baseUrl}/position/addInput.do?orgnizationId=${orgnizationId}" type="add"></@p.button>
+			<@p.button title="BTN_UPDATE" permissionCode="PositionEdit" iconCls="edit" url="${baseUrl}/position/updateInput.do" type="update"></@p.button>
+			<@p.button title="BTN_DELETE" permissionCode="PositionDelete" iconCls="trash" url="${baseUrl}/position/delete.do" type="delete"></@p.button>
+			<@p.button title="BTN_USER_SET" permissionCode="PositionEdit" iconCls="cogs" onclick="setUserPosision()"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/position/list.do?queryCondition[orgnizationId]=${orgnizationId}" id="dgPosition" >
+		<@p.column title="Id" checkbox="true"></@p.column>
+		<@p.column title="POSITION_ORGNAME" field="orgnization.name"   permissionCode="ORG_NAME"  width="100"></@p.column>
+		<@p.column title="POSITION_PARENT" field="parent.name"   permissionCode="POSITION_PARENT"  width="100"></@p.column>
+		<@p.column title="POSITION_CODE" field="code"   permissionCode="POSITION_CODE"  width="100"></@p.column>
+		<@p.column title="POSITION_NAME" field="name"   permissionCode="POSITION_NAME"  width="100"></@p.column>
+		<@p.column title="POSITION_DESCRIPTION" field="description"  permissionCode="POSITION_DESCRIPTION"   width="200"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+
+<script type="text/javascript">
+	function setUserPosision() {
+	    var rows = getSelectedRows('dgPosition');
+	    if (!rows || rows.length==0) {
+	        infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	        return;
+	    }
+	    if (rows.length>1) {
+	    	infoTip(commons_msg.plsSelOne);
+	        return;
+	    }
+	    var url='${baseUrl}/position/userListInput.do?id='+rows[0].id;
+	    createdetailwindow('<@s.m code='BTN_USER_SET'/>', url,'','','UserPosition');
+	}
+</script>

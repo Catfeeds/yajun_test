@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="BomFormMapper" >
+<delete id="deleteAbandon" >
+	DELETE FROM WACT_BOM_FORM WHERE APPLICATIONFORM_ID IS NULL
+</delete>
+
+   <update id="updateTempRow" parameterType="java.util.HashMap">
+       UPDATE WACT_BOM_FORM SET APPLICATIONFORM_ID=${appFormId} where TEMP_APPFORM_ID= ${tempAppformId}  
+    </update>
+    
+    <select id="getBomsByFormId" resultType="java.util.HashMap"  parameterType="map">
+    <![CDATA[
+    select t1.id as "id",
+    		t1.APPLICATIONFORM_ID as "applicationFormID",
+			t1.TEMP_APPFORM_ID as "tempAppformId",
+			t1.MATERIAL_CODE as "materialCode",
+			t1.MATERIAL_DESC as "materialDesc",
+			t1.FACTORY as "factory",
+			t1.MATERIAL_USE as "materialUse",
+			t1.EFFECTIVE_DATE as "effectiveDate",
+			t1.CHOICE_BOM as "choiceBom",
+			t1.EXPIRATION_DATE as "expirationDate",
+			t1.BASIS_QUANTITY as "basisQuantity",
+			t1.PDM_CODE as "pdmCode",
+			t1.OPTIONAL_TEXT as "optionalText",
+			t1.ITEM as "item",
+			t1.ITEM_CATEGORY as "itemCategory",
+			t1.MODULE as "module",
+			t1.MODULE_DESC as "moduleDesc",
+			t1.MODULE_QUANTITY as "moduleQuantity",
+			t1.UNIT as "unit",
+			t1.REJECT_RATE as "rejectRate",
+			t1.ORDER_DELIVERY_ADDRESS as "orderDeliveryAddress",
+			t1.LEAD_TIME_OFFSET as "leadTimeOffset",
+			t1.SORTING_STRING as "sortingString",
+			t1.MATERIAL_VERSIONS as "materialVersions",
+			t1.MODULE_VERSIONS as "moduleVersions"
+      from wact_bom_form t1
+      left join WACT_APPLICATION_FORM t2
+        on t1.APPLICATIONFORM_ID = t2.id
+    ]]>
+    <where>
+      <if test="formId != null and formId != '' ">
+       and t1.APPLICATIONFORM_ID = #{formId}
+      </if>
+     </where>
+     <![CDATA[ order by t1.id asc]]>
+  </select>
+</mapper>

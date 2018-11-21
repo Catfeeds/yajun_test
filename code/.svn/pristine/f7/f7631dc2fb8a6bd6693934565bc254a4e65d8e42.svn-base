@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/path/doDuplicate.do" class="form-horizontal" idValue=bean.id permissionModule="PATH">
+		<@p.formRow>
+			<@p.formColmd title="PATH_PLANT" permissionCode="PATH_PLANT">
+				<@p.input type="select"  value="${bean.tmPlantId}" onchange="path_add_plantChange(this.value);" excludeSelectOption="true"  options=plantOptions ></@p.input>
+				<input type="hidden"  id="update_plant" name="tmPlantId" value="${bean.tmPlantId}" >
+			</@p.formColmd>
+			<@p.formColmd title="PATH_LINE" permissionCode="PATH_LINE">
+				<@p.input type="select" id="cp_line"  excludeSelectOption="true" options=line value="${bean.tmLineId!}"></@p.input>
+				<input type="hidden" id="lineId" name="tmLineId" value="${bean.tmLineId!}">
+			</@p.formColmd>
+		</@p.formRow>	
+		<@p.formRow>
+			<@p.formColmd title="PATH_PART" permissionCode="PATH_PART">
+				<@p.input type="select"  id="cp_part" excludeSelectOption="true" options=plantOptions field="tmPartId" value="${bean.tmPartId!}"></@p.input>
+				<input type="hidden" id="partId" value="${bean.tmPartId!}">
+			</@p.formColmd>
+			<@p.formColmd title="PATH_NO" permissionCode="PATH_NO">
+				<input name="no" class="inputxt" />
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PATH_NAME" permissionCode="PATH_NAME">
+				<input name="name" class="inputxt"  datatype="*" maxlength="150"/>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ENABLED" permissionCode="PATH_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" value="${bean.enabled!}"  options=enabledOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_REMARK" permissionCode="PATH_REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250">${bean.remark!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+<script type="text/javascript">
+function path_add_plantChange(obj){
+	getPart(obj);
+	//getWorkShop(obj);
+	doGetLine(obj);
+	//getLine($("#add_plant").val(),$("#add_workShop").val());
+}
+
+function getPart(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/path/getPartByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			console.log(result);
+			try {
+				$("#cp_part").empty(); //清空下拉列表
+				$("#cp_part").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#cp_part").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+					var optionSize = $("#add_part option").size();
+					if(optionSize==2){
+						$('#cp_part option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function doGetLine(obj){
+	if (obj == "" || null == obj) {
+		return false;
+	}else{
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/uloc/selectLintNameOrPlantId.do", //修改为通过公司id得到所属产线
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				$("#cp_line").empty(); //清空下拉列表
+				$("#cp_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#cp_line").append(" <option  value='" + item.id + "'>"+item.nameCn + "</option>");
+					});
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+}
+</script>
+</html>

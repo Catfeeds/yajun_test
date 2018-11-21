@@ -1,0 +1,33 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function renderNcLevel(value){
+	return entryRenderer('NC_LEVEL', value);
+}
+function renderNgEntrance(value){
+	if(value){
+		var optionNgEntrance = eval('('+ '${optionNgEntrance!}' +')');
+		return keysValue(optionNgEntrance,value);
+	}
+}
+</script>
+<@p.body title="NC_LIST_TITLE" permissionModule="NC_GROUP" noBreadcrumbs="true">	
+	<input value="${optionNgEntrance!}" type = 'hidden'/>
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="FAULT_GRADE_LEVEL" field="ngLevel" permissionCode="EQUIPMENT_PLANT" class="select2"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="NC_ADD" permissionCode="NcAdd" iconCls="plus" url="${baseUrl}/faultGrade/addInput.do" type="add"  ></@p.button>
+			<@p.button title="NC_UPDATE" permissionCode="NcUpdate" iconCls="edit" url="${baseUrl}/faultGrade/updateInput.do" type="update"></@p.button>
+			<@p.button title="NC_DELETE" permissionCode="NcDelete" iconCls="trash" url="${baseUrl}/faultGrade/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid  url="${baseUrl}/faultGrade/list.do">
+		<@p.column checkbox="true"></@p.column>
+<!-- 		<@p.column title="FAULT_GRADE_LEVEL" field="ngLevel" permissionCode="TM_NC_GROUP_NO" formatter="renderNcLevel" ></@p.column> -->
+		<@p.column title="FAULT_GRADE_LEVEL" field="ngLevel" permissionCode="TM_NC_GROUP_NO" ></@p.column>
+		<@p.column title="FAULT_GRADE_ENTRANCE" field="ngEntrance"   permissionCode="TM_NC_GROUP_NO" formatter="renderNgEntrance"></@p.column>
+		<@p.column title="FAULT_GRADE_REMARKS" field="remarks"   permissionCode="TM_NC_GROUP_NO"></@p.column>
+	</@p.dataGrid>
+</@p.body>

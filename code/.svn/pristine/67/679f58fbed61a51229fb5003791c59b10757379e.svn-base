@@ -1,0 +1,84 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+
+	function renderPlant(value,record) {
+		if(value && record.plant.no){
+			return record.plant.no+ " - " + value;
+		}
+		return value;
+	}
+	function renderNullValue(value){
+		return value == null ? "" : value;
+	}
+</script>
+<@p.body title="WORKSHOP_LIST_TITLE" permissionModule="WORKSHOP">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PLANT" type="select"  onchange="plantWorkshop_listPage(this.value);" field="tmPlantId" options=plant></@p.input>
+			<@p.input title="LINE_WORKSHOP" id="workshopId" type="select" field="id" options=workshop></@p.input>
+			<@p.input title="WORKSHOP_NO" field="no"></@p.input>
+			<@p.input title="WORKSHOP_NAME_CN" field="nameCn"></@p.input>
+			<@p.input title="WORKSHOP_NAME_EN" field="nameEn"></@p.input>
+			<@p.input title="WORKSHOP_ENABLED" id="enabled" type="select" field="enabled" options=optionEnab></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar"> 
+			<@p.button title="WORKSHOP_ADD" iconCls="plus" permissionCode="WorkShopAdd"  url="${baseUrl}/workshop/addInput.do" type="add"  ></@p.button>
+			<@p.button title="WORKSHOP_UPDATE" iconCls="edit" permissionCode="WorkShopUpdate"  url="${baseUrl}/workshop/updateInput.do" type="update"></@p.button>
+			<@p.button title="WORKSHOP_DELTE" permissionCode="WorkShopDelete" iconCls="trash" url="${baseUrl}/workshop/delete.do" type="delete"></@p.button>
+			<@p.button title="WORKSHOP_IMPORT" permissionCode="WorkShopImport" downName="WORKSHOP_IMPORT_NAME" onclick="importData();" iconCls="signin" />
+			<@p.button title="WORKSHOP_EXPORT" permissionCode="WorkShopExport" downName="WORKSHOP_EXPORT_NAME" url="${baseUrl}/workshop/exportData.do" iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/workshop/list.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="WORKSHOP_PLANT" width="200" field="plant.nameCn" permissionCode="WORKSHOP_PLANT" formatter="renderPlant" ></@p.column>
+	    <@p.column title="WORKSHOP_NO"  field="no" permissionCode="WORKSHOP_NO" ></@p.column>
+		<@p.column title="WORKSHOP_NAME_CN" field="nameCn" permissionCode="WORKSHOP_NAME_CN" formatter="renderNullValue"></@p.column>
+		<@p.column title="WORKSHOP_NAME_EN" field="nameEn" permissionCode="WORKSHOP_NAME_EN" formatter="renderNullValue"></@p.column>
+		<@p.column title="WORKSHOP_NAME_CN_S" field="nameCnS" permissionCode="WORKSHOP_NAME_CN_S" formatter="renderNullValue"></@p.column>
+		<@p.column title="WORKSHOP_NAME_EN_S" field="nameEnS" permissionCode="WORKSHOP_NAME_EN_S" formatter="renderNullValue"></@p.column>
+		<@p.column title="WORKSHOP_ENABLED" field="enabled" permissionCode="WORKSHOP_ENABLED" formatter="renderEnabled"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+
+<script type="text/javascript">
+function renderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/workshop/exportTemplate.do";
+    importFile("<@s.m code="WORKSHOP_IMPORT" />", "${baseUrl}/workshop/importData.do", "dg${currentPageId}",obj);
+}
+
+function plantWorkshop_listPage(obj){
+	if (obj == "" || null == obj) {
+		return false;
+	}else{
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/line/selectWShopNameOrID.do",
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				try {
+					$("#workshopId").empty(); //清空下拉列表
+					$("#workshopId").append(" <option value=''>-----请选择-----</option>");
+					$(result).each(function(i, item) {
+						$("#workshopId").append(" <option value='" + item.id + "'>"+item.no+" - " +item.nameCn+ "</option>");
+					});
+	                document.getElementById("workshopId").value = '';
+					} catch (e) {
+						alert(e);
+					return;
+					}
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+}
+</script>

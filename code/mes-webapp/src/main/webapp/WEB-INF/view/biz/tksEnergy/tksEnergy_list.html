@@ -1,0 +1,59 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="TKS_ENERGY_TITLE" permissionModule="TKS_ENERGY">
+  <@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="CREATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="CREATETIME_END" id="createTimeEnd"  field="createTimeEnd"  ></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+			<@p.button title="BTN_EXPORT" onclick="downLoadAjax()" iconCls="upload-alt" type="button" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tksEnergy/list.do"  >
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="TKS_ENERGY_CREATE_TIME" field="createTime" permissionCode="TKS_ENERGY_CREATE_TIME"></@p.column>
+			<@p.column title="TKS_ENERGY_AC_ENERGY" field="acEnergy" permissionCode="TKS_ENERGY_AC_ENERGY"></@p.column>
+			<@p.column title="TKS_ENERGY_LIGHT_ENERGY" field="lightEnergy" permissionCode="TKS_ENERGY_LIGHT_ENERGY" ></@p.column>
+			<@p.column title="TKS_ENERGY_DEVICE_ENERGY" field="deviceEnergy" permissionCode="TKS_ENERGY_DEVICE_ENERGY"></@p.column>
+	</@p.dataGrid>  
+	<script type="text/javascript">
+	$(function(){
+		initQueryTime();
+		$('#createTimeStart').click(function(){
+			var createTimeEnd=$dp.$('createTimeEnd');
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm:ss',
+				onpicked:function(){
+					createTimeEnd.click();
+				},
+				maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+			})
+		});
+		$('#createTimeEnd').click(function(){
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm:ss',
+				minDate:'#F{$dp.$D(\'createTimeStart\')}'
+			})
+		});
+	});
+	function initQueryTime(){
+		var date = new Date();
+		var month = date.getMonth()+1;
+		var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		endTime=endTime +" "+caseLessTen(date.getHours())+":"+caseLessTen(date.getMinutes())+":"+caseLessTen(date.getSeconds());
+		$("#createTimeEnd").val(endTime);
+		date = new Date();
+		month = month-1;
+		var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		startTime=startTime +" "+caseLessTen(date.getHours())+":"+caseLessTen(date.getMinutes())+":"+caseLessTen(date.getSeconds());
+		$("#createTimeStart").val(startTime);
+	}
+	function downLoadAjax(){
+		downAjax("","${baseUrl}/tksEnergy/exportData.do",'dg${currentPageId}');
+	}
+</script>
+</@p.body>	
+

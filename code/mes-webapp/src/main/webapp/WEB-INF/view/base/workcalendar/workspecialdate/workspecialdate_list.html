@@ -1,0 +1,82 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+ <script type="text/javascript">
+ var checkedArray =[];
+ $(function(){
+		var lang='${lang!}';
+		var params={};
+		if(lang=='en_US'){
+			params.lang='en';
+		}
+		$('#specialDateStart,#specialDateEnd').focus(function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd'});
+		});
+		
+	});
+	<#list line as itme>
+		checkedArray.push({"${itme.code}":"${itme.name}"});
+	</#list>
+	function importData(){
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/workspecialdate/exportTemplate.do";
+		importFile("<@s.m code="WORKSHOP_IMPORT" />", "${baseUrl}/workspecialdate/importData.do", "dg${currentPageId}",obj);
+	}
+
+</script> 
+
+<@p.body title="WORK_SPECIAL_DATE_LIST_TITLE" permissionModule="WORK_SPECIAL_DATE" noBreadcrumbs="true">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="WORK_SPECIAL_DATE_LINE" id="TmClassManager.tmLineId" type="select"  field="TmClassManager.tmLineId" options=line></@p.input>
+			<@p.input title="WORK_SPECIAL_DATE_CLASS_NAME" type="select"  field="className" options=classOrderOptions class="select2"></@p.input>
+			<@p.input title="WORK_SPECIAL_DATE_BEGIN_DATE" field="specialDateStart" id="specialDateStart" class="timepicker"></@p.input>
+			<@p.input title="WORK_SPECIAL_DATE_END_DATE" field="specialDateEnd" id="specialDateEnd" class="timepicker"></@p.input>
+			<@p.input title="WORK_SPECIAL_DATE_TYPE" type="select" class="select2"  field="type" options=dateType></@p.input>
+		    <@p.input title="WORK_SPECIAL_DATE_ENABLED" type="select" class="select2" field="enabled" options=enabled></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar"> 
+			<@p.button title="WORK_SPECIAL_DATE_ADD" permissionCode="WorkspecialdateAdd" iconCls="plus" url="${baseUrl}/workspecialdate/addInput.do" type="add"></@p.button>
+			<@p.button title="WORK_SPECIAL_DATE_UPDATE" permissionCode="WorkspecialdateUpdate" iconCls="edit" url="${baseUrl}/workspecialdate/updateInput.do" type="update"></@p.button>
+			<@p.button title="WORK_SPECIAL_DATE_DELETE" permissionCode="WorkspecialdateDelete" iconCls="trash" url="${baseUrl}/workspecialdate/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/workspecialdate/list.do" >
+		<@p.column  checkbox="true"></@p.column>
+		<@p.column title="WORK_SPECIAL_DATE_SPECIAL_DATE"  field="specialDate"    permissionCode="WORK_SPECIAL_DATE_SPECIAL_DATE"></@p.column>
+		<@p.column title="WORK_SPECIAL_DATE_CLASS_NAME"  field="tmClassManager.className"  formatter="rendClassOrder"  permissionCode="WORK_SPECIAL_DATE_CLASS_NAME"></@p.column>
+		<@p.column title="WORK_SPECIAL_DATE_LINE"  field="tmClassManager.tmLineId" formatter="rendLine"   permissionCode="WORK_SPECIAL_DATE_LINE"></@p.column>
+		<@p.column title="WORK_SPECIAL_DATE_CLASS_GROUP"  field="tmClassManager.classGroup" formatter="rendClassGroup"   permissionCode="WORK_SPECIAL_DATE_CLASS_GROUP"></@p.column>
+		<@p.column title="WORK_SPECIAL_DATE_STARTTIME"   field="startTime"   permissionCode="WORK_SPECIAL_DATE_STARTTIME"></@p.column>
+		<@p.column title="WORK_SPECIAL_DATE_ENDTIME"   field="endTime"   permissionCode="WORK_SPECIAL_DATE_ENDTIME"></@p.column>
+		<@p.column title="WORK_SPECIAL_DATE_ENABLED" field="enabled"  permissionCode="WORK_SPECIAL_DATE_ENABLED" formatter="rendEnabled"></@p.column>
+	
+	</@p.dataGrid> 
+</@p.body>
+<!-- inline scripts related to this page -->
+ <script type="text/javascript">
+    function rendEnabled(value) {
+		return entryRenderer('ENABLED', value);
+	}
+    
+    function rendLine(value){
+    	var val='';
+    	for(var i=0;i<checkedArray.length;i++){
+    		if(checkedArray[i][value]!==null && checkedArray[i][value]!='' && checkedArray[i][value]!=undefined){
+    			val=checkedArray[i][value]
+    		}
+    	}
+    	return val;
+    }
+    
+    function renderType(value){
+		return entryRenderer('DATE_TYPE',value);
+	}
+    function rendClassGroup(value) {
+		return entryRenderer('CLASS_GROUP', value);
+  }
+   
+   function rendClassOrder(value) {
+		return entryRenderer('SHIFT_TYPE', value);
+  }
+</script>

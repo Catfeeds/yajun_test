@@ -1,0 +1,69 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+$('#startDate_lisPage').focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm'});
+	WdatePicker({
+		maxDate : '#F{$dp.$D(\'settingEnd\',{d:-1})}'
+	});
+});
+$('#endDate_listPage').focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm'});
+	WdatePicker({
+		maxDate : '#F{$dp.$D(\'settingEnd\',{d:-1})}'
+	});
+});
+$(function(){
+	initTime();
+});
+function initTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#startDate_lisPage").val(startTime+" 00:00");
+	date.setDate(date.getDate()+1);
+	month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#endDate_listPage").val(endTime+" 23:59");
+	
+}
+
+function caseLessTen(num){
+	if(num<10){
+		return '0'+num;
+	}else {
+		return num;
+	}
+}
+</script>
+<@p.body title="FIN_REPORT_LIST_TITLE" noBreadcrumbs="true" permissionModule="FIN_REPORT_EXPORT">
+	<@p.searchPanel >
+		<@p.searchColumns>
+		   <@p.input title="FIN_START" field="createTimeStart" id="startDate_lisPage" class="timepicker"></@p.input>
+		   <@p.input title="FIN_END" field="createTimeEnd" id="endDate_listPage" class="timepicker"></@p.input>
+		   <@p.input title="FIN_EXPORT_SHIFT_NO" field="shiftNo"  type="select" options=shiftNo ></@p.input>
+		   <@p.input title="FIN_EXPORT_NO" field="noShow"></@p.input>
+		   <@p.input title="FIN_EXPORT_DEVICE_STATUS" field="deviceStatus"  type="select" options=deviceStatus ></@p.input>
+		   <@p.input title="FIN_EXPORT_ONE_LEVEL_CONTENT" field="oneLivelStatusContent" type="select" options=oneLivelStatusContent ></@p.input>
+		   <@p.input title="FIN_EXPORT_TWO_LEVEL_CONTENT" field="twoLivelStatusContent" class="timepicker"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="FIN_EXPORT" permissionCode="FinExport" downName="FIN_EXPORT_NAME" url="${baseUrl}/finExport/exportData.do" iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+
+	 <@p.dataGrid  url="${baseUrl}/finExport/list.do">
+		<@p.column title="FIN_EXPORT_DATE" field="dateShow" permissionCode="FIN_EXPORT_DATE"></@p.column>
+		<@p.column title="FIN_EXPORT_SHIFT_NO" field="shiftNo" permissionCode="FIN_EXPORT_SHIFT_NO"></@p.column>
+		<@p.column title="FIN_EXPORT_NO" field="noShow" permissionCode="FIN_EXPORT_NO" ></@p.column>
+		<@p.column title="FIN_EXPORT_COLUMNS" field="columnsShow" permissionCode="FIN_EXPORT_COLUMNS" ></@p.column>
+		<@p.column title="FIN_EXPORT_SEGMENT" field="segmentShow" permissionCode="FIN_EXPORT_SEGMENT" ></@p.column>
+		<@p.column title="FIN_EXPORT_SLICES" field="slicesShow"   permissionCode="FIN_EXPORT_SLICES"></@p.column>
+		<@p.column title="FIN_EXPORT_DEVICE_STATUS" field="deviceStatusShow"   permissionCode="FIN_EXPORT_DEVICE_STATUS"></@p.column>
+		<@p.column title="FIN_EXPORT_BEGIN_TIME" field="beginTime"   permissionCode="FIN_EXPORT_BEGIN_TIME"></@p.column>
+		<@p.column title="FIN_EXPORT_FINISH_TIME" field="finishTime"   permissionCode="FIN_EXPORT_FINISH_TIME"></@p.column>
+		<@p.column title="FIN_EXPORT_LONG_TIME" field="timeLong"   permissionCode="FIN_EXPORT_LONG_TIME"></@p.column>
+		<@p.column title="FIN_EXPORT_ONE_LEVEL_CONTENT" field="oenLevelStatusContent"   permissionCode="FIN_EXPORT_ONE_LEVEL_CONTENT"></@p.column>
+		<@p.column title="FIN_EXPORT_TWO_LEVEL_CONTENT" field="twoLevelStatusContent"   permissionCode="FIN_EXPORT_TWO_LEVEL_CONTENT"></@p.column>
+<!-- 		<@p.column title="FIN_EXPORT_THREE_LEVEL_CONTENT" field="threeLevelStatusContent"   permissionCode="FIN_EXPORT_THREE_LEVEL_CONTENT"></@p.column> -->
+	</@p.dataGrid>
+</@p.body>

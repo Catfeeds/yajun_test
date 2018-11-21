@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SupplierPartMapper">
+	
+	<select id="getPartPageResult" resultType="com.wis.mes.master.part.entity.TmPart" parameterType="java.util.HashMap">
+  		select t.ID as id,
+  			   t.NO as no,
+  			   t.NAME_CN as nameCn,
+  			   t.NAME_CN_S as nameCnS,
+  			   t.NAME_EN as nameEn,
+  			   t.NAME_EN_S as nameEnS,
+  			   t.TYPE as type,
+  			   t.BATCH_QTY as batchQty,
+  			   t.BASE_UNIT as baseUnit,
+  			   t.ENABLED as enabled
+  		from tm_part t where  t.ID not in (select m.TM_PART_ID from tm_supplier_part m where m.TM_SUPPLIER_ID=#{tmSupplierId})
+  		<![CDATA[ and  t.TYPE <> 'FINISHED']]>
+  		<if test="no !=null and no!='' ">
+				AND t.NO LIKE CONCAT('%',#{no},'%')
+		</if>
+  		<if test="enabled !=null and enabled!='' ">
+				AND t.ENABLED LIKE CONCAT('%',#{enabled},'%')
+		</if>
+		<if test="nameCn !=null and nameCn!='' ">
+				AND t.NAME_CN LIKE CONCAT('%',#{nameCn},'%')
+		</if>
+  		<if test="type !=null and type!='' ">
+				AND  t.TYPE LIKE CONCAT('%',#{type},'%')
+		</if>
+  		LIMIT #{firstRow}, #{pageSize}
+  </select>
+  
+   <select id="getPartCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+  	select  COUNT(*)
+  		from tm_part t where  t.ID not in (select m.TM_PART_ID from tm_supplier_part m where m.TM_SUPPLIER_ID=#{tmSupplierId})
+  		  <![CDATA[ and  t.TYPE <> 'FINISHED']]> 
+  		<if test="no !=null and no!='' ">
+				AND t.NO LIKE CONCAT('%',#{no},'%')
+		</if>
+  		<if test="enabled !=null and enabled!='' ">
+				AND t.ENABLED LIKE CONCAT('%',#{enabled},'%')
+		</if>
+  		<if test="nameCn !=null and nameCn!='' ">
+				AND t.NAME_CN LIKE CONCAT('%',#{nameCn},'%')
+		</if>
+		<if test="type !=null and type!='' ">
+				AND  t.TYPE LIKE CONCAT('%',#{type},'%')
+		</if>
+  </select>
+
+</mapper>

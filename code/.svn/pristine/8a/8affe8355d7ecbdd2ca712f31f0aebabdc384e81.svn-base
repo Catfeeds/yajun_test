@@ -1,0 +1,44 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body title="PATH_LIST_TITLE" permissionModule="AVI_PATH_PART" noBreadcrumbs="true">	
+<!-- <div style="color: #428bca;text-align:center; margin:10px" >关键件信息</div> -->
+<input id="toPorderAviPathId" type="hidden" value="${toPorderAviPathId!}" />
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathPartAdd" iconCls="plus" url="${baseUrl}/avi/path/part/addInput.do?toPorderAviPathId="+"${toPorderAviPathId}" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathPartUpdate" iconCls="edit" url="${baseUrl}/avi/path/part/updateInput.do?toPorderAviPathId="+"${toPorderAviPathId}" type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathPartDelete" iconCls="trash" url="${baseUrl}/avi/path/part/delete.do" type="delete"></@p.button>
+<!-- 			<@p.button title="PATH_IMPORT" permissionCode="PathPartImport" downName="PATH_ULOC_PART_IMPORT_NAME" onclick="importData();" iconCls="signin" /> -->
+			<@p.button title="PATH_EXPORT" permissionCode="PathPartExport" downName="PATH_ULOC_PART_EXPORT_NAME" url="${baseUrl}/avi/path/part/exportData.do?toPorderAviPathId="+"${toPorderAviPathId}"  iconCls="upload-alt" type="down" />
+<!-- 			<@p.button title="PATH_EXPORT_TEMPLTE" permissionCode="PathPartImport" iconCls="upload-alt"  url="${baseUrl}/path/uloc/part/exportTemplate.do" type="down"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/avi/path/part/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_PART" field="part.nameCn" permissionCode="AVI_PATH_PART_NO" formatter="renderPart"></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_QTY" field="qty" permissionCode="AVI_PATH_PART_QTY" ></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_SEQ" field="seq" permissionCode="AVI_PATH_PART_SEQ" ></@p.column>
+<!-- 		<@p.column title="PATH_ULOC_PART_ULOC_ISTRAC" field="isTrac" permissionCode="AVI_PATH_PART_IS_TRAC" formatter="renderYesOrNo"></@p.column> -->
+		<@p.column title="PATH_ULOC_PART_ULOC_ISBATCHTRAC" field="isBatchTrac" permissionCode="AVI_PATH_PART_IS_BATCH_TRAC" formatter="renderYesOrNo"></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_NOTE" field="note" permissionCode="AVI_PATH_PART_NOTE" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+function renderUlocType(value){
+	return entryRenderer('ULOC_TYPE', value);
+}
+function renderPart(value,record){
+	if(record.part&&record.part.no){
+		return record.part.no+ " - " + record.part.nameCn;
+	}
+}
+
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

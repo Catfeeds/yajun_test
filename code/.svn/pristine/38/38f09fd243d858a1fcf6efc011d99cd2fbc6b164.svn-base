@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="FinMovableRateMapper" >
+	<select id="getFinMovableRateEveryDayUnUse" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			  select   a.dt                 as dateShow,
+				       a.dayofweek          as weekShow,
+				       decode(b.whiteShift,null,0,b.whiteShift) as whiteShift,
+		 			   decode(b.nightShift,null,0,b.nightShift) as nightShift
+			  from (select to_char(everyDay, 'MM-dd') as dt,
+			               to_char(everyday, 'dy') as dayofweek
+			          from (select to_date(#{createTimeStart}, 'yyyy-mm-dd') - 1 + level as everyDay
+			                  from dual
+			                connect by level &lt;= ((to_date(#{createTimeEnd}, 'yyyy-mm-dd') + 1) -
+			                           to_date(#{createTimeStart}, 'yyyy-mm-dd')))) a
+			  left join (select to_char(f.work_calendar_begin, 'day') as weekShow,
+			                    to_char(f.work_calendar_begin, 'MM-DD') as dateShow,
+			                    count(decode(f.shift_no, '1', f.real_run_rate, 0)) as whiteShift,
+			                    count(decode(f.shift_no, '2', f.real_run_rate, 0)) as nightShift
+			               from FIN_MOVABLE_RATE f
+			              where f.shift_no != '0'
+			                and f.work_calendar_begin is not null
+			                and f.is_rest = 'N'
+			               <if test="createTimeStart!=null and createTimeStart!='' ">
+							 and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+						 </if>
+						 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+						 	and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd')
+						 </if>   
+			              group by f.work_calendar_begin
+			              order by f.work_calendar_begin) b
+			    on a.dt = b.dateShow
+			   and a.dayofweek = b.weekShow
+			 order by a.dt
+	</select>
+	
+	<select id="getFinMovableRateEveryDay" resultType="java.util.HashMap" parameterType="java.util.HashMap"> 
+			select a.dt               as dateShow,
+		       a.dayofweek        as weekShow,
+		       b.whiteRealRunRate as whiteRealRunRateShow,
+		       b.nightRealRunRate as nightRealRunRateShow,
+		       b.allTime as allTimeShow
+		  from (select to_char(everyDay, 'MM-dd') as dt,
+		               to_char(everyday, 'dy') as dayofweek
+		          from (select trunc(to_date(#{createTimeStart}, 'yyyy-mm-dd'), 'MM') - 1 +
+		                       level as everyDay
+		                  from dual
+		                connect by level  &lt;=
+		                           (last_day((to_date(#{createTimeEnd}, 'yyyy-mm-dd'))) + 1) -
+		                           trunc(to_date(#{createTimeStart}, 'yyyy-mm-dd'), 'MM'))) a
+		  left join (select to_char(f.create_time, 'day') as weekShow,
+		                    to_char(f.create_time, 'MM-DD') as dateShow,
+		                     xmlagg(xmlparse(content decode(f.shift_no,
+                                       '1',
+                                       f.real_run_rate,
+                                       '2',
+                                       0)||',' wellformed) order by f.create_time).getclobval() as whiteRealRunRate,
+	                        xmlagg(xmlparse(content decode(f.shift_no,
+	                                       '2',
+	                                       f.real_run_rate,
+	                                       '1',
+	                                       0)||',' wellformed) order by f.create_time).getclobval() as nightRealRunRate,  
+	                        xmlagg(xmlparse(content decode(f.shift_no,
+	                                   1,
+	                                   '1')||',' wellformed) order by f.create_time).getclobval() as allTime
+		               from fin_movable_rate f
+		                 where f.shift_no = #{shiftNo}
+                		 and f.work_calendar_begin is not null
+                		 and f.is_rest = 'N'
+	                 <if test="createTimeStart!=null and createTimeStart!='' ">
+						 and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd')
+					 </if>
+					 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+					 	and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd') + 1
+					 </if>   
+		              group by to_char(f.create_time, 'day'),
+		                       to_char(f.create_time, 'MM-DD')) b
+		    on a.dt = b.dateShow
+		   and a.dayofweek = b.weekShow
+		 order by a.dt
+	</select>
+</mapper>  

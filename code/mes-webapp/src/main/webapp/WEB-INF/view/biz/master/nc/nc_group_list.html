@@ -1,0 +1,75 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	function ngImportData(){ 
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/ncGroup/exportTemplate.do";
+	    importFile("<@s.m code="NC_IMPORT" />", "${baseUrl}/ncGroup/importDataNcGroup.do", "dg${currentPageId}",obj);
+	}
+	function ngImportDataAll(){ 
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/ncGroup/exportTemplateAll.do";
+	    importFile("<@s.m code="NC_IMPORT" />", "${baseUrl}/ncGroup/importDataAll.do", "dg${currentPageId}",obj);
+	}
+	
+	$('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+	    //点击画面行的时候显示对应的工序和物料信息
+	    //document.getElementById("bomDetail").style.display="block";
+	    //工序信息的取得
+	    
+	   // alert($("#ncNo").val());
+	    $.ajax({
+	        url: "${baseUrl}/nc/listInput.do?currentPageId=ncGrid&params=queryCondition[tmNcGroupId]="+row.id,
+	        cache: false,
+	        global:false,
+	        type: "GET",
+	        dataType: "html",
+	        async:true,
+	        data : {
+				"tmNcGroupId":row.id,
+				"no":$("#ncNo").val(),
+				"name":$("#ncName").val(),
+				"remarks":$("#remarks").val()
+			},
+	        success: function(html){
+	            $("#ncList").html(html);
+	        }
+	    });
+	});
+ function renderNcGroup(value) {
+	return value == null ? "" : value;
+}
+ 
+function renderLineNoOrName(value,record) {
+	if(value && record.tmLine.nameCn){
+		return value+" - "+record.tmLine.nameCn;
+	}
+	return record.tmLine.no;
+}
+</script>
+<@p.body title="NC_GROUP_LIST_TITLE" permissionModule="NC_GROUP">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="NC_NO" field="no"  id="no"/>
+			<@p.input title="NC_NAME" field="name" id="name"/>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="NC_ADD" permissionCode="NcGroupAdd" iconCls="plus" url="${baseUrl}/ncGroup/addInput.do" type="add"  ></@p.button>
+			<@p.button title="NC_UPDATE" permissionCode="NcGroupUpdate" iconCls="edit" url="${baseUrl}/ncGroup/updateInput.do" type="update"></@p.button>
+			<@p.button title="NC_DELETE" permissionCode="NcGroupDelete" iconCls="trash" url="${baseUrl}/ncGroup/delete.do" type="delete"></@p.button>
+			<@p.button title="NC_IMPORT" permissionCode="NcGroupImport" onclick="ngImportData();" iconCls="signin" />
+			<@p.button title="NC_EXPORT" permissionCode="NcGroupExport" downName="NC_GROUP_EXPORT_NAME" url="${baseUrl}/ncGroup/exportData.do" iconCls="upload-alt" type="down" />
+			<@p.button title="NC_IMPORT_ALL" permissionCode="NcGroupImportAll" onclick="ngImportDataAll();" iconCls="signin" />
+			<@p.button title="NC_EXPORT_ALL" permissionCode="NcGroupExportAll" downName="NC_GROUP_EXPORT_ALL_NAME" url="${baseUrl}/ncGroup/exportDataAll.do" iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/ncGroup/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="NC_LINE" field="tmLine.no" permissionCode="TM_NC_GROUP_NO" formatter="renderLineNoOrName"/>
+		<@p.column title="NC_NO" field="no" permissionCode="TM_NC_GROUP_NO" formatter="renderNcGroup"/>
+		<@p.column title="NC_NAME" field="name" permissionCode="TM_NC_GROUP_NAME" formatter="renderNcGroup"/>
+		<@p.column title="NC_REMARKS" field="remarks" permissionCode="TM_NC_GROUP_REMARKS" formatter="renderNcGroup"/>
+	</@p.dataGrid>
+	<div id ="ncList"></div>
+</@p.body>

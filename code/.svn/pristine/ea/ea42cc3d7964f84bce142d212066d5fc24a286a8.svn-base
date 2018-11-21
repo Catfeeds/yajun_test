@@ -1,0 +1,272 @@
+package com.wis.mes.phone.controller;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.wis.basis.common.controller.BaseController;
+import com.wis.basis.common.utils.ActionUtils;
+import com.wis.basis.common.utils.ConstantUtils;
+import com.wis.basis.common.utils.DateUtils;
+import com.wis.basis.common.web.model.BootstrapTableQueryCriteria;
+import com.wis.basis.common.web.model.JsonActionResult;
+import com.wis.core.context.WebContextHolder;
+import com.wis.core.dao.OrderEnum;
+import com.wis.core.dao.QueryCriteria;
+import com.wis.core.framework.entity.DictEntry;
+import com.wis.core.framework.service.AuditLogService;
+import com.wis.core.framework.service.DictEntryService;
+import com.wis.core.framework.service.GlobalConfigurationService;
+import com.wis.core.framework.service.exception.BusinessException;
+import com.wis.mes.master.line.entity.TmLine;
+import com.wis.mes.master.line.service.TmLineService;
+import com.wis.mes.master.nc.entity.TmNc;
+import com.wis.mes.master.nc.service.TmFaultGradeService;
+import com.wis.mes.master.nc.service.TmNcGroupService;
+import com.wis.mes.master.nc.service.TmNcService;
+import com.wis.mes.master.nc.vo.NGVo;
+import com.wis.mes.master.uloc.entity.TmUloc;
+import com.wis.mes.master.uloc.service.TmUlocService;
+import com.wis.mes.master.workcalendar.entity.TmWorktime;
+import com.wis.mes.master.workcalendar.service.TmWorktimeService;
+import com.wis.mes.opc.service.OpcService;
+import com.wis.mes.production.producttracing.entity.TbProductTracing;
+import com.wis.mes.production.producttracing.service.TbProductTracingService;
+import com.wis.mes.production.qualitytracing.entity.TbQualityTracing;
+import com.wis.mes.production.qualitytracing.service.TbQualityTracingService;
+import com.wis.mes.rfid.vo.SnInfoObjVo;
+
+import net.sf.json.JSONArray;
+
+@Controller
+@RequestMapping(value = "/faultMachine")
+public class FaultMachineController extends BaseController {
+	@Autowired
+	private TmFaultGradeService faultGradeService;
+	@Autowired
+	private TbQualityTracingService qualityTracingService;
+	@Autowired
+	private AuditLogService logService;
+	@Autowired
+	private DictEntryService entryService;
+	@Autowired
+	private TmNcGroupService ncGroupService;
+	@Autowired
+	private TmUlocService ulocService;
+	@Autowired
+	private TmNcService ncService;
+	@Autowired
+	private TbProductTracingService productTracingService;
+	@Autowired
+	private OpcService opcservice;
+	@Autowired
+	private TmWorktimeService worktimeService;
+	@Autowired
+	private TmLineService lineService;
+	@Autowired
+	private GlobalConfigurationService globalConfigurationService;
+
+	@RequestMapping(value = "/settingInput")
+	public ModelAndView settingInput(HttpServletResponse response, QueryCriteria criteria, ModelMap modelMap) {
+		modelMap.addAttribute("USER_NAME", WebContextHolder.getUserDetails().getUsername());
+		return new ModelAndView("phone/setting");
+	}
+
+	@RequestMapping(value = "/homePageInput")
+	public ModelAndView homePageInput(HttpServletResponse response, QueryCriteria criteria, ModelMap modelMap) {
+		return new ModelAndView("phone/fault_machine");
+	}
+
+	@RequestMapping(value = "/faultMachineListInput")
+	public ModelAndView faultMachineListInput(HttpServletResponse response, QueryCriteria criteria, ModelMap modelMap) {
+		return new ModelAndView("phone/fault_machine_list");
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/faultMachineList")
+	public JsonActionResult list(HttpServletResponse response, BootstrapTableQueryCriteria criteria,
+			ModelMap modelMap) {
+		criteria.setFuzzyQueryFileds(Arrays.asList(new String[] { "backNumber", "machineOfName", "machineName" }));
+		criteria.setQueryRelationEntity(true);
+		criteria.setRows(criteria.getLimit());
+		criteria.setPage(criteria.getOffset() / criteria.getLimit() + 1);
+		criteria.setOrderField("id");
+		criteria.setOrderDirection(OrderEnum.DESC);
+		return ActionUtils.handleListResult(response, qualityTracingService.findBy(criteria));
+	}
+
+	@RequestMapping(value = "/faultMachineAddInput")
+	public ModelAndView faultMachineAddInput(ModelMap modelMap, String id) {
+		setModelMapDictionary(modelMap);
+		return new ModelAndView("phone/fault_machine_add");
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/faultMachineAdd")
+	public JsonActionResult faultMachineAdd(HttpServletResponse response, TbQualityTracing bean) {
+		SnInfoObjVo snInfoObjVo = SnInfoObjVo.splitSn(bean.getSn());
+		TbProductTracing eg = new TbProductTracing();
+		eg.setBackNumber(snInfoObjVo.getBackNumber());
+		eg.setMachineName(snInfoObjVo.getMachineName());
+		List<TbProductTracing> productTracings = productTracingService.findByEg(eg);
+		if (null != productTracings && productTracings.size() > 0) {
+			bean.setSn(productTracings.get(0).getSn());
+			bean.setMachineOfName(productTracingService.getEgModelName(snInfoObjVo.getBackNumber()));
+		} else {
+			throw new BusinessException("ERROR_KEY", "故障添加失败，产品未上线。");
+		}
+		if(StringUtils.isNoneBlank(bean.getShiftno())) {
+			String lineNo = globalConfigurationService.getValueByKey(ConstantUtils.R5_LINE_NO);
+			TmLine line = lineService.findUniqueByEg(TmLine.createLineNo(lineNo));
+			List<TmWorktime> todayWorkTimes = worktimeService.todayWorkTime(line.getId(), bean.getShiftno());
+			if(null != todayWorkTimes && todayWorkTimes.size()>0) {
+				bean.setTmWorkTimeId(todayWorkTimes.get(0).getId());
+			}
+		}
+		Date date = new Date();
+		bean.setInfoSources(ConstantUtils.EMPLOYEE_JUDGE);
+		bean.setEnteringTime(DateUtils.formatHMS(date));
+		bean.setCreateTime(date);
+		bean.setStatus(ConstantUtils.CREATED);
+		bean = qualityTracingService.doSave(bean);
+		productTracingService.updateUnhealthyCount(bean.getSn());
+		logService.doAddLog("TbQualityTracing", bean);
+		return ActionUtils.handleResult(response);
+	}
+
+	@RequestMapping(value = "/faultMachineDetailInput")
+	public ModelAndView faultMachineDetailInput(ModelMap modelMap, String id) {
+		TbQualityTracing bean = qualityTracingService.findById(Integer.valueOf(id), true);
+		modelMap.addAttribute("bean", bean);
+		List<NGVo> ncList = new ArrayList<NGVo>();
+		if (null != bean.getTmNcGroupId()) {
+			TmNc eg = new TmNc();
+			eg.setTmNcGroupId(bean.getTmNcGroupId());
+			ncList = ncService.getDictItem(eg);
+		}
+		modelMap.addAttribute("ncDictString", JSONArray.fromObject(ncList).toString());
+		setModelMapDictionary(modelMap);
+		return new ModelAndView("phone/fault_machine_detail");
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/faultMachineUpdate")
+	public JsonActionResult faultMachineUpdate(HttpServletResponse response, TbQualityTracing bean) {
+		TbQualityTracing before = qualityTracingService.findById(bean.getId());
+		TbQualityTracing setBean = before;
+		setBean.setShiftno(bean.getShiftno());
+		setBean.setTmNcGroupId(bean.getTmNcGroupId());
+		setBean.setTmNcId(bean.getTmNcId());
+		setBean.setNcProcessMode(bean.getNcProcessMode());
+		setBean.setDiscoveryStation(bean.getDiscoveryStation());
+		setBean.setNgEntrance(bean.getNgEntrance());
+		setBean.setSubmitTime(new Date());
+		qualityTracingService.doUpdate(setBean);
+		logService.doUpdateLog("TbQualityTracing", before, setBean);
+		return ActionUtils.handleResult(response);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/getNcItem")
+	public JsonActionResult getNcItem(HttpServletResponse response, Integer tmNcGroupId) {
+		TmNc eg = new TmNc();
+		eg.setTmNcGroupId(tmNcGroupId);
+		return ActionUtils.handleResult(ncService.getDictItem(eg));
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/UnqualifiedClosure")
+	public JsonActionResult UnqualifiedClosure(HttpServletResponse response, Integer id) {
+		TbQualityTracing bean = qualityTracingService.findById(id);
+		if (null == bean.getTmNcGroupId() || StringUtils.isBlank(bean.getNgEntrance())) {
+			throw new BusinessException("ERROR_KEY", "请先提交，在进行故障关闭。");
+		}
+		if (bean.getStatus().equals(ConstantUtils.CLOSED)) {
+			throw new BusinessException("ALREADY_CLOSED");
+		}
+		bean.setStatus(ConstantUtils.CLOSED);
+		qualityTracingService.doUpdate(bean);
+		return ActionUtils.handleResult(response);
+	}
+
+	@RequestMapping(value = "/queueCorrectionInput")
+	public ModelAndView queueCorrectionInput(HttpServletResponse response, QueryCriteria criteria, ModelMap modelMap) {
+		List<DictEntry> dictList = new ArrayList<DictEntry>();
+		for (TmUloc bean : ulocService.findAll()) {
+			DictEntry dict = new DictEntry();
+			dict.setCode(bean.getNo());
+			dict.setName("[" + bean.getNo() + "]" + (StringUtils.isNotBlank(bean.getName()) ? bean.getName() : ""));
+			dictList.add(dict);
+		}
+		modelMap.addAttribute("optionUloc", JSONArray.fromObject(dictList).toString());
+		return new ModelAndView("phone/queue_correction");
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/ulocToPlcSn")
+	public Map<String, Object> ulocToPlcSn(String ulocNo) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		String sn = opcservice.getSnByUlocNo(ulocNo);
+		if (StringUtils.isNotBlank(sn)) {
+			SnInfoObjVo snInfoObjVo = SnInfoObjVo.splitSn(sn);
+			map.put("sn", sn);
+			map.put("backNumber", snInfoObjVo.getBackNumber());
+			map.put("machineName", snInfoObjVo.getMachineName());
+			map.put("machineOfName", productTracingService.getEgModelName(snInfoObjVo.getBackNumber()));
+		}
+		return map;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/getSnInfo")
+	public Map<String, Object> getSnInfo(String sn) {
+		// TODO SN是16进制，需要解析
+		Map<String, Object> map = new HashMap<String, Object>();
+		SnInfoObjVo snInfoObjVo = SnInfoObjVo.splitSn(sn);
+		map.put("sn", sn);
+		map.put("backNumber", snInfoObjVo.getBackNumber());
+		map.put("machineName", snInfoObjVo.getMachineName());
+		map.put("machineOfName", productTracingService.getEgModelName(snInfoObjVo.getBackNumber()));
+		return map;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/plcWrite")
+	public JsonActionResult plcWrite(HttpServletResponse response, String ulocNo, String sn) {
+		opcservice.writeByUlocAndSN(ulocNo, sn);
+		return ActionUtils.handleResult(response);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/analyzeSn")
+	public JsonActionResult analyzeSn(String sn) {
+		SnInfoObjVo snInfoObj = SnInfoObjVo.splitSn(sn);
+		snInfoObj.setMachineOfName(productTracingService.getEgModelName(snInfoObj.getBackNumber()));
+		return ActionUtils.handleResult(snInfoObj);
+	}
+
+	private void setModelMapDictionary(ModelMap modelMap) {
+		modelMap.addAttribute("optionShiftno",
+				JSONArray.fromObject(entryService.getEntryByTypeCode(ConstantUtils.SHIFT_TYPE)).toString());
+		modelMap.addAttribute("optionNcStatus",
+				JSONArray.fromObject(entryService.getEntryByTypeCode(ConstantUtils.QUALITY_NC_STATUS)).toString());
+		modelMap.addAttribute("faultGrades", JSONArray.fromObject(faultGradeService.getDictItem(null)).toString());
+		modelMap.addAttribute("optionNgEntrance", JSONArray.fromObject(ulocService.getUlocNgExitEnterMap()).toString());
+		modelMap.addAttribute("ncGroup", JSONArray.fromObject(ncGroupService.queryDictItem(new QueryCriteria())).toString());
+		modelMap.addAttribute("optionUloc", JSONArray.fromObject(ulocService.getUlocAll()).toString());
+		modelMap.addAttribute("optionUlocExits", JSONArray.fromObject(ulocService.getDictItemExitEntrance(ConstantUtils.ULOC_EXIT_ENTER)).toString());
+	}
+}

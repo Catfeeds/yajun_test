@@ -1,0 +1,37 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+		function setPermission(){
+			detail('<@s.m code="ROLE_PERMISSION_SET" />','${baseUrl}/role/roleSetInput.do','dg${currentPageId}')
+		}
+		function renderSysdata(value) {
+			return entryRenderer('YES_OR_NO', value);
+		}
+		function setRoleMasgerPermission() {
+			detail('<@s.m code="ROLE_PERMISSION_SET" />','${baseUrl}/role/roleMasterSetInput.do','dg${currentPageId}')
+		}
+</script>	
+	<@p.body title="ROLE_LIST_TITLE" permissionModule="ROLE">
+		<@p.searchPanel>
+			<@p.searchColumns >
+				<@p.input title="ROLE_CODE" field="code"   permissionCode="ROLE_CODE"></@p.input>
+				<@p.input title="ROLE_NAME" field="name"   permissionCode="ROLE_NAME"></@p.input>
+				<@p.input title="ROLE_DESC" field="desc"   permissionCode="ROLE_DESC"></@p.input>
+			</@p.searchColumns>
+			<@p.toolbar id="toolbar">
+				<@p.button title="ROLE_ADD" iconCls="plus" url="${baseUrl}/role/addInput.do"  type="add"></@p.button>
+				<@p.button title="ROLE_EDIT" iconCls="edit" url="${baseUrl}/role/updateInput.do"  type="update"></@p.button>
+				<@p.button title="ROLE_VIEW" iconCls="eye-open" url="${baseUrl}/role/viewInput.do"  type="view"></@p.button>
+				<@p.button title="ROLE_DELETE" iconCls="trash" url="${baseUrl}/role/delete.do" type="delete"></@p.button>
+				<@p.button title="ROLE_PERMISSION_SET"  iconCls="cogs" onclick="setPermission()"></@p.button>
+<!-- 				<@p.button title="ROLE_MASTER_PERMISSION_SET"  iconCls="cogs" onclick="setRoleMasgerPermission()"></@p.button> -->
+			</@p.toolbar>
+		</@p.searchPanel>
+		<@p.dataGrid url="${baseUrl}/role/list.do">
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="ROLE_CODE" width="100"  field="code"   permissionCode="ROLE_CODE"></@p.column><#t/>
+			<@p.column title="ROLE_NAME" width="150" field="name"   permissionCode="ROLE_NAME"></@p.column><#t/>
+			<@p.column title="ROLE_DESC" width="200"  field="desc"   permissionCode="ROLE_DESC"></@p.column><#t/>
+			<!-- <@p.column title="FRAME_SYSTEM_DATA" width="100"  field="systemData" formatter="renderSysdata"  permissionCode="ROLE_CODE"></@p.column><#t/> -->
+		</@p.dataGrid>
+	</@p.body>

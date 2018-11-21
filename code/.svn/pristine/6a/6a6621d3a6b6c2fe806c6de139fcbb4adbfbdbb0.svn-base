@@ -1,0 +1,24 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>待办任务提醒</title>
+</head>
+<body  style = "background-color:#eeeeee;">
+<font size="2" >您有一个流程待处理：</font>
+	<table style="font-size: 12px;color:#003366; ">
+		<tr>
+			<td>流程名称</td>
+			<td>${instanceName!}</td>
+		</tr>
+		<tr>
+			<td>任务名称</td>
+			<td>${taskName!}</td>
+		</tr>
+	</table>
+
+<hr>
+<font size="2" color="#003366">
+这是由系统自动发出的邮件通知，请不要回复<br>
+</font>
+</body>
+</html>

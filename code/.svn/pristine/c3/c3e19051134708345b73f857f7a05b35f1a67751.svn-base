@@ -1,0 +1,203 @@
+<#include "../../include/bootstrapTableCommons.html">
+<html>
+<head>
+<meta charset="UTF-8">
+<title>钣金-生产管理报表</title>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<style type="text/css">
+.report-panel{
+	width:100%;
+	overflow-y: hidden;
+	padding-top: 10px;
+}
+</style>
+<script type="text/javascript">
+
+function refreshReport(){
+	var dataTime = $("#productionDate").val();
+	var equipmentId = $("#equipment").val();
+	var shiftno = $("#shiftNo").val();
+	showReport(dataTime,equipmentId,shiftno);
+	myFrame.window.report(dataTime,equipmentId,shiftno);
+}
+
+function thisResetSearch(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+month+"-"+date.getDate();
+	$("#productionDate").val(endTime);
+	$("#equipment").val('${equipmentId!}');
+	$("#shiftNo").val('MORNINGSHIFT');
+}
+ 
+function showReport(dataTime) {
+	$.ajax({
+		url:"${baseUrl}/productMrg/everyDayPrd.do",
+		type:"GET",
+		data:{
+			"time":dataTime
+		},
+		dataType:"json",
+		success:function(result){
+			var per = result.per;
+			prd(result.plannedList,result.practicalList);
+		 }
+	});
+}
+
+
+function prd(plannedLists,practicalLists){
+	var myChart = echarts.init(document.getElementById("shiftVeryCount"));
+		myChart.showLoading();
+		option = {
+			    title: {
+			        text: '当日生产回数表'
+			    },
+			    tooltip: {
+			        trigger: 'axis',
+			        axisPointer: {
+			            type: 'cross',
+			            label: {
+			                backgroundColor: '#283b56'
+			            }
+			        }
+			    },
+			    legend: {
+			        data:[ '每分钟生产数','当日生产数']
+			    },
+			    toolbox: {
+			        show: true,
+			        feature: {
+			            dataView: {readOnly: false},
+			            restore: {},
+			            saveAsImage: {}
+			        }
+			    },
+			    dataZoom: {
+			        show: false,
+			        start: 0,
+			        end: 100
+			    },
+			    grid: {
+	    	        right: 10,
+	    	        top: "25%",
+	    	        bottom: "5%",
+	    	        containLabel: true
+	    	    },
+			    xAxis: [
+			        {
+			            type: 'category',
+			           
+			            data:['8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00']
+			        }
+			    ],
+			    yAxis: [
+			        {
+			            type: 'value',
+			          
+			            name: '当日生产数',
+			          
+			            min: 0,
+			          
+			        },
+			        {
+			            type: 'value',
+			           // scale: true,
+			            name: '每分钟生产数',
+			           // max: 12000,
+			            min: 0
+			        }
+			    ],
+			    series: [
+			        {
+			            name:'当日生产数',
+			            type:'bar',
+			            data:plannedLists
+			        },
+			        {
+			            name:'每分钟生产数',
+			            type:'line',
+			            data:practicalLists
+			        }
+			    ]
+			};
+		myChart.hideLoading();
+		myChart.setOption(option);
+
+}
+
+</script>
+</head>
+<body>
+<div class="page-content" >
+	<div class="report-panel">
+		<div>
+			<@p.body title="METALPLATEPRODUCTIONRECORD_LIST_TITLE" permissionModule="PRODUCTION_RECORD">	
+				<@p.searchPanel >
+					<@p.searchColumns  showSeachButton="false">
+						<@p.input title="PRODUCTIONSCHEDULE_DATE" field="productionDate" id="productionDate"></@p.input>
+						<@p.input title="EQUIPMENT__NAME_PARAM" id="equipment" type="select" value="${equipmentId!}" options=equipmentArray></@p.input>
+						<@p.input title="CLASS_MANAGER_CLASS_NAME" field="workSchedule" id="shiftNo" value="MORNINGSHIFT" type="select"  options=shiftArray></@p.input>
+						<div class="search_btn_box">
+							<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="refreshReport(),refreshTable('dg${currentPageId}',this,'','');"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+							<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="thisResetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+						</div>
+					</@p.searchColumns>
+				</@p.searchPanel>
+				<@p.dataGrid url="${baseUrl}/mpProductionRecord/list.do">
+					<@p.column title="METALPLATEPRODUCTIONRECORD_PRODUCTIONDATE" field="productionDate" permissionCode="PRODUCTIONDATE"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_PRODUCTIONMODEL" field="model" permissionCode="MODEL"  formatter="renderModel"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_BATCHNUMBER" field="batchNumber" permissionCode="BATCHNUMBER"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_WORKPEOPLE" field="workPeople" permissionCode="WORKPEOPLE"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_WORKSCHEDULE" field="workSchedule" permissionCode="WORKSCHEDULE"  formatter="renderWorkSchedule"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_REGIONMARK" field="regionMark" permissionCode="REGIONMARK" formatter="renderRegionMark"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_PUNCH_PRESS" field="press" permissionCode="PRESS"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_MOULDS" field="moulds" permissionCode="MOULDS"  formatter="renderMoulds"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_PLANNEDCYCLES" field="plannedCycles" permissionCode="PLANNEDCYCLES"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_PRACTICALCYCLES" field="practicalCycles" permissionCode="PRACTICALCYCLES"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_DEFECTIVENUMBER" field="defectiveNumber" permissionCode="DEFECTIVENUMBER"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_PRODUCTIONTIME" field="productionTime" permissionCode="PRODUCTIONTIME"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_PERIODTAKETIME" field="periodTakeTime" permissionCode="PERIODTAKETIME" formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_PLACETIME" field="placeTime" permissionCode="PLACETIME"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_VELOCITY" field="velocity" permissionCode="PLACETIME"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_CYCLETIME" field="cycleTime" permissionCode="PLACETIME"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_STOPANGLE" field="stopAngle" permissionCode="PLACETIME"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_ALARMNUMBER" field="alarmNumber" permissionCode="ALARMNUMBER"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_STATUS" field="status" permissionCode="ALARMNUMBER"  formatter="renderStatus"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_STARTTIME" field="startTime" permissionCode="STARTTIME"  formatter="renderBatchQty"></@p.column>
+					<@p.column title="METALPLATEPRODUCTIONRECORD_ENDTIME" field="endTime" permissionCode="ENDTIME" formatter="renderBatchQty"></@p.column>
+				</@p.dataGrid>
+			</@p.body>
+		</div>
+		<div style="width: 80%;height: 30rem;margin-bottom: 10rem;">
+			<div id="shiftVeryCount" style="width: 100%;height: 100%;"></div>
+		</div>
+		<div style="width: 80%;height:35rem;margin-left: 5rem;">
+			<iframe name="myFrame" src="${baseUrl}/productMrg/productionStatusInput.do" style="width:100%;height:100%" frameborder="no"></iframe>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	$('#productionDate').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true});
+	});
+	initTime();
+})
+function renderBatchQty(value){return value == null ? "" : value;}
+function renderModel(value){return entryRenderer('SM_MACHINING_SURFACE', value);}
+function renderWorkSchedule(value){return entryRenderer('SHIFT_TYPE', value);}
+function renderMoulds(value){return entryRendererMulti('SM_TOOL_NUMBER', value);}
+function renderRegionMark(value){return entryRenderer('SM_REGION_MARK', value);}
+function renderStatus(value,row,index){return entryRenderer('BJ_BAD_STATUS', value);}
+function initTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+month+"-"+date.getDate();
+	$("#productionDate").val(endTime);
+	showReport(endTime);
+}
+</script>

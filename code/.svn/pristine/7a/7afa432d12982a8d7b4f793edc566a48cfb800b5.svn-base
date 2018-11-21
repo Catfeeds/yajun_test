@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/tmCodeRule/add.do" class="form-horizontal" permissionModule="CODE_RULE">
+		<@p.formRow>
+		    <@p.formColmd title="TM_CODE_RULE_LINE" permissionCode="NEW_CODE">
+				<@p.input type="select" datatype="*" field="tmLineId" options=lineOption></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="TM_CODE_RULE_DISTINGUISH"  permissionCode="OLD_CODE">
+				<@p.input type="select" datatype="*" field="distinguish" options=abnormalDistinguishOption></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+		     <@p.formColmd title="TM_CODE_RULE_ABNORMAL_SOURCE"  permissionCode="CODE_DESC">
+		        <@p.input type="select" datatype="*" field="dataSource" options=abnormalSourceOption></@p.input>
+		     </@p.formColmd>
+		     <@p.formColmd title="TM_CODE_RULE_CODE"  permissionCode="NOTE">
+		        <input name="code" class="inputxt" datatype="*" placeholder="请输入4位数字" maxlength='20' />
+		     </@p.formColmd>
+		</@p.formRow>
+			<@p.formRow>
+		     <@p.formColmd title="TM_CODE_RULE_CODE_DESC"  permissionCode="CODE_DESC">
+		        <input name="codeDesc" class="inputxt"   datatype="*" maxlength='50'  />
+		     </@p.formColmd>
+		     <@p.formColmd title="TM_CODE_RULE_NEW_CODE"  permissionCode="NOTE">
+		        <input name="plcCode" class="inputxt"   datatype="*" maxlength='50' />
+		     </@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+		     <@p.formColmd title="TM_CODE_RULE_NOTE"  permissionCode="CODE_DESC">
+		         <input name="note" class="inputxt"   ignore="ignore" maxlength='100' />
+		     </@p.formColmd>
+		</@p.formRow>
+		
+</@p.editForm>
+</body>
+</html>

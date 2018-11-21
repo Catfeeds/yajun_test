@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Implementation-Title: mes-biz
+Copyright: Licensed Materials - Property of WIS (c) Copyright WIS Corp
+ . 2007, 2015 All Rights Reserved - Use, duplication or disclosure	res
+ tricted by GSA ADP Schedule Contract with WIS Corp.
+Implementation-Version: 1.0.0-SNAPSHOT
+Built-By: yajun_ren
+Implementation-Vendor-Id: com.baic
+Build-Time: 2018-11-19 07:13:35
+Compile-Source-JDK: 1.6
+Compile-Target-JDK: 1.6
+Build-Jdk: 1.8.0_131
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: WIS
+

@@ -1,0 +1,44 @@
+<#include "../../../include/bootstrapTableCommons.html">
+
+<@p.body title="PARAMETER_MANAGE" permissionModule="PARAMETER">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PARAMETER_CODE" field="code"></@p.input>
+			<@p.input title="PARAMETER_NAME" field="name"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="PARAMETER_ADD" permissionCode="ParameterAdd" iconCls="plus" url="${baseUrl}/parameter/addInput.do" type="add" ></@p.button>
+			<@p.button title="PARAMETER_UPDATE" permissionCode="ParameterEdit" iconCls="edit" url="${baseUrl}/parameter/updateInput.do" type="update" ></@p.button>
+			<@p.button title="PARAMETER_DELETE" permissionCode="ParameterDelete" iconCls="trash" url="${baseUrl}/parameter/delete.do" type="delete" ></@p.button>
+			<@p.button title="PARAMETER_IMPORT" permissionCode="ParameterImport" iconCls="download-alt" onclick="importData()" ></@p.button>
+			<@p.button title="PARAMETER_EXPORT" downName="PARAMETER_EXPORT_NAME" permissionCode="ParameterExport" iconCls="upload-alt" url="${baseUrl}/parameter/exportData.do" type="down"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid  url="${baseUrl}/parameter/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="PARAMETER_NAME" field="name" permissionCode="PARAMETER_NAME"></@p.column>
+		<@p.column title="PARAMETER_CODE" field="code" permissionCode="PARAMETER_CODE"></@p.column>
+		<@p.column title="PARAMETER_PARAMETER_EXPLAIN" field="parameterExplain" permissionCode="PARAMETER_PARAMETER_EXPLAIN"></@p.column>
+		<@p.column title="PARAMETER_REGULAREXPRESSION" field="regularExpression" permissionCode="PARAMETER_REGULAR_EXPRESSION" ></@p.column>
+		<@p.column title="PARAMETER_UNIT" field="unit"  permissionCode="PARAMETER_UNIT" ></@p.column>
+		<@p.column title="PARAMETER_CONTROL_POST_NO" field="controlPostNo" permissionCode="PARAMETER_CONTROL_POST_NO"></@p.column>
+		<@p.column title="PARAMETER_CONTROL_POST_NAME" field="controlPostName" permissionCode="PARAMETER_CONTROL_POST_NAME"></@p.column>
+		<@p.column title="PARAMETER_NOTE" field="note"  permissionCode="PARAMETER_NOTE" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/parameter/exportTemplate.do";
+    importFile("<@s.m code="PARAMETER_IMPORT" />", "${baseUrl}/parameter/importData.do", "dg${currentPageId}",obj);
+}
+function validationExpression(){
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/parameter/exportTemplate.do";
+	var rowsDatas = getSelectedRows('dg${currentPageId}');
+	var rowsData = rowsDatas[0];
+	var url = "${baseUrl}/parameter/validationExpression.do?regularExpression="+rowsData.regularExpression+"&id="+rowsData.id;
+	createwindow("验证表达式", url, 'dg${currentPageId}');
+}
+</script>

@@ -1,0 +1,95 @@
+
+<#include "../include/bootstrapTableCommons.html">
+<script type="text/javascript" src="${baseUrl}/res/js/echarts.js"></script>
+
+<style>
+	fieldset{padding:.35em .625em .75em;margin:0 2px;border:1px solid #ccc}
+	legend{padding:.5em;border:0;width:auto;font-size: 20px;font-family: 微软雅黑;color: #ccc;}
+</style>
+<@p.body  permissionModule="RMMI" title="RMMI_LIST_TITLE">
+	<div style="margin-bottom: 3rem;">
+		<fieldset>
+			<legend>接口连接监控图</legend>
+			<div id="container" style="height:35rem;width:90%;"></div>
+		</fieldset>
+	</div>
+	<@p.dataGrid url="${baseUrl}/tsRmmi/list.do">
+			<@p.column title="RMMI_ABNORMAL_CONTENT" field="abnormalContent" permissionCode="RMMI_ABNORMAL_CONTENT"></@p.column>
+			<@p.column title="RMMI_MODEL_TYPE" field="modelType" permissionCode="RMMI_MODEL_TYPE" formatter="rendModelType"></@p.column>
+			<@p.column title="RMMI_BEGIN_TIME" field="createTime" permissionCode="RMMI_BEGIN_TIME" ></@p.column>
+			<@p.column title="RMMI_FINISH_TIME" field="updateTime" permissionCode="RMMI_FINISH_TIME" ></@p.column>
+	</@p.dataGrid>
+</@p.body>	
+
+<script type="text/javascript">
+ var data= [
+	{name:'MES服务器',x:'100',y:'50'},    
+	{name:'oracle数据库',x:'200',y:'50'},
+	{name:'RFID1',x:'300',y:'120'},
+	{name:'RFID2',x:'240',y:'120'},
+	{name:'RFID3',x:'180',y:'120'},
+	{name:'RFID4',x:'120',y:'120'},
+	{name:'RFID5',x:'60',y:'120'}
+ ];
+ var links = [
+      {source: 'MES服务器',target: 'oracle数据库',label: {normal: {show: false}},lineStyle: {normal: { curveness: 0 }}},
+   	  {source: 'MES服务器',target: 'RFID1',label: {normal: {show: false}},lineStyle: {normal: { curveness: 0 }}},
+   	  {source: 'MES服务器',target: 'RFID2',label: {normal: {show: false}},lineStyle: {normal: { curveness: 0 }}},
+   	  {source: 'MES服务器',target: 'RFID3',label: {normal: {show: false}},lineStyle: {normal: { curveness: 0 }}},
+   	  {source: 'MES服务器',target: 'RFID4',label: {normal: {show: false}},lineStyle: {normal: { curveness: 0 }}},
+   	  {source: 'MES服务器',target: 'RFID5',label: {normal: {show: false}},lineStyle: {normal: { curveness: 0 }}}
+ ];
+ 
+ function getOption(data,links){
+	 var option = {
+		    tooltip: {},
+		    legend: {
+		        data: ['MES服务器','RFID1', 'RFID2', 'RFID3']
+		     },
+		    animationDurationUpdate: 1500,
+		    animationEasingUpdate: 'quinticInOut',
+		    series : [
+		        {
+		            type: 'graph',
+		            layout: 'none',
+		            symbolSize: 70,
+		            roam: true,
+		            label: {
+		                normal: {
+		                    show: true
+		                }
+		            },
+		            edgeSymbol: ['circle', 'arrow'],
+		            edgeSymbolSize: [4, 10],
+		            edgeLabel: {
+		                normal: {
+		                    textStyle: {
+		                        fontSize: 10
+		                    }
+		                }
+		            },
+		            data: data,
+		            links: links,
+		            lineStyle: {
+		                normal: {
+		                    opacity: 0.9,
+		                    width: 2,
+		                    curveness: 0
+		                }
+		            }
+		        }
+		    ]
+		}; 
+	 return option;
+ 	}
+ 
+ $(function(){
+	 var dom = document.getElementById("container");
+	 var myChart = echarts.init(dom);
+	 var option = getOption(data,links);
+	 myChart.setOption(option, true);
+ });
+
+ 
+
+</script>

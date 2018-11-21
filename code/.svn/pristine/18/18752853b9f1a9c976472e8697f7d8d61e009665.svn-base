@@ -1,0 +1,112 @@
+
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function renderPlantNoOrName(value,record) {
+	if(value && record.plant.no){
+		return record.plant.no+ " - " + record.plant.nameCn;
+	}
+	return record.plant.no+ " - ";
+}
+
+function renderWShopNoOrName(value,record) {
+	if(value && record.workshop.no){
+		return record.workshop.no+ " - " + value;
+	}
+	return record.workshop.no+ " - ";
+}
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+</script>
+<@p.body title="LINE_LIST_TITLE" permissionModule="LINE">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="LINE_PLANT" id="plantId" type="select"  field="tmPlantId" options=plant ></@p.input>
+			<@p.input title="LINE_NO" field="no"></@p.input>
+			<@p.input title="LINE_NAME_CN" field="nameCn"></@p.input>
+			<!-- <@p.input title="LINE_REMARK" field="remark"></@p.input> -->
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="LINE_ADD" permissionCode="LineAdd" iconCls="plus" url="${baseUrl}/line/addInput.do" type="add"  ></@p.button>
+			<@p.button title="LINE_UPDATE" permissionCode="LineUpdate" iconCls="edit" url="${baseUrl}/line/updateInput.do" type="update"></@p.button>
+			<@p.button title="LINE_DELETE" permissionCode="LineDelete" iconCls="trash" url="${baseUrl}/line/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/line/list.do" >
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="LINE_PLANT" field="plant.no" permissionCode="TM_PLANT_ID"></@p.column>
+		<@p.column title="LINE_NO" field="no" permissionCode="LINE_NO" formatter="renderNullValue"></@p.column>
+		<@p.column title="LINE_NAME_CN" field="nameCn" permissionCode="LINE_NAME_CN" formatter="renderNullValue"></@p.column>
+		<@p.column title="LINE_REMARK" field="remark" permissionCode="LINE_REMARK" formatter="renderNullValue"></@p.column>
+		<@p.column title="LINE_ENABLED" field="enabled" permissionCode="LINE_ENABLED" formatter="renderGender"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderGender(value) {
+	return entryRenderer('ENABLED', value);
+}
+function renderBatchQty(value){
+	return value == null ? "" : value;
+}
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/line/exportTemplate.do";
+    importFile("<@s.m code="LINE_IMPORT" />", "${baseUrl}/line/importData.do", "dg${currentPageId}",obj);
+}
+function plantWorkshop_listPage(obj){
+	if (obj == "" || null == obj) {
+		return false;
+	}
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/line/selectWShopNameOrID.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#workshopId").empty(); //清空下拉列表
+				$("#workshopId").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(function(i, item) {
+					$("#workshopId").append(" <option value='" + item.id + "'>"+item.no+" - " +item.nameCn+ "</option>");
+				});
+                document.getElementById("workshopId").value = '';
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function workshopLineCascade_listPage(obj){
+	$.ajax({
+		data:{workShopId:obj,
+			  plantId: $("#plantId").val()},
+		url:"${baseUrl}/line/selectLineNameOrId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#lineId").empty(); //清空下拉列表
+				$("#lineId").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#lineId").append(" <option value='" + item.id + "'>"+item.no+" - " +item.nameCn+ "</option>");
+					});
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+</script>

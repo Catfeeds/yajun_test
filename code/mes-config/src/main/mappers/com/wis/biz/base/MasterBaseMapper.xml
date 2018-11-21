@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MasterBaseMapper">
+	<select id="get" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+  		${sql} where ${idColumnName}= ${id} 
+  		<if test="roleMasterSetData != null ">
+  		and id in (${roleMasterSetData})
+  		</if>
+    </select>
+    
+   <select id="findAll" resultType="java.util.Map" parameterType="map">
+    <![CDATA[${sql} ]]> where 1=1
+		<if test="removed != null">
+			and MARK_FOR_DELETE != #{removed}
+		</if>
+		<if test="ids != null">
+			and ${idColumnName} in
+			<foreach item="item" index="index" collection="ids" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="roleMasterSetData != null ">
+  		and id in (${roleMasterSetData})
+  		</if>
+		<if test="orderBy != null">
+			<![CDATA[${orderBy} ]]>
+		</if>
+	</select>
+	
+	 <select id="findByEg" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			 ${querySql} where 1=1
+		<if test="whereSql != null ">
+  		and ${whereSql}
+  		</if>
+     	<if test="roleMasterSetData != null ">
+  		and id in (${roleMasterSetData})
+  		</if>
+    </select>
+	
+	
+	<!-- 多数据库 -->
+    	<!-- oracle -->
+	      <select id="queryByPage_Oracle" resultType="java.util.HashMap" parameterType="map">
+	    	SELECT * FROM ( 
+	                    SELECT ROW_.* , ROWNUM ROWNUM_  
+	                     FROM (
+	                            ${sql} 
+	                          )  ROW_ 
+	                  )    
+	         <if test="firstRow != null and lastRow != null">
+				WHERE ROWNUM_ <![CDATA[ > ]]> #{firstRow} AND #{lastRow} <![CDATA[ >= ]]> ROWNUM_
+			</if>        
+	    </select>
+	    <select id="getId_Oracle" resultType="int" parameterType="java.lang.String">
+	    	<![CDATA[SELECT ${_parameter}.Nextval FROM DUAL]]>
+	    </select>
+	    <!-- mysql -->
+	     <select id="queryByPage_MySQL" resultType="java.util.HashMap" parameterType="map">
+	    	${sql}   
+	    	<if test="firstRow != null and pageSize != null">
+				LIMIT #{firstRow}, #{pageSize}
+			</if>
+	    </select>
+	    <select id="getId_MySQL" resultType="int" parameterType="java.lang.String">
+	    	<![CDATA[SELECT  LAST_INSERT_ID()]]>
+	    </select>
+	    <!-- SQLServer -->
+	     <select id="queryByPage_SQLServer" resultType="java.util.HashMap" parameterType="map">
+	    	select * from ( 
+					select *, ROW_NUMBER() OVER(${orderBy}) AS RowNumber from (
+							${sql}
+						) as a 
+				) as b 
+	    	<if test="firstRow != null and lastRow != null">
+	    		where RowNumber <![CDATA[ > ]]> #{firstRow} and #{lastRow} <![CDATA[ >= ]]> RowNumber
+			</if>
+	    </select>
+	    <select id="getId_SQLServer" resultType="int" parameterType="java.lang.String">
+	    	<![CDATA[select @@identity]]>
+	    </select>
+	    <!-- hana -->
+	     <select id="queryByPage_HANA" resultType="java.util.HashMap" parameterType="map">
+	    	${sql}   
+	    	<if test="firstRow != null and pageSize != null">
+				LIMIT#{pageSize} OFFSET #{firstRow}
+			</if>
+	    </select>
+	    <select id="getId_HANA" resultType="int" parameterType="java.lang.String">
+	    	<![CDATA[SELECT ${_parameter}.NEXTVAL FROM DUMMY]]>
+	    </select>
+	    <!-- hana -->
+	     <select id="queryByPage_HDB" resultType="java.util.HashMap" parameterType="map">
+	    	${sql}   
+	    	<if test="firstRow != null and pageSize != null">
+				LIMIT#{pageSize} OFFSET #{firstRow}
+			</if>
+	    </select>
+	    <select id="getId_HDB" resultType="int" parameterType="java.lang.String">
+	    	<![CDATA[SELECT ${_parameter}.NEXTVAL FROM DUMMY]]>
+	    </select>
+		
+</mapper>

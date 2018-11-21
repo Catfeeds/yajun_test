@@ -1,0 +1,42 @@
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="EQUIPMENT_RT_LIST_TITLE" permissionModule="MPEQUIPMENTRT">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EQUIPMENT_STATUS_LINE" type="select" field="tmLineId" options=lines ></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_NO_NAME" type="select" field="tmEquipmentId" options=equipmentOptions ></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_STATUS" field="runningState" type="select" options=eqcirculateStates></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel> 
+	<@p.dataGrid url="${baseUrl}/mpEquipment/list.do?queryCondition[IS_HISTORY]=NO" singleSelect="true">
+		<@p.column title="EQUIPMENT_STATUS_DATE" field="createTime" permissionCode="TMWORKTIME"></@p.column>
+		<@p.column title="EQUIPMENT_TM_PLANT" field="tmEquipment.tmPlantId" permissionCode="TMWORKTIME" formatter="getPlants"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_LINE" field="tmLine.nameCn" permissionCode="TMWORKTIME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_CLASSES" field="tmWorktime.shiftno" permissionCode="TMWORKTIME" formatter="rendShiftno"></@p.column>
+		<@p.column title="PRODUCT_TRACING_CLASS_MANAGER_CLASSGROUP" field="tmClassManager.classGroup" permissionCode="TMWORKTIME" formatter="rendClassGroup" ></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_NO" field="tmEquipment.no" permissionCode="TMEQUIPMENT"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_NAME" field="tmEquipment.name" permissionCode="TMEQUIPMENT"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_STATUS" field="runningState" permissionCode="RUNNINGSTATE" formatter="renderRunningState"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_STATUS_NO" field="codeRule.code" permissionCode="STATUSNUMBER"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_CONTENT" field="codeRule.codeDesc" permissionCode="STATUSCONTENT"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderRunningState(value) {
+	return entryRenderer('SM_CIRCULATE_STATE', value);
+}
+function rendShiftno(value){
+	return entryRenderer('SHIFT_TYPE', value);
+}
+function getPlants(value,row){
+	var plants = eval('('+ '${plants!}' +')');
+	for(var i in plants){
+		if(plants[i].code==value){
+			return plants[i].name;
+		}
+	}
+}
+
+function rendClassGroup(value){
+	return entryRenderer('CLASS_GROUP', value);
+}
+</script>

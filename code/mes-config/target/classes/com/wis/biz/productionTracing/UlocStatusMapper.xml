@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UlocStatusMapper">
+	<select id="queryPageTbUlocStatusCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+  select count(*)
+    from tb_uloc_status t 
+     left join tm_uloc uc on t.tm_uloc_id = uc.id
+   where exists (select 1
+            from (select max(tt.id) tid
+                    from tb_uloc_status tt
+                   group by tt.tm_uloc_id) tbl
+           where tbl.tid = t.id)
+            <if test="ulocName!=null and ulocName!='' ">
+           		and uc.name like '%'||#{ulocName,jdbcType=VARCHAR}||'%'
+           </if>
+            <if test="ulocNo!=null and ulocNo!='' ">
+           		 and uc.no like '%'||#{ulocNo,jdbcType=VARCHAR}||'%'
+           </if>
+            <if test="stationState!=null and stationState!='' ">
+            	and ${stationState}
+           </if>
+           <if test="tmLineId!=null and tmLineId!='' ">
+		      and uc.tm_line_id = #{tmLineId}
+		     </if>  
+		    <if test="tmPlantId!=null and tmPlantId!='' ">
+		      and uc.tm_plant_id = #{tmPlantId}
+		    </if>  
+		    <if test="tmUlocId!=null and tmUlocId!='' ">
+		      and t.tm_uloc_id = #{tmUlocId}
+		    </if>  
+	</select>
+<select id="queryPageTbUlocStatus" resultType="com.wis.mes.production.ulocstatus.entity.TbUlocStatus" parameterType="java.util.HashMap">
+ SELECT
+    *
+    FROM
+    (
+    SELECT
+    ROW_.*,
+    ROWNUM ROWNUM_
+    FROM
+    (
+      select 
+       t.id "id",
+       t.tm_uloc_id    "tmUlocId",
+       t.duration            "duration",
+       t.status_content      "statusContent",
+       t.content_description "contentDescription",
+       t.station_state       "stationState",
+       t.begin_time          "beginTime",
+       t.finish_time         "finishTime",
+       t.status_code         "statusCode",
+       t.create_time         "createTime",
+       uc.no                 "uloc.no",
+       uc.name               "uloc.name",
+       uc.tm_plant_id        "uloc.tmPlantId",
+       uc.tm_line_id         "uloc.tmLineId",
+       ur.no           "employeeNo.no",
+       ur.name_cn          "employeeNo.name",
+       wt.shiftno            "worktime.shiftno",
+       cm.class_group        "classManager.classGroup",
+       tbulocabnormal.abnormal_name as "ulocAbnormal.abnormalName",
+       coderule.code as "codeRule.code",
+       coderule.code_desc as "codeRule.codeDesc"
+      from tb_uloc_status t
+      left join tm_uloc_abnormal tbulocabnormal on tbulocabnormal.tm_uloc_id = t.tm_uloc_id 
+       and tbulocabnormal.abnormal_code = t.status_code
+      left join tm_uloc uc on t.tm_uloc_id = uc.id
+      left join tm_employee_no ur on ur.id = t.employee_number
+      left join tm_worktime wt on wt.id = t.tm_work_time_id
+      left join tm_class_manager cm on cm.id = t.tm_class_manager_id
+       left join tm_code_rule coderule on coderule.plc_code = uc.no || ' ' || t.status_code 
+       		and coderule.tm_line_id = uc.tm_line_id 
+    where exists (select 1
+    from (select max(tt.id) tid from tb_uloc_status tt group by tt.tm_uloc_id) tbl where tbl.tid = t.id) 
+      <if test="ulocName!=null and ulocName!='' ">
+      	and uc.name like '%'||#{ulocName,jdbcType=VARCHAR}||'%'
+     </if>
+    <if test="ulocNo!=null and ulocNo!='' ">
+       and uc.no like '%'||#{ulocNo,jdbcType=VARCHAR}||'%'
+     </if>
+    <if test="stationState!=null and stationState!='' ">
+      and ${stationState}
+     </if>  
+    <if test="tmLineId!=null and tmLineId!='' ">
+      and uc.tm_line_id = #{tmLineId}
+     </if>  
+    <if test="tmPlantId!=null and tmPlantId!='' ">
+      and uc.tm_plant_id = #{tmPlantId}
+     </if> 
+     <if test="tmUlocId!=null and tmUlocId!='' ">
+      and t.tm_uloc_id = #{tmUlocId}
+     </if> 
+      <choose>
+        <when test="orderField !=null and orderField != '' and orderField=='no'">
+        	ORDER BY to_number(regexp_substr(uc.no,'[0-9]*[0-9]',1)) ${orderDirection}
+        </when>
+        <otherwise>
+           order by ${orderField} ${orderDirection}
+        </otherwise>
+    </choose>
+    ) ROW_
+    )
+    WHERE
+   ROWNUM_ > #{firstRow}
+   AND #{pageSize} >= ROWNUM_
+	</select>
+</mapper>

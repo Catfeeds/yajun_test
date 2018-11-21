@@ -1,0 +1,986 @@
+<#include "../../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>翅片-故障明细</title>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<style type="text/css">
+	.report-panel{
+		width:100%;
+		height:70rem;
+		overflow: auto;
+		padding-top: 10px;
+	}
+	.trC{
+		font-weight: 800;
+		text-align:center;
+	}
+	.tdC{
+		font-weight: 800;
+		text-align:center;
+	}
+	.divC{
+		background-color: f3f3f3;
+		width: 50%;
+		height: 500px;
+	}
+</style>
+<script type="text/javascript">
+$('#createTimeStart').click(function(){
+	var createTimeEnd=$dp.$('createTimeEnd');
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm',
+		onpicked:function(){
+			createTimeEnd.click();
+		},
+		maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+	})
+});
+$('#createTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm',
+		minDate:'#F{$dp.$D(\'createTimeStart\')}'
+	})
+});
+function initTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#createTimeEnd").val(endTime+" 23:59");
+	date = new Date(date.getTime()-1000*60*60*24*30);
+	month = date.getMonth()+1;
+	var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	$("#createTimeStart").val(startTime+" 00:00");
+}
+function caseLessTen(num){
+	if(num<10){
+		return '0'+num;
+	}else {
+		return num;
+	}
+}
+$(function(){
+	initTime();
+	showReport();
+});
+
+function showReport () {
+	whiteBarAjax();
+	nightBarAjax();
+	whitePieAjax();
+	nightPieAjax();
+	/* faultedYearDesintyShow(); */
+}
+//全局白班的数据，用来点击时获取对应名称的值
+var whiteAllData = [];
+var whiteAllCount = [];
+var whiteAllBarData = [];
+var whiteAllBarName = [];
+var whiteAllBarCount = [];
+
+//全局晚班的数据，用来点击时获取对应名称的值
+var nightAllData = [];
+var nightAllCount = [];
+var nightAllBarData = [];
+var nightAllBarName = [];
+var nightAllBarData = [];
+var namesWhiteSelectedData = {};
+var namesNightSelectedData = {};
+
+function whiteBarAjax() {
+	$.ajax({
+		url:"${baseUrl}/finFaultedDetails/getFinFaultedBarInfo.do",
+		type:"GET",
+		data:{
+			"shiftNo":"1",
+			"beginTime":$("#createTimeStart").val(),
+			"endTime":$("#createTimeEnd").val()
+		},
+		dataType:"json",
+		success:function(result){
+			whiteAllBarData = JSON.parse(result.data);
+			whiteAllBarName = JSON.parse(result.name);
+			whiteAllBarCount = JSON.parse(result.dataCount);
+			whiteAllCount = JSON.parse(result.dataCount);
+			whiteBar(JSON.parse(result.name),JSON.parse(result.data),JSON.parse(result.dataCount));
+		 }
+	});
+}
+function nightBarAjax() {
+	$.ajax({
+		url:"${baseUrl}/finFaultedDetails/getFinFaultedBarInfo.do",
+		type:"GET",
+		data:{
+			"shiftNo":"2",
+			"beginTime":$("#createTimeStart").val(),
+			"endTime":$("#createTimeEnd").val()
+		},
+		dataType:"json",
+		success:function(result){
+			nightAllBarData = JSON.parse(result.data);
+			nightAllBarName = JSON.parse(result.name);
+			nightAllBarCount = JSON.parse(result.dataCount);
+			nightAllCount = JSON.parse(result.dataCount);
+			nightBar(JSON.parse(result.name),JSON.parse(result.data),JSON.parse(result.dataCount));
+		 }
+	});
+}
+function whitePieAjax() {
+	$.ajax({
+		url:"${baseUrl}/finFaultedDetails/getFinFaultedPieInfo.do",
+		type:"GET",
+		data:{
+			"shiftNo":"1",
+			"beginTime":$("#createTimeStart").val(),
+			"endTime":$("#createTimeEnd").val()
+		},
+		dataType:"json",
+		success:function(result){
+			whiteAllData = JSON.parse(result.data);
+			whitePie(JSON.parse(result.name),JSON.parse(result.data));
+		 }
+	});
+}
+function nightPieAjax() {
+	$.ajax({
+		url:"${baseUrl}/finFaultedDetails/getFinFaultedPieInfo.do",
+		type:"GET",
+		data:{
+			"shiftNo":"2",
+			"beginTime":$("#createTimeStart").val(),
+			"endTime":$("#createTimeEnd").val()
+		},
+		dataType:"json",
+		success:function(result){
+			nightAllData = JSON.parse(result.data);
+			nightPie(JSON.parse(result.name),JSON.parse(result.data));
+		 }
+	});
+}
+function whiteBar(name1,data1,dataMin1) {
+	var name = [];
+	var data = [];
+	var dataMin = [];
+	for(var i=0; i<name1.length; i++) {
+		if(name1[i] == "其他") {
+			name.push(name1[i]);
+			data.push(data1[i]);
+			dataMin.push(dataMin1[i]);
+			name1.splice(i,1);
+			data1.splice(i,1);
+			dataMin1.splice(i,1);
+			break;
+		}
+	}
+	name = name.concat(name1);
+	data = data.concat(data1);
+	dataMin = dataMin.concat(dataMin1);
+	var myChart = echarts.init(document.getElementById("whiteBar"));
+	myChart.showLoading();
+	option = {
+		    backgroundColor: '#ffffff',
+		    title:{
+		        text:'故障时间明细-白班',
+		        left:'left'
+		    },
+		    legend: {
+		        top: 30,
+		        left:30,
+		        textStyle: {
+		            color: '#000000',
+		        },
+		        data: ['时间','次数']
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '10%',
+		        bottom: '10%',
+		        containLabel: true
+		    },
+
+		    tooltip: {
+		        show: "true",
+		        trigger: 'axis',
+		        axisPointer: { // 坐标轴指示器，坐标轴触发有效
+		            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    xAxis: [ {
+		            type: 'value',
+		            name: '/min',
+		            min: 0,
+		            axisLabel: {
+		                formatter: '{value}'
+		            }
+		        },
+		        {
+		            type: 'value',
+		            name: '次数',
+		            min: 0,
+		            axisLabel: {
+		                formatter: '{value}'
+		            }
+		        }
+		    ],
+		    yAxis: [{
+		            type: 'category',
+		            axisTick: {
+		                show: false
+		            },
+		            axisLine: {
+		                show: true,
+		                lineStyle: {
+		                    color: '#000000',
+		                }
+		            },
+		            data: name
+		        }
+		        
+		    ],
+		    series: [
+		    	{
+		            name: '时间',
+		            type: 'bar',
+		            data: data,
+		        },
+		        {
+		            name: '次数',
+		            type: 'line',
+		            data: dataMin
+		        }
+		    	]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);	
+}
+
+function nightBar(name1, data1,dataMin1) {
+	var name = [];
+	var data = [];
+	var dataMin = [];
+	for(var i=0; i<name1.length; i++) {
+		if(name1[i] == "其他") {
+			name.push(name1[i]);
+			data.push(data1[i]);
+			dataMin.push(dataMin1[i]);
+			name1.splice(i,1);
+			data1.splice(i,1);
+			dataMin1.splice(i,1);
+			break;
+		}
+	}
+	name = name.concat(name1);
+	data = data.concat(data1);
+	dataMin = dataMin.concat(dataMin1);
+	var myChart = echarts.init(document.getElementById("nightBar"));
+	myChart.showLoading();
+	option = {
+		    backgroundColor: '#ffffff',
+		    title:{
+		        text:'故障时间明细-晚班',
+		        left:'left'
+		    },
+		    legend: {
+		        top: 30,
+		        left:30,
+		        textStyle: {
+		            color: '#000000',
+		        },
+		        data: ['时间','次数']
+		    },
+		    grid: {
+		        left: '3%',
+		        right: '10%',
+		        bottom: '10%',
+		        containLabel: true
+		    },
+
+		    tooltip: {
+		        show: "true",
+		        trigger: 'axis',
+		        axisPointer: { // 坐标轴指示器，坐标轴触发有效
+		            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    xAxis: [
+		    	{
+		            type: 'value',
+		            name: '/min',
+		            min: 0,
+		            axisLabel: {
+		                formatter: '{value}'
+		            }
+		        },
+		        {
+		            type: 'value',
+		            name: '次数',
+		            min: 0,
+		            axisLabel: {
+		                formatter: '{value}'
+		            }
+		        }
+		    ],
+		    yAxis: [{
+		            type: 'category',
+		            axisTick: {
+		                show: false
+		            },
+		            axisLine: {
+		                show: true,
+		                lineStyle: {
+		                    color: '#000000',
+		                }
+		            },
+		            data: name
+		        }
+		        
+		    ],
+		    series: [
+		    	{
+		            name: '时间',
+		            type: 'bar',
+		            color:'#2f4553',
+		            data: data
+		        },
+		        {
+		            name: '次数',
+		            type: 'line',
+		            color:'#2f4553',
+		            data: dataMin
+		        }
+		    	]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+function whitePie(name, data) {
+	if (JSON.stringify(namesWhiteSelectedData) == "{}") {
+		for(var i =0; i<whiteAllData.length; i++){
+			namesWhiteSelectedData[whiteAllData[i].name]=true;
+		} 
+	}
+	var newData = [];
+    var nameArr = [];
+	for(var i=data.length -1 ; i>=0; i--) {
+		if (i == (Number(data.length) - Number(1)).toFixed(0)) {
+			otherName = data[i].name;
+			otherValue = data[i].value;
+		} else {
+			var obj = new Object();
+			obj.name = data[i].name;
+			obj.value = data[i].value;
+			newData.push(obj);
+			nameArr.push(obj.name);
+		}
+	}
+	newData.push({'name':otherName,'value':otherValue});
+    nameArr.push(otherName);
+    
+	var myChart = echarts.init(document.getElementById("whitePie"));
+	myChart.showLoading();
+	option = {
+			 title: {
+			        text: '故障内容占比明细-白班',
+			    //    subtext: '白班',
+			        x: 'center'
+			},
+		    tooltip : {
+		        trigger: 'item',
+		        formatter: "{a} <br/>{b} : {c} ({d}%)"
+		    },
+		    legend: {
+		        type: 'scroll',
+		        orient: 'vertical',
+		        right: 10,
+		        top: 20,
+		        bottom: 20,
+		        data: nameArr,
+		        selected:namesWhiteSelectedData
+		    },
+		    series : [
+		        {
+		            name: '白班',
+		            type: 'pie',
+		            radius : '55%',
+		            center: ['40%', '50%'],
+		            data: newData,
+		            itemStyle: {
+		                emphasis: {
+		                    shadowBlur: 10,
+		                    shadowOffsetX: 0,
+		                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+		                }
+		            }
+		        }
+		    ]
+		};
+	
+	myChart.hideLoading();
+	myChart.setOption(option);
+	
+}
+function arrSort(arr) {
+	var compare = function (obj1, obj2) {
+	    var val1 = obj1.value;
+	    var val2 = obj2.value;
+	    if (val1 < val2) {
+	        return -1;
+	    } else if (val1 > val2) {
+	        return 1;
+	    } else {
+	        return 0;
+	    }            
+	} 
+	return arr.sort(compare);
+}
+//实现白班关联事件
+var whiteEventChart = echarts.init(document.getElementById("whitePie"));
+whiteEventChart.on("legendselectchanged", whiteLegendSelectEv);
+//用来保存柱状图已删除的数据。
+var deleteWhiteBarData = [];
+var deleteWhiteBarCount = [];
+function whiteLegendSelectEv(param) {
+	var chooseValue = "";
+	var chooseCount = 0;
+	var deleteBarIndex =null;
+	for(var i=0; i<whiteAllData.length; i++) {
+		if(whiteAllData[i].name == param.name) {
+			chooseValue = whiteAllData[i].value;
+			chooseCount = whiteAllCount[i];
+			break;
+		}
+	}
+	//未选中
+    if(param.name != "其他") {
+		if (!param.selected[param.name]) {
+			//点击颜色饼图改变的事件
+			var newValue =addNum(chooseValue,whiteAllData[whiteAllData.length-1].value);
+			whiteAllData[whiteAllData.length-1].value = newValue;
+			
+			//关联到柱状图事件
+			//先判断“其他”元素是否存在，不存在添加，已存在数值加上置灰项
+			var flag = null;
+			var index = null;
+			for(var j=0; j<whiteAllBarName.length; j++) {
+				if(whiteAllBarName[j] == "其他") {
+					flag = "其他";
+					index = j;
+					break;
+				}
+			}
+			var newValue =addNum(chooseValue,whiteAllBarData[index]);
+			var newCountValue = addNum(chooseCount, whiteAllBarCount[index]);
+			
+			whiteAllBarData[index] = newValue;
+			whiteAllBarCount[index] = newCountValue;
+			
+			var object = new Object();
+			object.name = param.name;
+			object.value = chooseValue;
+			deleteWhiteBarData.push(object);
+			deleteWhiteBarCount.push(chooseCount);
+			
+			var willDeleteElementIndex = whiteAllBarName.indexOf(param.name);
+			whiteAllBarData.splice(willDeleteElementIndex, 1);
+			whiteAllBarName.splice(willDeleteElementIndex,1);
+			whiteAllBarCount.splice(willDeleteElementIndex,1);
+			namesWhiteSelectedData[param.name] = false;
+			
+		} else {
+			//选中
+			//点击颜色饼图改变的事件
+			var newValue = 0;
+			if (whiteAllData[whiteAllData.length-1].value > 0) {
+				newValue = (Number(whiteAllData[whiteAllData.length-1].value) - Number(chooseValue)).toFixed(2);
+			}
+			var newCountValue = 0;
+			if (whiteAllCount[whiteAllCount.length-1] > 0)  {
+				newCountValue = (Number(whiteAllCount[whiteAllCount.length-1]) - Number(chooseCount)).toFixed(0);
+			}
+			whiteAllData[whiteAllData.length-1].value = newValue;
+		
+			//关联到柱状图事件
+			//选中柱状图新增选中的项
+			whiteAllBarData.push(chooseValue);
+			whiteAllBarName.push(param.name);
+			whiteAllBarCount.push(chooseCount);
+			//选中的话，其他减去选中的数值
+			var flag = null;
+			var index = null;
+			for(var j=0; j<whiteAllBarName.length; j++) {
+				if(whiteAllBarName[j] == "其他") {
+					flag = "其他";
+					index = j;
+					break;
+				}
+			}
+			for(var i =0; i<deleteWhiteBarData.length; i++) {
+				var obj = deleteWhiteBarData[i];
+				if (obj.name == param.name) {
+					deleteWhiteBarData.splice(i, 1);
+					deleteWhiteBarCount.splice(i,1);
+					break;
+				}
+			}
+			var newBarValue = (Number(whiteAllBarData[index]) - Number(chooseValue)).toFixed(2);
+			var newBarCount = (Number(whiteAllBarCount[index]) - Number(chooseCount)).toFixed(0);
+			whiteAllBarData[index] = newBarValue;
+			whiteAllBarCount[index] = newBarCount;
+			namesWhiteSelectedData[param.name] = true;
+		}
+    } else {
+
+    	if(!param.selected[param.name]) {
+    		if (null != deleteWhiteBarData && deleteWhiteBarData.length > 0) {
+    			for(var i =0; i<deleteWhiteBarData.length; i++) {
+    				var obj = deleteWhiteBarData[i];
+    				whiteAllBarData.push(obj.value);
+    				whiteAllBarName.push(obj.name);
+    				whiteAllBarCount.push(deleteWhiteBarCount[i]);
+    				for(var j =0; j< whiteAllData.length; j++) {
+    					if (whiteAllData[j].name == obj.name || whiteAllData[j].name == "其他") {
+    						if (!namesWhiteSelectedData[whiteAllData[j].name]) {
+    							namesWhiteSelectedData[whiteAllData[j].name] = true;
+    						}
+    					}
+   						if (whiteAllData[j].name == "其他") {
+   							whiteAllData[j].value = 0;
+   							whiteAllCount[j] = 0;
+   						}
+   						if (whiteAllBarName[j] == "其他") {
+    						whiteAllBarData[j] = 0;
+    						whiteAllBarCount[j] = 0;
+						}
+    				}			
+    			}
+    			 deleteWhiteBarData = [];
+    			 deleteWhiteBarCount = [];
+    		}
+    	}
+    }
+	
+	var otherSortBefore = arrSort(whiteAllData);
+	whitePie(name, otherSortAfter(otherSortBefore));
+	
+	var beforeSort = [];
+	for (var i=0; i<whiteAllBarName.length; i++) {
+		var object = new Object();
+		object.name = whiteAllBarName[i] + "-" + whiteAllBarCount[i];
+		object.value = whiteAllBarData[i];
+		beforeSort.push(object);
+	}
+	var beforeOhterSort = arrSort(beforeSort);
+	var afterArrSort = otherSortAfter(beforeOhterSort);
+	
+	var afterWhiterBarName = [];
+	var afterWhiterBarData = [];
+	var afterWhiterBarCount = [];
+	for(var i = 0; i<afterArrSort.length; i++) {
+		var obj = afterArrSort[i];
+		var name = obj.name.split("-");
+		if (name[0] == "其他") {
+			afterWhiterBarName.push(name[0]);
+			afterWhiterBarData.push(obj.value);
+			afterWhiterBarCount.push(name[1]);
+			afterArrSort.splice(i,1);
+			break;
+		} 
+	}
+	for(var i = 0; i<afterArrSort.length; i++) {
+		var obj = afterArrSort[i];
+		var name = obj.name.split("-");
+		afterWhiterBarName.push(name[0]);
+		afterWhiterBarData.push(obj.value);
+		afterWhiterBarCount.push(name[1]);
+	}
+	
+	whiteBar(afterWhiterBarName, afterWhiterBarData, afterWhiterBarCount);
+}
+function otherSortAfter(arr) {
+	var otherSourAfter = [];
+	var otherName = "";
+	var otherCount = 0;
+	for(var i=0; i<arr.length; i++) {
+		var name = arr[i].name;
+		if (name.indexOf("其他") != -1 && i != arr.length-1) {
+			otherName = name;
+			otherCount = arr[i].value;
+			arr.splice(i,1);
+		}
+		otherSourAfter.push(arr[i]);
+	}
+	if (otherName.indexOf("其他") != -1) {
+		var object = new Object();
+		object.name = otherName;
+		object.value = otherCount;
+		arr.push(object);
+		otherSourAfter.push(object);
+	}
+	return otherSourAfter;
+}
+
+//实现晚班关联事件
+var deleteNightBarData = [];
+var deleteNightBarCount = [];
+var nightEventChart = echarts.init(document.getElementById("nightPie"));
+nightEventChart.on("legendselectchanged", nightLegendSelectEv);
+function nightLegendSelectEv(param) {
+	var chooseValue = "";
+	var chooseCount = 0;
+	var deleteBarIndex =null;
+	for(var i=0; i<nightAllData.length; i++) {
+		if(nightAllData[i].name == param.name) {
+			chooseValue = nightAllData[i].value;
+			chooseCount = nightAllCount[i];
+			break;
+		}
+	}
+	//未选中
+    if(param.name != "其他") {
+		if (!param.selected[param.name]) {
+			//点击颜色饼图改变的事件
+			var newValue =addNum(chooseValue,nightAllData[nightAllData.length-1].value);
+			nightAllData[nightAllData.length-1].value = newValue;
+			
+			//关联到柱状图事件
+			//先判断“其他”元素是否存在，不存在添加，已存在数值加上置灰项
+			var flag = null;
+			var index = null;
+			for(var j=0; j<nightAllBarName.length; j++) {
+				if(nightAllBarName[j] == "其他") {
+					flag = "其他";
+					index = j;
+					break;
+				}
+			}
+			var newValue =addNum(chooseValue,nightAllBarData[index]);
+			var newCountValue = addNum(chooseCount, nightAllBarCount[index]);
+			
+			nightAllBarData[index] = newValue;
+			nightAllBarCount[index] = newCountValue;
+			
+			var object = new Object();
+			object.name = param.name;
+			object.value = chooseValue;
+			deleteNightBarData.push(object);
+			deleteNightBarCount.push(chooseCount);
+			
+			var willDeleteElementIndex = nightAllBarName.indexOf(param.name);
+			nightAllBarData.splice(willDeleteElementIndex, 1);
+			nightAllBarName.splice(willDeleteElementIndex,1);
+			nightAllBarCount.splice(willDeleteElementIndex,1);
+			namesNightSelectedData[param.name] = false;
+			
+		} else {
+			//选中
+			//点击颜色饼图改变的事件
+			var newValue = 0;
+			if (nightAllData[nightAllData.length-1].value > 0) {
+				newValue = (Number(nightAllData[nightAllData.length-1].value) - Number(chooseValue)).toFixed(2);
+			}
+			var newCountValue = 0;
+			if (nightAllCount[nightAllCount.length-1] > 0)  {
+				newCountValue = (Number(nightAllCount[nightAllCount.length-1]) - Number(chooseCount)).toFixed(0);
+			}
+			nightAllData[nightAllData.length-1].value = newValue;
+		
+			//关联到柱状图事件
+			//选中柱状图新增选中的项
+			nightAllBarData.push(chooseValue);
+			nightAllBarName.push(param.name);
+			nightAllBarCount.push(chooseCount);
+			//选中的话，其他减去选中的数值
+			var flag = null;
+			var index = null;
+			for(var j=0; j<nightAllBarName.length; j++) {
+				if(nightAllBarName[j] == "其他") {
+					flag = "其他";
+					index = j;
+					break;
+				}
+			}
+			for(var i =0; i<deleteNightBarData.length; i++) {
+				var obj = deleteNightBarData[i];
+				if (obj.name == param.name) {
+					deleteNightBarData.splice(i, 1);
+					deleteNightBarCount.splice(i,1);
+					break;
+				}
+			}
+			var newBarValue = (Number(nightAllBarData[index]) - Number(chooseValue)).toFixed(2);
+			var newBarCount = (Number(nightAllBarCount[index]) - Number(chooseCount)).toFixed(0);
+			nightAllBarData[index] = newBarValue;
+			nightAllBarCount[index] = newBarCount;
+			namesNightSelectedData[param.name] = true;
+		}
+    } else {
+
+    	if(!param.selected[param.name]) {
+    		if (null != deleteNightBarData && deleteNightBarData.length > 0) {
+    			for(var i =0; i<deleteNightBarData.length; i++) {
+    				var obj = deleteNightBarData[i];
+    				nightAllBarData.push(obj.value);
+    				nightAllBarName.push(obj.name);
+    				nightAllBarCount.push(deleteNightBarCount[i]);
+    				for(var j =0; j< nightAllData.length; j++) {
+    					if (nightAllData[j].name == obj.name || nightAllData[j].name == "其他") {
+    						if (!namesNightSelectedData[nightAllData[j].name]) {
+    							namesNightSelectedData[nightAllData[j].name] = true;
+    						}
+    					}
+   						if (nightAllData[j].name == "其他") {
+   							nightAllData[j].value = 0;
+   							nightAllCount[j] = 0;
+   						}
+   						if (nightAllBarName[j] == "其他") {
+    						nightAllBarData[j] = 0;
+    						nightAllBarCount[j] = 0;
+						}
+    				}			
+    			}
+    			 deleteNightBarData = [];
+    			 deleteNightBarCount = [];
+    		}
+    	}
+    }
+	var beforeOtherSort = arrSort(nightAllData);
+	var lastOtherSort = otherSortAfter(beforeOtherSort);
+	nightPie(name, lastOtherSort);
+	
+	var beforeSort = [];
+	for (var i=0; i<nightAllBarName.length; i++) {
+		var object = new Object();
+		object.name = nightAllBarName[i] + "-" + nightAllBarCount[i];
+		object.value = nightAllBarData[i];
+		beforeSort.push(object);
+	}
+	var beforeOtherSort = arrSort(beforeSort);
+	var afterArrSort = otherSortAfter(beforeOtherSort);
+	var afterNightBarName = [];
+	var afterNightBarData = [];
+	var afterNightBarCount = [];
+	for(var i = 0; i<afterArrSort.length; i++) {
+		var obj = afterArrSort[i];
+		var name = obj.name.split("-");
+		if (name[0] == "其他") {
+			afterNightBarName.push(name[0]);
+			afterNightBarData.push(obj.value);
+			afterNightBarCount.push(name[1]);
+			afterArrSort.splice(i,1);
+			break;
+		}
+	}
+	for(var i = 0; i<afterArrSort.length; i++) {
+		var obj = afterArrSort[i];
+		var name = obj.name.split("-");
+		afterNightBarName.push(name[0]);
+		afterNightBarData.push(obj.value);
+		afterNightBarCount.push(name[1]);
+	}
+	nightBar(afterNightBarName, afterNightBarData, afterNightBarCount);
+}
+
+function addNum (num1, num2) {
+       var sq1,sq2,m;
+        try {
+          sq1 = num1.toString().split(".")[1].length;
+        }
+        catch (e) {
+          sq1 = 0;
+        }
+        try {
+         sq2 = num2.toString().split(".")[1].length;
+       }
+       catch (e) {
+         sq2 = 0;
+       }
+       m = Math.pow(10,Math.max(sq1, sq2));
+       return (num1 * m + num2 * m) / m;
+}
+function nightPie(name, data) {
+	if (JSON.stringify(namesNightSelectedData) == "{}") {
+		for(var i =0; i<nightAllData.length; i++){
+			namesNightSelectedData[nightAllData[i].name]=true;
+		} 
+	}
+	var newData = [];
+    var nameArr = [];
+	for(var i=data.length -1 ; i>=0; i--) {
+		if (i == (Number(data.length) - Number(1)).toFixed(0)) {
+			otherName = data[i].name;
+			otherValue = data[i].value;
+		} else {
+			var obj = new Object();
+			obj.name = data[i].name;
+			obj.value = data[i].value;
+			newData.push(obj);
+			nameArr.push(obj.name);
+		}
+	}
+	newData.push({'name':otherName,'value':otherValue});
+    nameArr.push(otherName);
+	var myChart = echarts.init(document.getElementById("nightPie"));
+	myChart.showLoading();
+	option = {
+			 title: {
+			        text: '故障内容占比明细-晚班',
+			    //    subtext: '白班',
+			        x: 'center'
+			},
+		    tooltip : {
+		        trigger: 'item',
+		        formatter: "{a} <br/>{b} : {c} ({d}%)"
+		    },
+		    legend: {
+		        type: 'scroll',
+		        orient: 'vertical',
+		        right: 10,
+		        top: 20,
+		        bottom: 20,
+		        data: nameArr,
+		        selected:namesNightSelectedData
+		    },
+		    series : [
+		        {
+		            name: '晚班名称',
+		            type: 'pie',
+		            radius : '55%',
+		            center: ['40%', '50%'],
+		            data: newData,
+		            itemStyle: {
+		                emphasis: {
+		                    shadowBlur: 10,
+		                    shadowOffsetX: 0,
+		                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+		                }
+		            }
+		        }
+		    ]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+function faultedYearDesintyShow() {
+	ajaxRequest("${baseUrl}/finFaultedDetails/faultedDetailsYearShow.do", {
+		"createTimeStart":$("#createTimeStart").val(),
+		"createTimeEnd":$("#createTimeEnd").val()
+	}, function(result){
+		var data = result.data;
+		if(data){
+			faultedYearMinuteShow(data.year,JSON.parse(data.minute),data.countMax,data.minuteMax);
+			faultedYearCountShow(data.year,JSON.parse(data.count),data.countMax,data.minuteMax);
+		}
+	}, false);
+}
+function faultedYearMinuteShow(year,minute,countMax,minuteMax) {
+	var myChart = echarts.init(document.getElementById("faultedYearMinuteShow"));
+	myChart.showLoading();
+	var option = {
+			title: {
+		        text: '故障年历(时间/min)'		       
+		    },
+			tooltip: {
+		        position: 'top',
+		        formatter: function (p) {
+		            var format = echarts.format.formatTime('yyyy-MM-dd', p.data[0]);
+		            return format + ': ' + p.data[1];
+		        }
+		    },
+		    visualMap: {
+		    	 min: 0,
+		         max:parseInt(minuteMax),
+		         calculable: true,
+		         orient: 'vertical',
+		         top: '30%'
+		    },
+		    calendar: [
+		    {
+		        orient: 'vertical',
+		        cellSize: [15,15, 'auto'],
+		        range: year,
+		        yearLabel: {show: false}
+		    }],
+		    series: [{
+		        type: 'heatmap',
+		        coordinateSystem: 'calendar',
+		        calendarIndex: 0,
+		        data: minute
+		    }]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+function faultedYearCountShow(year,count,countMax,minuteMax) {
+	var myChart = echarts.init(document.getElementById("faultedYearCountShow"));
+	myChart.showLoading();
+	var option = {
+			title: {
+		        text: '故障年历(次数/次)'		       
+		    },
+			tooltip: {
+		        position: 'top',
+		        formatter: function (p) {
+		            var format = echarts.format.formatTime('yyyy-MM-dd', p.data[0]);
+		            return format + ': ' + p.data[1];
+		        }
+		    },
+		    visualMap: {
+		    	 min: 0,
+		         max:parseInt(countMax),
+		         calculable: true,
+		         orient: 'vertical',
+		         top: '30%'
+		    },
+		    calendar: [
+		    {
+		        orient: 'vertical',
+		        cellSize: [15,15, 'auto'],
+		        range: year,
+		        yearLabel: {show: false}
+		    }],
+
+		    series: [{
+		        type: 'heatmap',
+		        coordinateSystem: 'calendar',
+		        calendarIndex: 0,
+		        data: count
+		    }]
+		};
+	myChart.hideLoading();
+	myChart.setOption(option);
+}
+</script>
+</head>
+<body>
+<div class="page-content" >
+<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="showReport(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	
+	<div class="report-panel">
+		<div style="width:130rem;height:100%;">
+			<div style="width:100%;float: left;height:100%;">
+				<div id="whiteBar" style="width: 40%;height: 50%;float: left;"></div>
+				<div id="whitePie"  style="width: 60%;height: 50%;float: left;"></div>
+				<div id="nightBar" style="width: 40%;height: 50%;float: left;"></div>
+				<div id="nightPie" style="width: 60%;height: 50%;float: left;"></div>
+			</div>
+			<!-- <div style="width: 30%;float: left;height:100%;">
+				<div id="faultedYearMinuteShow" style="width:50%;height:100%;float: left;"></div>
+				<div id="faultedYearCountShow" style="width:50%;height:100%;float: left;"></div>
+			</div> -->
+		</div>
+	</div>
+</div>
+</body>
+</html>

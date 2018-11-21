@@ -1,0 +1,28 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function renderYesOrNo(value){
+	return entryRenderer('QUALIRY_CHECK_RESULT', value); 
+}
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+</script>
+
+<@p.body  permissionModule="RECORD" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="recordQualityGrid">
+		<@p.searchColumns>
+			<@p.input title="PECORD_ULOC_QUALITY_CHECK_ITEM" field="checkItem"  permissionCode="PECORD_ULOC_QUALITY_CHECK_ITEM"></@p.input>
+			<@p.input title="PECORD_ULOC_QUALITY_CHECK_RESULT" field="checkResult"  permissionCode="PECORD_ULOC_QUALITY_CHECK_RESULT"></@p.input>
+			<@p.input title="PECORD_ULOC_QUALITY_CHECK_RESULT" type="select" options=checkResults field="checkResult"  permissionCode="PECORD_ULOC_QUALITY_CHECK_RESULT"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div style="color: #428bca;text-align:center; margin:10px" >产品档案质检信息</div>
+	<@p.dataGrid url="${baseUrl}/record/uloc/quality/getQualityDate.do?tpRecordId=${tpRecordId}" id="recordQualityGrid">
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="PECORD_ULOC_QUALITY_CHECK_ITEM" field="checkItem" permissionCode="PECORD_ULOC_QUALITY_CHECK_ITEM" ></@p.column>
+			<@p.column title="PECORD_ULOC_QUALITY_CHECK_RESULT" field="checkResult" permissionCode="PECORD_ULOC_QUALITY_CHECK_RESULT" formatter="renderYesOrNo"></@p.column>
+			<@p.column title="PECORD_ULOC_NC_NOTE" field="note" permissionCode="PECORD_ULOC_QUALITY_NOTE" formatter="renderNullValue" ></@p.column>
+		</@p.dataGrid>
+</@p.body>	
+

@@ -1,0 +1,26 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html">
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/job/update.do" idValue=job.id class="form-horizontal"  noPermissionModule="true">
+		<@p.formRow>
+			<@p.formColmd title="JOB_NAME" >
+				<input name="jobName" class="inputxt" value="${job.jobName!}" readonly="readonly">
+			</@p.formColmd>
+			<@p.formColmd title="JOB_CRON_EXPRESSION">
+				<input name="cronExpression" class="inputxt" value="${job.cronExpression!}" ajaxurl="${baseUrl}/job/checkCronExp.do" datatype="*">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ENABLE_STATUS">
+				 <@p.input type="select" excludeSelectOption="true" field="enableStatus" value=job.enableStatus options=options></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="JOB_NOTES">
+				<input name="jobMemo" class="inputxt" value="${job.jobMemo!}">
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/bom/doDuplicateInput.do" class="form-horizontal" idValue=bom.id permissionModule="BOM">
+		<@p.formRow>
+			<@p.formColmd title="BOM_PLANT" permissionCode="BOM_PLANT">
+				<@p.input type="select" value="${bom.tmPlantId}" excludeSelectOption="true"  options=plantOptions ></@p.input>
+				<input type="hidden"  id="update_plant" name="tmPlantId" value="${bom.tmPlantId}" >
+			</@p.formColmd>
+			<@p.formColmd title="BOM_LINE" permissionCode="BOM_LINE">
+				<@p.input type="select" id="update_line" options=lineOptions value="${bom.tmLineId!}"></@p.input>
+				<input type="hidden" name="tmLineId" value="${bom.tmLineId!}" >
+			</@p.formColmd>
+			
+		</@p.formRow>
+		<#--
+			<@p.formColmd title="BOM_PART" permissionCode="BOM_PART">
+				<@p.input type="select" disabled="disabled" value="${bom.tmPartId}" excludeSelectOption="true"  options=partOptions></@p.input>
+				<input type="hidden" name="tmPartId" value="${bom.tmPartId}" >
+			</@p.formColmd>
+			<@p.formColmd title="BOM_WORKSHOP" permissionCode="BOM_WORKSHOP">
+				<@p.input type="select" id="update_workShop"disabled="disabled"  value="${bom.tmWorkshopId!}"  options=workShopOptions onchange ="update_workShopChange(this.value);"></@p.input>
+				<input type="hidden" name="tmWorkshopId" value="${bom.tmWorkshopId!}" >
+			</@p.formColmd>
+			<@p.formRow>
+			<@p.formColmd title="BOM_BOMVERSION" permissionCode="BOM_BOMVERSION">
+				<input name="bomversion" class="inputxt" readonly=readonly value="${bom.bomversion}"/>
+			</@p.formColmd>
+			<@p.formColmd title="BOM_MAX_FLAG" permissionCode="BOM_MAX_FLAG">
+				<@p.input type="select" excludeSelectOption="true" field="maxFlag" options=bomVersionOptions value="${bom.maxFlag}"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		 <@p.formColmd title="BOM_STATUS" permissionCode="BOM_STATUS">
+				<@p.input type="select" excludeSelectOption="true" field="status" options=statusOptions  value="${bom.status}"></@p.input>
+			</@p.formColmd>
+		-->
+		
+		 <@p.formRow>
+	   		<@p.formColmd title="BOM_BACK_NUMBER" permissionCode="BOM_BACK_NUMBER">
+				<input name="backNumber" class="inputxt" value="${bom.backNumber!}"  errormsg="<@s.m code='ERROR_CHINESE'/>" ignore="ignore" maxlength='22' />
+			</@p.formColmd>
+			<@p.formColmd title="BOM_MACHINE_OF_NAME" permissionCode="BOM_MACHINE_OF_NAME">
+				<input name="machineOfName" class="inputxt" value="${bom.machineOfName!}"  errormsg="<@s.m code='ERROR_CHINESE'/>" ignore="ignore" maxlength='50' />
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="BOM_MACHINE_NAME" permissionCode="BOM_MACHINE_NAME">
+				<input name="machineName" class="inputxt" value="${bom.machineName!}" errormsg="<@s.m code='ERROR_CHINESE'/>" ignore="ignore" maxlength='50' />
+			</@p.formColmd>
+			<@p.formColmd title="BOM_ENABLED" permissionCode="BOM_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" options=enabledOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BOM_REMARK" permissionCode="BOM_REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250">${bom.remark!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+		
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	getWorkShop($("#update_workShop").val());
+	getLine($("#update_workShop").val(),$("#update_line").val());
+});
+
+function getWorkShop(obj){
+	$.ajax({
+		data:{plantId:$("#update_plant").val()},
+		url:"${baseUrl}/bom/selectWorkShopByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#update_workShop").empty(); //清空下拉列表
+				$("#update_workShop").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#update_workShop").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+				$("#update_workShop").val(obj);
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function update_workShopChange(obj){
+	getLine(obj);
+}
+
+function getLine(workShopId,obj){
+	$.ajax({
+		data:{
+			plantId:$("#update_plant").val(),
+			workShopId:workShopId
+		},
+		url:"${baseUrl}/bom/selectLineByWorkShopIdAndPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#update_line").empty(); //清空下拉列表
+				$("#update_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#update_line").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+				$("#update_line").val(obj);
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+</script>

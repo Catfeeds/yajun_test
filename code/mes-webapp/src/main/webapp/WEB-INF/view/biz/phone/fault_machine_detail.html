@@ -1,0 +1,238 @@
+<#include "../phone_main/head.html"/>
+<style>
+	.custom-search{ 
+		background:url(../res/mui/images/sweep_code.png) no-repeat left center;
+		background-color: #F2F2F2F2 !important;
+		border-radius: 5px !important;
+		text-indent: 20px;
+	}
+	.mui-content-padded .mui-input-group .mui-input-row label{
+	    font-size: 14px;
+   		font-family: 微软雅黑;
+	}
+   .edit-label-color {
+     color: #0062cc;;
+    }
+    .nborder{
+    	border: none;
+    }
+    
+</style>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">故障机详情</h1>
+	</header>
+<div class="mui-content">
+	<div class="mui-content-padded" style="margin: 5px;">
+		<form id="formId" class="mui-input-group">
+			<input value="${bean.id!}" id="valId" name="id" type="hidden"/>
+			<div class="mui-input-row">
+				<label>录入时间：</label>
+				<input type="text" value="${bean.createTime!}" readonly="readonly"  >
+			</div>
+			<div class="mui-input-row">
+				<label>班次：</label>
+				<select id="shiftno" disabled="disabled" ></select>
+			</div>
+			<div class="mui-input-row">
+				<label>背番号：</label>
+				<input type="text" value="${bean.backNumber!}" readonly="readonly"  >
+			</div>
+			<div class="mui-input-row">
+				<label>机种名：</label>
+				<input type="text" value="${bean.machineOfName!}" readonly="readonly"  >
+			</div>
+			<div class="mui-input-row">
+				<label>机&nbsp;&nbsp;号：</label>
+				<input type="text" value="${bean.machineName!}" readonly="readonly" >
+			</div>
+			<div class="mui-input-row">
+				<label>信息来源：</label>
+				<input type="text" id="infoSources" readonly="readonly"  >
+			</div>
+			<div class="mui-input-row">
+				<label class="edit-label-color">故障类型：<span style='color:red;'>*</span></label>
+				<select id="tmNcGroupId" title="故障类型" name="tmNcGroupId" onchange="nc_listAdd(this.value);" disabled="disabled" ></select>
+			</div>
+			<div class="mui-input-row">
+				<label class="edit-label-color ">故障内容：<span style='color:red;'>*</span></label>
+				<select id="tmNcId" name="tmNcId" title="故障内容" onchange="ngLevelOrExit(this.value);" disabled="disabled" ></select>
+			</div>
+			<div class="mui-input-row">
+				<label class="edit-label-color ">处理方式：<span style='color:red;'>*</span></label>
+				<select id="ncProcessMode" title="处理方式" name="ncProcessMode" disabled="disabled" ></select>
+			</div>
+			<div class="mui-input-row">
+				<label>故障等级：</label>
+				<input type="text" id="ngLevel" readonly="readonly"  >
+			</div>
+			<div class="mui-input-row">
+				<label>适应NG入口：</label>
+				<input type="text" name="ngEntrance" id="ngEntrance" value="${bean.ngEntrance!}" readonly="readonly"  >
+			</div>
+			<div class="mui-input-row">
+				<label class="edit-label-color ">发现工位：<span style='color:red;'>*</span></label>
+				<select id="discoveryStation" name="discoveryStation" disabled="disabled" ></select>
+			</div>
+			<div class="mui-input-row">
+				<label>NG出口：</label>
+				<input type="text" value="${bean.ngExit!}"  readonly="readonly"  >
+			</div>
+			<div class="mui-input-row">
+				<label>状态：</label>
+				<input type="text" id="status" readonly="readonly"  >
+			</div>
+			<div class="mui-input-row">
+				<label>提交人：</label>
+				<input type="text" value="${bean.employee.name!}" class="mui-input-clear" readonly="readonly"  >
+			</div>
+			<div class="mui-button-row">
+				<button type="button" class="mui-btn mui-btn-primary" onclick="faultEdit();">编辑</button>&nbsp;&nbsp;
+				<button type="button" class="mui-btn mui-btn-primary nborder" style="background-color: #ccc;" id="submitFromId" onclick="submitFrom();">提交</button>&nbsp;&nbsp;
+				<button type="button" class="mui-btn mui-btn-danger" onclick="unqualifiedClosure();">故障关闭</button>
+			</div>
+		</form>
+	</div>
+</div>
+<#include "../phone_main/footer.html"/>
+<script>
+var data;
+(function($, doc) {
+	$.init();
+	$.ready(function() {
+		data={
+			'infoSources':'${bean.infoSources!}',	
+			'status':'${bean.status!}',	
+			'shiftno':'${bean.shiftno!}',	
+			'tmNcGroupId':'${bean.tmNcGroupId!}',	
+			'tmNcId':'${bean.tmNcId!}',	
+			'ncProcessMode':'${bean.ncProcessMode!}',	
+			'discoveryStation':'${bean.discoveryStation!}',	
+			'optionShiftno':eval('('+ '${optionShiftno!}' +')'),	
+			'ncGroup':eval('('+ '${ncGroup!}' +')'),	
+			'ncDictString':eval('('+ '${ncDictString!}' +')'),	
+			'optionNcStatus':eval('('+ '${optionNcStatus!}' +')'),	
+			'optionUloc':eval('('+ '${optionUloc!}' +')'),
+			'faultGrades':eval('('+ '${faultGrades!}' +')'),
+			'optionNgEntrance':eval('('+ '${optionNgEntrance!}' +')'),
+		} 
+		
+		initSelect('shiftno',data.shiftno,data.optionShiftno);
+		initSelect('tmNcGroupId',data.tmNcGroupId,data.ncGroup);
+		initSelect('tmNcId',data.tmNcId,data.ncDictString);
+		initSelect('ncProcessMode',data.ncProcessMode,data.optionNcStatus);
+		initSelect('discoveryStation',data.discoveryStation,data.optionUloc);
+		if(data.infoSources){
+			document.getElementById('infoSources').value=entryRenderer('INFO_SOURCES', data.infoSources);
+		}
+		if(data.status){
+			document.getElementById('status').value = entryRenderer('UNQUALIFIED_STATE', data.status);
+		}
+		ngLevelOrExit(data.tmNcId);
+	});
+})(mui, document);
+
+  function nc_listAdd(obj){
+	data.ncDictString = false;
+	mui.ajax({
+   	    type: "post",
+        dataType: "json",
+        contentType:'application/x-www-form-urlencoded',//ajax submit 编码
+    	    url:'${baseUrl}/faultMachine/getNcItem.do',
+			data:{'tmNcGroupId':obj},
+			success:function(r){
+				data.ncDictString = r.data;
+				initSelect('tmNcId','',r.data);
+			}
+		})
+	}
+ function ngLevelOrExit(val){
+	 	var ncData = data.ncDictString;
+		var levelId = "";
+		for(var nc in ncData){
+			if(ncData[nc].code == val){
+				levelId =ncData[nc].ngLevel; 
+			}
+		}
+		if(levelId){
+			var faultGrades = data.faultGrades;
+			var optionNgEntrance = data.optionNgEntrance;
+			for(var i in faultGrades){
+				if(faultGrades[i].code==levelId){
+					$('#ngLevel').val(faultGrades[i].name);
+					$('#ngEntrance').val(keysValue(optionNgEntrance,faultGrades[i].relevantParameter));
+				}
+			}
+		}else{
+			$('#ngLevel').val('');
+			$('#ngEntrance').val('');
+		}
+	} 
+ function faultEdit(){
+	 if(data.status=='CREATED'){
+		document.getElementById('tmNcGroupId').disabled = '';
+		document.getElementById('tmNcId').disabled = '';
+		document.getElementById('ncProcessMode').disabled = '';
+		document.getElementById('discoveryStation').disabled = '';
+		document.getElementById('submitFromId').style = '#007aff';
+	 }else{
+		 mui.toast("关闭状态不可以进行编辑操作！",{ duration:'short', type:'div' }); 
+	 }
+ }
+function submitFrom(){
+	var formData = document.getElementById("formId");
+    for(var i=0;i<formData.length;i++){
+          if(formData.elements[i].name!="" && formData.elements[i].value==""){
+	       	  mui.toast(formData.elements[i].title+"不能为空！",{ duration:'short', type:'div' });
+              formData.elements[i].focus(); 
+              return ;
+          }
+    }
+	if(data.status=='CREATED'){
+		$("#formId").submit( 
+	        mui.ajax({
+		   	    type: "post",
+		        dataType: "json",
+		        contentType:'application/x-www-form-urlencoded',//ajax submit 编码
+		    	url:'${baseUrl}/faultMachine/faultMachineUpdate.do',
+				data:$('#formId').serialize(),
+				success:function(r){
+					if(r.success){
+						document.getElementById('tmNcGroupId').disabled = 'disabled';
+						document.getElementById('tmNcId').disabled = 'disabled';
+						document.getElementById('ncProcessMode').disabled = 'disabled';
+						document.getElementById('discoveryStation').disabled = 'disabled';
+						document.getElementById('submitFromId').style = '#ccc';
+						mui.toast("执行成功。",{ duration:'short', type:'div' });
+					}else{
+						mui.toast("更新故障失败，错误原因请联系系统管理员。",{ duration:'short', type:'div' });
+					}
+				}
+			})
+	       ); 
+		}else{
+				mui.toast("已经是关闭状态。",{ duration:'short', type:'div' });
+		}
+	}
+ function unqualifiedClosure(){
+	 mui.confirm("故障关闭", null, ['取消','确认'], function(e){
+			if(e.index === 1){
+				 mui.ajax({
+				   	    type: "post",
+				        dataType: "json",
+				        contentType:'application/x-www-form-urlencoded',//ajax submit 编码
+				    	url:'${baseUrl}/faultMachine/UnqualifiedClosure.do',
+						data:{id:$('#valId').val()},
+						success:function(r){
+							if(r.success){
+								mui.toast("执行成功！",{ duration:'short', type:'div' });
+								/* mui.back(); */
+							}else{
+								mui.toast(r.message,{ duration:'short', type:'div' });
+							}
+						}
+					})
+			}
+		});
+ }
+</script>

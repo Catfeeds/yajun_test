@@ -1,0 +1,90 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+$(function(){
+	$("#beginTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'endTime\')}'});
+	});
+	$("#endTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'beginTime\')}'});
+	});
+});
+function operator(action){
+	var rows = getSelectedRows('dg${currentPageId}');
+    if(rows.length<1){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    var executionIds = [];
+    for (var i = 0; i < rows.length; i++) {
+		if (rows[i].executionId != null) {
+			executionIds.push(rows[i].executionId);
+		}
+	}
+    var url = '${baseUrl}/bpm/instance/' + action + '.do';
+    ajaxRequest(url, {
+    	'ids' :  JSON.stringify(getSelectedIds('dg${currentPageId}')),
+    	'executionIds' :  JSON.stringify(executionIds)
+    	}, function(){
+    	reloadTable('dg${currentPageId}');
+	});
+}
+function deleteInstance(){
+    var rows = getSelectedRows('dg${currentPageId}');
+   if(0 == rows.length){
+   	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+   	return;
+   }
+   var executionIds = [];
+   for (var i = 0; i < rows.length; i++) {
+		if (rows[i].executionId != null) {
+			executionIds.push(rows[i].executionId);
+		}
+	}
+   var url='${baseUrl}/bpm/instance/deleteInput.do?ids='+getSelectedIds('dg${currentPageId}')+"&executionIds="+executionIds;
+   createwindow('<@s.m code="PROCESS_INSTANCE_DELETE" />',url,'dg${currentPageId}');
+}
+function showHistory(){
+    var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var id = rows[0].executionId;
+    showProcHistory(id, 'dg${currentPageId}');
+}
+function renderProcessStatus(value) {
+	return entryRenderer('PROCESS_DEF_STATUS', value);
+}
+function renderInitiator(value) {
+	return value.name + '('+value.account+')';
+}
+</script>
+<@p.body title="PROCESS_INSTANCE_MANAGE_TITLE" permissionModule="RUNNING_INSTANCE">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="PROCESS_INSTANCE_PROCESS" field="execution.name"></@p.input>
+			<@p.input title="PROCESS_INSTANCE_STATE" permissionCode="PROCESS_INSTANCE_STATE" type="select" field="execution.suspensionState" options=statusOptions></@p.input>
+			<@p.input title="DATETIME_START" field="createTimeStart" id="beginTime"></@p.input>
+			<@p.input title="DATETIME_END" field="createTimeEnd" id="endTime"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar>
+			<@p.button title="PROCESS_BUTTON_HANGUP"  permissionCode="ProcessRunningHangup" onclick="operator('suspend')" iconCls="pause"></@p.button>
+			<@p.button title="PROCESS_BUTTON_ACTIVE"  permissionCode="ProcessRunningActive" onclick="operator('active')" iconCls="play" ></@p.button>
+			<@p.button title="BTN_DELETE" permissionCode="ProcessRunningDelete" onclick="deleteInstance()" iconCls="trash"></@p.button>
+			<@p.button title="PROCESS_VALUE_PICTURE" permissionCode="ProcessRunningPicture" onclick="showHistory()" iconCls="h-sign"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/instance/manage/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<!-- 
+		<@p.column title="PROCESS_INSTANCE_ID" sortable="false" permissionCode="PROCESS_INSTANCE_ID" field="executionId" width="100"></@p.column>
+		 -->
+		<@p.column title="PROCESS_INSTANCE_PROCESS" sortable="false" permissionCode="PROCESS_INSTANCE_PROCESS" field="execution.name" width="350"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_STATE" sortable="false" permissionCode="PROCESS_INSTANCE_STATE" field="execution.suspensionState" width="50" formatter="renderProcessStatus"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_CREATEUSER" sortable="false" permissionCode="PROCESS_INSTANCE_CREATEUSER" width="200" field="employee" formatter="renderInitiator"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_CREATE_TIME" sortable="false" permissionCode="PROCESS_INSTANCE_CREATE_TIME" field="createTime" width="150"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_ACT_NAME" sortable="false" permissionCode="PROCESS_INSTANCE_ACT_NAME" width="180" field="taskName"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_OWNER" sortable="false" permissionCode="PROCESS_INSTANCE_OWNER" width="200" field="tasksOwnersStr"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+

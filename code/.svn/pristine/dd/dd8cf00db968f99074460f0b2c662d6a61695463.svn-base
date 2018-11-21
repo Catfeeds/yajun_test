@@ -1,0 +1,23 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"/>
+</head>	
+<script type="text/javascript">
+
+
+</script>
+<body style="overflow-y: hidden" scroll="no"> 
+	<@p.editForm url="${baseUrl}/bpm/nodeConfig/addCounteSign.do" class="form-horizontal"  noPermissionModule="true" idValue="${(counterSign.id)!}" >
+		<@p.formRow>
+			<@p.formColmd title="COUNTERSIGN_COL_TYPE">
+			 	<@p.input type="select" excludeSelectOption="true" field="type" options=signTypeOptions value=counterSign.type></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="COUNTERSIGN_COL_RATE">
+			 	<input name="rate" id="rate" class="inputxt" value="${(counterSign.rate)!}" datatype="n" errormsg="<@s.m code='COUNTERSIGN_RATE_TIP'/>"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+$(function(){
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#restStart,#restEnd').focus(function(){
+		WdatePicker({dateFmt:'HH:mm',minDate:'00:00',maxDate:'24:00'});
+	});
+});
+var workscheduleStartTime ="2017-01-01 " + $("#workscheduleStartTime").val();
+var workscheduleEndTime = "2017-01-01 " + $("#workscheduleEndTime").val();
+function checkRestStartTime(obj) {
+	var restStartTime ="2017-01-01 " + obj.value;
+	if (restStartTime != "2017-01-01 ") {
+		if(Date.parse(workscheduleStartTime) > Date.parse(workscheduleEndTime)){
+			if(Date.parse(restStartTime)<Date.parse(workscheduleStartTime)&&Date.parse(restStartTime)>Date.parse(workscheduleEndTime)){
+				infoTip('休息开始时间不在工作时间内！');
+				obj.value="";
+		    	obj.focus();
+				return ;	
+			}
+		}else{
+			if (Date.parse(restStartTime) < Date.parse(workscheduleStartTime) || Date.parse(restStartTime) > Date.parse(workscheduleEndTime)) {
+				infoTip('休息开始时间不在工作时间内！');	
+				obj.value="";
+		    	obj.focus();
+		        return false;
+	   		}
+		}
+	}
+}
+function checkRestEndTime(obj) {
+	var restEndTime ="2017-01-01 " + obj.value;
+	var restStartTime ="2017-01-01 " + $("#restStart").val();
+	if (restEndTime != "2017-01-01 ") {
+		if(Date.parse(workscheduleStartTime) > Date.parse(workscheduleEndTime)){
+			if(Date.parse(restEndTime)<Date.parse(workscheduleStartTime)&&Date.parse(restEndTime)>Date.parse(workscheduleEndTime)){
+				infoTip('休息结束时间不在工作时间内！');
+				obj.value="";
+    			obj.focus();
+				return;	
+			}
+		}else{
+			if (Date.parse(restEndTime) < Date.parse(workscheduleStartTime) || Date.parse(restEndTime) > Date.parse(workscheduleEndTime)) {
+		    	infoTip('休息结束时间不在工作时间内！');	
+		    	obj.value="";
+		    	obj.focus();
+		        return false;
+		   	}
+		}
+		
+	  if (Date.parse(workscheduleStartTime) < Date.parse(workscheduleEndTime) && Date.parse(restStartTime) > Date.parse(restEndTime)) {
+		   infoTip('开始时间不能大于结束时间！');	
+		   obj.value="";
+	   	   obj.focus();
+	       return false;
+	   }
+	}
+}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/workschedulerest/update.do" class="form-horizontal" idValue=tmWorkscheduleRest.id   permissionModule="WORKSCHEDULEREST">
+
+	<@p.formRow>
+		 <@p.formColmd title="WORK_SCHEDULE_REST_WORKSCHEDULE_ID" permissionCode="WORK_SCHEDULE_REST_START_TIME">
+			   <input class="inputxt"  name="no" value="${tmWorkschedule.no}"  readonly="readonly">	
+			   <input type="hidden"  name="tmWorkscheduleId" value="${tmWorkscheduleRest.tmWorkscheduleId}">	
+			</@p.formColmd>
+			<@p.formColmd title="WORK_SCHEDULE_REST_START_TIME" permissionCode="WORK_SCHEDULE_REST_START_TIME">
+				  <input type="hidden" id="workscheduleStartTime" value="${tmWorkschedule.startTime}"/>
+				 <input class="inputxt" id="restStart" class="timepicker"  datatype="*" onblur="checkRestStartTime(this);" name="startTime" value="${tmWorkscheduleRest.startTime}">	
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="WORK_SCHEDULE_REST_END_TIME" permissionCode="WORK_SCHEDULE_REST_END_TIME">
+			    <input type="hidden" id="workscheduleEndTime" value="${tmWorkschedule.endTime}"/>
+                <input class="inputxt" id="restEnd" class="timepicker" datatype="*" onblur="checkRestEndTime(this);" name="endTime"  value="${tmWorkscheduleRest.endTime}">			
+            </@p.formColmd>
+		</@p.formRow>
+		
+		
+	</@p.editForm>
+</body>
+</html>
+
+

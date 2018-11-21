@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="format-detection" content="telephone=no" />
+	<title>模具校验</title>
+	<link rel="stylesheet" href="../../mui/css/mui.min.css" />
+	<link href="../../mui/css/mui.picker.css" rel="stylesheet" />
+	<link href="../../mui/css/mui.poppicker.css" rel="stylesheet" />
+	<link href="../../mui/css/app.css" rel="stylesheet" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+</head>
+<style>
+	.page-content{background:#fff}
+	.title-form-group{border-radius:5px;margin:0 0 1.5em 0;border:1px solid #ccc}
+	.title-form-group label{background:#f0f0f0;border-radius:5px}
+	.title-form-group div{border-bottom:1px solid #f2f2f2}
+	.edit-label-color{color:#0062cc}
+	.nav-bth{background:#fff;height:3.5em;position:fixed;bottom:0;width:100%;border-bottom:1px solid #f0f0f0;border-top:1px solid #f0f0f0;align-items: center;justify-content: center;display: flex;}
+	.nav-bth span{background:#007aff;color:#fff;font-size:14px;border-radius:10px;padding:5px;margin-top:9px}
+	.custom-search{background:url(../../images/sweep_code.png) no-repeat left center;background-color:#F2F2F2F2!important;border-radius:5px!important;text-indent:20px;margin-bottom:5px}
+	.group-title{height:30px;text-align:center;font-size:18px;font-weight:500;letter-spacing:2px;font-family:微软雅黑}
+</style>
+<body>
+<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">模具校验</h1>
+</header>
+<div  style="background: #fff;height:100%;margin-bottom: 3.5em;">
+	<div class="page-content" style="margin-top:50px;margin-left:10px;margin-right:10px;">
+		<div class="title-form-group">
+			<div class="mui-input-row">
+				<input type="text" id="searchVal" class="mui-input-clear custom-search" placeholder="" onkeydown="if(event.keyCode==13)getInfo(this.value)" >
+			</div>
+			<div class="group-title">MES主数据信息</div>
+			<div class="mui-input-row my-input-row">
+				<label>区域:</label>
+				<input type="text" id="regionMark" readonly="readonly"/>
+				<input type="hidden" id="id" value=""/>
+				<input type="hidden" id="type" value="PRESS"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机台名称:</label>
+				<input type="text" id="press" readonly="readonly"/>
+				<input type="hidden" id="pressCode"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>模具编号:</label>
+				<input type="text" id="mould"/>
+				<input type="hidden" id="propertyNumbers"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>批次:</label>
+				<input type="text" id="batchNumber" >
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>加工図面:</label>
+				<input type="text" id="model" readonly="readonly"/>
+			</div>
+		</div>
+
+		<div class="title-form-group">
+			<div class="group-title">机台模具信息</div>
+			<div class="mui-input-row my-input-row">
+				<label>机台名称:</label>
+				<input type="text" id="pressName" readonly="readonly"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>模具编号:</label>
+				<input type="text" id="mouldCode" readonly="readonly"/>
+			</div>
+		</div>
+	</div>
+	<div class="nav-bth">
+		<span onclick="clearInput()" >重  置</span>
+	</div>
+</div>
+<script src="../../mui/js/mui.min.js"></script>
+<script src="../../mui/js/app.js"></script>
+<script src="../../js/jquery-1.8.0.min.js"></script>
+<script>
+function getInfo(value){
+    var parameters = {};
+    parameters.type = $("#type").val();
+    parameters.value = value;
+    parameters.press = $("#pressCode").val();
+	parameters.id = $("#id").val();
+	if(parameters.type=="PRESS"){
+		$("#id").val("");
+		$("#regionMark").val("");
+		$("#press").val("");
+		$("#pressCode").val("");
+		$("#mould").val("");
+		$("#batchNumber").val("");
+		$("#model").val("");
+		$("#pressName").val("");
+		$("#mouldCode").val("");
+		$("#propertyNumbers").val("");
+	} else if(parameters.type=="MOULD"){
+		var moulds = $("#propertyNumbers").val();
+		var mouldArray = moulds.split(",");
+		var isPass = false;
+		for (var j=0 ; j< mouldArray.length ; j++){
+			if(value == mouldArray[j]){
+				isPass=true;
+			}
+		}
+		if(isPass==false){
+			mui.alert("扫描模具错误，应该为["+$("#mould").val()+"],请重新扫描正确的模具码！");
+			return;
+		}
+		$("#mouldCode").val("");
+	}
+	getData(parameters);
+}
+function getData(parameters){
+    app.ajaxRequest({
+            url:"mpSchedul/mouldVerify.do",
+            data:parameters,
+            callback:function(result){
+                if(result){
+                 	if(!result.success){
+                        mui.alert(result.message);
+                        return;
+                    }
+                 	var resultData = result.data;
+                    if(resultData){
+                        if($("#type").val()=="PRESS"){
+                       	 	$("#id").val(resultData.sendWorkers);
+							$("#regionMark").val(resultData.regionMark);
+							$("#press").val(resultData.press);
+							$("#pressCode").val( $("#searchVal").val());
+							$("#mould").val(resultData.moulds);
+							$("#batchNumber").val(resultData.batchNumber);
+							$("#model").val(resultData.model);
+							$("#propertyNumbers").val(resultData.propertyNumbers);
+							$("#pressName").val(resultData.press);
+							$("#type").val("MOULD");
+                        }else if($("#type").val()=="MOULD"){
+                       		mui.alert("模具校验成功。");
+                       		$("#mouldCode").val($("#mould").val());
+                       		$("#type").val("PRESS");
+                        }
+                        $("#searchVal").val("");
+                    }
+                }
+            }
+       });
+}
+function clearInput(){
+	$("#id").val("");
+	$("#regionMark").val("");
+	$("#press").val("");
+	$("#mould").val("");
+	$("#batchNumber").val("");
+	$("#model").val("");
+	$("#pressName").val("");
+	$("#mouldCode").val("");
+	$("#propertyNumbers").val("");
+	$("#searchVal").val("");
+	$("#type").val("PRESS");
+}
+function scanSN(value){
+	$('#searchVal').val(value);
+	getInfo(value);
+}
+</script>
+</body>
+</html>

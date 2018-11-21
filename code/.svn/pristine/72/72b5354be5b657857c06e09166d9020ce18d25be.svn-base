@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="DataPermissionMapper" >
+
+  <select id="selectByUserAndModule" resultType="java.util.HashMap"  parameterType="java.util.HashMap" >
+  	SELECT t.ID as "id",t.PERMISSION_CODE as "code",tfpps.DATA_TPE as "dataType",t.DATA_URL as "url",tfpps.DATA_VALUE as "value",t.MODULE as "module",t.DESCRIPTION as "description",t.PACKAGE_NAME as "packageName" FROM TS_DATA_PERMISSION t
+  	 LEFT JOIN TR_FORM_PER_PER_SET tfpps ON t.ID=tfpps.PERMISSION_ID  WHERE tfpps.PERMISSION_SET_ID  IN
+  	(SELECT tefp.PERMISSION_SET_ID FROM  TR_USER_FORM_PERMISSION tefp WHERE tefp.USER_ID= #{userId,jdbcType=INTEGER} ) 
+  	AND t.MODULE= #{moduleName,jdbcType=VARCHAR}
+  </select>
+  <select id="selectByUser" resultType="java.util.HashMap"  parameterType="java.util.HashMap" >
+   	SELECT t.ID as "id",t.PERMISSION_CODE as "code",t.DATA_TYPE as "dataType",t.DATA_URL as "url",t.DATA_VALUE as "value",t.MODULE as "module",t.DESCRIPTION as "description",t.PACKAGE_NAME as "packageName" FROM TS_DATA_PERMISSION t 
+  	 LEFT JOIN TR_DATA_PER_PER_SET tfpps ON t.ID=tfpps.PERMISSION_ID  WHERE tfpps.PERMISSION_SET_ID  IN
+  	(SELECT tefp.PERMISSION_SET_ID  FROM  TR_USER_DATA_PERMISSION tefp WHERE tefp.USER_ID= #{userId,jdbcType=INTEGER} ) 
+  </select>
+    <insert id="savePermissionRelation" parameterType="java.util.HashMap">
+    	INSERT INTO TR_DATA_PER_PER_SET(PERMISSION_SET_ID,PERMISSION_ID)VALUES(#{setId,jdbcType=INTEGER},#{permissionId,jdbcType=INTEGER})
+    </insert>
+    <delete id="deletePermissionRelation" parameterType="int">
+    	DELETE FROM TR_DATA_PER_PER_SET WHERE PERMISSION_SET_ID=#{setId,jdbcType=INTEGER}
+    </delete>
+    
+     <select id="selectAllByUser" resultType="java.util.HashMap"  parameterType="java.util.HashMap" >
+  	 SELECT t.ID as "id",t.PERMISSION_CODE as "code",tfpps.DATA_TYPE as "type",t.DATA_URL as "url",tfpps.DATA_VALUE as "value",t.MODULE as "module",t.DESCRIPTION as "description",t.PACKAGE_NAME as "packageName" FROM TS_DATA_PERMISSION t 
+  	 LEFT JOIN TR_DATA_PER_PER_SET tfpps ON t.ID=tfpps.PERMISSION_ID  WHERE tfpps.PERMISSION_SET_ID  IN
+  	(SELECT tefp.PERMISSION_SET_ID  FROM  TR_USER_DATA_PERMISSION tefp WHERE tefp.USER_ID= #{userId,jdbcType=INTEGER} ) 
+  </select>
+</mapper>

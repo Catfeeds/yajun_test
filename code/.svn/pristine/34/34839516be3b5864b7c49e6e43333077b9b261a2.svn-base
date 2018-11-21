@@ -1,0 +1,39 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body title="PATH_LIST_TITLE" permissionModule="AVI_PATH_PARAMETER" noBreadcrumbs="true">	
+<!-- <div style="color: #428bca;text-align:center; margin:10px" >参数信息</div> -->
+<input id="toPorderAviPathId" type="hidden" value="${toPorderAviPathId!}" />
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathParameterAdd" iconCls="plus" url="${baseUrl}/avi/path/parameter/addInput.do?toPorderAviPathId="+"${toPorderAviPathId}" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathParameterUpdate" iconCls="edit" url="${baseUrl}/avi/path/parameter/updateInput.do?toPorderAviPathId="+"${toPorderAviPathId}" type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathParameterDelete" iconCls="trash" url="${baseUrl}/avi/path/parameter/delete.do" type="delete"></@p.button>
+<!-- 			<@p.button title="PATH_IMPORT" permissionCode="PathParameterImport" downName="PATH_ULOC_PARAMETER_IMPORT_NAME" onclick="importData();" iconCls="signin" /> -->
+			<@p.button title="PATH_EXPORT" permissionCode="PathParameterExport" downName="PATH_ULOC_PARAMETER_EXPORT_NAME" url="${baseUrl}/avi/path/parameter/exportData.do?toPorderAviPathId="+"${toPorderAviPathId}"  iconCls="upload-alt" type="down" />
+<!-- 			<@p.button title="PATH_EXPORT_TEMPLTE" permissionCode="PathParameterImport" iconCls="upload-alt"  url="${baseUrl}/avi/path/parameter/exportTemplate.do" type="down"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/avi/path/parameter/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_CODE" field="parameter.code" permissionCode="AVI_PATH_PARAMETER_CODE"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_NAME" field="parameter.name" permissionCode="AVI_PATH_PARAMETER_NAME"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_VARIUABLE_NAME" field="parameter.variuableName" permissionCode="AVI_PATH_PARAMETER_VARIUABLE_NAME"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_DEFAULT_VALUE" field="parameter.defaultValue" permissionCode="AVI_PATH_PARAMETER_DEFAULT_VALUE"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_REGULAR_EXPRESSION" field="parameter.regularExpression" permissionCode="AVI_PATH_PARAMETER_REGULAR_EXPRESSION"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_PARAMETER_NOTE" field="parameter.note" permissionCode="AVI_PATH_PARAMETER_PARAMETER_NOTE"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_IS_REQUIRED" field="isRequired" permissionCode="AVI_PATH_PARAMETER_IS_REQUIRED"  formatter="renderYesOrNo"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_ENABLED" field="enabled" permissionCode="AVI_PATH_PARAMETER_ENABLED" formatter="renderGenderEnabled"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_NOTE" field="note" permissionCode="AVI_PATH_PARAMETER_NOTE" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+/* function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+} */
+
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

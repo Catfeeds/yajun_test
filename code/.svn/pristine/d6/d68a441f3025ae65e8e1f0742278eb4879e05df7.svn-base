@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/i18n">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/com.jcraft.jzlib_1.1.1.v201205102305.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.external.jbzip2_0.9.1.201303051448.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.external.jcifs_1.2.25.201303051448.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.external.logback.default_1.0.0.201303051448.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.external.odfdom_0.8.7.201303051448.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.external.osgi.enterprise_4.2.0.201303051448.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.external.postgresql_9.1.901.201303051448.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.jinterop.core_2.0.8.201303051454.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.jinterop.deps_1.0.0.201303051454.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.opc.dcom_1.0.0.201303051455.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/org.openscada.opc.lib_1.0.0.201303051455.jar"/>
+	<classpathentry kind="lib" path="/mes-webapp/src/main/webapp/WEB-INF/lib/alien-rfid-1.0.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

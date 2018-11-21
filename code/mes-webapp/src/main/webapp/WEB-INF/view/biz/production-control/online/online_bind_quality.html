@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<link type="text/css" rel="stylesheet" href="${baseUrl}/res/css/bootstrap-switch.min.css" />
+<script  type="text/javascript" src="${baseUrl}/res/js/bootstrap-switch.min.js"></script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<div style="text-align: center">
+	<input type="text" value="${SN!}" readonly="readonly"  style="width: 500px;height: 50px;margin-bottom: 10px;"/>
+</div>
+<form action="${baseUrl}/onLine/recordQuality.do"  class="form-horizontal" method="POST" id="recordQualtityForm">
+<input type="hidden" name="recordId" value="${recordId}">
+<input type="hidden" name="shiftNo" value="${shiftNo!}">
+<input type="hidden" name="tmUlocId" value="${tmUlocId}">
+<input type="hidden" name="currentUlocSeq" value="${currentUlocSeq}">
+<input type="hidden" value="recordQualityCallback" id="callback">
+<table class="table table-bordered  table-hover table-condensed">
+	<thead><tr><th>检查项目</th><th>参数说明</th><th>结果值</th><th>备注</th></tr></thead>
+	<tbody >
+		<#if quality??>
+			<#list quality as bean>
+			<tr >
+				<td style="vertical-align: middle">${bean.parameter.code}-${bean.parameter.name}</td><td style="vertical-align: middle">${bean.parameter.note}</td>
+				<td style="width: 230px;vertical-align: middle">
+				<input type="hidden" name="qualityCode" value='${bean.parameter.code}'/>
+				<input type="hidden" name="qualityId" value="${bean.parameter.id}"/>
+				<input type="hidden" name="qualityName" value="${bean.parameter.name}"/>
+				<#if "${bean.parameter.regularExpression}" =="YES_NO">
+						<div id="mySwitch" class="switch" data-on-label="<i class='icon-ok icon-white'></i>" data-off-label="<i class='icon-remove'></i>">
+    						<input type="checkbox"  data-index="${bean_index}" checked />
+						</div>
+						<input type="hidden" class="checkResult_checkbox"  name="checkResult" id="${bean_index}_checkboxId" value="YES"/>
+					<#else>
+						<input  data-index = "${bean_index}"  class="checkResult_input" data-id='${bean.parameter.id}' data-value='${bean.parameter.regularExpression}' data-code ='${bean.parameter.code}' data-name='${bean.parameter.name}'  datatype="*" maxlength='100' />
+						<input id ="${bean_index}_checkResultInput" name="checkResult" type="hidden" value="YES"/>
+				</#if>
+				</td>
+			<td style="width: 230px;"><input data-index = "${bean_index}" class="inputxt" name="qualityNote" maxlength="75"></td>
+			</tr>
+		</#list>
+		</#if>
+	</tbody>
+</table>
+</form>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$(".close").hide();
+	$(".btn-primary").hide()
+	$(".btn-default").hide();
+	$(".form_required_flag").attr("style","position:relative;");
+	$(".checkResult_input").attr("style","width:200px;");
+	$(".inputxt").attr("style","width:200px;");
+	$(".bootstrap-dialog-footer-buttons").append("<button class='btn btn-primary' onclick='confirmRecordQuality()'>确定</button>"
+			+"<button class='btn btn-primary' onclick='reLoadQuality()'>重新读取</button>"
+			+"<button class='btn btn-primary' onclick='goGackQuality()'>返回</button>");
+	setTimeout('getSwithCheckbox()',50);
+});
+function getSwithCheckbox(){
+	$("div[class='switch']").each(function() {
+	    $this = $(this);
+	    var onColor = $this.attr("onColor");
+	    var offColor = $this.attr("offColor");
+	    var onText = $this.attr("onText");
+	    var offText = $this.attr("offText");
+	    var labelText = $this.attr("labelText");
+	    var $switch_input = $(" :only-child", $this);
+	    $switch_input.bootstrapSwitch({
+	        onColor : onColor,
+	        offColor : offColor,
+	        onText : onText,
+	        offText : offText,
+	        labelText : labelText,
+	        onSwitchChange:function(event,state){  
+	            if(state==true){  
+	            	$("#"+$(this).attr("data-index")+"_checkboxId").val("YES");
+	            }else{
+	            	$("#"+$(this).attr("data-index")+"_checkboxId").val("NO");
+	            }
+	        } 
+	    });
+	}); 
+}
+$.fn.serializeObject = function()
+{
+	var o = {};
+	var a = this.serializeArray();
+	$.each(a, function() {
+		if (o[this.name] !== undefined) {
+			if (!o[this.name].push) {
+				o[this.name] = [o[this.name]];
+			}
+			o[this.name].push(this.value || '');
+		} else {
+			o[this.name] = this.value || '';
+		}
+	});
+	return o;
+};
+
+
+function confirmRecordQuality(){
+	var isTrue =true;
+	$(".checkResult_input").each(function(){
+		var regular = $(this).attr("data-value");
+		var qualityId = $(this).attr("data-id");
+		var qualityCode = $(this).attr("data-code");
+		var qualityName = $(this).attr("data-name");
+		var data_index = $(this).attr("data-index");
+		var value=this.value;
+		var expression = new RegExp(regular.replace(/\//g,''));
+		if(value){
+			if(!expression.test(value)){
+				$(this).css("background-color","red");
+				$("#"+data_index+"_checkResultInput").val("NO");
+				isTrue=false;
+			}else{
+				$(this).css("background-color","white");
+				$("#"+data_index+"_checkResultInput").val("YES");
+			}
+		}
+	});
+	$(".checkResult_checkbox").each(function(){
+		if(this.value=="NO"){
+			isTrue=false;
+		}
+	});
+	if(!isTrue){
+		if(confirm("有校验不通过项，确认保存吗?")){
+			$(".close").click();
+			var url = "${baseUrl}/onLine/unQuallityRecordNc.do?quality="+JSON.stringify($("#recordQualtityForm").serializeObject())
+			+"&recordId=${recordId}&shiftNo=${shiftNo}&tmUlocId=${tmUlocId}&currentUlocSeq=${currentUlocSeq}&SN=${SN}";
+			createwindow("填写不合格信息",url,"UnQualityRecordNCGridId");
+			isTrue = false;
+		}					
+	}
+	if(isTrue){
+		$("#recordQualtityForm").submit();
+	}
+}
+
+function recordQualityCallback(){
+	clickSN("${SN}");
+}
+
+function reLoadQuality(){
+	$("input[name='checkResult']").each(function(){
+		$(this).val("");
+		$(this).css("background-color","white");
+	});
+	$("input[type='radio']").each(function(){
+		this.checked=false;
+	});
+}
+function goGackQuality(){
+	ajaxRequest(baseUrl+"/onLine/recordQualityGoBack.do", {
+		recordId:"${recordId}",
+		shiftNo:"${shiftNo}",
+		tmUlocId:"${tmUlocId}",
+		currentUlocSeq:"${currentUlocSeq}"
+	}, function(result){
+		$(".close").click();
+	}, true);
+}
+</script>

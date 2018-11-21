@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" src="${baseUrl}/res/ckeditor/ckeditor.js"></script> 
+<link rel="stylesheet" href="${baseUrl}/res/ckeditor/samples/toolbarconfigurator/lib/codemirror/neo.css">
+</head>	
+<script type="text/javascript">
+$(function(){
+	 CKEDITOR.replace( 'txtContent', { toolbar: 'basic',height:window.screen.availHeight*0.6*0.4} );
+	initValidForm(function(){
+		$("#txtContent").val(CKEDITOR.instances.txtContent.getData());
+	}); 
+	$(".form-horizontal input").attr("class","col-xs-10 col-sm-5 form-control");
+	$(".form-horizontal textarea").attr("class","col-xs-10 col-sm-5 form-control");
+	$(".form-horizontal input[type='radio']").attr("class","");
+	
+});
+function nodeSelect(dialog){
+	var selectedRows = $('#dgNodeSelectGrid').bootstrapTable('getSelections');
+	if (!selectedRows || selectedRows.length == 0) {
+		infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+	$('#txtNodeName').val(selectedRows[0].name);
+	$('#nodeDescription').val(selectedRows[0].description);
+	$('#processNodeId').val(selectedRows[0].id);
+	$('#processName').val(selectedRows[0].processName);
+	$('#processDescription').val(selectedRows[0].processDescription);
+	$('#reminderName').val(selectedRows[0].userName);
+	$('#reminderAccount').val(selectedRows[0].reminderAccount);
+	dialog.close();
+}
+function reminderSelect(dialog){
+	if($("#reminderType").val()=='ACCOUNT'){
+		var selectedRows = $('#orgnization_principal_list').bootstrapTable('getSelections');
+		if (!selectedRows || selectedRows.length == 0) {
+			infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+			return;
+		}
+		$('#reminderName').val(selectedRows[0].name);
+		$('#reminder').val(selectedRows[0].id);
+		$('#reminderAccount').val(selectedRows[0].account);
+		dialog.close();
+	}
+}
+</script>
+<body> 
+<@p.editForm url="${baseUrl}/bpm/manage/remind/add.do" class="form-horizontal"  permissionModule="TASK_REMIND" noPermissionModule="true">
+		<@p.formRow>
+			<@p.formColmd title="TASK_REMIND_NODE_NAME"    permissionCode="NODE_NAME">
+				<input name="processNodeId"  type="hidden" id="processNodeId" >
+			 	<input type="text" name="myNodeName" id="txtNodeName" class="readonlyText" readonly="readonly" datatype="*2-100" />
+		 	  <@p.select  title="TASK_REMIND_SELECT_NODE"    url="${baseUrl}/bpm/manage/remind/nodeSelect.do?currentPageId=NodeSelectGrid&singleSelect=true" callback="nodeSelect"/>
+			</@p.formColmd>
+			<@p.formColmd title="TASK_REMIND_NODE_DESCRIPTION"    permissionCode="NODE_DESCRIPTION">
+				 	<input name="nodeDescription" id="nodeDescription" class="readonlyText" readonly="readonly"  />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="TASK_REMIND_PROCESS_NAME"    permissionCode="PROCESS_NAME">
+				 	<input name="processName" id="processName" class="readonlyText" readonly="readonly"  />
+			</@p.formColmd>
+			<@p.formColmd title="TASK_REMIND_PROCESS_DESCRIPTION"    permissionCode="PROCESS_DESCRIPTION">
+				 	<input name="processDescription" id="processDescription" class="readonlyText" readonly="readonly"  />
+			</@p.formColmd>
+		</@p.formRow>
+		<br/>
+		<@p.formRow>	
+			<@p.formColmd title="TASK_REMIND_REMINDER_TYPE"    permissionCode="REMINDER_TYPE">
+			 		<@p.input  type="select" id="reminderType" excludeSelectOption="true" value="ASSIGNEE"  field="reminderType" options=reminderTypes></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="TASK_REMIND_EXPRESSION"    permissionCode="EXPRESSION">
+				 	<input name="expression" datatype="*1-100"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="TASK_REMIND_REMINDER_ACCOUNT"    permissionCode="REMINDER_ACCOUNT">
+			 	<input name="reminderAccount" id="reminderAccount"  class="readonlyText" readonly="readonly"  />
+			 	<input name="reminder" id="reminder" type="hidden" />
+	 		    <@p.select  title="TASK_REMIND_SELECT_REMINDER"    url="${baseUrl}/user/listSelect.do?currentPageId=UserSelectGrid&singleSelect=true" callback="reminderSelect"/>
+			</@p.formColmd>
+			<@p.formColmd title="TASK_REMIND_REMINDER_NAME"    permissionCode="REMINDER_NAME">
+				 	<input name="reminderName" id="reminderName" class="readonlyText" readonly="readonly"  />
+			</@p.formColmd>
+			</@p.formRow>
+			<@p.formRow>
+			<@p.formColmd title="TASK_REMIND_IS_RELEASED"    permissionCode="RELEASED">
+				 	<input name="released" id="txtReleased" value='<@s.m code="TASK_REMIND_NOT_RELEASED" />' class="readonlyText" readonly="readonly"  />
+			</@p.formColmd>
+			</@p.formRow>
+			<br/>
+			<@p.formRow>
+			<@p.formColmd title="TASK_REMIND_TITLE"   permissionCode="TITLE" >
+				 	<input name="title"  value='<@s.m code="TASK_REMIND_DEFAULT_TITLE" />' datatype="*1-300" />
+			</@p.formColmd>
+			</@p.formRow>
+			<@p.formRow>
+			<@p.formColmd title="TASK_REMIND_CONTENT" class="col-md-9"  permissionCode="CONTENT">
+				 	<textarea id="txtContent" name="content" style="height: 500px;">
+				 		<#if "zh_CN"==lang>
+				 			<div  style = "background-color:#eeeeee;">
+							<font size="2" >您有一个流程待处理：</font>
+								<table style="font-size: 12px;color:#003366; ">
+									<tr>
+										<td>流程名称</td>
+										<td></td>
+									</tr>
+										<tr>
+										<td>流程描述</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>任务名称</td>
+										<td></td>
+									</tr>
+									<tr>
+										<td>任务描述</td>
+										<td></td>
+									</tr>
+								</table>
+							
+							<hr>
+							<font size="2" color="#003366">
+								这是由系统自动发出的邮件通知，请不要回复<br>
+							</font>
+							</div>
+				 		</#if>
+				 	</textarea></@p.formColmd></@p.formRow>
+	</@p.editForm>
+</body>
+</html>

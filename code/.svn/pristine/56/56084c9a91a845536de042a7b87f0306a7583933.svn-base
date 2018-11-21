@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/uloc/update.do" idValue=uloc.id class="form-horizontal"   permissionModule="ULOC">
+		<@p.formRow>
+			<@p.formColmd title="ULOC_PLANT" permissionCode="ULOC_PLANT">
+				<@p.input type="select" disabled="disabled" value="${uloc.tmPlantId}" excludeSelectOption="true"  options=plants ></@p.input>
+				<input type="hidden" name="tmPlantId" value="${uloc.tmPlantId!}" >
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_LINE" permissionCode="ULOC_LINE">
+				<@p.input type="select" disabled="disabled" value="${uloc.tmLineId}" excludeSelectOption="true"  options=lines ></@p.input>
+				<input type="hidden" name="tmLineId" value="${uloc.tmLineId!}" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_NO" permissionCode="ULOC_NO">
+				<input name="no"  readonly="readonly" value="${uloc.no!}" type="inputxt" >
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_NAME" permissionCode="ULOC_NAME">
+				<input name="name" class="inputxt" value="${uloc.name!}"  maxlength='150'/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_POSITION_TYPE" permissionCode="ULOC_POSITION_TYPE">
+				 <@p.input type="select" field="positionType" value=uloc.positionType options=positionOptions ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_IS_ENTRANCE" permissionCode="ULOC_IS_ENTRANCE">
+				 <@p.input type="select" field="isEntrance" value=uloc.isEntrance  options=entranceOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="ULOC_RFID_IP" permissionCode="ULOC_RFID_IP">
+				 <input name="rfidIP" class="inputxt" maxlength='30' value="${uloc.rfidIP!}">
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_RFID_PORT" permissionCode="ULOC_RFID_PORT">
+				 <input name="rfidPort" class="inputxt" value="${uloc.rfidPort!}" maxlength='10'>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="ULOC_RFID_ANT" permissionCode="ULOC_RFID_ANT">
+				  <input name="rfidAnt" class="inputxt" maxlength='10' value="${uloc.rfidAnt!}">
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_TM_EQUIPMENT_ID" permissionCode="ULOC_TM_EQUIPMENT_ID">
+				 <@p.input type="select"  field="tmEquipmentId" options=optionEquipment value="${uloc.tmEquipmentId!}" ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_ENABLED" permissionCode="ULOC_ENABLED">
+				<@p.input type="select" excludeSelectOption="true" value=uloc.enabled  field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>	
+			<@p.formColmd title="ULOC_NOTE" permissionCode="ULOC_NOTE">
+				<input name="note" class="inputxt" maxlength='256' value="${uloc.note!}">
+			</@p.formColmd>
+		</@p.formRow>
+		<input name="serviceName" class="inputxt" type="hidden" value="${uloc.serviceName!}">
+	<!-- 	<@p.formRow>
+			<@p.formColmd title="ULOC_NOTE" permissionCode="ULOC_NOTE">
+				<input name="serviceName" class="inputxt" value="${uloc.serviceName!}">
+			</@p.formColmd>
+		</@p.formRow> -->
+	</@p.editForm>
+</body>
+</html>

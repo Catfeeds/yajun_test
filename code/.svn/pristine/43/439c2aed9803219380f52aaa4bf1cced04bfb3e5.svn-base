@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PmcMapper">
+	<select id="queryPageTbPmcCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT count(1) FROM TM_WORKTIME tw LEFT JOIN (
+						SELECT TM_WORKTIME_id,
+							<!-- wmsys.wm_concat(end_time ) as restTimeEnd, wmsys.wm_concat(start_time ) as restTimeStart -->
+                			LISTAGG(start_time,',')WITHIN GROUP (ORDER BY id) as restTimeStart, 
+							LISTAGG(end_time,',')WITHIN GROUP (ORDER BY id) as restTimeEnd
+							FROM TM_WORKTIME_REST twr GROUP BY TM_WORKTIME_id
+						) A ON tw. ID = A .TM_WORKTIME_id LEFT JOIN (
+						SELECT TM_CLASS_MANAGER_ID,
+								SPECIAL_DATE,
+								<!-- wmsys.wm_concat(starttime ) as overTimeStart, wmsys.wm_concat(endtime ) as overTimeEnd -->
+								LISTAGG(starttime,',')WITHIN GROUP (ORDER BY id) as overTimeStart, 
+                				LISTAGG(endtime,',')WITHIN GROUP (ORDER BY id) as overTimeEnd
+								FROM TM_WORK_SPECIAL_DATE twsd  where <![CDATA[ SPECIAL_DATE<=SYSDATE ]]> GROUP BY SPECIAL_DATE, TM_CLASS_MANAGER_ID
+							) b ON tw.TM_CLASS_MANAGER_ID = b.TM_CLASS_MANAGER_ID and to_char(tw.work_date ,'yyyy-MM-dd')=to_char(b.SPECIAL_DATE ,'yyyy-MM-dd')
+						LEFT JOIN TM_CLASS_MANAGER tcm ON tcm. ID = tw.tm_class_manager_id
+						LEFT JOIN TM_LINE tl ON tcm.tm_line_id = tl. ID
+						LEFT JOIN (
+							SELECT COUNT (trt.TM_WORKTIME_id) AS countNumber, trt.TM_WORKTIME_id
+							FROM TB_PRODUCT_TRACING trt WHERE trt.finish_time IS NOT NULL GROUP BY TM_WORKTIME_id
+						) c ON c.TM_WORKTIME_id = tw. ID where 1=1 and
+						<![CDATA[ work_date<=SYSDATE ]]>
+						<if test="className!=null and className!='' ">
+							 and tcm.class_name=#{className}
+						</if>
+						<if test="classGroup!=null and classGroup!='' ">
+							and tcm.class_group=#{classGroup}
+						</if>
+						<if test="productDateStart!=null and productDateStart!='' ">
+							<![CDATA[ and	 tw.work_date >=to_date(#{productDateStart},'yyyy-MM-dd') ]]>
+						</if>
+						<if test="productDateEnd!=null and productDateEnd!='' ">
+							<![CDATA[  and  tw.work_date<=to_date(#{productDateEnd},'yyyy-MM-dd')  ]]>
+						</if>
+						  
+	</select>
+	<select id="queryPageTbPmc" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		SELECT * FROM
+			(
+			SELECT T .*, ROWNUM AS rownum_ FROM
+				(
+				SELECT to_char(tw.work_date ,'yyyy-MM-dd') as work_date,tw.plan_online_qty,tw.start_time,tw.end_time,tcm.class_name,
+				tcm.class_group,tl.name_cn,c.countNumber,a.restTimeEnd,a.restTimeStart,TO_char(SYSDATE, 'yyyy-MM-dd hh24:mi') as curredn_time,overTimeStart,overTimeEnd
+					FROM TM_WORKTIME tw LEFT JOIN (
+						SELECT TM_WORKTIME_id,
+							<!-- wmsys.wm_concat(end_time ) as restTimeEnd, wmsys.wm_concat(start_time ) as restTimeStart -->
+							LISTAGG(start_time,',')WITHIN GROUP (ORDER BY id) as restTimeStart, 
+							LISTAGG(end_time,',')WITHIN GROUP (ORDER BY id) as restTimeEnd
+							FROM TM_WORKTIME_REST  twr GROUP BY TM_WORKTIME_id
+						) A ON tw. ID = A .TM_WORKTIME_id LEFT JOIN (
+						SELECT TM_CLASS_MANAGER_ID,
+								SPECIAL_DATE,
+								<!-- wmsys.wm_concat(starttime ) as overTimeStart, wmsys.wm_concat(endtime ) as overTimeEnd -->
+								LISTAGG(starttime,',')WITHIN GROUP (ORDER BY id) as overTimeStart, 
+                				LISTAGG(endtime,',')WITHIN GROUP (ORDER BY id) as overTimeEnd
+								FROM TM_WORK_SPECIAL_DATE twsd where <![CDATA[ SPECIAL_DATE<=SYSDATE ]]>
+								  GROUP BY SPECIAL_DATE, TM_CLASS_MANAGER_ID
+							) b ON tw.TM_CLASS_MANAGER_ID = b.TM_CLASS_MANAGER_ID and to_char(tw.work_date ,'yyyy-MM-dd')=to_char(b.SPECIAL_DATE ,'yyyy-MM-dd')
+						LEFT JOIN TM_CLASS_MANAGER tcm ON tcm. ID = tw.tm_class_manager_id
+						LEFT JOIN TM_LINE tl ON tcm.tm_line_id = tl. ID
+						LEFT JOIN (
+							SELECT COUNT (trt.TM_WORKTIME_id) AS countNumber, trt.TM_WORKTIME_id
+							FROM TB_PRODUCT_TRACING trt WHERE trt.finish_time IS NOT NULL GROUP BY TM_WORKTIME_id
+						) c ON c.TM_WORKTIME_id = tw. ID where 1=1 and 
+						<![CDATA[ work_date<=SYSDATE ]]>
+						<if test="className!=null and className!='' ">
+							 and tcm.class_name=#{className}
+						</if>
+						<if test="classGroup!=null and classGroup!='' ">
+							and tcm.class_group=#{classGroup}
+						</if>
+						<if test="productDateStart!=null and productDateStart!='' ">
+							<![CDATA[	and tw.work_date >=to_date(#{productDateStart},'yyyy-MM-dd') ]]>
+						</if>
+						<if test="productDateEnd!=null and productDateEnd!='' ">
+							<![CDATA[  and tw.work_date<=to_date(#{productDateEnd},'yyyy-MM-dd')  ]]>
+						</if>
+						  order by tw.work_date desc
+					) T WHERE
+						<![CDATA[ ROWNUM<=#{pageSize} ]]>
+				) tb
+				WHERE tb.rownum_>#{firstRow}
+	
+	</select>
+</mapper>

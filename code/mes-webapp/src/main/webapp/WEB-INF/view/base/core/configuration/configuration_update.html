@@ -1,0 +1,31 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>	
+<#include "../../include/editorCommons.html"> 
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/basis/configuration/update.do" idValue=bean.id  class="form-horizontal"  noPermissionModule="true">
+		<@p.formRow>
+			<@p.formColmd title="CONFIGURATION_KEY">
+				  <input name="sysKey" value="${bean.sysKey!}" readonly="readonly">
+			</@p.formColmd>
+			<@p.formColmd title="CONFIGURATION_NAME">
+				  <input name="name" value="${bean.name!}" readonly="readonly">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<!-- 
+			<@p.formColmd title="CONFIGURATION_PROPERTY">
+				  <input name="property" value="${bean.property!}" class="col-xs-10 col-sm-5 form-control" nullmsg="<@s.m code='CONFIGURATION_PROPERTY_NULL'/>" datatype="*">
+			</@p.formColmd>
+			 -->
+			<@p.formColmd title="CONFIGURATION_VALUE">
+				  <input name="value" value="${bean.value!}" nullmsg="<@s.m code='CONFIGURATION_VALUE_NULL'/>" datatype="${bean.property!}">
+			</@p.formColmd>
+			<@p.formColmd title="CONFIGURATION_REMARK">
+				  <input name="remark" value="${bean.remark!}"  datatype="*0-500">
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

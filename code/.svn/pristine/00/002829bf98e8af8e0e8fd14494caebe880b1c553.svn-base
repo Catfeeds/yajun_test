@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+
+<body style="overflow-y: hidden" scroll="no">
+	
+<@p.editForm url="${baseUrl}/workschedulerest/add.do" class="form-horizontal"   permissionModule="WORKSCHEDULEREST">
+	<input id="beforeSubmit" type="hidden" value="checkRestEndTime">
+		<@p.formRow>
+			<@p.formColmd title="WORK_SCHEDULE_REST_WORKSCHEDULE_ID" permissionCode="WORK_SCHEDULE_REST_START_TIME">
+				  <input class="inputxt"  name="no"  value="${tmWorkschedule.no}" readonly="readonly">
+				   <input type="hidden" id="tmWorkscheduleId" name="tmWorkscheduleId"  value="${tmWorkschedule.id}">
+			</@p.formColmd>
+			
+			<@p.formColmd title="WORK_SCHEDULE_REST_START_TIME" permissionCode="WORK_SCHEDULE_REST_START_TIME">
+				 <input type="hidden" id="workscheduleStartTime" value="${tmWorkschedule.startTime}"/>
+				 <input class="inputxt"  name="startTime"  id="restStart"  class="timepicker"  datatype="*" onblur="checkRestStartTime(this);">	
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_SCHEDULE_REST_END_TIME" permissionCode="WORK_SCHEDULE_REST_END_TIME">
+			    <input type="hidden" id="workscheduleEndTime" value="${tmWorkschedule.endTime}"/>
+                <input class="inputxt"  name="endTime" id="restEnd" class="timepicker" datatype="*" ">			
+            </@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+<script type="text/javascript">
+$(function(){
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#restStart,#restEnd').focus(function(){
+		WdatePicker({dateFmt:'HH:mm',minDate:'00:00',maxDate:'24:00'});
+	});
+	
+});
+var workscheduleStartTime ="2017-01-01 " + $("#workscheduleStartTime").val();
+var workscheduleEndTime = "2017-01-01 " + $("#workscheduleEndTime").val();
+
+function checkRestStartTime(obj) {
+	var restStartTime ="2017-01-01 " + obj.value;
+	if (restStartTime != "2017-01-01 ") {
+		if(Date.parse(workscheduleStartTime) > Date.parse(workscheduleEndTime)){
+			if(Date.parse(restStartTime)<Date.parse(workscheduleStartTime)&&Date.parse(restStartTime)>Date.parse(workscheduleEndTime)){
+				  errorTip('休息开始时间不在工作时间内！');
+		    	obj.focus();
+				return false;	
+			}
+		}else{
+			if (Date.parse(restStartTime) < Date.parse(workscheduleStartTime) || Date.parse(restStartTime) > Date.parse(workscheduleEndTime)) {
+				  errorTip('休息开始时间不在工作时间内！');	
+		    	obj.focus();
+		        return false;
+	   		}
+		}
+		
+	}
+}
+function checkRestEndTime() {
+	var restEndTime ="2017-01-01 " + $("#restEnd").val();
+	var restStartTime ="2017-01-01 " + $("#restStart").val();
+	if (restEndTime != "2017-01-01 ") {
+		if(Date.parse(workscheduleStartTime) > Date.parse(workscheduleEndTime)){
+			if(Date.parse(restEndTime)<Date.parse(workscheduleStartTime)&&Date.parse(restEndTime)>Date.parse(workscheduleEndTime)){
+				  errorTip('休息结束时间不在工作时间内！');
+    			$("#restEnd").focus();
+				return false;	
+			}
+		}else{
+			if (Date.parse(restEndTime) < Date.parse(workscheduleStartTime) || Date.parse(restEndTime) > Date.parse(workscheduleEndTime)) {
+		    	  errorTip('休息结束时间不在工作时间内！');	
+		    	$("#restEnd").focus();
+		        return false;
+	   		}
+		}
+		
+	  if (Date.parse(workscheduleStartTime) < Date.parse(workscheduleEndTime) && Date.parse(restStartTime) > Date.parse(restEndTime)) {
+		   errorTip('早班和中班：结束时间不能晚于开始时间 ！');	
+	   	   $("#restEnd").focus();
+	       return false;
+	   }
+	}
+	return checkTimeOverlap();
+}
+function checkTimeOverlap(){
+	var flag = true;
+	var sTime = $("#restStart").val();
+	var eTime = $("#restEnd").val();
+	var tmWorkscheduleId = $("#tmWorkscheduleId").val();
+	var workscheduleStartTime = $("#workscheduleStartTime").val();
+	var workscheduleEndTime = $("#workscheduleEndTime").val();
+	$.ajax({
+		url: "${baseUrl}/workschedulerest/checkTimeOverlap.do",
+        dataType: "json",
+        async:false,
+        data : {"tmWorkscheduleId":tmWorkscheduleId,
+        		"startTime":sTime,
+        		"endTime":eTime,
+        		"workscheduleStartTime":workscheduleStartTime ,
+        		"workscheduleEndTime":workscheduleEndTime },
+        success: function(result){
+        	if(result.isExisted=="true"){
+        		errorTip(result.message);
+        		flag = false;
+        	}
+        }
+	});
+	return flag;
+}
+</script>
+</html>
+
+

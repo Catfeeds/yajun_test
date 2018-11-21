@@ -1,0 +1,24 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+function renderPic(value , row, index){
+	return '<a href="#" onclick="viewPic('+"'"+row.defId+"'"+','+"'"+value+"'"+')" >'+value+'</a>';
+}
+function viewPic(processDefinitionId ,value){
+	createwindow('<@s.m code="PROCESS_COLUMN_IMG" />'+value,'${baseUrl}/bpm/definition/resource/viewPic.do?processDefinitionId='+processDefinitionId+'&resourceType=image','');
+}
+</script>
+<@p.body title="PROCESS_LIST_TITLE" noPermissionModule="true" noBreadcrumbs="true">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="PROCESS_COLUMN_TITLE" permissionCode="PROCESS_COLUMN_TITLE" field="name" ></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/definition/personal/list.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="PROCESS_COLUMN_TITLE" sortable="false" permissionCode="PROCESS_COLUMN_TITLE" field="name" width="200"></@p.column>
+		<@p.column title="PROCESS_COLUMN_DESC" sortable="false" permissionCode="PROCESS_COLUMN_DESC" width="200" field="description" ></@p.column>
+		<@p.column title="PROCESS_COLUMN_IMG" sortable="false" permissionCode="PROCESS_COLUMN_IMG" width="200" field="diagramResourceName" formatter="renderPic" ></@p.column>
+		<@p.column title="PROCESS_COLUMN_SERVISION" sortable="false" permissionCode="PROCESS_COLUMN_SERVISION" width="90" field="version" ></@p.column>
+	</@p.dataGrid>
+</@p.body>

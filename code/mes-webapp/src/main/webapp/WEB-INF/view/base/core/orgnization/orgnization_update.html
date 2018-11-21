@@ -1,0 +1,59 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+	function usercallback(dialog){
+		var rowsData = getSelectedRows('dgUserSelectGrid');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		$('#leaderName').val(rowsData[0].name);
+		$('#leaderId').val(rowsData[0].id);
+		dialog.close();
+	}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/orgnization/update.do" class="form-horizontal" idValue=orgnization.id  permissionModule="ORGNIZATION">
+		<@p.formRow>
+			<@p.formColmd title="DIMENSION_NAME"   permissionCode="DIMENSION_NAME">
+				<#if options?is_sequence>
+						<#list dimensions as option>
+							<#if orgnization.dimension==option.code>
+								<input type="text" class="inputxt" readonly="readonly" value="${option.name!}" class="txtreadonly"/>
+							</#if>
+						</#list>
+					</#if>
+			</@p.formColmd>
+			<@p.formColmd title="ORG_PARENT_NAME"    permissionCode="ORG_PARENT_NAME">
+				<input  readonly="readonly" class="inputxt" value="<#if parent??>${parent.name!}</#if>" class="txtreadonly">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>	
+			<@p.formColmd title="ORG_CODE"  permissionCode="ORG_CODE">
+				  <input name="code" class="inputxt" readonly="readonly" value="${orgnization.code!}" class="txtreadonly">
+			</@p.formColmd>
+			<@p.formColmd title="ORG_NAME"  checktip="ORG_CHECK_TIP"   permissionCode="ORG_NAME">
+				  <input name="name" class="inputxt" id="name"  datatype="*2-50"  value="${orgnization.name!}" nullmsg='<@s.m code="ORG_NAME_NULL" />'>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>	
+			<@p.formColmd title="ORG_TYPE" checktip="ORG_TYPE_NULL"   permissionCode="ORG_TYPE">
+				<@p.input type="select" excludeSelectOption="true" field="type" options=options value=orgnization.type ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="ORG_LEADER" permissionCode="ORG_LEADER">
+		 	  <input name="leaderId"  type="hidden" id="leaderId" value="<#if orgnization.leader??>${orgnization.leader.id!}</#if>">
+			  <input  class="inputxt" class="inputxt" readonly="readonly" id="leaderName" value="<#if orgnization.leader??>${orgnization.leader.name!}</#if>">
+			  <@p.select  title="ORG_LEADER"   url="${baseUrl}/user/listSelect.do?currentPageId=UserSelectGrid&singleSelect=true" callback="usercallback"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>	
+			<@p.formColmd class="col-md-8" title="ORG_DESCRIPTION"    permissionCode="ORG_DESCRIPTION">
+				<textarea name="description" class="inputxt" ignore="ignore">${orgnization.description!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

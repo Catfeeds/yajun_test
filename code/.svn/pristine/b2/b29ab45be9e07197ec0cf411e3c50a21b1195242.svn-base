@@ -1,0 +1,19 @@
+package com.wis.mes.production.regionstatus.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.wis.core.service.impl.BaseServiceImpl;
+import com.wis.mes.production.regionstatus.dao.TmpRegionstatusDao;
+import com.wis.mes.production.regionstatus.entity.TmpRegionstatus;
+import com.wis.mes.production.regionstatus.service.TmpRegionstatusService;
+
+@Service
+public class TmpRegionstatusServiceImpl extends BaseServiceImpl<TmpRegionstatus>
+		implements TmpRegionstatusService {
+
+	@Autowired
+	public void setDao(TmpRegionstatusDao dao) {
+		this.dao = dao;
+	}
+}

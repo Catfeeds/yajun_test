@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="MenuMapper" >
+  <resultMap id="MenuResult" type="com.wis.core.framework.entity.Menu" extends="com.wis.core.framework.mapper.CommonMapper.CommonResult">
+    <result column="ID" property="id" />
+    <result column="MENU_NAME" property="name" />
+    <result column="ICON_CLS" property="iconCls" />
+    <result column="PARENT_ID" property="parentId" />
+    <result column="PAGE_URL" property="url" />
+    <association property="parent" column="PARENT_ID" select="getMenuById" />
+  </resultMap>
+
+  <select id="getMenuByUserId" resultMap="MenuResult"  parameterType="java.lang.Integer" >
+    <![CDATA[
+    SELECT t.* from ts_menu t
+      left join ts_permission p on t.id=p.menu_id
+      left join tr_role_permission rp on rp.permission_id = p.id 
+      left join TR_ROLE_USER re on rp.role_id = re.role_id
+      left join TS_USER u on u.id = re.user_id
+     where t.parent_Id is not null
+       and t.mark_for_delete != 1 
+       and p.IS_MENU_PERMISSION = 1
+       and u.id = #{id}  order by t.parent_Id,t.id asc]]>
+  </select>
+  
+  <select id="getMenuById" resultMap="MenuResult"  parameterType="java.lang.Integer" >
+    <![CDATA[
+    SELECT t.* from ts_menu t where t.Id = #{id} ]]>
+  </select>
+  
+   <select id="getAllTopMenu" resultMap="MenuResult"  parameterType="java.lang.Integer" >
+    <![CDATA[
+    	SELECT t.* from ts_menu t where t.parent_Id is null and t.mark_for_delete != 1]]>
+  </select>
+   <select id="getChildMenu" resultMap="MenuResult"  parameterType="java.lang.Integer" >
+    <![CDATA[
+    	SELECT t.* from ts_menu t where t.parent_Id = #{id} and t.mark_for_delete != 1 ]]>
+  </select>
+   <select id="getMenuByRoleId" resultMap="MenuResult"  parameterType="java.lang.Integer" >
+    <![CDATA[
+	     SELECT t.* from ts_menu t
+	      left join ts_permission p on t.id=p.menu_id
+	      left join tr_role_permission rp on rp.permission_id = p.id 
+	     where rp.role_id= #{id} and t.mark_for_delete != 1
+       ]]>
+  </select> 
+  
+   <select id="getAllMenus" resultMap="MenuResult">
+    <![CDATA[
+    	SELECT t.* from ts_menu t where t.parent_Id is not null and t.mark_for_delete != 1 ]]>
+  </select>
+  
+  <insert id="addMenu" parameterType="com.wis.core.framework.entity.Menu">
+		INSERT INTO ts_menu (ID,
+		PARENT_ID, MENU_NAME, ICON_CLS, PAGE_URL)
+		values(#{id},#{parentId},#{name},#{iconCls},#{url})
+	</insert>
+	
+</mapper>

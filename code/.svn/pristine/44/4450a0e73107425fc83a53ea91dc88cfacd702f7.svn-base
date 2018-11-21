@@ -1,0 +1,698 @@
+package com.wis.basis.common.utils;
+
+public final class ConstantUtils {
+
+	public final static int TIPS_COUNT_FOR_DUPLICATE_ERROR = 15;
+	public final static int TIPS_COUNT_FOR_PATTERN_ERROR = 5;
+	public final static int IMPORT_BATCH_COUNT = 50;
+	public final static String OPERATION_INSERT = "insert";
+	public final static String SUSPENSION_POINTS = "......";
+	public final static String PROJECT_TITLE = "CFME";
+
+	public final static String PASSWORD_DEFAULT = "1";
+
+	public final static int MARK_FOR_DELETE_Y = 1;
+	public final static int MARK_FOR_DELETE_N = 0;
+	public final static String ENTRY_CODE_N = "1";
+	public final static String ENTRY_CODE_Y = "0";
+	public final static String KEY_TRY_PASSWORD_COUNTS = "TRY_PASSWORD";
+	public final static String KEY_SESSION_EXCEED_MAXIMUM_URL = "SESSION_EXCEED_MAXIMUM_URL";
+
+	// 用户状态
+	public final static String USER_ACCOUNT_NORMAL = "NORMAL";
+	public final static String USER_ACCOUNT_LOCKED = "LOCK";
+
+	// 开始结束时间查询
+	public final static String QUERY_CONDITION_SUFFIX_START = "Start";
+	public final static String QUERY_CONDITION_SUFFIX_END = "End";
+
+	// 包名
+	public final static String PACKAGE_NAME_ENTITY = "entity";
+	public final static String PACKAGE_NAME_DAO = "dao";
+
+	public final static String REQUEST_CUSTOM_PARAMS = "params";
+
+	// 访问成功标志
+	public final static String REQUEST_SUCCESS_KEY = "success";
+	public final static String REQUEST_EXCEPTION_MESSAGE_KEY = "message";
+	public final static String REQUEST_EXCEPTION_SYSTEM = "ERROR_SYSTEM";
+	public final static String REQUEST_CURRENT_PAGE_ID = "currentPageId";
+	public final static String REQUEST_SINGLE_SELECT_KEY = "singleSelect";
+
+	// 国际化
+	public final static String REQUEST_LANG_KEY = "lang";
+	public final static String REQUEST_LANG_ZH_CN = "zh_CN";
+	public final static String REQUEST_LANG_EN_US = "en_US";
+
+	// Type Code
+	public final static String TYPE_CODE_USER_STATUS = "LOGINSTATUS";
+	public final static String TYPE_CODE_USER_SEX = "GENDER";
+	public final static String TYPE_CODE_ENTERPRISE_TYPE = "ENTERPRISE_TYPE";
+	public final static String TYPE_CODE_PARTS_NAME = "PARTS_NAME";
+	public final static String TYPE_CODE_USER_DEPT = "DEPT";
+	public final static String TYPE_CODE_ORGNIZATION_TYPE = "ORGNIZATION_TYPE";// 组织类型
+	public final static String TYPE_CODE_ORGNIZATION_DIMENSION = "ORGNIZATION_DIMENSION";// 组织维度
+	public final static String TYPE_CODE_DATA_PERMISSION_VALUE_TYPE = "DATA_PERMISSION_VALUE_TYPE";
+	public final static String TYPE_CODE_DATA_PERMISSION_MUDULE = "DATA_PERMISSION_MODULE";
+	public final static String TYPE_CODE_FORM_PERMISSION_MUDULE = "FORM_PERMISSION_MODULE";
+	public final static String TYPE_CODE_YES_OR_NO = "YES_OR_NO";
+	public final static String TYPE_CODE_ENABLE_STATUS = "ENABLE_STATUS";// 启用状态
+	public final static String TYPE_CODE_ENABLE_DISABLE = "DISABLE";// 启用状态
+	public final static String TYPE_CODE_DATA_PERMISSION_TYPE = "DATA_PERMISSION_TYPE";
+	public final static String TYPE_CODE_ENABLED = "ENABLED"; // 启用状态
+	public final static String TYPE_CODE_ENABLED_OFF = "OFF"; // 启用状态关闭值
+	public final static String TYPE_CODE_ENABLED_ON = "ON";// 启用状态打开值
+
+	public final static String TYPE_CODE_POSITION = "POSITION_TYPE";// 岗位类型
+
+	public final static String TYPE_CODE_ENTRANCE = "IS_ENTRANCE";// 是否出入口
+
+	public final static String TYPE_CODE_WORK_ORDER = "WORKORDER";// 工位顺序
+
+	public final static String TYPE_CODE_CLASS_ORDER = "SHIFT_TYPE"; // 班次
+
+	public final static String TYPE_CODE_CLASS_GROUP = "CLASS_GROUP"; // 班组
+
+	/** 物料类型字典常量 */
+	public final static String TYPE_CODE_PART_TYPE = "PART_TYPE";
+	/** 成品 */
+	public final static String ENTRY_CODE_PART_TYPE_FINISHED = "FINISHED";
+	/** 半成品 */
+	public final static String ENTRY_CODE_PART_TYPE_SEMI_FINISHED = "SEMI_FINISHED";
+	/** 零件 */
+	public final static String ENTRY_CODE_PART_TYPE_PARTS = "PARTS";
+	/** 耗材 */
+	public final static String ENTRY_CODE_PART_TYPE_CONSUMPTIVE = "CONSUMPTIVE";
+	/** 工艺路径站点类型字典常量 */
+	public final static String TYPE_CODE_PATH_ULOC_TYPE = "PATH_ULOC_TYPE";
+	/** 上线点 */
+	public final static String ENTRY_CODE_PATH_ULOC_TYPE_ONLINE = "ONLINE";
+	/** 普通站点 */
+	public final static String ENTRY_CODE_PATH_ULOC_TYPE_COMMON = "COMMON";
+	/** 下线点 */
+	public final static String ENTRY_CODE_PATH_ULOC_TYPE_OFFLINE = "OFFLINE";
+
+	/** 维护状态 */
+	public final static String TYPE_CODE_MAINTAIN_STATUS = "MAINTAIN_STATUS";
+	/** 维护中 */
+	public final static String MAINTAIN_STATUS_REPAIR = "REPAIR";
+	/** 维护完成 */
+	public final static String MAINTAIN_STATUS_COMPLETE = "COMPLETE";
+
+	/** 单位名称 */
+	public final static String TYPE_CODE_BASE_UNIT = "BASE_UNIT";
+	/** 件 */
+	public final static String ENTRY_CODE_BASE_UNIT_PC = "PC";
+
+	/** 工序类型 */
+	public final static String TYPE_CODE_ULOC_TYPE = "ULOC_TYPE";
+	/** 上线点 */
+	public final static String ENTRY_CODE_ULOC_TYPE_ONLINE = "ONLINE";
+	/** 下线点 */
+	public final static String ENTRY_CODE_ULOC_TYPE_OFFLINE = "OFFLINE";
+
+	// entry code
+	public final static String ENTRY_CODE_S_PROCU_TYPE_TEN = "ten";
+	public final static String ENTRY_CODE_S_PROCU_TYPE_TWEN = "twen";
+	public final static String ENTRY_CODE_PROCU_TYPE_F = "F";
+	public final static String ENTRY_CODE_PROCU_TYPE_E = "E";
+	public final static String ENTRY_CODE_CONFIRM_STATUS_NO = "NO";
+	public final static String ENTRY_CODE_CONFIRM_STATUS_YES = "YES";
+	public final static String ENTRY_CODE_STATUS_OPEN = "OPEN";
+	public final static String ENTRY_CODE_STATUS_CLOSE = "CLOSE";
+	public final static String ENTRY_CODE_DATA_PERMISSION_VALUE_TYPE_MULTI = "MULTI";
+	public final static String ENTRY_CODE_DATA_PERMISSION_VALUE_TYPE_SINGLE = "SINGLE";
+	public final static String ENTRY_CODE_DATA_PERMISSION_VALUE_TYPE_RANGE_DATE = "RANGE_DATE";
+	public final static String ENTRY_CODE_DATA_PERMISSION_VALUE_TYPE_RANGE_NORMAL = "RANGE_NORMAL";
+	public final static String ENTRY_CODE_DATA_PERMISSION_VALUE_TYPE_SQL = "SQL";
+
+	public final static String DATA_PERMISSION_VALUE_RANGE_SPLIT = ";";
+	public final static String DATA_PERMISSION_RANGE_START = "Start";
+	public final static String DATA_PERMISSION_RANGE_END = "end";
+
+	// databse name
+	public final static String DATABASE_NAME_ORACLE = "Oracle";
+	public final static String DATABASE_NAME_MYSQL = "MySQL";
+
+	public final static String ENTRY_CODE_YES = "Y";
+	public final static String ENTRY_CODE_NO = "N";
+	// 组织类型
+	/** 公司 */
+	public final static String ENTRY_CODE_COMPANY = "COMPANY";
+	/** 部门 */
+	public final static String ENTRY_CODE_PART = "PART";
+	/** 科室 */
+	public final static String ENTRY_CODE_SECTION = "SECTION";
+	/** DAE */
+	public final static String ENTRY_CODE_DAE = "DAE";
+
+	/** 系统配置 */
+	public static final String SYS_CONFIG_PWD_REG_EXP = "PWD_REG_EXP";
+	public static final String SYS_CONFIG_PWD_DUPLICATION_VERIFY = "PWD_DUPLICATION_VERIFY";
+	public static final String SYS_CONFIG_DEL_PVP_COUNT = "DEL_PVP_COUNT";
+	public static final String SYS_CONFIG_PWD_RESET_DEFAULT = "PWD_RESET_DEFAULT";
+	public static final String SYS_CONFIG_PWD_VALIDITY_PERIOD_VERIFY = "PWD_VALIDITY_PERIOD_VERIFY";
+	public static final String SYS_CONFIG_PWD_VALIDITY_PERIOD = "PWD_VALIDITY_PERIOD";
+	public static final String SYS_CONFIG_SMTP_USER_NAME = "SMTP_USER_NAME";
+	public static final String SYS_CONFIG_SMTP_PASSWORD = "SMTP_PASSWORD";
+	public static final String SYS_CONFIG_SMTP_HOST = "SMTP_HOST";
+	public static final String SYS_CONFIG_IMG_BASE_URL = "IMG_BASE_URL";
+	public static final String SYS_CONFIG_IMG_BASE_PATH = "IMG_BASE_PATH";
+	public static final String SYS_CONFIG_ATTACHMENT_BASE_PATH = "ATTACHMENT_BASE_PATH";
+	public static final String SYS_CONFIG_NIGHTSHIFT_TIME_SET = "NIGHTSHIFT_TIME_SET";
+	/** 导入时覆盖与否标识 */
+	public final static String SYS_CONFIG_IMP_EXE_UPDATE_WHEN_REPEAT = "IMP_EXE_UPDATE_WHEN_REPEAT";
+
+	/** 日志配置 */
+	// 不合规组
+	public final static String AUDIT_TYPE_NC_GROUP = "NC_GROUP";
+	// 不合规代码
+	public final static String AUDIT_TYPE_NC = "NC";
+	// 报废代码
+	public final static String AUDIT_TYPE_SCRAP = "SCRAP";
+	// 物料
+	public final static String AUDIT_TYPE_PART = "PART";
+	// 工艺路径
+	public final static String AUDIT_TYPE_PATH = "PATH";
+	// 工艺路径站点
+	public final static String AUDIT_TYPE_PATH_ULOC = "PATH_ULOC";
+
+	/** 常用字符串 */
+	/** 字符串0 */
+	public final static String STRING_ZERO = "0";
+	/** 字符串空 */
+	public final static String STRING_EMPTY = "";
+	/** 字符串NULL */
+	public final static String STRING_NULL = "NULL";
+	/** 字符串空格 */
+	public final static String STRING_SPACE = " ";
+	/** 字符串LIST_NULL */
+	public final static String STRING_LIST_NULL = "LIST_NULL";
+	/** 字符串success */
+	public final static String STRING_SUCCESS = "success";
+	/** 字符串ERROR */
+	public final static String STRING_ERROR = "ERROR";
+	/** 字符串盘符 */
+	public final static String STRING_SEPARATE = "/";
+	/** 字符串逗号 */
+	public final static String STRING_COMMA = ",";
+	/** 字符串. */
+	public final static String STRING_POINT = ".";
+	/** 字符串* */
+	public final static String STRING_ASTERISK = "*";
+	/** 字符串横杠 */
+	public final static String STRING_ROD = "-";
+	/** 字符串下划线 */
+	public final static String STRING_UNDERLINE = "_";
+	/** 字符串单引号 */
+	public final static String STRING_SINGLE = "'";
+	/** 数字0 */
+	public final static Integer MATH_ZERO = 0;
+	/** serialVersionUID */
+	public final static String SERIAL_VERSION_ID = "serialVersionUID";
+
+	/** 区分保存时是新增还是更新 */
+	/** 字符串ADD */
+	public final static String STRING_ADD = "ADD";
+	/** 字符串UPDATE */
+	public final static String STRING_UPDATE = "UPDATE";
+
+	/** 保存或导入时公共报错提示信息 */
+	/** 字符串操作失败提示title信息 */
+	public final static String STRING_OPERATION_ERROR_TITLE = "SAVE_DATA_VALID_ERROR_INFO";
+	/** 字符串操作失败提示信息已存在信息 */
+	public final static String STRING_OPERATION_ERROR_EXSIT = "NC_GROUP_SAVE_ERROR_ONE";
+
+	/** 序列类型 */
+	public final static String ENTRY_TYPE_SERIALIZABLE_TYPE = "SERIALIZABLE_TYPE";
+	/** 序列规则 */
+	public final static String ENTRY_TYPE_SERIALIZABLE_RULE = "SERIALIZABLE_RULE";
+	/** 根据BOM版本号的规则生成序列 */
+	public final static String SERIALIZABLE_TYPE_BOM_VERSION = "BOM_VERSION";
+	/** 根据SN的规则生成序列 */
+	public final static String SERIALIZABLE_TYPE_SN = "SN";
+	/** 根据工单的规则生成序列 */
+	public final static String SERIALIZABLE_TYPE_PORDER_NO = "PORDER_NO";
+	/** 根据生产序列的规则生成序列 */
+	public final static String SERIALIZABLE_TYPE_AVI_NO = "AVI_NO";
+	/** 物料编码校验规则 **/
+	public final static String SERIALIZABLE_TYPE_PART_BAR_CHECK = "PART_BAR_CHECK";
+
+	/** 类型列举 */
+	/** 字符串Date全名 */
+	public final static String STRING_DATE_FULL = "java.util.Date";
+	/** 字符串TimeStamp全名 */
+	public final static String STRING_TIMESTAMP_FULL = "java.sql.Timestamp";
+	/** 字符串String全名 */
+	public final static String STRING_STRING_FULL = "java.lang.String";
+	/** 字符串int */
+	public final static String STRING_INT = "int";
+	/** 字符串Integer全名 */
+	public final static String STRING_INTEGER_FULL = "java.lang.Integer";
+	/** 字符串short */
+	public final static String STRING_SHORT = "short";
+	/** 字符串Short全名 */
+	public final static String STRING_SHORT_FULL = "java.lang.Short";
+	/** 字符串long */
+	public final static String STRING_LONG = "long";
+	/** 字符串Long全名 */
+	public final static String STRING_LONG_FULL = "java.lang.Long";
+	/** 字符串byte */
+	public final static String STRING_BYTE = "byte";
+	/** 字符串Byte全名 */
+	public final static String STRING_BYTE_FULL = "java.lang.Byte";
+	/** 字符串float */
+	public final static String STRING_FLOAT = "float";
+	/** 字符串Float全名 */
+	public final static String STRING_FLOAT_FULL = "java.lang.Float";
+	/** 字符串double */
+	public final static String STRING_DOUBLE = "double";
+	/** 字符串Double全名 */
+	public final static String STRING_DOUBLE_FULL = "java.lang.Double";
+	/** 字符串boolean */
+	public final static String STRING_BOOLEAN = "boolean";
+	/** 字符串Boolean全名 */
+	public final static String STRING_BOOLEAN_FULL = "java.lang.Boolean";
+	/** 字符串BigDecimal全名 */
+	public final static String STRING_DOUBLE_BIGDECIMAL = "java.math.BigDecimal";
+
+	public final static String DATE_TYPE_CODE = "DATE_TYPE"; // 特殊日期类型
+	public final static String DATE_TYPE_WORK = "WORK"; // 特殊日期-工作
+	public final static String DATE_TYPE_REST = "REST";// 特殊日期-休息
+
+	/** 班次定义 */
+	public final static String SHIFT_TYPE = "SHIFT_TYPE";
+	public final static String SHIFT_MORNING = "MORNINGSHIFT"; // 早班
+	public final static String SHIFT_NOON = "NOONSHIFT"; // 中班
+	public final static String SHIFT_NIGHT = "NIGHTSHIFT"; // 晚班
+
+	/** 星期定义 */
+	public final static String WEEK_VALUE = "WEEK_VALUE";
+	public final static String WEEK_MON = "MON";
+	public final static String WEEK_TUE = "TUE";
+	public final static String WEEK_WED = "WED";
+	public final static String WEEK_THUR = "THUR";
+	public final static String WEEK_FRI = "FRI";
+	public final static String WEEK_SAT = "SAT";
+	public final static String WEEK_SUN = "SUN";
+
+	/** 工单生产状态 */
+	public final static String TYPE_CODE_PORDER_PRODUCT_STATUS = "PORDER_PRODUCT_STATUS";
+	/** 新单 */
+	public final static String ENTRY_CODE_PORDER_PRODUCT_STATUS_NEW = "NEW";
+	/** 生产中 */
+	public final static String ENTRY_CODE_PORDER_PRODUCT_STATUS_PRODUCTING = "PRODUCTING";
+	/** 生产完成 */
+	public final static String ENTRY_CODE_PORDER_PRODUCT_STATUS_FINSH = "FINSH";
+	/** 关闭 */
+	public final static String ENTRY_CODE_PORDER_PRODUCT_STATUS_CLOSE = "CLOSE";
+
+	/** 工单派工状态 */
+	public final static String TYPE_CODE_PORDER_TASK_STATUS = "PORDER_TASK_STATUS";
+	/** 未派工 */
+	public final static String ENTRY_CODE_PORDER_TASK_STATUS_NOT = "NOT_TASK";
+	/** 部分派工 */
+	public final static String ENTRY_CODE_PORDER_TASK_STATUS_PART = "PART_TASK";
+	/** 全部派工 */
+	public final static String ENTRY_CODE_PORDER_TASK_STATUS_ALL = "ALL_TASK";
+
+	/** 工单入库状态 */
+	public final static String TYPE_CODE_PORDER_INSTORAGE_STATUS = "PORDER_INSTORAGE_STATUS";
+	/** 未入库 */
+	public final static String ENTRY_CODE_PORDER_INSTORAGE_STATUS_NOT = "NOT_INSTORAGE";
+	/** 部分入库 */
+	public final static String ENTRY_CODE_PORDER_INSTORAGE_STATUS_PART = "PART_INSTORAGE";
+	/** 全部入库 */
+	public final static String ENTRU_CODE_PORDER_INSTORAGE_STATUS_ALL = "ALL_INSTORAGE";
+
+	/** 工单优先级 */
+	public final static String TYPE_CODE_PORDER_PRIORITY = "PORDER_PRIORITY";
+	/** 紧急 */
+	public final static String ENTRY_CODE_PORDER_PRIORITY_EMERGENCY = "EMERGENCY";
+	/** 次紧急 */
+	public final static String ENTRY_CODE_PORDER_PRIORITY_SECONDARY = "SECONDARY";
+	/** 正常 */
+	public final static String ENTRY_CODE_PORDER_PRIORITY_NORMAL = "NORMAL";
+
+	public final static String TYPE_CODE_AVI_STATUS = "AVI_STATUS";
+	/** 新单 */
+	public final static String ENTRY_CODE_AVI_STATUS_NEW = "NEW";
+	/** 部分上线 */
+	public final static String ENTRY_CODE_AVI_STATUS_PART = "PART_ONLINE";
+	/** 全部上线 */
+	public final static String ENTRY_CODE_AVI_STATUS_ALL = "ALL_ONLINE";
+	/** 生产完成 */
+	public final static String ENTRY_CODE_AVI_STATUS_FINSH = "FINSH";
+	/** 关闭 */
+	public final static String ENTRY_CODE_AVI_STATUS_CLOSE = "CLOSE";
+	/** excel导入时是否全部回滚key */
+	public final static String EXCEL_IMPORT_IS_ALL_ROLLBACK = "IS_ALL_ROLLBACK";
+
+	/** 设备 类型 */
+	public final static String EQUIPMENT_NAME_TYPE = "EQUIPMENT_TYPE";
+	/** 设备 状态 */
+	public final static String EQUIPMENT_NAME_STATUS = "EQUIPMENT_STATUS";
+	/** 设备可提供参数类型-状态类型 */
+	public final static String EQUIPMENT_PARAM_TYPE_STATUS_ = "STATUS";
+	/** 设备可提供参数类型-生产 类型 */
+	public final static String EQUIPMENT_PARAM_TYPE_PRODUCT = "PRODUCT";
+	/** 设备可提供参数类型-质量类型 */
+	public final static String EQUIPMENT_PARAM_TYPE_QUALITY = "QUALITY";
+	/** 设备可提供参数类型 */
+	public final static String EQUIPMENT_PARAM_TYPE = "EQUIPMENT_PARAM_TYPE";
+	/** 设备生产状态类型 */
+	public final static String EQUIPMENT_STATUS_PRODUCT = "EQUIPMENT_STATUS_PRODUCT";
+	/** 设备保养时间提示警戒值 */
+	public final static long EQUIPMENT_MAINTENANCE_NOTICE_TIME = 3;
+	/** 设备保养邮件提示主题 */
+	public final static String EQUIPMENT_MAINTENANCE_EAMIL_SUBJECT = "EQUIPMENT_MAINTENANCE_EAMIL_SUBJECT";
+	/** 设备保养邮件提示内容 */
+	public final static String EQUIPMENT_MAINTENANCE_EAMIL_TEXT = "EQUIPMENT_MAINTENANCE_EAMIL_TEXT";
+	/** 设备保养次数提示警戒值 */
+	public final static int EQUIPMENT_MAINTENANCE_NOTICE_COUNT = 5;
+	/** 时间保养周期类型 */
+	public final static String EQUIPMENT_MAINTENANCE_TIME_TYPE = "EQUIPMENT_MAINTENANCE_TIME_TYPE";
+	/** 上传图片在window中保存的路径 */
+	public final static String IMG_URL_FOR_SYSTEM = "IMG_URL_FOR_SYSTEM";
+
+	/** 工艺路径关键件序列ID */
+	public final static String SERIAL_PATH_ULOC_PART_ID = "PATH_ULOC_PART_SERIAL_ID";
+	/** 工艺路径参数序列ID */
+	public final static String SERIAL_PATH_ULOC_PARAMETER_ID = "PATH_ULOC_PARAMETER_SERIAL_ID";
+	/** 工艺路径质检项序列ID */
+	public final static String SERIAL_PATH_ULOC_SIP_ID = "PATH_ULOC_SIP_SERIAL_ID";
+	/**
+	 * 生产过点工位操作类型(进入站点、出站点、记录不合格、 绑定关键件、绑定参数、记录质量项、记录报废 )
+	 */
+	/** 生产过点工位操作类型 */
+	public final static String PRODUCT_OPERTION_TYPE = "PRODUCT_OPERTION_TYPE";
+	/** 进入站点 */
+	public final static String PRODUCT_OPERTION_TYPE_ULOC_START = "ULOC_START";
+	/** 出站点 */
+	public final static String PRODUCT_OPERTION_TYPE_ULOC_END = "ULOC_END";
+	/** 记录不合格 */
+	public final static String PRODUCT_OPERTION_TYPE_RECORD_NC_START = "NC_START";
+	public final static String PRODUCT_OPERTION_TYPE_RECORD_NC_END = "NC_END";
+	/** 绑定关键件 */
+	public final static String PRODUCT_OPERTION_TYPE_BIND_PART_START = "PART_BINDING_START";
+	public final static String PRODUCT_OPERTION_TYPE_BIND_PART_END = "PART_BINDING_END";
+	/** 绑定参数 */
+	public final static String PRODUCT_OPERTION_TYPE_BIND_PARAMETER_START = "PARAMETER_BINDING_START";
+	public final static String PRODUCT_OPERTION_TYPE_BIND_PARAMETER_END = "PARAMETER_BINDING_END";
+	/** 记录质量项 */
+	public final static String PRODUCT_OPERTION_TYPE_RECORD_QUALITY_START = "QUALITY_START";
+	public final static String PRODUCT_OPERTION_TYPE_RECORD_QUALITY_END = "QUALITY_END";
+	/** 记录报废 */
+	public final static String PRODUCT_OPERTION_TYPE_RECORD_SCRAP = "RECORD_SCRAP";
+
+	/** 参数类型 */
+	public final static String PRODUCTION_PARAMETER_TYPE = "PARAMETER_TYPE";
+	/** 加工参数 */
+	public final static String PRODUCT_PARAMETER = "PRODUCT_PARAMETER";
+
+	/**
+	 * 在制表中状态(返修状态、等待生产，生产中)
+	 */
+	/** 状态 */
+	public final static String PRODUCT_WIP_STATUS = "PRODUCT_WIP_STATUS";
+	/** 等待返修 */
+	public final static String PRODUCT_WIP_STATUS_WAIT_REPAIR = "WAIT_REPAIR";
+	/** 返修状态 */
+	public final static String PRODUCT_WIP_STATUS_REPAIRD = "REPAIRING";
+	/** 等待生产 */
+	public final static String PRODUCT_WIP_STATUS_WAIT = "WAIT_PRODUCTION";
+	/** 生产中 */
+	public final static String PRODUCT_WIP_STATUS_PRODUCT = "PRODUCTION";
+
+	/** 不合格类型 **/
+	public final static String TYPE_CODE_NC_TYPE = "NC_TYPE";
+	/** 让步放行 **/
+	public final static String ENTRY_NC_TYPE_CONCESSION = "CONCESSION";
+	/** 返修 **/
+	public final static String ENTRY_NC_TYPE_REPAIRED = "REPAIRED";
+
+	/** 质量检查结果 */
+	public final static String QUALIRY_CHECK_RESULT = "QUALIRY_CHECK_RESULT";
+	/** 不合格 */
+	public final static String QUALIRY_CHECK_RESULT_NO = "NO";
+	/** 合格 */
+	public final static String QUALIRY_CHECK_RESULT_YES = "YES";
+
+	/** 故障等级 */
+	public final static String QUALITY_NC_LEVEL = "NC_LEVEL";
+	/** 故障状态 **/
+	public final static String QUALITY_NC_STATUS = "NC_STATUS";
+	/** NG入口 **/
+	public final static String NG_ENTRANCE = "NG_ENTRANCE";
+
+	/** 操作日志 */
+	public static final String AUDIT_TYPE_OPC_RFIDSTATION_8_READ = "RFIDSTATION_8_READ";
+	public static final String AUDIT_TYPE_OPC_RFIDSTATION_8_WRITE = "RFIDSTATION_8_WRITE";
+	public static final String AUDIT_TYPE_OPC_RFIDSTATION_WRITE = "RFIDSTATION_WRITE";
+	public static final String AUDIT_TYPE_OPC_RFIDSTATION_READ = "RFIDSTATION_READ";
+
+	public final static String EOL = "\r\n";
+
+	/** 信息来源 **/
+	public final static String INFO_SOURCES = "INFO_SOURCES";
+	/** 员工判定 */
+	public final static String EMPLOYEE_JUDGE = "EMPLOYEE_JUDGE";
+	/** 设备判定 */
+	public final static String EQUIPMENT_JUDGE = "EQUIPMENT_JUDGE";
+	/** PC判定 */
+	public final static String PRODUCT_OK_NG_PC_JUDGE = "PC_JUDGE";
+	/** 其它NG */
+	public final static String PRODUCT_OK_NG_ORTHER_JUDGE = "ORTHER_JUDGE";
+
+	/** 不合格状态 **/
+	public final static String UNQUALIFIED_STATE = "UNQUALIFIED_STATE";
+	/** 已创建 **/
+	public final static String CREATED = "CREATED";
+	/** 已关闭 **/
+	public final static String CLOSED = "CLOSED";
+
+	// PMC管理
+
+	/** R5线公告 **/
+	public final static String PMST_AFFICHE = "PMST_AFFICHE";
+	/** R5线参数设置 **/
+	public final static String PMST_PARAMETER = "PMST_PARAMETER";
+	/** 翅片冲床公告 **/
+	public final static String FIN_PUNCH_AFFICHE = "FIN_PUNCH_AFFICHE";
+	/** 翅片冲床设置 **/
+	public final static String FIN_PUNCH_PARAMETER = "FIN_PUNCH_PARAMETER";
+	/** R5线工作参数设置 **/
+	public final static String PMST_WORK_PARAMETER = "PMST_WORK_PARAMETER";
+	/** R5线休息参数设置 **/
+	public final static String PMST_RECESS_PARAMETER = "PMST_RECESS_PARAMETER";
+	/** 早会点检时间**/
+	public final static String EARLY_INSPECTION_TIME = "EARLY_INSPECTION_TIME";
+
+	/*** 接口监控 */
+	public final static String RMMI_MODEL = "RMMI_MODEL";
+	/** RFID接口 **/
+	public final static String RFID_INTERFACE = "RFID_INTERFACE";
+	/** ORACLE数据库 **/
+	public final static String ORACLE_DATA_BASE = "ORACLE_DATA_BASE";
+	/** MES服务器 **/
+	public final static String MES_SERVER = "MES_SERVER";
+
+	/** 8工位读写标识 **/
+	public final static String IS_READ_WRITE = "IS_READ_WRITE";
+	/** 是否下线标识 **/
+	public final static String IS_INSERTING_COIL = "IS_INSERTING_COIL";
+
+	// PLC状态标识
+	public final static String PLC_0 = "0";
+
+	public final static String PLC_1 = "1";
+
+	/** 设备运行状态 **/
+	public final static String EQ_CIRCULATE_STATE = "EQ_CIRCULATE_STATE";
+	public final static String SM_CIRCULATE_STATE = "SM_CIRCULATE_STATE";
+	/** 工位状态 **/
+	public final static String ULOC_STATUS = "ULOC_STATUS";
+	/** 编码规则类型 */
+	public final static String ENTRY_TYPE_CODE_RULE_TYPE = "CODE_RULE_TYPE";
+	/** RFID写入工位配置 */
+	public final static String RFID_WRITE_ENTRY = "RFID_WRITE_ENTRY";
+	/** 8号工位PLC状态guoup_code **/
+	public final static String RFID_STATION = "RFID_STATION";
+
+	/** 审计日志，RFID读取TYPE **/
+	public final static String RFID_READ = "RFID_READ";
+	/** 审计日志，RFID写入TYPE **/
+	public final static String RFID_WRITE = "RFID_WRITE";
+	/** 工位编号ridis key **/
+	public final static String WIS_REDIS_ULOC_KEY = "WIS_ULOC_KEY";
+	/** NG出入口 **/
+	public final static String NG_EXIT_ENTER = "NG_EXIT_ENTER";
+	/** NG出口 **/
+	public final static String NG_EXIT = "NG_EXIT";
+	/** 出口 **/
+	public final static String EXIT = "EXIT";
+	/** 入口 **/
+	public final static String ENTER = "ENTER";
+	/** NG入口 **/
+	public final static String NG_ENTER = "NG_ENTER";
+
+	/** 异常区分 */
+	public final static String ENTRY_TYPE_ABNORMAL_DISTINGUISH = "ABNORMAL_DISTINGUISH";
+	/** 异常来源 */
+	public final static String ENTRY_TYPE_ABNORMAL_SOURCE = "ABNORMAL_SOURCE";
+
+	// 工位数据分析报表
+	/*** 岗位暂停时间/次数统计 **/
+	public final static String FREQUENCY_STATISTICS = "frequencyStatistics";
+	/*** 工位紧停次数统计 **/
+	public final static String TIGHT_STOP_TIMES = "tightStopTimes";
+	/*** 岗位求助时间/次数统计 **/
+	public final static String NUMBER_REQUESTS_HELP = "numberRequestsHelp";
+	/*** 岗位等工时间/次数统计 **/
+	public final static String EQUAL_NUMBER_WORK = "equalNumberWork";
+	/** 校验位紧停 ***/
+	public final static Integer CHECKBIT_SUSPEND = 5;
+	/** 校验位暂停 ***/
+	public final static Integer CHECKBIT_TIGHT_STOP = 6;
+	/** 校验位求助 ***/
+	public final static Integer CHECKBIT_FALL_BACK = 7;
+
+	/** NG入口，NG出入口 ***/
+	public final static String ULOC_NG_EXIT_ENTER = "'NG_ENTER','NG_EXIT_ENTER'";
+	/** NG出口，NG出入口,出口 ***/
+	public final static String ULOC_EXIT_ENTER = "'NG_EXIT_ENTER','NG_EXIT','EXIT'";
+	/** NG出口，NG出入口,出口 ,入口***/
+	public final static String ULOC_EXIT_ENTER_ALL = "'NG_EXIT_ENTER','NG_EXIT','EXIT','NG_ENTER'";
+
+	/** R5产线编号，系统配置 **/
+	public final static String R5_LINE_NO = "R5_LINE_NO";
+	/** 翅片产线编号，系统配置 **/
+	public final static String XK_LINE_NO = "XK_LINE_NO";
+
+	/** 休息时间，数量 ***/
+	public final static Integer REST_TEMPLATE_ROWNUM = 10;
+	/** 非故障停机包含的类别 ***/
+	public final static String FIN_NO_FAULT_SWITCH_STOP="切换停机";
+	public final static String FIN_NO_FAULT_CHANGE_MATERIAL_STOP="换料停机";
+	public final static String FIN_NO_FAULT_ADD_OIL_STOP="加油停机";
+	/**机种大类**/
+	public final static String SM_MODEL_TYPE="SM_MODEL_TYPE";
+	/**室内室外**/
+	public final static String SM_PLACE_TYPE="SM_PLACE_TYPE";
+	public final static String SM_MATERIAL_DRAWING_NO="SM_MATERIAL_DRAWING_NO";
+	/**流水线用图号等级**/
+	public final static String SM_DRAWING_NO_LEVEL="SM_DRAWING_NO_LEVEL";
+	public final static String SM_ASSEMBLY_LINE="SM_ASSEMBLY_LINE";
+	public final static String SM_COATING_WITH="SM_COATING_WITH";
+	public final static String SM_MACHINING_SURFACE="SM_MACHINING_SURFACE";
+	/**累进**/
+	public final static String SM_PROGRESSION="SM_PROGRESSION";
+	/**部品名**/
+	public final static String SM_COMPONENT="SM_COMPONENT";
+	public final static String SM_TEXTURE="SM_TEXTURE";
+	public final static String SM_PLATE_THICKNESS="SM_PLATE_THICKNESS";
+	public final static String SM_MATERIAL_SIZE="SM_MATERIAL_SIZE";
+	public final static String SM_MACHINE_TAGS="SM_MACHINE_TAGS";
+	public final static String SM_TOOL_NUMBER="SM_TOOL_NUMBER";
+	public final static String SM_RES_TOOL_NUMBER="SM_RES_TOOL_NUMBER";
+	/**区域**/
+	public final static String SM_REGION_MARK="SM_REGION_MARK";
+	/**后工程**/
+	public final static String SM_AFTER_PROCESS="SM_AFTER_PROCESS";
+
+	public final static String SM_MAINTENANCE_PROJECT="SM_MAINTENANCE_PROJECT";
+	public final static String SM_MAINTENANCE_UNIT="SM_MAINTENANCE_UNIT";
+	/** 钣金不良类型 */
+	public final static String SM_BAD_TYPE="SM_BAD_TYPE";
+	
+	public final static String NC_GROUP_TEMPLATE_KEY = "NC_GROUP_KEY";
+	public final static String NC_TEMPLATE_KEY = "NC_KEY";
+	
+	public final static String SM_PRODUCTION_STATE="SM_PRODUCTION_STATE";
+	public final static String SM_SOURCE_DATA_TYPE="SM_SOURCE_DATA_TYPE";
+	
+	/** 钣金冲压线产线编号，系统配置 **/
+	public final static String MP_LINE_NO = "MP_LINE_NO";
+	/** 钣金冲压线左侧加工図面 **/
+	public final static String MP_LEFT_MACHINING_SURFACE = "MP_LEFT_MACHINING_SURFACE";
+	/** 钣金冲压线右侧加工図面 **/
+	public final static String MP_RIGHT_MACHINING_SURFACE = "MP_RIGHT_MACHINING_SURFACE";
+	
+	/**设备机台编号前9位，用于模糊查询**/
+	public final static String EQUIPMENT_BOARD_NO = "BJ-PRESS-";
+	/**设备模具编号前9位，用于模糊查询**/
+	public final static String EQUIPMENT_MOULD_NO = "BJ-MOULD-";
+	/**钣金编号前3位，用于模糊查询**/
+	public final static String EQUIPMENT_BJALL_NO = "BJ-";
+	
+	/**钣金排产记录状态**/
+	public final static String BJ_BAD_STATUS = "BJ_BAD_STATUS";
+	/**生产完成**/
+	public final static String BJ_BAD_STATUS_0 = "0";
+	/**不良待确认**/
+	public final static String BJ_BAD_STATUS_1 = "1";
+	/**已追加排产**/
+	public final static String BJ_BAD_STATUS_2 = "2";
+	/**不良确认**/
+	public final static String BJ_BAD_STATUS_3 = "3";
+	
+	/*** 钣金线生产状态----针对PLC的状态**/
+	/**待产**/
+	public final static Integer BJ_MP_SCHEDUL_STATUS_0 = 0;
+	/**在产**/
+	public final static Integer BJ_MP_SCHEDUL_STATUS_1 = 1;
+	/**已发送**/
+	public final static Integer BJ_MP_SCHEDUL_STATUS_2 = 2;
+	/**已下发**/
+	public final static Integer BJ_MP_SCHEDUL_STATUS_3 = 3;
+	/**模具校验完成**/
+	public final static Integer BJ_MP_SCHEDUL_STATUS_4 = 4;
+	/**生产完成**/
+	public final static Integer BJ_MP_SCHEDUL_STATUS_5 = 5;
+	/**9左关联右的右数据,不做显示派发等操作，生产完成后直接进生产记录表**/
+	public final static String BJ_MP_SCHEDUL_STATUS_9 = "9";
+	
+	/*** 钣金线生产状态,针对MES系统**/
+	/**待产中**/
+	public final static Integer SM_PRODUCTION_STATE_0 = 0;
+	/**生产中**/
+	public final static Integer SM_PRODUCTION_STATE_1 = 1;
+	/**	已完成**/
+	public final static Integer SM_PRODUCTION_STATE_2 = 2;
+	/**已下发**/
+	public final static Integer SM_PRODUCTION_STATE_3 = 3;
+	/**已校验**/
+	public final static Integer SM_PRODUCTION_STATE_4 = 4;
+	/**锁定**/
+	public final static Integer SM_PRODUCTION_STATE_5 = 5;
+	/**取消派工**/
+	public final static Integer SM_PRODUCTION_STATE_6 = 6;
+	
+	/**解锁**/
+	public final static Integer SM_PRODUCTION_STATE_7 = 7;
+	/**强制结束**/
+	public final static Integer SM_PRODUCTION_STATE_8 = 8;
+	
+
+	/**锁定**/
+	public final static String BJ_MP_SCHEDUL_STATUS_8 = "8";
+
+	/**默认标签编号**/
+	public final static String DEFAULT_SN = "0000000000000000000000";
+	
+	/**APC21文件存放地址**/
+	public final static String APC21_FILE_PATH = "APC21_FILE_PATH";
+	
+	/**是否删除**/
+	public final static String WHETHER_DELETE = "WHETHER_DELETE";
+	
+	/**APC汇总**/
+	public final static String MP_SOURCE_DATA_TYPE_1= "1";
+	/**手动新增**/
+	public final static String MP_SOURCE_DATA_TYPE_2= "2";
+	/**系统追加**/
+	public final static String MP_SOURCE_DATA_TYPE_3= "3";
+	/**app超时时间**/
+	public final static String APP_TIME_OUT= "APP_TIME_OUT";
+
+}

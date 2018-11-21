@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="KsGroupMapper">
+	<select id="getGroupServerIsNotNull" resultType="com.wis.mes.opc.group.entity.KsGroup">
+		select t.* from	tks_group t where t.group_server is not null
+	</select>
+	<delete id="clearPlcStationDeviceData">
+		delete from tks_device_status
+	</delete>
+		<delete id="clearPlcStationStatusData">
+		delete from tks_staion_status
+	</delete>
+	<delete id="clearFinDeviceData" parameterType="java.util.HashMap">
+		delete from ${tableName}
+	</delete>
+</mapper>

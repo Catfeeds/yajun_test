@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OnlineMapper">
+	<select id="getOnlineUlocByLineId" resultType="com.wis.mes.master.uloc.entity.TmUloc" parameterType="java.util.HashMap">
+	SELECT
+		a.*
+	FROM
+		tm_uloc a
+	LEFT JOIN to_porder_avi_path b ON b.TM_ULOC_ID = a.ID
+	WHERE
+		b.IS_ONLINE = 'YES' AND a.TM_LINE_ID=#{tmLineId}
+		<if test="tmUlocIds!=null and tmUlocIds!='' ">
+			AND a.id in (#{tmUlocIds})
+		</if>
+	GROUP BY
+		a.ID
+	</select>
+	<select id="getBindParameterByAviId" resultType="com.wis.mes.production.plan.porder.entity.ToPorderAviPathParameter" parameterType="java.util.HashMap">
+	SELECT
+		a.ID as "id",
+		a.TO_PORDER_AVI_PATH_ID as "toPorderAviPathId",
+		a.TS_PARAMETER_ID as "tsParameterId",
+		a.NOTE as "note",
+		a.ENABLED AS "enabled",
+		a.IS_REQUIRED as "isRequired",
+		c.`CODE` AS "parameter.code",
+		c.ID AS "parameter.id",
+		c.name AS "parameter.name",
+		c.REGULAR_EXPRESSION as "parameter.regularExpression",
+		c.VARIUABLE_NAME as "parameter.variuableName",
+		c.DEFAULT_VALUE as "parameter.defaultValue",
+		c.note AS "parameter.note",
+		c.unit AS "parameter.unit"
+	FROM
+		to_porder_avi_path_parameter a
+	LEFT JOIN to_porder_avi_path b ON a.TO_PORDER_AVI_PATH_ID = b.ID
+	LEFT JOIN ts_parameter c ON c.ID = a.TS_PARAMETER_ID
+	WHERE
+			b.TO_PORDER_AVI_ID = #{toPorderAviId}
+		AND b.TM_ULOC_ID = #{tmUlocId}
+		AND b.SEQ = #{seq}
+	</select>
+	
+	<select id="getBomByUlocIdAndToPorderAviId" resultType="com.wis.mes.production.plan.porder.entity.ToPorderAviBom" parameterType="java.util.HashMap">
+	SELECT
+		a.ID as "id",
+		a.TO_PORDER_AVI_ID as "toPorderAviId",
+		a.TM_ULOC_ID AS "tmUlocId",
+		a.TM_PART_ID as "tmPartId",
+		a.QTY as "qty",
+		a.SEQ as "seq",
+		a.IS_TRAC AS "isTrac",
+		a.IS_BATCH_TRAC as "isBatchTrac",
+		c.BATCH_QTY AS "part.batchQty",
+		c.ENABLED AS "part.enabled",
+		c.BASE_UNIT AS "part.baseUnit",
+		c.no as "part.no",
+		c.NAME_CN as "part.nameCn",
+		c.NAME_CN_S as "part.nameCnS"
+	FROM
+		to_porder_avi_bom a
+	LEFT JOIN to_porder_avi_path b ON a.TM_ULOC_ID = b.TM_ULOC_ID
+	LEFT JOIN tm_part c ON a.TM_PART_ID =  c.ID
+	WHERE
+		a.TM_ULOC_ID = #{tmUlocId}
+	AND a.TO_PORDER_AVI_ID = #{toPorderAviId}
+	AND b.TO_PORDER_AVI_ID = #{toPorderAviId}
+	AND a.IS_BATCH_TRAC ='NO'
+	AND a.IS_TRAC='YES'
+	order by a.seq asc
+	</select>
+	<select id="getQbomByAviIdUlocAndSeq" resultType="com.wis.mes.production.plan.porder.entity.ToPorderAviPathPart"  parameterType="java.util.HashMap">
+	SELECT
+		a.ID as "id",
+		a.TO_PORDER_AVI_PATH_ID as "toPorderAviPathId",
+		a.TM_PART_ID as "tmPartId",
+		a.QTY as "qty",
+		a.SEQ as "seq",
+		a.IS_BATCH_TRAC as "isBatchTrac",
+		b.BATCH_QTY AS "part.batchQty",
+		b.ENABLED AS "part.enabled",
+		b.BASE_UNIT AS "part.baseUnit",
+		b.no as "part.no",
+		b.NAME_CN as "part.nameCn",
+		b.NAME_CN_S as "part.nameCnS"
+	FROM
+			to_porder_avi_path_part a
+		LEFT JOIN tm_part b ON a.TM_PART_ID  = b.ID
+		LEFT JOIN to_porder_avi_path c ON c.ID = a.TO_PORDER_AVI_PATH_ID
+	WHERE
+			c.TO_PORDER_AVI_ID = #{toPorderAviId} 
+		AND a.IS_BATCH_TRAC ='NO'
+		AND c.TM_ULOC_ID =#{tmUlocId} 
+		AND c.SEQ =#{seq}
+		order by a.seq asc
+	</select>
+	<select id="getSipByAviIdUlocAndSeq" resultType="com.wis.mes.production.plan.porder.entity.ToPorderAviPathSip" parameterType="java.util.HashMap">
+	SELECT
+		a.id AS "id",
+		a.TO_PORDER_AVI_PATH_ID AS "toPorderAviPathId",
+		a.TS_PARAMETER_ID AS "tsParameterId",
+		a.NOTE AS "NOTE",
+		c.`CODE` AS "parameter.code",
+		c.ID AS "parameter.id",
+		c. NAME AS "parameter.name",
+		c.REGULAR_EXPRESSION AS "parameter.regularExpression",
+		c.VARIUABLE_NAME AS "parameter.variuableName",
+		c.DEFAULT_VALUE AS "parameter.defaultValue",
+		c.note AS "parameter.note",
+		c.unit AS "parameter.unit"
+	FROM
+		to_porder_avi_path_sip a
+	LEFT JOIN to_porder_avi_path b ON a.TO_PORDER_AVI_PATH_ID = b.ID
+	LEFT JOIN ts_parameter c ON a.TS_PARAMETER_ID = c.ID
+	WHERE
+		b.TO_PORDER_AVI_ID = #{toPorderAviId}
+		AND b.TM_ULOC_ID = #{tmUlocId}
+		AND SEQ =#{seq}
+	</select>
+	<!--查询该工位下待过点的工单  -->
+	<select id="getPorderByUlocId" resultType="com.wis.mes.production.plan.porder.entity.ToPorder" parameterType="java.util.HashMap">
+	SELECT
+		a.*,
+		d.no as "part.no",
+		d.NAME_CN as "part.nameCn"
+	FROM
+		to_porder a
+	LEFT JOIN to_porder_avi b ON a.ID = b.TO_PORDER_ID
+	LEFT JOIN to_porder_avi_path c ON c.TO_PORDER_AVI_ID = b.ID
+	LEFT JOIN tm_part d on d.id = a.TM_PART_ID
+	WHERE
+		a.PRODUCT_STATUS NOT IN('CLOSE','FINSH') AND a.TASK_STATUS != "NOT_TASK"
+	AND c.TM_ULOC_ID = #{tmUlocId}
+	AND b.`STATUS`NOT IN ('FINSH','CLOSE','ALL_ONLINE')
+	GROUP BY a.`NO`
+	ORDER BY a.PRIORITY ASC
+	</select>
+	<!-- 查询工单下待的生产序列 -->
+	<select id="getAviByPorderId" resultType="com.wis.mes.production.plan.porder.entity.ToPorderAvi" parameterType="java.util.HashMap">
+	SELECT
+		a.ID AS "id",
+		a.TO_PORDER_ID AS "toPorderId",
+		a.`NO` AS "no",
+		a.TM_LINE_ID AS "tmLineId",
+		a.QTY AS "qty",
+		a.ONLINE_QTY AS "onlineQty",
+		a.OFFLINE_QTY AS "offlineQty",
+		a.SCRAP_QTY AS "scrapQty",
+		a.IS_HOLD AS "isHold",
+		a.`STATUS` AS "status",
+		b.`NO` AS "porder.no",
+		b.TM_PART_ID AS "porder.tmPartId"
+	FROM
+		to_porder_avi a
+	LEFT JOIN to_porder b ON a.TO_PORDER_ID = b.ID
+	WHERE 
+		a.`STATUS` NOT IN (${aviStatus})
+ 		AND a.TO_PORDER_ID =#{toPorderId}
+		GROUP BY a.`NO` ASC
+		LIMIT 0,10
+	</select>
+	<!--查询当前工作日历  -->
+	<select id="getNowWorkTimeByLineId" resultType="com.wis.mes.master.workcalendar.entity.TmWorktime" parameterType="java.util.HashMap">
+	SELECT 
+		a.* 
+	FROM 
+		tm_worktime a
+	WHERE
+		a.TM_LINE_ID=#{tmLineId} 
+		AND CONCAT(CONCAT(a.WORK_DATE, " ",a.START_TIME)) &lt;= NOW() 
+		AND CONCAT(CONCAT(a.WORK_DATE, " ",a.END_TIME)) &gt;=NOW()
+		limit  0,1;
+	</select>
+	<select id="getUlocCrossQty" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			tp_record_uloc a
+		WHERE
+		a.TM_ULOC_ID = #{tmUlocId}
+		<if test="operationType!=null and operationType!='' ">
+			AND a.OPERATION_TYPE in (${operationType})
+		</if>
+		<if test="startTime!=null and startTime!=''">
+			AND a.CREATE_TIME &gt;= #{startTime}
+		</if>
+		<if test="endTime!=null and endTime!='' ">
+			AND a.CREATE_TIME &lt;= #{endTime};
+		</if>
+	</select>
+	<select id="getWaitOnlineSn" resultType="com.wis.mes.production.wip.entity.TpWip" parameterType="java.util.HashMap">
+		SELECT
+			a.*
+		FROM
+			tp_wip a
+		WHERE
+			a.TM_ULOC_ID = #{tmUlocId}
+		AND a.AVI_NO = #{aviNo}
+		AND a.ROUTING_SEQ =#{routingSeq}
+	</select>
+	<select id="getAlreadyOnlineData" resultType="com.wis.mes.production.record.entity.TpRecordUloc" parameterType="java.util.HashMap">
+	SELECT
+		a.*,
+		b.SN AS "record.sn",
+		b.PORDER_NO as "record.porderNo",
+		b.AVI_NO as "record.aviNo",
+		b.ONLINE_TIME as "record.onlineTime",
+		c.`NO` AS "record.part.no",
+		c.NAME_CN AS "record.part.nameCn",
+		b.TM_PART_ID AS "record.tmPartId"
+	FROM
+		tp_record_uloc a
+	LEFT JOIN tp_record b ON a.TP_RECORD_ID = b.ID
+	LEFT JOIN tm_part c ON c.ID = b.TM_PART_ID	
+	WHERE
+		a.OPERATION_TYPE = 'ULOC_END'
+	AND a.TM_ULOC_ID = #{tmUlocId}
+	GROUP BY a.CREATE_TIME desc
+	LIMIT 0,10
+	</select>
+	<select id="findUloc" resultType="com.wis.mes.master.uloc.entity.TmUloc" parameterType="java.util.HashMap">
+	SELECT
+		a.*
+	FROM
+		tm_uloc a
+	WHERE 1=1 
+	<if test="id!=null and id!='' ">
+			AND a.ID = #{id};
+	</if>
+	<if test="tmLineId!=null and tmLineId!=''">
+		AND a.TM_LINE_ID =#{tmLineId}
+	</if>
+	</select>
+	<select  id="findTmUlocSipNcByTmUlocId" resultType="com.wis.mes.master.uloc.entity.TmUlocSipNc" parameterType="java.util.HashMap">
+		SELECT
+			tmulocsipnc_0.CREATE_TIME AS "createTime",
+			tmulocsipnc_0.CREATE_USER AS "createUser",
+			tmulocsipnc_0.ID AS "id",
+			tmulocsipnc_0.NOTE AS "note",
+			tmulocsipnc_0.OPT_COUNTER AS "optCounter",
+			tmulocsipnc_0.TM_NC_GROUP_ID AS "tmNcGroupId",
+			tmulocsipnc_0.TM_NC_ID AS "tmNcId",
+			tmulocsipnc_0.TM_ULOC_SIP_ID AS "tmUlocSipId",
+			tmulocsipnc_0.UPDATE_TIME AS "updateTime",
+			tmulocsipnc_0.UPDATE_USER AS "updateUser",
+			tmnc_0.CREATE_TIME AS "nc.createTime",
+			tmnc_0.CREATE_USER AS "nc.createUser",
+			tmnc_0.EXT_CODE AS "nc.extCode",
+			tmnc_0.ID AS "nc.id",
+			tmnc_0. NAME AS "nc.name",
+			tmnc_0. NO AS "nc.no",
+			tmnc_0.OPT_COUNTER AS "nc.optCounter",
+			tmnc_0.TM_NC_GROUP_ID AS "nc.tmNcGroupId",
+			tmnc_0.TYPE AS "nc.type",
+			tmnc_0.UPDATE_TIME AS "nc.updateTime",
+			tmnc_0.UPDATE_USER AS "nc.updateUser",
+			tmncgroup_0.CREATE_TIME AS "ncGroup.createTime",
+			tmncgroup_0.CREATE_USER AS "ncGroup.createUser",
+			tmncgroup_0.EXT_CODE AS "ncGroup.extCode",
+			tmncgroup_0.ID AS "ncGroup.id",
+			tmncgroup_0. NAME AS "ncGroup.name",
+			tmncgroup_0. NO AS "ncGroup.no",
+			tmncgroup_0.OPT_COUNTER AS "ncGroup.optCounter",
+			tmncgroup_0.UPDATE_TIME AS "ncGroup.updateTime",
+			tmncgroup_0.UPDATE_USER AS "ncGroup.updateUser",
+			tmulocsip_0.CREATE_TIME AS "tmUlocSip.createTime",
+			tmulocsip_0.CREATE_USER AS "tmUlocSip.createUser",
+			tmulocsip_0.DETAIL AS "tmUlocSip.detail",
+			tmulocsip_0.ID AS "tmUlocSip.id",
+			tmulocsip_0.IS_EXAMINE AS "tmUlocSip.isExamine",
+			tmulocsip_0.OPT_COUNTER AS "tmUlocSip.optCounter",
+			tmulocsip_0.TM_ULOC_ID AS "tmUlocSip.tmUlocId",
+			tmulocsip_0.TS_PARAMETER_ID AS "tmUlocSip.tsParameterId",
+			tmulocsip_0.UPDATE_TIME AS "tmUlocSip.updateTime",
+			tmulocsip_0.UPDATE_USER AS "tmUlocSip.updateUser"
+		FROM
+			TM_ULOC_SIP_NC tmulocsipnc_0
+		LEFT JOIN tm_nc tmnc_0 ON tmulocsipnc_0.TM_NC_ID = tmnc_0.ID
+		LEFT JOIN tm_nc_group tmncgroup_0 ON tmulocsipnc_0.TM_NC_GROUP_ID = tmncgroup_0.ID
+		LEFT JOIN tm_uloc_sip tmulocsip_0 ON tmulocsipnc_0.TM_ULOC_SIP_ID = tmulocsip_0.ID
+		WHERE
+			1 = 1
+		AND tmulocsip_0.TM_ULOC_ID = #{tmUlocId}
+		ORDER BY
+			tmulocsipnc_0.ID DESC
+	</select>
+	<select id="getUnTreatedNcBySN" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT COUNT(*) FROM tp_untreated_nc a WHERE a.SN = #{SN};
+	</select>
+</mapper>

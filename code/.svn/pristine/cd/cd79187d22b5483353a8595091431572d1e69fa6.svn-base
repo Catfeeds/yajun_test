@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/ulocSipNc/update.do" class="form-horizontal" idValue=ulocSipNc.id  permissionModule="ULOC_SIP_NC">
+	<input type="hidden" name ="tmUlocSipId" value="${tmUlocSipId}"/>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_SIP_NC_TM_NC_GROUP_ID" permissionCode="ULOC_SIP_NC_TM_NC_GROUP_ID">
+				 <@p.input type="select" excludeSelectOption="true" id="update_NcGroup" options=ncGroupOptions  datatype="*"  field="tmNcGroupId" onchange="NcGroupNc_listPage(this.value);"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="ULOC_SIP_NC_TM_NC_ID" permissionCode="ULOC_SIP_NC_TM_NC_ID">
+			 	<@p.input type="select" id="update_Nc" options=ncOptions  datatype="*"  field="tmNcId"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ULOC_SIP_NC_NOTE" permissionCode="ULOC_SIP_NC_NOTE">
+				 <input name="note" class="inputxt" maxlength="100" value="${ulocSipNc.note}"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+<script type="text/javascript">
+//默认选择旧数据
+$("#update_NcGroup option[value='${ncGroup.id}']").attr("selected","selected");
+$("#update_Nc option[value='${nc.id}']").attr("selected","selected");
+function NcGroupNc_listPage(obj){
+	$.ajax({
+		data:{tmNcGroupId:obj},
+		url:"${baseUrl}/ulocSipNc/getSelectNc.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#update_Nc").empty(); //清空下拉列表
+				$("#update_Nc").append(" <option value=''>---请选择---</option>");
+				$(result).each(function(i, item) {
+					$("#update_Nc").append(" <option value='" + item.id + "'>"+item.no+" - " +item.name+ "</option>");
+				});
+                document.getElementById("update_Nc").value = '';
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+</script>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/crossPoint/doHold.do" class="form-horizontal" idValue=id  noPermissionModule="true">
+		<@p.formRow>
+		<@p.formColmd title="PORDER_NOTE">
+				<input class="inputxt"name="note" maxlength="100" datatype="*" >
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

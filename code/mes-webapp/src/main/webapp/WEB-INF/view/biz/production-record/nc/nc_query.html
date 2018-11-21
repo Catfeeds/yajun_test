@@ -1,0 +1,142 @@
+<#include "../../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	$(function(){
+		$('#startTime').focus(function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+		$('#endTime').focus(function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+		});
+		$.ajax({
+	        url: "${baseUrl}/ncQuery/initNcGroup.do",
+	        cache: false,
+	        global: false,
+	        type: "POST",
+	        data : {},
+	        success: function(result){
+	        	var str = "<option value='0'>全部</option>";
+	        	if(result == "ERROR"){
+					infoTip("请检查网络或硬件");
+	        	}else{
+	        		var arr = eval(result);
+	        		for(var i = 0;i < arr.length;i++){
+	        			str = str + "<option value='" + arr[i].id + "'>" + arr[i].name + "</option>";
+	        		}
+	        	}
+	        	document.getElementById("ncGroup").innerHTML = str;
+	        	changeNc($("#ncGroup").val());
+	        }
+	    });
+		getData();
+	});
+	function changeNc(ncGroupId){
+		$.ajax({
+	        url: "${baseUrl}/ncQuery/initNc.do",
+	        cache: false,
+	        global: false,
+	        type: "POST",
+	        data : {
+	        	"ncGroupId" : ncGroupId
+	        },
+	        success: function(result){
+	        	var str = "<option value='0'>全部</option>";
+	        	if(result == "ERROR"){
+					infoTip("请检查网络或硬件");
+	        	}else{
+	        		var arr = eval(result);
+	        		for(var i = 0;i < arr.length;i++){
+	        			str = str + "<option value='" + arr[i].id + "'>" + arr[i].name + "</option>";
+	        		}
+	        	}
+	        	document.getElementById("nc").innerHTML = str;
+	        }
+	    });
+	}
+	function getData(){
+		$.ajax({
+	        url: "${baseUrl}/ncQuery/getData.do",
+	        cache: false,
+	        global: false,
+	        type: "POST",
+	        data : {
+	        	"sn" : $("#sn").val(),
+	        	"ncId" : $("#nc").val(),
+	        	"ncGroupId" : $("#ncGroup").val(),
+	        	"startTime" : $("#startTime").val(),
+	        	"endTime" : $("#endTime").val()
+	        },
+	        success: function(result){
+	        	var str = "";
+	        	if(result == "ERROR"){
+					infoTip("请检查网络或硬件");
+	        	}else{
+	        		var arr = eval(result);
+	        		for(var i = 0;i < arr.length;i++){
+	        			str = str + "<tr><td>" + arr[i].SN + "</td><td>" + arr[i].PART_NO + "</td>"
+	        				+"<td>" + arr[i].PART_NAME + "</td><td>" + arr[i].NC_NAME + "</td>"
+	        				+"<td>" + arr[i].NC_GROUP_NAME + "</td><td>" + arr[i].NC_NOTE + "</td>"
+	        				+"<td>" + arr[i].IS_END + "</td><td>" + arr[i].CREATE_USER + "</td><td>" + formatDate(new Date(arr[i].CREATE_TIME)) + "</td>"
+	        				+"<td>" + arr[i].AVI_NO + "</td><td>" + arr[i].PORDER_NO + "</td></tr>";
+	        		}
+	        	}
+	        	document.getElementById("tb").innerHTML = str;
+	        }
+	    });
+	}
+	document.onkeydown = function(event){
+        var e = event || window.event || arguments.callee.caller.arguments[0];           
+         if(e && e.keyCode==13){
+        	 if($("#startTime").val() > $("#endTime").val()){
+			 	infoTip("起始日期不能晚于截止日期");
+        		return;
+        	 }
+        	 getData();
+        }
+    }; 
+    function formatDate(date){
+    	var d = date.getFullYear() + "-";
+    	d = d + (date.getMonth() < 9 ? "0" : "") + (date.getMonth() + 1)+ "-" 
+    		+ (date.getDate() < 10 ? "0" : "") + date.getDate() + " " 
+    		+ (date.getHours() < 10 ? "0" : "") + date.getHours() + ":" 
+    		+ (date.getMinutes() < 10 ? "0" : "") + date.getMinutes() + ":" 
+    		+ (date.getSeconds() < 10 ? "0" : "") + date.getSeconds();
+    	return d;
+    }
+</script>
+<@p.body title="NC_QUERY_TITLE" permissionModule="NC_QUERY">	
+<div style="width: 100%">
+	<table width="100%">
+		<tbody>
+			<tr height="35px">
+				<td width="20%"><input id="sn" placeholder="请输入SN" style="height: 90%;width: 100%;" /></td>
+				<td width="15%">&nbsp;&nbsp;不合格组：<select id="ncGroup" onchange="changeNc(this.value)" style="height: 100%;width: 60%;"></select></td>
+				<td width="15%">&nbsp;&nbsp;不合格代码：<select id="nc" style="height: 100%;width: 60%;"></select></td>
+				<td width="50%">
+					<@p.input title="DATETIME_START" id="startTime" />
+					<@p.input title="DATETIME_END" id="endTime" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div style="width:100%;overflow-x:auto;">
+	<table class="table table-bordered  table-hover table-condensed">
+		<thead>
+			<tr height="35px">
+				<th>SN</th>
+				<th>产品编码</th>
+				<th>产品描述</th>
+				<th>不合格描述</th>
+				<th>不合格组描述</th>
+				<th>不合格注释</th>
+				<th>是否处理完毕</th>
+				<th>记录人员</th>
+				<th>记录时间</th>
+				<th>生产序列号</th>
+				<th>工单号</th>
+			<tr>
+		</thead>
+		<tbody id="tb"></tbody>
+	</table>
+</div>
+</@p.body>

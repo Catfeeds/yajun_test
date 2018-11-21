@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<div style="text-align: center">
+	<input type="text" value="${SN!}" readonly="readonly"  style="width: 500px;height: 50px;margin-bottom: 10px;"/>
+</div>
+<@p.editForm url="${baseUrl}/onLine/recordNcAndGroup.do" class="form-horizontal"   permissionModule="ONLINE">
+<input type="hidden" name="recordId" value="${recordId}">
+<input type="hidden" name="shiftNo" value="${shiftNo!}">
+<input type="hidden" name="tmUlocId" value="${tmUlocId}">
+<input type="hidden" name="SN" value="${SN!}">
+<input type="hidden" name="currentUlocSeq" value="${currentUlocSeq}">
+<input type="hidden" id="beforeSubmit" value="checkNcValue"/>
+	<center>
+	<table>
+		<tbody>
+		<tr>
+			<td>不合格组：</td><td>
+					<select onchange="chageNcGroup(this.value)" style="width: 300px;" name="ncGroup">
+						<option  value=''>-----请选择不合格组------</option>
+						<#if ncGroup??>
+							 <#list ncGroup as bean>
+							 	   <option data-code="${bean.no}" value="${bean.id}" >${bean.no}-${bean.name}</option>
+							 </#list>
+						</#if>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>不合格代码：</td>
+			<td>
+				<select id="recordNc" name="ncCode" style="width: 300px;" onchange="recordNcChange(this)"></select>
+			</td>
+		</tr>
+		<tr>
+			<td>不合格类型：</td>
+			<td>
+			<input type="hidden" name="ncTypeInput"   id="ncTypeInput"  value="CONCESSION"/>
+				<select  style="width: 300px;" id="recordNcType" onchange="ncTypeChange(this.value)">
+				<#if ncType??>
+					 <#list ncType as bean>
+					 	   <option  value="${bean.code}" >${bean.name}</option>
+					 </#list>
+				</#if>
+		</select>
+			</td>
+		</tr>	
+		<tr>
+			<td>备注：</td>
+			<td><input    name="note"  style="width: 300px;" id="recordNcNote" maxlength="75"></td>	
+		</tr>	
+		</tbody>
+	</table>
+	</center>
+</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$(".close").hide();
+	$(".btn-default").hide();
+	$(".form_required_flag").attr("style","position:relative;");
+	$(".inputxt").attr("style","width:200px;");
+	$(".bootstrap-dialog-footer-buttons").append("<button class='btn btn-primary' onclick='goGackNc()'>返回</button>");
+})
+function checkNcValue(){
+	if($("#recordNc").val()==""){
+		infoTip("必须选择不合格代码!");
+		return false;
+	}
+	if($("#ncTypeInput").val()=="REPAIRED"&&!$("#recordNcNote").val()){
+		infoTip("该不合格类型必须填写备注!");
+		return false;
+	}
+	return true;
+}
+
+function chageNcGroup(groupId){
+	$.ajax({
+		url:"${baseUrl}/onLine/getNcData.do",
+		type:"GET",
+		dataType:"json",
+		data:{
+			"tmNcGroupId":groupId
+		},
+		success:function(result){
+			var options="<option value=''>-------请选择-----------</option>";
+			$(result).each(function(i,item){
+				options+="<option value="+item.id+" data-type="+item.type+">"+item.no+"-"+item.name+"</option>";
+			});
+			$("#recordNc").html(options);
+		}
+	});
+}
+
+function ncTypeChange(value){
+	$("#ncTypeInput").val(value);
+}
+
+function recordNcChange(obj){
+	var type = $(obj).find("option:selected").attr("data-type");
+	if(type&&type!="null"){
+		$("#ncTypeInput").val(type);
+		$("#recordNcType").val(type);
+		$("#recordNcType").attr("disabled","disabled");
+	}else{
+		$("#recordNcType").show();
+		$("#recordNcType").removeAttr("disabled");
+	}
+}
+
+function goGackNc(){
+	ajaxRequest(baseUrl+"/onLine/recordNcGoBack.do", {
+		recordId:"${recordId}",
+		shiftNo:"${shiftNo}",
+		tmUlocId:"${tmUlocId}",
+		currentUlocSeq:"${currentUlocSeq}"
+	}, function(result){
+		$(".close").click();
+	}, true);
+}
+</script>

@@ -1,0 +1,153 @@
+<?xml  version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<!-- need to refine with your biz package here -->
+	<!-- <context:component-scan base-package="com.wis.bpm,com.wis.basis,com.wis.mes,org.activiti.rest"> -->
+	<context:component-scan base-package="com.wis.basis,com.wis.mes">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Service" />
+	</context:component-scan>
+
+	<bean id="exceptionHandler" class="com.wis.basis.common.interceptor.ExceptionInterceptor" />
+	<mvc:interceptors>
+		<bean class="com.wis.basis.common.interceptor.ActionParameterInterceptor" />
+	</mvc:interceptors>
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>classpath:languages/exception/messages</value>
+				<value>classpath:languages/exception/messages_FK</value>
+				<value>classpath:languages/front/core/messages</value>
+				<!-- <value>classpath:languages/front/bpm/messages</value> -->
+				<value>classpath:languages/front/biz/messages</value>
+				<value>classpath:languages/front/biz/messages_export_title_zh_CN
+				</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+		<property name="defaultLocale" value="zh_CN" />
+	</bean>
+	<bean id="freemarkerViewResolver"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="suffix" value=".html" />
+		<property name="order" value="1" />
+		<property name="contentType" value="text/html; charset=UTF-8" />
+		<property name="exposeRequestAttributes" value="false" />
+		<property name="exposeSessionAttributes" value="false" />
+		<property name="exposeSpringMacroHelpers" value="true" />
+	</bean>
+	<bean id="freemarkerConfig"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="" />
+		<property name="templateLoaderPaths">
+			<list>
+				<value>/WEB-INF/view/common</value>
+				<value>/WEB-INF/view/base</value>
+<!-- 				<value>/WEB-INF/view/bpm</value> -->
+				<value>/WEB-INF/view/business</value>
+				<value>/WEB-INF/view/biz</value>
+				<value>/wis</value>
+			</list>
+		</property>
+		<property name="defaultEncoding" value="utf-8" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="template_update_delay">0</prop>
+				<prop key="defaultEncoding">UTF-8</prop>
+				<prop key="url_escaping_charset">UTF-8</prop>
+				<prop key="locale">zh_CN</prop>
+				<prop key="boolean_format">true,false</prop>
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+				<prop key="date_format">yyyy-MM-dd</prop>
+				<prop key="time_format">HH:mm:ss</prop>
+				<prop key="number_format">0.######</prop>
+				<prop key="whitespace_stripping">true</prop>
+				<prop key="auto_import">/ftl/spring.ftl as s,/ftl/ui/index.ftl as p</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- View Resolver for JSPs -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="requestContextAttribute" value="rc" />
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/view/" />
+		<property name="suffix" value=".jsp" />
+		<property name="order" value="3" />
+	</bean>
+
+	<!-- SpringMVC file upload -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="maxUploadSize">
+			<value>20971520</value>
+		</property>
+		<property name="maxInMemorySize">
+			<value>4096</value>
+		</property>
+		<property name="uploadTempDir" value="fileUpload/temp" />
+	</bean>
+	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="true">
+			<!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<constructor-arg value="UTF-8" />
+			</bean>
+			<bean
+				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/json;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<!-- Mail -->
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.exmail.qq.com" />
+		<property name="port" value="25" />
+
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+			</props>
+		</property>
+
+	</bean>
+	<bean id="mailService" class="com.wis.basis.mail.impl.MailServiceImpl">
+		<property name="mailSender" ref="mailSender"></property>
+		<property name="freeMarkerConfigurer" ref="freemarkerConfig"></property>
+	</bean>
+
+	<!-- <bean id="commonDownloadViewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver"> 
+		<property name="order" value="2"></property> <property name="basenames"> 
+		<list> <value>com.wis.basis.common.web.download.downloading</value> </list> 
+		</property> </bean> -->
+
+	<mvc:resources location="/WEB-INF/wis/" mapping="/wis/**" />
+	<!-- 注册XmlViewResolver，用于iReport & JasperReports报表生成 -->
+	<bean id="jasperReportResolver" class="org.springframework.web.servlet.view.XmlViewResolver">
+		<property name="order">
+			<value>0</value>
+		</property>
+		<property name="location">
+			<value>WEB-INF/jasper/jasper-defs.xml</value>
+		</property>
+	</bean>
+</beans>

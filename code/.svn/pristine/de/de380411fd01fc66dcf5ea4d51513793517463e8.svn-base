@@ -1,0 +1,20 @@
+package com.wis.mes.production.metalplate.dao.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Repository;
+
+import com.wis.core.dao.impl.BaseDaoImpl;
+import com.wis.mes.production.metalplate.dao.TbMetalPlateProductionRecordDao;
+import com.wis.mes.production.metalplate.entity.TbMetalPlateProductionRecord;
+
+@Repository
+public class TbMetalPlateProductionRecordDaoImpl extends BaseDaoImpl<TbMetalPlateProductionRecord> implements TbMetalPlateProductionRecordDao {
+
+	@Override
+	public List getEveryDayPrd(Map<String, Object> params) {
+		// TODO Auto-generated method stub
+		return this.getSqlSession().selectList("MetalPlateReportMapper.getEveryDayPrd", params);
+	}
+}

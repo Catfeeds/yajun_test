@@ -1,0 +1,39 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+
+function renderNcGroup(value,record) {
+	if(value && record.tmNcGroup.no){
+		return record.tmNcGroup.no + " - " + value;
+	}
+	return record.tmNcGroup.no + " - ";
+}
+
+function renderNc(value,record){
+	if(value && record.tmNc.no){
+		return record.tmNc.no + " - " + value;
+	}
+	return record.tmNc.no + " - ";
+}
+</script>
+
+<@p.body  permissionModule="RECORD" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="recordUlocNcGrid">
+		<@p.searchColumns>
+			<@p.input title="PECORD_ULOC_NC_NC_GROUP" field="ncGroup"  permissionCode="PECORD_ULOC_NC_NC_GROUP"></@p.input>
+			<@p.input title="PECORD_ULOC_NC_NC_CODE" field="ncCode"  permissionCode="PECORD_ULOC_NC_NC_CODE"></@p.input>
+			<@p.input title="PECORD_ULOC_NC_NOTE" field="note"  permissionCode="PECORD_ULOC_NC_NOTE"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div style="color: #428bca;text-align:center; margin:10px" >产品档案不合格信息</div>
+	<@p.dataGrid url="${baseUrl}/record/uloc/nc/list.do?queryCondition[tpRecordUlocId]=${tpRecordUlocId}" id="recordUlocNcGrid">
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="PECORD_ULOC_NC_NC_GROUP" field="tmNcGroup.name" permissionCode="PECORD_ULOC_NC_NC_GROUP" formatter="renderNcGroup" ></@p.column>
+			<@p.column title="PECORD_ULOC_NC_NC_CODE" field="tmNc.name" permissionCode="PECORD_ULOC_NC_NC_CODE" formatter="renderNc" ></@p.column>
+			<@p.column title="PECORD_ULOC_NC_NOTE" field="note" permissionCode="PECORD_ULOC_NC_NOTE" formatter="renderNullValue"></@p.column>
+		</@p.dataGrid>
+</@p.body>	
+

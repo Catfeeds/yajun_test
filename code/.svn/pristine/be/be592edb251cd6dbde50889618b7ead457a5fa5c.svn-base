@@ -1,0 +1,35 @@
+/**
+ * 
+ */
+package com.wis.mes.dakin.report.dao.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import com.wis.mes.dakin.report.dao.ProductMrgDao;
+
+/**
+ * @author caixia
+ *
+ */
+public class ProductMrgDaoImpl implements ProductMrgDao {
+
+	/* (non-Javadoc)
+	 * @see com.wis.mes.dakin.report.dao.ProductMrgDao#getShiftEvery(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public List<Map<String, Object>> getShiftEvery(String pressName, String startTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.wis.mes.dakin.report.dao.ProductMrgDao#getShiftEveryCount(java.lang.String, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public List<Map<String, Object>> getShiftEveryCount(String pressName, String startTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

@@ -1,0 +1,62 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+	function usercallback(dialog){
+		var rowsData =getSelectedRows('dgUserSelectGrid');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+
+		$('#hidden_leaderId').val(rowsData[0].id);
+		$('#display_leaderId').val(rowsData[0].name);
+		dialog.close();
+	}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/orgnization/add.do" class="form-horizontal"  permissionModule="ORGNIZATION">
+		<input type="hidden" name="parentId" value="<#if parent??>${parent.id!}</#if>">
+		<input type="hidden" name="parentSystemCode" value="${(parent.systemCode)!}">
+		<input id="callback" type="hidden" value="initOrgTree">
+		<@p.formRow>
+			<@p.formColmd title="DIMENSION_NAME"   permissionCode="DIMENSION_NAME">
+				<input  type="hidden" name="dimension" value="${dimension!}">
+				<#if options?is_sequence>
+						<#list dimensions as option>
+							<#if dimension==option.code>
+								<input type="text" class="inputxt" readonly="readonly" value="${option.name!}"/>
+							</#if>
+						</#list>
+					</#if>
+			</@p.formColmd>
+			<@p.formColmd title="ORG_PARENT_NAME"    permissionCode="ORG_PARENT_NAME">
+				<input  readonly="readonly" class="inputxt" value="<#if parent??>${parent.name!}</#if>">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>	
+			<@p.formColmd title="ORG_CODE"  checktip="ORG_CHECK_TIP"   permissionCode="ORG_CODE">
+				  <input name="code" class="inputxt" ajaxurl="${baseUrl}/orgnization/checkCode.do"  datatype="*2-50" nullmsg='<@s.m code="ORG_CODE_NULL" />'>
+			</@p.formColmd>
+			<@p.formColmd title="ORG_NAME"  checktip="ORG_CHECK_TIP"  permissionCode="ORG_NAME">
+				  <input name="name" class="inputxt" id="name"  datatype="*2-50" nullmsg='<@s.m code="ORG_NAME_NULL" />'>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ORG_TYPE" checktip="ORG_TYPE_NULL"   permissionCode="ORG_TYPE">
+				<@p.input type="select" excludeSelectOption="true" id="type" field="type" options=options></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="ORG_LEADER" permissionCode="ORG_LEADER">
+			  <@p.magnify id="leaderId" field="leaderId" url="${baseUrl}/user/listSelect.do?currentPageId=UserSelectGrid&singleSelect=true" callback="usercallback" datatype="*"></@p.magnify>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd class="col-md-8" title="ORG_DESCRIPTION"   permissionCode="ORG_DESCRIPTION">
+				<textarea name="description" class="inputxt" ignore="ignore" ></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

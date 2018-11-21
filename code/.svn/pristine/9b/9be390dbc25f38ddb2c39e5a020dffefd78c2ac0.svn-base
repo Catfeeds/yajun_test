@@ -1,0 +1,52 @@
+<#include "../../../include/bootstrapTableCommons.html">
+	<script src="././res/js/echarts.min.js"></script>
+<@p.body title="DPATH_LIST_TITLE" permissionModule="SUPPLIER" noBreadcrumbs="true">	
+	<div style="color: #428bca;text-align:center; margin:10px" >供应商零件信息</div>
+   	<@p.searchPanel >
+		<@p.toolbar> 
+	 	   	<@p.button title="SUPPLIER_PART_ADD" permissionCode="SupplierPartAdd" iconCls="plus" url="${baseUrl}/supplierPart/addInput.do?tmSupplierId="+"${tmSupplierId}" type="add"  ></@p.button>
+			<@p.button title="SUPPLIER_PART_UPDATE" permissionCode="SupplierPartUpdate" iconCls="edit" url="${baseUrl}/supplierPart/updateInput.do?tmSupplierId="+"${tmSupplierId}" type="update"></@p.button>
+			<@p.button title="SUPPLIER_PART_DELETE" permissionCode="SupplierPartDelete" iconCls="trash" url="${baseUrl}/supplierPart/delete.do" type="delete"></@p.button>
+			<@p.button title="SUPPLIER_PART_EXPORT" permissionCode="SupplierPartExport" downName="SUPPLIER_PART_EXPORT_FILE_NAME" iconCls="upload-alt" url="${baseUrl}/supplierPart/exportData.do?tmSupplierId="+"${tmSupplierId}" type="down"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<div id="dataGrid">
+		<@p.dataGrid url="${baseUrl}/supplierPart/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="SUPPLIER_PART_NO" field="part.no" permissionCode="SUPPLIER_PART_NO"></@p.column>
+		<@p.column title="SUPPLIER_PART_NAME_CN" field="part.nameCn" permissionCode="SUPPLIER_PART_NAME_CN"></@p.column>
+		<@p.column title="SUPPLIER_PART_TYPE" field="part.type" permissionCode="SUPPLIER_PART_TYPE" formatter="renderType"></@p.column>
+		<@p.column title="SUPPLIER_PART_ENABLED" field="enabled" permissionCode="SUPPLIER_PART_ENABLED" formatter="renderGenderEnabled"></@p.column>
+	</@p.dataGrid>
+		
+	</div>
+	<div id="echarts" style="width: 1000px;height:400px;"></div>
+</@p.body>
+<script type="text/javascript">
+
+	function renderGenderEnabled(value) {
+		return entryRenderer('ENABLED', value);
+	}
+	
+	function renderType(value){
+		return entryRenderer('PART_TYPE', value);
+	}
+
+	$(function(){
+		$(".clearfix").hide();
+	});
+	function renderUlocSip(value,record){
+		if(record.tsParameter&&record.tsParameter.code){
+			return record.tsParameter.code+ " - " + record.tsParameter.name;
+		}
+		return "";
+	}
+	function renderIsExamine(value){
+		return entryRenderer('YES_OR_NO', value);
+	}
+	function importDataUlocSip(){
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/supplierPart/exportTemplate.do";
+		importFile("<@s.m code="ULOC_IMPORT" />", "${baseUrl}/supplierPart/importData.do?tmSupplierId="+"${tmSupplierId}", "dg${currentPageId}",obj);
+	}
+</script>

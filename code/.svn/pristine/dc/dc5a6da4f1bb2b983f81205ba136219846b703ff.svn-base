@@ -1,0 +1,18 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body  permissionModule="USER" noBreadcrumbs="true">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="USER_NAME" field="name" permissionCode="USER_NAME"></@p.input>
+			<@p.input title="USER_ACCOUNT_NUMBER" field="account" permissionCode="USER_ACCOUNT_NUMBER"></@p.input>
+		</@p.searchColumns>
+	
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid  url="${baseUrl}/equipmentResponsiblePerson/getUserList.do?tmEquipmentId="+"${tmEquipmentId}" singleSelect=singleSelect>
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="USER_NAME" field="name"   permissionCode="USER_NAME"></@p.column>
+		<@p.column title="USER_PHONE" field="phone"  permissionCode="USER_PHONE"></@p.column>
+		<@p.column title="USER_MAIL" field="email"  permissionCode="USER_MAIL"></@p.column>
+		<@p.column title="USER_ACCOUNT_NUMBER" field="account"   permissionCode="USER_ACCOUNT_NUMBER"></@p.column>
+	</@p.dataGrid>
+</@p.body>

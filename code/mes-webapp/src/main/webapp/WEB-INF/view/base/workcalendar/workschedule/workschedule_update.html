@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+$(function(){
+
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#settingStart,#settingEnd').focus(function(){
+		WdatePicker({dateFmt:'HH:mm',minDate:'00:00',maxDate:'24:00'});
+	});
+	var $subBox = $("#select_all_checkbox").prevAll();
+	var selectCount = 0;
+	$.each($subBox,function(i,domObj){
+		if(this.value == "ON"){
+			this.checked=true;
+			selectCount++;
+		}else{
+			this.checked=false;
+		}
+	});
+	if(selectCount==7){
+		$("#select_all_checkbox").prop("checked",true);
+	}
+ 	$("#select_all_checkbox").click(function() {
+      	$subBox.prop("checked",this.checked);
+      	$subBox.attr("value",this.checked?"ON":"OFF");
+    });
+	
+});
+
+
+//开始时间 结束日期判断
+var endDate = "";
+var startDate = "";
+function settingStartFunction(x)
+{
+	var shiftno = document.getElementById("shiftno").value;
+	startDate =x.value;
+	  if(shiftno !=""){
+		if(endDate != "" && startDate !=""){
+		     if(shiftno=="MORNINGSHIFT" || shiftno=="NOONSHIFT"){
+		　 　 　 　 	    var a = "2016-12-12 " + startDate;
+						  var b = "2016-12-12 " + endDate;
+			　 　 　 　 	    if (Date.parse(a) > Date.parse(b)) {
+		　 　 　 　 	    	    infoTip('早中班开始时间大于结束时间');	
+					        x.focus();
+					        return false;
+				     }
+			 }
+		}
+	  }else{
+		  infoTip('请先填写班次！');	
+	  }
+	
+}
+function settingEndFunction(x)
+{
+	var shiftno = document.getElementById("shiftno").value;
+	endDate =x.value;
+    if(shiftno !=""){
+		if(endDate != "" && startDate !=""){
+			 if(shiftno=="MORNINGSHIFT" || shiftno=="NOONSHIFT"){
+				 var a = "2016-12-12 " + startDate;
+				  var b = "2016-12-12 " + endDate;
+		　 　 　 　 	    if (Date.parse(a) > Date.parse(b)) {
+		　 　 　 　 	    	infoTip('早中班开始时间大于结束时间');	
+					        x.focus();
+					        return false;
+				     }
+			 }
+		}
+    }else{
+	  infoTip('请先填写班次！');	
+    }
+} 
+function chooseValue(obj){
+	if(obj.checked){
+		obj.value = "ON";
+	} else {
+		obj.value = "OFF";
+	}
+	var $subBox = $("#select_all_checkbox").prevAll();
+	var count = 0;
+    $.each($subBox,function(i,domObj){
+    	if(this.checked){
+    		count++;
+    	}
+    });
+    $("#select_all_checkbox").prop("checked",$subBox.length == count ? true : false);
+}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+
+<@p.editForm url="${baseUrl}/workschedule/update.do" class="form-horizontal" idValue=workschedule.id   permissionModule="WORKSCHEDULE">
+	    <@p.formRow>
+			<@p.formColmd title="WORK_SCHEDULE_NO" permissionCode="WORK_SCHEDULE_NO">
+				<input class="inputxt" disabled="disabled"  name="no" value="${workschedule.no}">
+				<input name="no" class="inputxt"  value="${workschedule.no}"  type="hidden" />
+			</@p.formColmd>
+			<@p.formColmd title="WORK_SCHEDULE_PLANT" permissionCode="WORK_SCHEDULE_TM_PLANT">
+				 <@p.input type="select" id="plantId_updatePage" value="${workschedule.tmPlantId}"  options=plant disabled="disabled"></@p.input>
+			     <input type="hidden"  id="update_plant" name="tmPlantId" value="${workschedule.tmPlantId}" >
+			</@p.formColmd>
+		</@p.formRow>
+		<input type="hidden" id="enabled" name="enabled" value="ON"/>
+		<input type="hidden" id="isCover" name="isCover"/>
+		<@p.formRow>
+			<@p.formColmd title="WORK_SCHEDULE_LINE" permissionCode="WORK_SCHEDULE_LINE">
+				<@p.input type="select" id="lineId_updatePage" field="tmLineId" datatype="*" value="${workschedule.tmLineId!}" options=line disabled="disabled" ></@p.input>
+				<input type="hidden"  name="tmLineId" value="${workschedule.tmLineId!}" >
+			</@p.formColmd>
+			<@p.formColmd title="WORK_SCHEDULE_SHIFTNO_ID" permissionCode="WORK_SCHEDULE_SHIFTNO_ID">
+                <@p.input type="select" class="select2" id="shiftno" field="shiftnoId" datatype="*" value= "${workschedule.shiftnoId!}" options=shiftType ></@p.input>			
+            </@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_SCHEDULE_START_TIME" permissionCode="WORK_SCHEDULE_START_TIME">
+				<input class="inputxt" id="settingStart" class="timepicker" onblur="settingStartFunction(this);" datatype="*" name="startTime" value="${workschedule.startTime}">	
+			</@p.formColmd>
+			<@p.formColmd title="WORK_SCHEDULE_END_TIME" permissionCode="WORK_SCHEDULE_END_TIME">
+                <input class="inputxt" id="settingEnd" class="timepicker"   onblur="settingEndFunction(this);"   datatype="*" name="endTime"  value="${workschedule.endTime}">			
+            </@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="WEEK_VALUE" permissionCode="WORK_SCHEDULE_WEEK_VALUE" class="col-md-10">
+                <input  type= "checkbox"  name="mon" value="${workschedule.mon!}"  onclick="chooseValue(this);">星期一
+                <input  type= "checkbox"  name="tue" value="${workschedule.tue!}"  onclick="chooseValue(this);">星期二
+                <input  type= "checkbox"  name="wed" value="${workschedule.wed!}"  onclick="chooseValue(this);">星期三
+                <input  type= "checkbox"  name="thu" value="${workschedule.thu!}"  onclick="chooseValue(this);">星期四
+                <input  type= "checkbox"  name="fri" value="${workschedule.fri!}"  onclick="chooseValue(this);">星期五
+                <input  type= "checkbox"  name="sat" value="${workschedule.sat!}"  onclick="chooseValue(this);">星期六
+                <input  type= "checkbox"  name="sun" value="${workschedule.sun!}"  onclick="chooseValue(this);">星期日
+                <input  type= "checkbox" id="select_all_checkbox" >全选
+            </@p.formColmd>
+		</@p.formRow>
+		
+<!-- 		<@p.formRow> -->
+<!-- 			<@p.formColmd title="WORK_SCHEDULE_PLAN_ONLINE_QTY" permissionCode="WORK_SCHEDULE_PLAN_ONLINE_QTY"> -->
+<!-- 				 <input class="inputxt"  name="planOnlineQty" value="${workschedule.planOnlineQty!}" datatype="n" maxlength='36' ignore = "ignore">	 -->
+<!-- 			</@p.formColmd> -->
+<!-- 		</@p.formRow> -->
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+function rendClassGroup(value) {
+	return entryRenderer('CLASS_GROUP', value);
+}
+
+//公司产线联动 
+function plantLine_lisAdd(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/line/selectLineNameOrId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#lineId_addPage").empty(); //清空下拉列表
+				$("#lineId_addPage").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#lineId_addPage").append(" <option value='" + item.code + "'>"+item.name+"</option>");
+					});
+					
+					var optionSize = $("#lineId_addPage option").size();
+					if(optionSize==2){
+						$('#lineId_addPage option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { // 出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function lineClassManager_listAdd(obj){
+	$.ajax({
+		data:{plantId:$("#plantId_addPage").val(),lineId:obj},
+		url:"${baseUrl}/classManager/plantTolineToClassManager.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#shiftnoGroup").empty(); //清空下拉列表
+				$("#shiftnoGroup").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#shiftnoGroup").append(" <option value='" + item.id + "'>"+rendClassGroup(item.classGroup)+"</option>");
+					});
+					
+					var optionSize = $("#shiftnoGroup option").size();
+					if(optionSize==2){
+						$('#shiftnoGroup option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}	
+	
+</script>
+
+

@@ -1,0 +1,9 @@
+
+<#list workshopList as workshop>  
+	<span class="tree-icon tree-file role">&nbsp;</span>
+	<span >
+	<input style="vertical-align:middle;" type="checkbox" name="workshopIds" value='${workshop["id"]!}' <#if workshop.checked>checked='checked'</#if> />
+	</span><span style="vertical-align:middle;">${workshop["no"]!}-${workshop["name"]!}</span>
+	<br>
+</#list>
+

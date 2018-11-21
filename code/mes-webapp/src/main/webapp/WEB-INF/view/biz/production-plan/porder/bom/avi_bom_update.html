@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/aviBom/update.do" class="form-horizontal" idValue=bean.id permissionModule="AVI_BOM">
+		<@p.formRow>
+			<@p.formColmd title="BOM_DETAIL_ULOC" permissionCode="AVI_BOM_ULOC">
+				<@p.input type="select" disabled="disabled" value="${bean.tmUlocId}"  options=ulocOptions></@p.input>
+				<input type="hidden" name="tmUlocId" value="${bean.tmUlocId}" >
+			</@p.formColmd>
+			<@p.formColmd title="BOM_DETAIL_PART" permissionCode="AVI_BOM_PART">
+				<@p.input type="select" disabled="disabled" value="${bean.tmPartId}"   options=partOptions></@p.input>
+				<input type="hidden" name="tmPartId" value="${bean.tmPartId}" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BOM_DETAIL_QTY" permissionCode="AVI_BOM_QTY">
+				<input name="qty" id="update_qty"class="inputxt"  value="${bean.qty}" maxlength='16' datatype="n"/>
+			</@p.formColmd>
+			<@p.formColmd title="BOM_DETAIL_SEQ" permissionCode="AVI_BOM_SEQ">
+				<input name="seq" class="inputxt" value="${bean.seq}" maxlength='16' datatype="n" />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BOM_DETAIL_ISTRAC" permissionCode="AVI_BOM_ISTRAC">
+			<@p.input type="select" value="${bean.isTrac}" id="update_isTrac" field="isTrac" options=yesOrNoOptions  onchange="changeIstrac_update(this.value);" datatype="*"></@p.input>
+			</@p.formColmd>
+			<div id="isBatchTrac_update">
+			<@p.formColmd title="BOM_DETAIL_ISBATCHTRAC" permissionCode="AVI_BOM_ISBATCHTRAC">
+				<@p.input type="select"  value="${bean.isBatchTrac!}" id="update_isBatchTrac" field="isBatchTrac" options=yesOrNoOptions onchange="changeIsBatch_update(this.value);"datatype="*"></@p.input>
+			</@p.formColmd>
+			</div>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BOM_DETAIL_NOTE" permissionCode="AVI_BOM_NOTE">
+				<input name="note" class="inputxt"  maxlength='150' value="${bean.note!}" />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	if($("#update_isTrac").val()=="YES"){
+		$("#isBatchTrac_update").show();
+	}else{
+		$("#isBatchTrac_update").hide();
+	}
+});
+var isBatchTracValue = $("#update_isBatchTrac").val();
+function changeIstrac_update(value){
+	if(value=="YES"){
+		$("#update_isBatchTrac").attr("datatype","*");
+		$("#isBatchTrac_update").show();
+		$("#update_isBatchTrac").val(isBatchTracValue);
+	}else{
+		$("#update_isBatchTrac").val("");
+		$("#update_isBatchTrac").removeAttr("datatype");
+		$("#isBatchTrac_update").hide();
+	}
+}
+</script>

@@ -1,0 +1,9 @@
+
+<#list plantList as plants>  
+	<span class="tree-icon tree-file role">&nbsp;</span>
+	<span >
+	<input style="vertical-align:middle;" type="checkbox" name="plantIds" value='${plants["id"]!}' <#if plants.checked>checked='checked'</#if> />
+	</span><span style="vertical-align:middle;">${plants["no"]!}-${plants["name"]!}</span>
+	<br>
+</#list>
+

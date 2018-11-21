@@ -1,0 +1,125 @@
+package com.wis.mes.master.workcalendar.service;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Workbook;
+
+import com.wis.basis.excel.pojo.ExcelImportPojo;
+import com.wis.core.service.BaseService;
+import com.wis.mes.master.workcalendar.entity.TmWorktime;
+
+public interface TmWorktimeService extends BaseService<TmWorktime> {
+	String queryWorkTimeByParams(Integer tmPlantId, Integer tmWorkshopId, Integer tmLineId, String shiftno,
+			String[] workDate);
+
+	void deleteWorkTimeARestByIds(Integer[] ids);
+
+	Map<String, Object> exportExcelData(HttpServletResponse response, List<TmWorktime> list, String filePath,
+			String[] header);
+
+	Map<String, Object> exportExcelDataAll(HttpServletResponse response, List<TmWorktime> list, String parentHeadStr,
+			String childHeadStr, String filePath);
+
+	Workbook getWorkbookTemp(final String downName, final String templatePath);
+
+	String doImportExcelData(Workbook workbook, HttpServletRequest request);
+
+	/**
+	 * @desc 工作日历&休息时间联表导入
+	 * @param workbook
+	 * @param excelImportPojo
+	 * @param request
+	 * @return
+	 */
+	public String doImportExcelDataAll(Workbook workbook, ExcelImportPojo excelImportPojo, HttpServletRequest request);
+
+	Map<String, Object> getEveryShiftTime(TmWorktime worktime,Integer workTimeId,String enabledNo);
+
+	/**
+	 * 根据开始／结束工作时间+ 班次id查询工作日历是否存在
+	 * 
+	 * @param tmWorktime
+	 * @return
+	 */
+	Integer getWorkTime(Map<String, Object> map);
+
+	/**
+	 * 获取当前时间对应的工作日历
+	 * 
+	 * @param date
+	 */
+	TmWorktime thisWorkTime(Integer tmLineId);
+
+	/**
+	 * @author yajun_ren
+	 * @tmWorktimeId 工作日历时间
+	 * @rownum 每次查询多少条数据
+	 * @return String 根据当前班次获取休息时间
+	 **/
+	String breathingSpace(Integer tmWorktimeId, Integer rownum);
+
+	/**
+	 * @author yajun_ren
+	 * @return Map<String,Object> 给PLC发送工作时间，休息时间，当日计划
+	 **/
+	Map<String, Object> sendPlcWorkingCalendar();
+
+	/**
+	 * @author yajun_ren
+	 * @shiftno 班次
+	 * @tmLineId 产线 获取下个班次的工作日历
+	 **/
+	TmWorktime getNextFlight(String shiftno, Integer tmLineId);
+
+	/**
+	 * 翅片工作日历
+	 * 
+	 * @return
+	 */
+	Map<String, String> sendFinPlcWorkingCalendar();
+	
+	TmWorktime getWorkTimeByDayAndShiftno(String queryDay, String lineNo, String shiftNo);
+	
+	TmWorktime getDateWorkTime(Date queryDate, String lineNo);
+	
+	/**
+	 * @author yajun_ren
+	 * @param shiftno
+	 * @param tmLineId
+	 * 获取前一天的工作日历
+	 * ***/
+	TmWorktime lastDayWordkTime(String shiftno, Integer tmLineId);
+	
+	/**
+	 * @author yajun_ren
+	 * 检查下个班次有没有维护工作日历，没有的把前一天的工作日历，复制到当天
+	 * ***/
+	public void checkWorkTimeMain();
+
+    Long calcMinutes(TmWorktime tmWorktime);
+
+    Date getStartTime(TmWorktime tmWorktime);
+
+    Date getEndTime(TmWorktime tmWorktime);
+    
+    /***
+	 * @author yajun_ren
+	 * @return List<TmWorktime>
+	 * @param tmLineId shiftNo
+	 * 通过产线ID获取当天的工作日历
+	 * ***/
+	List<TmWorktime> todayWorkTime(Integer tmLineId,String shiftNo);
+	
+	/**
+	 * @desc钣金工作日历
+	 * 
+	 * @return
+	 */
+	Map<String, Object> sendBjPlcWorkingCalendar();
+	
+}

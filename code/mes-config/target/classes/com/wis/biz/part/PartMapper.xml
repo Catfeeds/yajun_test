@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PartMapper">
+
+	<select id="queryPartByType" resultType="com.wis.mes.master.part.entity.TmPart"  parameterType="java.util.HashMap" >
+		SELECT p.ID as id,p.NO as no,p.NAME_CN as p.nameCn from tm_part p WHERE p.type in ${type} AND p.ENABLED ='ON';
+	</select>
+	
+	<select id="queryPartBy" resultType="com.wis.mes.master.part.entity.TmPart"  parameterType="java.util.HashMap" >
+		<![CDATA[${sql} ]]>
+	</select>
+	
+	<select id="findByPage" resultType="java.util.Map"  parameterType="java.util.HashMap" >
+		SELECT a.ID,CONCAT(a.NO,'-',a.NAME_CN) AS NAME FROM (SELECT ID,NAME_CN,NO FROM TM_PART WHERE TYPE = 'FINISHED' ORDER BY ID) a LIMIT #{pageNow},5;
+	</select>
+	
+	<!-- 根据 主键集合 查询 不合格记录 -->
+	<select id="findByIds" resultType="java.util.Map" parameterType="java.util.HashMap">
+		${sql}
+	</select>
+</mapper>

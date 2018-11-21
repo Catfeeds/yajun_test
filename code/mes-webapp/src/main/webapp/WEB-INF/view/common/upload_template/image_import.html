@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<#include "../include/editorCommons.html">
+<script type="text/javascript">
+	$(function() {
+		initFileInput('rawFile', {
+			showUpload : false,
+			maxFileCount:1,
+			allowedFileExtensions :[${allowedFileExtensions}]
+		});
+	});
+	function beforeFileSubmit(curform) {
+		if ($('#rawFile').val() != "") {
+			curform.ajaxSubmit({
+				type : 'post',
+				url : '${importUrl}',
+				beforeSubmit : function() {
+					var target = document.getElementById('fileUploadForm');
+					spinner.spin(target);
+				},
+				success : function(data) {
+					if('${callback}' != ''){
+						window['${callback}']();
+					}
+					initValidFormCallback({
+						'success' : data.success,
+						'message' : data.message
+					});
+					spinner.spin();
+				}
+			});
+			return false;
+		} else {
+			return true;
+		}
+	}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm formId="fileUploadForm" url="${importUrl}" class="form-horizontal dialog-form" noPermissionModule="true" enctype="multipart/form-data">
+		<input type="hidden" id="beforeSubmit" value="beforeFileSubmit" >
+		<@p.formRow>
+			<@p.formColmd title="FRAME_UPLOAD_FILE" class="col-md-8">
+				<input id="rawFile" name="rawFile" type="file" class="file" required="required">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="FRAME_UPLOAD_TYPE" class="col-md-8">
+				 ${allowedFileExtensions}
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

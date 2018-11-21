@@ -1,0 +1,169 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+<script type="text/javascript">
+	function renderDataPermission(value) {
+		return entryRenderer('DATA_PERMISSION_MODULE', value);
+	}
+</script>
+<script type="text/javascript">
+	function clickcallback(dialog){
+		var selectedRows= getSelectedRows('dgDataPerSelectGrid');	
+		if (!selectedRows || selectedRows.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		$('#permissionId').val(selectedRows[0].id);
+		$('#permissionCode').val(selectedRows[0].code);
+		$('#relationCode').val(selectedRows[0].relationCode);
+		$('#module').val(renderDataPermission(selectedRows[0].module));
+		$('#url').val(selectedRows[0].url);
+		$('#description').val(selectedRows[0].description);
+		dialog.close();
+	}
+	function openChooseValueWin(){
+		if($("#permissionId").val().length < 1){
+			infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+			return;
+		}
+		BootstrapDialog.show({
+			size : BootstrapDialog.SIZE_WIDE,
+			title : '<@s.m code="PERMISSION_SELECT_VALUE" />【'+$("#module").val()+'】【'+$("#description").val()+'】',
+			message : function(dialog) {
+				var $message = $('<div></div>');
+				var pageToLoad = dialog.getData('pageToLoad');
+				$message.load(pageToLoad);
+
+				return $message;
+			},
+			buttons : [ {
+				label : commons_msg.btnConfirm,
+				cssClass : 'btn-primary',
+				action : function(dialogRef) {
+					
+					var selectedRows = getSelectedRows('dgdataPerSel');
+					if (!selectedRows || selectedRows.length == 0) {
+						infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+						return ;
+					}
+					 var str= $('#value').val();
+					 if(str.length > 0)str+=',';
+					 for(var i=0;i<selectedRows.length;i++){
+						 var selectedRow=selectedRows[i];
+						 str+=selectedRow[$("#relationCode").val()];
+						 str+=',';
+					 }
+					 if(str.length > 1)str=str.substring(0,str.length-1);
+					 $('#value').val(str);
+					 dialogRef.close();
+				}
+			}, {
+				label : commons_msg.btnClose,
+				cssClass : 'btn-default',
+				action : function(dialogRef) {
+					dialogRef.close();
+				}
+			} ],
+			data : {
+				'pageToLoad' : '${baseUrl}/dataPermissionRel/selectValue.do?pageId=dataPerSel&url='+$('#url').val()
+			}
+		});
+	}
+	function testSQL(){
+		if($("#permissionId").val().length < 1){
+			infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+			return;
+		}
+		if($("#sqlValue").val().length < 1){
+			infoTip('<@s.m code="PERMISSION_SQL_NULL" />');
+			return;
+		}
+		ajaxRequest('${baseUrl}/dataPermissionRel/testSQL.do',{'permissionId' : $("#permissionId").val(),'sql':$("#sqlValue").val()},function(){
+			grid.datagrid('reload');
+		});
+	}
+	function changeType(timeOut){
+		var type=$("#selType").val();
+		var showId='';
+		if('RANGE_DATE'==type){
+			showId="#divPermissionValueRangeDate";
+		}else if('RANGE_NORMAL'==type){
+			showId="#divPermissionValueRangeNormal";
+		}else if('SQL'==type){
+			showId="#divPermissionValueSQL";
+			infoTip('<@s.m code="PERMISSION_SQL" />');
+		}else {
+			showId="#divPermissionValueDefault";
+		}
+		$(showId).siblings().hide(timeOut);
+		$(showId).show(timeOut);
+	}
+	$(function(){
+		changeType(0);
+		var lang='${lang!}';
+		var params={};
+		if(lang=='en_US'){
+			params.lang='en';
+		}
+		$('#module').val(renderDataPermission('${bean.dataPermissionVo.module!}'));
+		$("#startTime,#endTime").focus(function(){
+			WdatePicker({dateFmt:'yyyy-MM-dd'});
+		});
+	});
+</script>
+<style type="text/css">
+</style>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/dataPermissionRel/update.do" class="form-horizontal" idValue=bean.id   permissionModule="DATA_PERMISSION">
+		<input type="hidden" name="permissionSetId" value="${bean.permissionSetId!}"/>
+	<@p.formRow class="row rowDivTop">
+		<@p.formColmd class="col-md-4" title="PERMISSION_CODE"  permissionCode="PERMISSION_CODE">
+			 <input name="permissionId"  type="hidden" id="permissionId" value="${bean.permissionId!}">
+			 <input name="code" readonly="readonly" class="inputxt" id="permissionCode" value="${bean.dataPermissionVo.code!}"/>
+			 <@p.select  title="PERMISSION_SELECT"   url="${baseUrl}/dataPermission/listSelect.do?currentPageId=DataPerSelectGrid&singleSelect=true" callback="clickcallback"/>
+		</@p.formColmd>
+		<@p.formColmd class="col-md-4" title="PERMISSION_RELATION_CODE"  permissionCode="PERMISSION_RELATION_CODE">
+			 <input name="relationCode" value="${bean.dataPermissionVo.relationCode!}" id="relationCode" readonly="readonly" class="inputxt" />
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow class="row rowDivTop">
+		<@p.formColmd class="col-md-4" title="PERMISSION_MODULE"  permissionCode="PERMISSION_MODULE">
+			 <input name="module" readonly="readonly"  class="inputxt" id="module" />
+		</@p.formColmd>
+		<@p.formColmd class="col-md-4" title="PERMISSION_URL"  permissionCode="PERMISSION_URL">
+				 <input name="url" readonly="readonly" class="inputxt" value="${bean.dataPermissionVo.url!}" id="url"/>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow class="row rowDivTop">
+		<@p.formColmd class="col-md-4" title="PERMISSION_DESCRIPTION"  permissionCode="PERMISSION_DESCRIPTION">
+			<textarea name="description" readonly="readonly" class="inputxt" id="description" style="width:98%">${bean.dataPermissionVo.description!}</textarea>
+		</@p.formColmd>
+		<@p.formColmd class="col-md-4" title="PERMISSION_TYPE"  permissionCode="PERMISSION_TYPE">
+				<@p.input type="select" excludeSelectOption="true" style="width:210px" field="type" id="selType" value=bean.type options=options onchange="changeType(300)"></@p.input>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow class="row rowDivTop">
+		<@p.formColmd class="col-md-4" title="PERMISSION_VALUE"  permissionCode="PERMISSION_VALUE">
+			<div id="divPermissionValueDefault" style="display: none;">
+			 <textarea name="value" datatype="*1-400"  ignore="ignore" id="value" style="width:100%" class="inputxt">${bean.value!}</textarea>
+			  <a href="#" class="linkbutton" plain="true" icon="magnifier" 	onClick="openChooseValueWin()" ><@s.m code="FRAME_CHOOSE" /></a>
+			</div>
+			<div id="divPermissionValueRangeDate" style="display: none;">
+				<input type="text" name="startTime" id="startTime" value="${bean.startTime!}"/> <a  class="linkbutton" plain="true">-&gt;</a>
+				<input type="text" name="endTime" id="endTime" value="${bean.endTime!}"/>
+			</div>
+			<div id="divPermissionValueRangeNormal" style="display: none;">
+				<input type="text" name="start" value="${bean.start!}" /> <a  class="linkbutton" plain="true">-&gt;</a>
+				<input type="text" name="end" value="${bean.end!}"/>
+			</div>
+			<div id="divPermissionValueSQL" style="display: none;">
+				<textarea  name="sql" datatype="*1-400" ignore="ignore" id="sqlValue" style="width:85%">${bean.sql!}</textarea>
+			  <a href="#" class="linkbutton" plain="true" icon="resultset_next" 	onClick="testSQL()" ><@s.m code="PERMISSION_SQL_TEST" /></a>
+			</div>
+		</@p.formColmd>
+	</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

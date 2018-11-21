@@ -1,0 +1,23 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body title="WORK_SCHEDULE_REST_LIST_TITLE" permissionModule="WORKSCHEDULEREST" noBreadcrumbs="true">
+   <div style="color: #428bca;text-align:center; margin:10px" >工作日历休息模板</div>
+	<@p.searchPanel>
+		<@p.toolbar> 
+			<@p.button title="WORK_SCHEDULE_REST_ADD" permissionCode="WorkScheduleRestAdd" iconCls="plus" url="${baseUrl}/workschedulerest/addInput.do?tmWorkscheduleId=${tmWorkscheduleId!}" type="add"></@p.button>
+			<@p.button title="WORK_SCHEDULE_REST_UPDATE" permissionCode="WorkScheduleRestUpdate" iconCls="edit" url="${baseUrl}/workschedulerest/updateInput.do" type="update"></@p.button>
+			<@p.button title="WORK_SCHEDULE_REST_DELETE" permissionCode="WorkScheduleRestDelete" iconCls="trash" url="${baseUrl}/workschedulerest/delete.do" type="delete"></@p.button>			
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/workschedulerest/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="WORK_SCHEDULE_REST_START_TIME"  field="startTime"    permissionCode="WORK_SCHEDULE_REST_START_TIME"></@p.column>
+		<@p.column title="WORK_SCHEDULE_REST_END_TIME"  field="endTime"    permissionCode="WORK_SCHEDULE_REST_END_TIME"></@p.column>
+	</@p.dataGrid> 
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+</script>

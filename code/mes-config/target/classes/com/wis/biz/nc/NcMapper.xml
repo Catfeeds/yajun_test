@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="NcMapper">
+	
+	<!--根据不合格组主键集 不合格代码条数 -->
+	<select id="getCountByNcGroupIds" resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT COUNT(*) FROM TM_NC WHERE TM_NC_GROUP_ID IN (#{ids});
+	</select>
+	
+	<!--根据 不合格组主键 查询 不合格代码列表 -->
+	<select id="findByNcGroupId" resultType="com.wis.mes.master.nc.entity.TmNc" parameterType="java.util.HashMap">
+		SELECT
+			ID,
+			TM_NC_GROUP_ID,
+			NO,
+			NAME,
+			EXT_CODE,
+			TYPE
+		FROM
+			TM_NC WHERE TM_NC_GROUP_ID = #{ncGroupId};
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="findByPage" resultType="com.wis.mes.master.nc.entity.TmNc" parameterType="java.util.HashMap">
+		SELECT a.ID,a.NAME FROM (SELECT ID,NAME FROM TM_NC ORDER BY ID) a LIMIT #{start},5;
+	</select>
+	
+	<!-- 获取条数 -->
+	<select id="getCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT COUNT(*) FROM TM_NC;
+	</select>
+	
+	<!-- 根据 不合格集 不合格代码/组 查询 不合格记录 -->
+	<select id="findByType" resultType="java.util.Map" parameterType="java.util.HashMap">
+		${sql}
+	</select>
+	
+</mapper>

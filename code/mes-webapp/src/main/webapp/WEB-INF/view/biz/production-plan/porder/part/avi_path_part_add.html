@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/avi/path/part/add.do" class="form-horizontal"   permissionModule="AVI_PATH_PART">
+		<input type ="hidden" name="toPorderAviPathId" value="${toPorderAviPathId}"/>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_PART" permissionCode="AVI_PATH_PART_NO">
+				 <@p.input type="select" id="ulocPartId" datatype="*" field="tmPartId" options=partOptions ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_QTY" permissionCode="AVI_PATH_PART_QTY">
+				<input name="qty" class="inputxt" datatype="n" maxlength='16' />
+			</@p.formColmd>
+			
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_SEQ" permissionCode="AVI_PATH_PART_SEQ">
+				<input name="seq" class="inputxt" datatype="n" maxlength='16' datatype="*"/>
+			</@p.formColmd>
+				<@p.formColmd title="PATH_ULOC_PART_ULOC_ISBATCHTRAC" permissionCode="AVI_PATH_PART_IS_BATCH_TRAC">
+				 <@p.input type="select" id="add_isBatchTrac"  field="isBatchTrac" datatype="*" options=yesOrNoOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_NOTE" permissionCode="AVI_PATH_PART_NOTE">
+				<input name="note" class="inputxt"  maxlength='150' />
+			</@p.formColmd>
+		</@p.formRow>	
+	</@p.editForm>
+</body>
+</html>

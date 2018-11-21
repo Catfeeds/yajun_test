@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<script type="text/javascript">
+function workScheduleOncheng(){
+	if($("#workSchedule").val()==""){
+		return;
+	}
+	$.ajax({
+		data:{workSchedule:$("#workSchedule").val(),taskDate:'${bean.taskDate!}'},
+		url:"${baseUrl}/mpSourceData/workScheduleChange.do",
+		dataType : 'json', 
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.msg){
+					errorTip(result.msg);
+					$("#tmWorktimeId").val("");
+				}
+			} else {
+				$("#tmWorktimeId").val(result.tmWorktimeId);
+			}
+		},
+		error : function(result, status) {}
+	});
+}
+function checkValue(){
+	if(!$("#tmWorktimeId").val()){
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_TMWORKTIMEID_ERROR'/>");
+		return false;
+	}
+}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/mpSchedul/single.do" class="form-horizontal" idValue=bean.id permissionModule="PRODUCTION_SCHEDULE">
+	<input type="hidden" id="beforeSubmit" value="checkValue">
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_MACHININGSURFACE" permissionCode="MODEL">
+				<@p.input type="text" value="${msbean.machiningSurface!}" readonly="readonly" options=smMachiningSurface></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_PROGRAMNUMBER" permissionCode="MODEL">
+				<@p.input type="text" field="model" id="model" value="${msbean.programNumber!}" options=smMachiningSurface readonly="readonly"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+
+		<@p.formRow>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_APCTOTALNUMBER" permissionCode="APCTOTALNUMBER">
+				 <input name="apcTotalNumber" type="text" readonly="readonly" value="${bean.apcTotalNumber!}" id="apcTotalNumber"/>
+			</@p.formColmd>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_PLANNEDPRODUCTION" permissionCode="PLANNEDPRODUCTION">
+				 <input name="plannedProduction" type="text" readonly="readonly" value="${bean.plannedProduction!}" id="plannedProduction"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_INVENTORYNUMBER" permissionCode="INVENTORYNUMBER">
+				 <input name="inventoryNumber" value="${bean.inventoryNumber!}" id="inventoryNumber" readonly="readonly"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_WORKSCHEDULE" permissionCode="WORKSCHEDULE">
+				<@p.input type="select" value="" id="workSchedule" field="workSchedule" datatype="*" options=smCodeClassOrder onchange="workScheduleOncheng()"></@p.input>
+				 <input name="tmWorktimeId" type="hidden" id="tmWorktimeId"/>
+			</@p.formColmd>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_S_DISPATCHNUMBER" permissionCode="S_DISPATCHNUMBER">
+				 <input name="dispatchNumber" type="number" value="0" id="dispatchNumber" datatype="*" ajaxurl="${baseUrl}/mpSchedul/checkDispatchNumber.do?id=${bean.id}"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

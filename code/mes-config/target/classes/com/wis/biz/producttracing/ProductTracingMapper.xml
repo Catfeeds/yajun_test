@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProductTracingMapper">
+	<select id="getEgModelName" resultType="java.lang.String" parameterType="java.util.HashMap">
+		select 
+			<!-- t.EG_MODEL_NAME  -->
+			t.EG_PRODUCT_CODE
+		from GSVX_GM_MV t 
+			WHERE 
+			t.SEBANGO=#{backNumber}
+			AND (t.EG_PRODUCT_RESP_FACTORY='AQ' OR t.EG_PRODUCT_FACTORY='AQ' OR t.EG_PRODUCT_FACTORY='FJ')	
+	</select>
+	
+	<update id="doUpdatePlcRfidStatus" parameterType="java.util.HashMap">
+		update TABLE_RFID_WRITE set READ_WRITE_FLAG = #{readWriteFlag},SN=#{sn} where TYPE = 'IS_READ_WRITE'
+	</update>
+	
+	<select id="readWriteFlag" resultType="java.lang.String" parameterType="java.util.HashMap">
+		select to_char(READ_WRITE_FLAG) from TABLE_RFID_WRITE where TYPE = #{type}
+	</select>
+
+	<select id="getLineIdAndUlocIdByNo" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		select t.id ulocId,t.tm_line_id lineId from tm_uloc t where t.no = #{ulocNo}
+	</select>
+	<select id="getStaffIdBy" resultType="java.lang.Integer"  parameterType="java.util.HashMap">
+	select e.id staffId
+          from tm_class_manager_detail t
+          left join tm_employee_no e
+            on e.id = t.tm_employee_no_id
+         where tm_uloc_id = #{ulocId}
+           and tm_class_manager_id =#{tmClassManagerId}
+           and rownum = 1	
+	</select>
+	<select id="getCunrrentWorkTime" resultType="com.wis.mes.master.workcalendar.entity.TmWorktime"  parameterType="java.util.HashMap">
+		select tab.*
+                  from (select t.id as id,
+                   			   t.shiftno as shiftno,
+                               t.tm_class_manager_id tmClassManagerId,
+                               to_char(t.work_date, 'yyyy-MM-dd') || ' ' ||
+                               t.start_time as startTime,
+                               case
+                                 when t.end_time &lt; t.start_time then
+                                  to_char(t.work_date + 1, 'yyyy-MM-dd') || ' ' ||
+                                  t.end_time
+                                 else
+                                  to_char(t.work_date, 'yyyy-MM-dd') || ' ' ||
+                                  t.end_time
+                               END endTime
+                          from tm_worktime t where  t.tm_line_id=#{tmLineId} and t.enabled='ON') tab
+                 where rownum = 1
+                   and sysdate between
+                       to_date(tab.startTime, 'yyyy-MM-dd HH24:mi:ss') and
+                       to_date(tab.endTime, 'yyyy-MM-dd HH24:mi:ss')
+	</select>
+	<select id="getProductIdBySn" resultType="java.lang.Integer"  parameterType="java.util.HashMap" >
+		select t.id from tb_product_tracing t where t.sn =#{sn} and rownum =1
+	</select>
+	
+	<update id="updateUnhealthyCount" parameterType="java.util.HashMap" >
+		update tb_product_tracing set UNHEALTHY_COUNT=(select (UNHEALTHY_COUNT+1) from tb_product_tracing where sn=#{sn}) where sn=#{sn}
+	</update>
+	
+	<update id="updateFinshTime" parameterType="java.util.HashMap" >
+		update tb_product_tracing set finish_time=to_char(sysdate,'hh24:mi:ss'),update_time=sysdate where sn =#{sn}
+	</update>
+	
+	<select id="getTbProductTracingSn" resultType="com.wis.mes.production.producttracing.entity.TbProductTracing"  parameterType="java.util.HashMap" >
+		SELECT t.*,rownum FROM tb_product_tracing t where t.sn =#{sn} and rownum = 1
+	</select>
+</mapper>

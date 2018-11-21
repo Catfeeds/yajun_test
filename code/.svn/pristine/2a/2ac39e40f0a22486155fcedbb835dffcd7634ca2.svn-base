@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RoleMasterSetMapper">
+
+	<select id="queryRoleMasterSet" resultType="com.wis.mes.master.rolemaster.entity.TsRoleMasterSet"  parameterType="java.util.HashMap" >
+		SELECT t.ID,t.USER_ID,t.ROLE_ID,t.TM_PLANT_ID,t.TM_WORKSHOP_ID,t.TM_LINE_ID,t.TM_ULOC_ID
+		  from ts_role_master_set t
+		 where t.ROLE_ID = #{roleId}
+	</select>
+	<delete id="deletePlantRelationById" parameterType="java.util.Map">
+        delete from ts_role_master_set where USER_ID = #{userId} and ROLE_ID=#{roleId} and TM_PLANT_ID in 
+          <foreach item="item" index="index" collection="plantIds" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+   </delete>
+   <delete id="deleteByRoleId">
+    delete from ts_role_master_set where ROLE_ID=#{roleId}
+   </delete>
+   
+   <select id="queryRoleIdsByUserId" resultType="java.lang.String"  parameterType="java.util.HashMap" >
+		SELECT GROUP_CONCAT(tru.role_id separator ',') 
+		  from tr_role_user tru
+		 where tru.USER_ID=#{userId}
+	</select>
+	
+	<select id="queryPlantIdsByUserIdAndRoleIds" resultType="java.lang.String"  parameterType="java.util.HashMap" >
+		SELECT GROUP_CONCAT(tr.TM_PLANT_ID separator ',') 
+		  from ts_role_master_set tr
+		 where tr.USER_ID=#{userId}
+		   and tr.TM_PLANT_ID is not null
+		    and tr.ROLE_ID in 
+          <foreach item="item" index="index" collection="roleIds" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+	</select>
+	
+	<select id="queryUserIdByRoleIds" resultType="java.lang.String"  parameterType="java.util.HashMap">
+		SELECT GROUP_CONCAT(tru.user_id separator ',') 
+		  from tr_role_user tru
+		 where tru.ROLE_ID=#{roleId}
+	</select>
+	<select id="getCountByCurrUser" resultType="java.lang.Integer"  parameterType="java.util.HashMap">
+		SELECT COUNT(*) FROM TS_ROLE_MASTER_SET WHERE ROLE_ID IN (SELECT ROLE_ID FROM TR_ROLE_USER WHERE USER_ID = #{currUser});
+	</select>
+</mapper>

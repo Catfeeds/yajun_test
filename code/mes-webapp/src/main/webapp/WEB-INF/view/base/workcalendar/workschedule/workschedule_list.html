@@ -1,0 +1,326 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script>
+ $('#dg${currentPageId}').on('click-row.bs.table', function (e, row, $element) {
+	 	var parameters = {currentPageId:"workschedulerestId",params:"queryCondition[tmWorkscheduleId]="+row.id,tmWorkscheduleId:row.id};
+		ajaxResponseHtml('${baseUrl}/workschedulerest/listInput.do',parameters,'workschedulerestShow');
+	});
+ function returnRows() {
+		var rows=getSelectedRows('dg${currentPageId}');
+		if (rows.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+	 return rows;
+ }
+ 
+ function generateCurrentWeekTemplete() {
+	var rows = returnRows();
+	var workscheduleIds = null;
+	if (rows.length > 0) {
+		 for (var i = 0; i < rows.length; i++) {
+			 workscheduleIds = workscheduleIds + rows[i].id + ",";
+			 if (rows[i].enabled == "OFF") {
+				 infoTip("选中的第" + (parseInt(i) + parseInt(1)) + "行未启用，请先启用再生成模板！");
+				 return false;
+			 }
+		 }
+	    var msg = "生成本周日历时，是否设置包含当天？"; 
+		 var isCoveredValue;
+		 alternativeWindow(msg,function(){ 
+			 isCoveredValue = "Y";
+			 doGenerateCurrent(isCoveredValue,workscheduleIds);
+		 },function(){
+		 	isCoveredValue = "N";
+		 	doGenerateCurrent(isCoveredValue,workscheduleIds);
+		 });
+		 
+		
+		 
+	}
+ }
+ 
+  function doGenerateCurrent(isCoveredValue,workscheduleIds){
+	 	$.ajax({
+			url: "${baseUrl}/workschedule/checkIsGenerateWorkTime.do",
+	        dataType : 'json',
+	        async: false,
+	        data : {"isCoveredValue":isCoveredValue,
+	        	   "ids": workscheduleIds
+	               },
+	        success: function(result){
+	        	if (result.msg != null && result.msg !="") {
+	        		 if (confirm(result.msg)==true){
+	        			 deleteWorkTimeARestByIds(result.workTimeIds);
+	        		 } else {
+	        			 return false;
+	        		 }
+	        	}
+	        	 $.ajax({
+ 					url: "${baseUrl}/workschedule/generateCurrentWeekTemplete.do",
+ 			        dataType : 'json',
+ 			        async: false,
+ 			        data : {"isCoveredValue":isCoveredValue,
+ 			        	   "ids": workscheduleIds
+ 			               },
+ 			        success: function(result){
+ 			        	if (result.returnMsg == "success") {
+ 			        		infoTip("工作日历模板已生成！");
+ 			        	}
+ 			        },
+ 			        error : function(result, status) {
+ 						if (status == 'error') {
+ 							alert(status);
+ 						}
+ 					}
+ 				});
+	    	
+	        },
+	        error : function(result, status) {
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+		 
+	}
+ function deleteWorkTimeARestByIds(ids) {
+	 $.ajax({
+			url: "${baseUrl}/worktime/deleteWorkTimeARestByIds.do",
+	        dataType : 'text',
+	        async: false,
+	        data : {
+	        	    "ids":ids
+	               },
+	        success: function(result){
+	        
+	        },
+	        error : function(result, status) {
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+ }
+ function generateNextWeekTemplete() {
+	 var rows = returnRows();
+	 var workscheduleIds = null;
+	 for (var i = 0; i < rows.length; i++) {
+		 workscheduleIds = workscheduleIds + rows[i].id + ",";
+		 if (rows[i].enabled == "OFF") {
+			 infoTip("选中的第" + (parseInt(i) + parseInt(1)) + "行未启用，请先启用再生成模板！");
+			 return false;
+		 }
+	 }
+	 $.ajax({
+			url: "${baseUrl}/workschedule/checkIsGenerateWorkTime.do",
+	        dataType : 'json',
+	        data : {"isCoveredValue":"",
+	        	   "ids": workscheduleIds
+	               },
+	        success: function(result){
+	        	if (result.msg != null && result.msg !="") {
+	        		 if (confirm(result.msg)==true){
+	        			 deleteWorkTimeARestByIds(result.workTimeIds);
+	        		 } else {
+	        			 return false;
+	        		 }
+	        	}
+	        	 $.ajax({
+	     			url: "${baseUrl}/workschedule/generateNextWeekTemplete.do",
+	     	        dataType : 'json',
+	     	        data : {
+	     	        	     "ids": workscheduleIds
+	     	               },
+	     	        success: function(result){
+	     	        	if (result.returnMsg == "success") {
+ 			        		infoTip("工作日历模板已生成！");
+ 			        	}
+	     	        },
+	     	        error : function(result, status) {
+	     				if (status == 'error') {
+	     					alert(status);
+	     				}
+	     			}
+	     		});
+	    	
+	        },
+	        error : function(result, status) {
+	       		
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+	});
+	}
+</script>
+<@p.body title="WORK_SCHEDULE_LIST_TITLE" permissionModule="WORKSCHEDULE">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="WORK_SCHEDULE_NO"  field="no"></@p.input>
+			<@p.input title="WORK_SCHEDULE_PLANT" id="plantId" type="select"  onchange="plantWorkshopCascade_lisPage(this.value);" field="tmPlantId" options=plant ></@p.input>
+			<@p.input title="WORK_SCHEDULE_LINE" id="lineId" type="select" field="tmLineId" options=line></@p.input>
+			<@p.input title="WORK_SCHEDULE_SHIFTNO_ID" id="shiftNo"   type="select" field="shiftnoId" options=shiftType></@p.input>
+		</@p.searchColumns>
+
+		<@p.toolbar id="toolbar"> 
+			<@p.button title="WORK_SCHEDULE_ADD" permissionCode="WorkScheduleAdd" iconCls="plus" url="${baseUrl}/workschedule/addInput.do" type="add"></@p.button>
+			<@p.button title="WORK_SCHEDULE_UPDATE" permissionCode="WorkScheduleUpdate" iconCls="edit" url="${baseUrl}/workschedule/updateInput.do" type="update"></@p.button>
+			<@p.button title="WORK_SCHEDULE_DELETE" permissionCode="WorkScheduleDelete" iconCls="trash" url="${baseUrl}/workschedule/delete.do" type="delete"></@p.button>
+			<@p.button title="GENERATE_CURRENT_WEEK_TEMPLETE" permissionCode="GenerateCurrentWeekTemplete" iconCls="envelope" onclick="generateCurrentWeekTemplete()" ></@p.button>
+			<@p.button title="GENERATE_NEXT_WEEK_TEMPLETE" permissionCode="GenerateNextWeekTemplete" iconCls="envelope" onclick="generateNextWeekTemplete()"  ></@p.button>
+			
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/workschedule/list.do" >
+		<@p.column checkbox="true" ></@p.column>
+			<@p.column title="WORK_SCHEDULE_LINE" field="line.nameCn"   permissionCode="WORK_SCHEDULE_LINE" formatter="renderLineNoOrName"></@p.column>
+			<@p.column title="WORK_SCHEDULE_START_TIME"  field="startTime" permissionCode="WORK_SCHEDULE_START_TIME"></@p.column>
+			<@p.column title="WORK_SCHEDULE_END_TIME"  field="endTime"    permissionCode="WORK_SCHEDULE_END_TIME"></@p.column>
+			<@p.column title="WORK_SCHEDULE_NO" field="no"   permissionCode="WORK_SCHEDULE_NO" ></@p.column>
+			<@p.column title="WORK_SCHEDULE_PLANT" field="plant.no"   permissionCode="WORK_SCHEDULE_TM_PLANT"></@p.column>
+			<@p.column title="WORK_SCHEDULE_SHIFTNO_ID" field="shiftnoId" formatter="renderType2" permissionCode="WORK_SCHEDULE_SHIFTNO_ID"></@p.column>
+			<@p.column title="WORK_SCHEDULE_MON"  field="mon"    permissionCode="WORK_SCHEDULE_MON" formatter="weekShow"></@p.column>
+			<@p.column title="WORK_SCHEDULE_TUE"  field="tue"    permissionCode="WORK_SCHEDULE_TUE" formatter="weekShow"></@p.column>
+			<@p.column title="WORK_SCHEDULE_WED" field="wed"  permissionCode="WORK_SCHEDULE_WED" formatter="weekShow"></@p.column>
+			<@p.column title="WORK_SCHEDULE_THU"  field="thu"    permissionCode="WORK_SCHEDULE_THU" formatter="weekShow"></@p.column>
+			<@p.column title="WORK_SCHEDULE_FRI"  field="fri"    permissionCode="WORK_SCHEDULE_FRI" formatter="weekShow"></@p.column>
+			<@p.column title="WORK_SCHEDULE_SAT"  field="sat"    permissionCode="WORK_SCHEDULE_SAT" formatter="weekShow"></@p.column>
+			<@p.column title="WORK_SCHEDULE_SUN" field="sun"  permissionCode="WORK_SCHEDULE_SUN" formatter="weekShow"></@p.column>
+	</@p.dataGrid> 
+	<div id ="workschedulerestShow"></div>
+</@p.body>
+<!-- inline scripts related to this page -->
+ <script type="text/javascript">
+ function rendClassGroup(value) {
+		return entryRenderer('CLASS_GROUP', value);
+}
+    function importData(){
+    	var obj = new Object();
+    	obj.templateUrl = "${baseUrl}/workschedule/exportTemplate.do"
+		importFile("<@s.m code="WORK_SCHEDULE_IMPORT" />", "${baseUrl}/workschedule/importData.do", "dg${currentPageId}",obj);
+	}
+    function importDataAll(){
+    	var obj = new Object();
+    	obj.templateUrl = "${baseUrl}/workschedule/exportTemplateAll.do"
+		importFile("<@s.m code="WORK_SCHEDULE_IMPORT_ALL" />", "${baseUrl}/workschedule/importDataAll.do", "dg${currentPageId}",obj);
+	}
+ 
+    function rendEnabled(value) {
+		return entryRenderer('ENABLED', value);
+	}
+	function renderType1(value){
+		return entryRenderer('WEEK_VALUE',value);
+	}
+	function renderType2(value){
+		return entryRenderer('SHIFT_TYPE',value);
+	}
+	function weekShow(value) {
+		if (value == "ON") {
+			return "√";
+		}
+	}
+	function renderPlantNoOrName(value,record) {
+		if(value && record.plant.no){
+			return record.plant.no+ " - " + value;
+		}
+		return "";
+	}
+	function renderWorkShopNoOrName(value,record) {
+		if(value || record.workshop.no){
+			return record.workshop.no+ " - " + value;
+		}
+		return "";
+	}
+	function renderLineNoOrName(value,record) {
+		if(value || record.line.no){
+			return record.line.no+ " - " + value;
+		}
+		return "";
+	}
+	
+	//工厂车间 联动 
+	function plantWorkshopCascade_lisPage(obj){
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/line/selectWShopNameOrID.do",
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				try {
+					$("#workshopId").empty(); //清空下拉列表
+					$("#workshopId").append(" <option value=''>-----请选择-----</option>");
+					$(result).each(
+						function(i, item) {
+							$("#workshopId").append(" <option value='" + item.id + "'>"+item.no+" - " +item.nameCn+ "</option>");
+						});
+					} catch (e) {
+						alert(e);
+					return;
+					}
+				},
+			error : function(result, status) { // 出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+	
+	function workshopLineCascade_listPage(obj){
+		$.ajax({
+			data:{workShopId:obj,
+				  plantId: $("#plantId").val()},
+			url:"${baseUrl}/line/selectLineNameOrId.do",
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				try {
+					$("#lineId").empty(); //清空下拉列表
+					$("#lineId").append(" <option value=''>-----请选择-----</option>");
+					$(result).each(
+						function(i, item) {
+							$("#lineId").append(" <option value='" + item.id + "'>"+item.no+" - " +item.nameCn+ "</option>");
+						});
+					} catch (e) {
+						alert(e);
+					return;
+					}
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+	
+	function alternativeWindow(message,yesCallbck,noCallback) {
+		BootstrapDialog.show({
+			title : '提示信息',
+			closeByBackdrop: false,
+			draggable: true,
+			message : function(dialog) {
+				return message;
+			},
+			buttons : [ {
+				label : '是',
+				cssClass : 'btn-primary',
+				action : function(dialogRef) {
+					if(yesCallbck){
+						yesCallbck();
+					}
+					dialogRef.close();
+				}
+			}, {
+				label : '否',
+				cssClass : 'btn-default',
+				action : function(dialogRef) {
+					if(noCallback){
+						noCallback();
+					}
+					dialogRef.close();
+				}
+			}]
+		});
+
+	}
+</script>

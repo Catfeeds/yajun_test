@@ -1,0 +1,42 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body title="PATH_LIST_TITLE" permissionModule="AVI_PATH_SIP" noBreadcrumbs="true">	
+<!-- <div style="color: #428bca;text-align:center; margin:10px" >参数信息</div> -->
+<input id="toPorderAviPathId" type="hidden" value="${toPorderAviPathId!}" />
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathSipAdd" iconCls="plus" url="${baseUrl}/avi/path/sip/addInput.do?toPorderAviPathId=${toPorderAviPathId}" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathSipUpdate" iconCls="edit" url="${baseUrl}/avi/path/sip/updateInput.do?toPorderAviPathId=${toPorderAviPathId}"  type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathSipDelete" iconCls="trash" url="${baseUrl}/avi/path/sip/delete.do" type="delete"></@p.button>
+<!-- 			<@p.button title="PATH_IMPORT" permissionCode="PathSipImport" downName="PATH_ULOC_SIP_IMPORT_NAME" onclick="importData();" iconCls="signin" /> -->
+			<@p.button title="PATH_EXPORT" permissionCode="PathSipExport" downName="PATH_ULOC_SIP_EXPORT_NAME" url="${baseUrl}/avi/path/sip/exportData.do?toPorderAviPathId=${toPorderAviPathId}"   iconCls="upload-alt" type="down" />
+<!-- 			<@p.button title="PATH_EXPORT_TEMPLTE" permissionCode="PathSipImport" iconCls="upload-alt"  url="${baseUrl}/avi/path/sip/exportTemplate.do" type="down"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/avi/path/sip/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_CODE" field="parameter.code" permissionCode="AVI_PATH_SIP_CODE"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_NAME" field="parameter.name" permissionCode="AVI_PATH_SIP_NAME" ></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_VARIUABLE_NAME" field="parameter.variuableName" permissionCode="AVI_PATH_SIP_VARIUABLE_NAME"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_DEFAULT_VALUE" field="parameter.defaultValue" permissionCode="AVI_PATH_SIP_DEFAULT_VALUE" ></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_REGULAR_EXPRESSION" field="parameter.regularExpression" permissionCode="AVI_PATH_SIP_REGULAR_EXPRESSION" ></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_PARAMETER_NOTE" field="parameter.note" permissionCode="AVI_PATH_SIP_PARAMETER_NOTE"></@p.column>
+		<@p.column title="AVI_PATH_PARAMETER_NOTE" field="note" permissionCode="AVI_PATH_SIP_NOTE"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+/* function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+} */
+/* function renderParameterNo(value){
+	if(record.part&&record.part.no){
+		return record.part.no+ " - " + record.part.nameCn;
+	}
+} */
+
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

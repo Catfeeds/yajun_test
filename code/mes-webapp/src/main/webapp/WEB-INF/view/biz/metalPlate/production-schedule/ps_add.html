@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<script type="text/javascript">
+function modelChange(){
+	if($("#model").val()==""){
+		return;
+	}
+	$.ajax({
+		data:{model:$("#model").val()},
+		url:"${baseUrl}/mpSourceData/modelChange.do",
+		dataType : 'json', 
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.msg){
+					errorTip(result.msg);
+					$("#inventoryNumber").val("");
+				}
+			} else {
+				$("#inventoryNumber").val(result.inventoryNumber);
+				apcTotalNumberChange();
+			}
+		},
+		error : function(result, status) {}
+	});
+	apcTotalNumberChange();
+}
+function workScheduleChange(nextDate){
+	if(!nextDate){
+		nextDate = $("#taskDate1").val();
+	}
+	if($("#workSchedule").val()=="" || nextDate=="" ){
+		return;
+	}
+	$.ajax({
+		data:{workSchedule:$("#workSchedule").val(),taskDate:nextDate},
+		url:"${baseUrl}/mpSourceData/workScheduleChange.do",
+		dataType : 'json', 
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.msg){
+					errorTip(result.msg);
+					$("#sendPeriodTime").val("");
+				}
+			} else {
+				$("#sendPeriodTime").val(result.sendPeriodTime);
+			}
+		},
+		error : function(result, status) {}
+	});
+}
+function apcTotalNumberChange(){
+	if($("#model").val()=="" || $("#apcTotalNumber").val()=="" || $("#apcTotalNumber").val()==0){
+		return;
+	}
+	$.ajax({
+		data:{apcTotalNumber:$("#apcTotalNumber").val(),model:$("#model").val(),inventoryNumber:$("#inventoryNumber").val()},
+		url:"${baseUrl}/mpSourceData/apcTotalNumberChange.do",
+		dataType : 'json', 
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.msg){
+					errorTip(result.msg);
+					$("#plannedProduction").val("");
+				}
+			} else {
+				$("#plannedProduction").val(result.plannedProduction);
+			}
+		},
+		error : function(result, status) {}
+	});
+}
+function checkValue(){
+	if(!$("#plannedProduction").val()){
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_PLANNEDPRODUCTION_ERROR'/>");
+		return false;
+	}
+	/* if(!$("#sendPeriodTime").val()){
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_SENDPERIODTIME_ERROR'/>");
+		return false;
+	} */
+	var isSubmit = true;
+	
+	$.ajax({
+		data:{taskDate:$("#taskDate1").val(),model:$("#model").val(),workSchedule:$("#workSchedule").val(),dataType:$("#dataType").val()},
+		url:"${baseUrl}/mpSourceData/addDataCheck.do",
+		dataType : 'json', 
+		async:false,
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.info){
+					errorTip(result.info);
+					isSubmit=false;
+					return false;
+				}
+			}
+		},
+		error : function(result, status) {}
+	});
+	return isSubmit;
+}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/mpSourceData/add.do" class="form-horizontal"   permissionModule="PRODUCTION_SCHEDULE">
+	<input type="hidden" id="beforeSubmit" value="checkValue">
+		<@p.formRow>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_TASKDATE" permissionCode="TASKDATE">
+				<input name="taskDate" id="taskDate1" type="text" class="inputxt" datatype="*" onclick="WdatePicker({onpicking:function(dq){workScheduleChange(dq.cal.getNewDateStr());},dateFmt:'yyyy-MM-dd'})"/>
+				<input name="dataType" value="2" type="hidden"/>
+			</@p.formColmd>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_MODEL" permissionCode="MODEL">
+				<@p.input  type="multiple" multipleSelect="false"  datatype="*" id="model" field="model" options=smMachiningSurface onchange="modelChange()"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_APCTOTALNUMBER" permissionCode="APCTOTALNUMBER">
+				<input name="apcTotalNumber" id="apcTotalNumber" class="inputxt" datatype="*" errormsg="<@s.m code='ERROR_NUMBER'/>" maxlength='10' onkeyup="value=value.replace(/[^\d]/g,'')" onblur="apcTotalNumberChange();"/>
+				 <input name="inventoryNumber" id="inventoryNumber" value="0" type="hidden"/>
+			</@p.formColmd>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_PLANNEDPRODUCTION" permissionCode="PLANNEDPRODUCTION">
+				<input name="plannedProduction" id="plannedProduction" class="inputxt" readonly="readonly"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<!-- <@p.formRow>
+		 	<@p.formColmd title="PRODUCTIONSCHEDULE_WORKSCHEDULE" permissionCode="WORKSCHEDULE">
+				<@p.input type="select" field="workSchedule" id="workSchedule" options=smCodeClassOrder datatype="*" onchange="workScheduleChange()"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_SENDPERIODTIME" permissionCode="SENDPERIODTIME">
+				<input name="sendPeriodTime" id="sendPeriodTime" class="inputxt" readonly="readonly"/>
+			</@p.formColmd>
+		</@p.formRow> -->
+	</@p.editForm>
+	<div style="height:100px;"></div>
+</body>
+</html>

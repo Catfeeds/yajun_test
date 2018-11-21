@@ -1,0 +1,82 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+
+function addCounterSign(){
+    var rowsData = getSelectedRows('processNodeGrid');
+	if (!rowsData || rowsData.length==0) {
+		infoTip('<@s.m code="NO_CHOOSE_DATA"/>');
+		return;
+	}
+	if (rowsData.length>1) {
+		infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+		return;
+	}
+	if(rowsData[0].multiInstance == 'N'){
+		infoTip(commons_msg.notCountersignNode);
+		return;
+	}
+	var nodeId = rowsData[0].id;
+	var definitionId = rowsData[0].definitionId;
+	var url = '${baseUrl}/bpm/nodeConfig/addCounteSignInput.do?processDefinitionId='+definitionId+'&nodeId='+nodeId;
+    createwindow('<@s.m code="PROCESS_BUT_CONFIGURATION" />',url,'processNodeGrid');
+}
+function renderCounterSign(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+function renderRecall(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+function configRecall(type) {
+	var rowsData = getSelectedRows('processNodeGrid');
+	if (!rowsData || rowsData.length==0) {
+		infoTip('<@s.m code="NO_CHOOSE_DATA"/>');
+		return;
+	}
+	if (rowsData.length>1) {
+		infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+		return;
+	}
+	if(rowsData[0].enableRecall == type) {
+		return;
+	}
+	ajaxRequest('${baseUrl}/bpm/nodeConfig/configRecall.do',
+		{
+			'id' :  rowsData[0].id,
+			'enableRecall' : type
+		},function(){
+    	reloadTable('processNodeGrid');
+	});
+}
+function configDelayAlert(){
+    var rowsData = getSelectedRows('processNodeGrid');
+	if (!rowsData || rowsData.length==0) {
+		infoTip('<@s.m code="NO_CHOOSE_DATA"/>');
+		return;
+	}
+	if (rowsData.length>1) {
+		infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+		return;
+	}
+	var nodeId = rowsData[0].id;
+	var url = '${baseUrl}/bpm/delayAlertConfig/listInput.do?nodeId='+nodeId;
+	createdetailwindow('<@s.m code="DELAY_ALERT_CONFIGRATION" />:'+rowsData[0].name,url,'processNodeGrid');
+}
+</script>
+<@p.body title="PROCESS_BUT_CONFIGURATION" noPermissionModule="true" noBreadcrumbs="true">
+	<@p.searchPanel gridId="processNodeGrids">
+		<@p.toolbar id="processNodeGridss">
+			<!-- <@p.button title="COUNTERSIGN_CONFIGURATION"  permissionCode="ProcessSign" onclick="addCounterSign()" iconCls="pause"></@p.button> -->
+			<@p.button title="ENABLE_RECALL"  onclick="configRecall('Y')" iconCls="adjust"></@p.button>
+			<@p.button title="DISABLE_RECALL"  onclick="configRecall('N')" iconCls="ban-circle"></@p.button>
+			<@p.button title="DELAY_ALERT_CONFIGRATION" onclick="configDelayAlert()" iconCls="bell"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/nodeConfig/nodeList.do?queryCondition[definitionId]=${definitionId}" id="processNodeGrid">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="TASK_REMIND_NODE_NAME" field="name" sortable="false" permissionCode="NODE_NAME"></@p.column>
+		<@p.column title="COUNTERSIGN_NODE" field="multiInstance" formatter="renderCounterSign" sortable="false"></@p.column>
+		<@p.column title="ENABLE_RECALL" field="enableRecall" formatter="renderRecall" sortable="false"></@p.column>
+		<@p.column title="TASK_REMIND_NODE_DESCRIPTION" sortable="false" width="300" field="description" permissionCode="NODE_DESCRIPTION"></@p.column>
+	</@p.dataGrid>
+</@p.body>	

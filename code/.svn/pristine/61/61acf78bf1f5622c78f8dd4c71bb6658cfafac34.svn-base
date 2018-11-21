@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/supplier/update.do?removed=0" idValue=supplier.id class="form-horizontal"   permissionModule="SUPPLIER">
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_NO" permissionCode="SUPPLIER_NO">
+				<@p.input  readonly="readonly" value="${supplier.no}" field="no" datatype="*" ></@p.input>
+			
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_NAME" permissionCode="SUPPLIER_NAME">
+				<@p.input   value="${supplier.name}" field="name" datatype="*" ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_ADDR" permissionCode="SUPPLIER_ADDR">
+				<@p.input  value="${supplier.addr!}" field="addr"  ></@p.input>
+			
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_ENABLED" permissionCode="SUPPLIER_ENABLED">
+				<@p.input type="select" excludeSelectOption="true" value=supplier.enabled  field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_CONTACT1" permissionCode="SUPPLIER_CONTACT1">
+				<@p.input   value="${supplier.contact1!}" field="contact1"  ></@p.input>
+			
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_TEL_NO1" permissionCode="SUPPLIER_TEL_NO1">
+				<input type="text"  value="${supplier.telNo1!}" ignore="ignore"  name="telNo1" datatype="/^(\(\d{3,4}\)|\d{3,4}-|\s)?[1-9]\d{5,8}(\(\d{1,5}\)|-\d{1,5}|\s)?$/" errormsg="<@s.m code='PLS_INPUT_CORRECT_TEL_NO'/>" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_FAX_NO1" permissionCode="SUPPLIER_FAX_NO1">
+				<input type="text" value="${supplier.faxNo1!}" ignore="ignore"  name="faxNo1" datatype="/^(\(\d{3,4}\)|\d{3,4}-|\s)?[1-9]\d{5,8}(\(\d{1,5}\)|-\d{1,5}|\s)?$/" errormsg="<@s.m code='PLS_INPUT_CORRECT_FAX_NO'/>" >
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_MOBILE_NO1" permissionCode="SUPPLIER_MOBILE_NO1">
+				<@p.input   value="${supplier.mobileNo1!}" datatype="m"  ignore="ignore" field="mobileNo1" errormsg="PLS_INPUT_CORRECT_MOBILE_NO"  ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_EMAIL1" permissionCode="SUPPLIER_EMAIL1">
+				<@p.input   value="${supplier.emaile1!}" datatype="e"  ignore="ignore" field="emaile1" errormsg="PLS_INPUT_CORRECT_EMAIL_NO"  ></@p.input>
+			
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_CONTACT2" permissionCode="SUPPLIER_CONTACT2">
+				<@p.input   value="${supplier.contact2!}" field="contact2"  ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_TEL_NO2" permissionCode="SUPPLIER_TEL_NO2">
+				<input type="text" value="${supplier.telNo2!}" ignore="ignore"  name="telNo2" datatype="/^(\(\d{3,4}\)|\d{3,4}-|\s)?[1-9]\d{5,8}(\(\d{1,5}\)|-\d{1,5}|\s)?$/" errormsg="<@s.m code='PLS_INPUT_CORRECT_TEL_NO'/>" >
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_FAX_NO2" permissionCode="SUPPLIER_FAX_NO2">
+				<input type="text" value="${supplier.faxNo2!}" ignore="ignore"  name="faxNo2" datatype="/^(\(\d{3,4}\)|\d{3,4}-|\s)?[1-9]\d{5,8}(\(\d{1,5}\)|-\d{1,5}|\s)?$/" errormsg="<@s.m code='PLS_INPUT_CORRECT_FAX_NO'/>" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_MOBILE_NO2" permissionCode="SUPPLIER_MOBILE_NO2">
+				<@p.input   value="${supplier.mobileNo2!}" datatype="m"  ignore="ignore" field="mobileNo2" errormsg="PLS_INPUT_CORRECT_MOBILE_NO" ></@p.input>
+			
+			</@p.formColmd>
+			<@p.formColmd title="SUPPLIER_EMAIL2" permissionCode="SUPPLIER_EMAIL2">
+				<@p.input   value="${supplier.emaile2!}" datatype="e"  ignore="ignore" field="emaile2" errormsg="PLS_INPUT_CORRECT_EMAIL_NO"  ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="SUPPLIER_NOTES" permissionCode="SUPPLIER_NOTES">
+				<@p.input   value="${supplier.notes!}" field="notes"  ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

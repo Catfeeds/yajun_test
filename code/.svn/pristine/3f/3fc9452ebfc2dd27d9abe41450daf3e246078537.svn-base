@@ -1,0 +1,24 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html">
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/type/update.do" idValue=type.id class="form-horizontal"   permissionModule="DICT_TYPE">
+		<@p.formRow>
+			<@p.formColmd title="TYPE_CODE"  checktip="TYPE_CODE_CHECK_TIP"   permissionCode="TYPE_CODE">
+				<input type="hidden" name="systemData" value="${type.systemData!}">
+				<input name="code" ajaxurl="${baseUrl}/type/checkType.do?code=${type.code}" class="inputxt" value="${type.code}" datatype="s2-20">
+			</@p.formColmd>
+			<@p.formColmd title="TYPE_NAME_CN"  checktip="TYPE_NAME_CHECK_TIP"   permissionCode="TYPE_NAME">
+				  <input name="name" class="inputxt" value="${type.name}" datatype="s2-16">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="TYPE_NAME_EN"  checktip="TYPE_NAME_CHECK_TIP"  permissionCode="TYPE_NAME">
+				  <input name="enName" class="inputxt" value="${type.enName}" datatype="s2-32">
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

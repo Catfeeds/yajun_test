@@ -1,0 +1,51 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<#include "../../../include/editorCommons.html">
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm  url="" class="form-horizontal" permissionModule="PARAMETER">
+	<input id="beforeSubmit" value="updateExpression" type="hidden"/>
+	<input id="callback" value="refresh" type="hidden"/>
+	<@p.formRow>
+		<@p.formColmd title="PARAMETER_REGULAREXPRESSION" permissionCode="PARAMETER_REGULAR_EXPRESSION">
+			<input type="text" name="reg" id="reg" value="${regularExpression}"/>
+		</@p.formColmd>
+		<@p.formColmd title="PARAMETER_VALUE" permissionCode="PARAMETER_REGULAR_EXPRESSION">
+			<input type="text" name="writeReg" id="writeReg" style="width: 140px" />
+			<button type="button" class="btn btn-default"  onclick="regularExpression()">验证</button>
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+	function regularExpression() {
+		var va = $("#reg").val();
+		var vas = va.replace(/\//g,'');
+		var expression = new RegExp(vas);
+		var val = $("#writeReg").val();
+		if (val == null || val == ""){
+			infoTip("请输入数据");
+			return false;
+		}
+		if(expression.test(val)){
+			infoTip("验证成功！");
+		    return false;
+		 }
+		errorTip("验证失败！");
+		return false;
+	}
+	function updateExpression(){
+		var regValue = $("#reg").val();
+		if (${regularExpression} == regValue) {
+			infoTip("修改：请输入新的表达式");
+			return false;
+		}
+		$.post("${baseUrl}/parameter/updateExpression.do",{regularExpression:regValue,id:${id}},
+				function(data){
+				});		
+	}
+</script>
+<style>
+</style>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/line/update.do" class="form-horizontal" idValue=line.id permissionModule="LINE">
+		<@p.formRow>
+			<@p.formColmd title="LINE_PLANT" permissionCode="TM_PLANT_ID">
+				<@p.input type="select" value="${line.tmPlantId}" excludeSelectOption="true"  options=plant ></@p.input>
+				<input type="hidden" name="tmPlantId" value="${line.tmPlantId}" >
+			</@p.formColmd>
+			<@p.formColmd title="LINE_NO" permissionCode="LINE_NO">
+				<input name="no" class="inputxt" readonly="readonly" value="${line.no}" >
+			</@p.formColmd>
+		<#--	<@p.formColmd title="LINE_WORKSHOP" permissionCode="TM_WORKSHOP_ID">
+				<@p.input type="select" disabled="disabled" value="${line.tmWorkshopId}" excludeSelectOption="true"  options=workshop></@p.input>
+				<input type="hidden" name="tmWorkshopId" value="${line.tmWorkshopId}" >
+			</@p.formColmd>
+			<@p.formColmd title="LINE_NAME_EN" permissionCode="LINE_NAME_EN">
+				<input name="nameEn" class="inputxt" value="${line.nameEn!}" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore"  maxlength='100' />
+			</@p.formColmd>
+		-->
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="LINE_NAME_CN" permissionCode="LINE_NAME_CN">
+				<input name="nameCn" class="inputxt" value="${line.nameCn!}" errormsg="<@s.m code='ERROR_CHINESE'/>" ignore="ignore" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="LINE_ENABLED" permissionCode="LINE_ENABLED">
+				<@p.input type="select" excludeSelectOption="true" value=line.enabled field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="LINE_REMARK"  permissionCode="LINE_REMARK">
+		        <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250">${line.remark!}</textarea>
+		     </@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

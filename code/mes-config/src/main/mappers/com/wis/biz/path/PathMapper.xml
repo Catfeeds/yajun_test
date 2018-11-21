@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PathMapper">
+	<select id="queryPathUloc" resultType="java.util.HashMap"  parameterType="java.util.HashMap" >
+		SELECT 
+			a.seq as seq,
+			a.ID as id,
+			a.TM_ULOC_ID as tmUlocId,
+			IFNULL(a.IS_ONLINE,"") as isOnline,
+			IFNULL(b.`NO`,"") as ulocNo,
+			IFNULL(b.NAME,"") as ulocName,	
+			a.PARENT_ID as parentId,
+			IFNULL(a.IS_OFFLINE,"") as isOffline
+		FROM 
+			tm_path_uloc a 
+		LEFT JOIN 
+			tm_uloc b ON a.TM_ULOC_ID = b.ID
+       WHERE 1=1
+        <if test="tmPathId != null and tmPathId  != '' ">
+	        	and a.TM_PATH_ID = #{tmPathId}
+	      </if>
+	    <if test="isOnline !=null and isOnline !='' ">
+	    	and a.IS_ONLINE ${isOnline}
+	    </if>
+	        <if test="isOffline !=null and isOffline !='' ">
+	    	and a.IS_OFFLINE ${isOffline}
+	    </if>
+       <if test="tmPathUlocIds !=null and tmPathUlocIds!='' ">
+      		and a.ID in ${tmPathUlocIds}
+      	</if>
+      	order by id asc;
+	</select>
+	
+	<select id="getPath" resultType="com.wis.mes.master.path.entity.TmPath"  parameterType="java.util.HashMap" >
+		SELECT 
+			t.*
+		FROM 
+			tm_path t 
+       WHERE t.enabled="ON" AND t.status='COMPLETE'
+       <if test="tmPartId !=null and tmPartId!='' ">
+      		and (t.TM_PART_ID = #{tmPartId} or t.TM_PART_ID is null)
+      </if>
+        <if test="tmPlantId !=null and tmPlantId!='' ">
+      		and t.TM_PLANT_ID = #{tmPlantId}
+      </if>
+      	order by t.id asc;
+	</select>
+	<select id="getByPathUlocId" resultType="com.wis.mes.master.path.entity.TmPath"  parameterType="java.util.HashMap" >
+		SELECT a.* FROM tm_path a
+			LEFT JOIN tm_path_uloc b ON a.ID= b.TM_PATH_ID
+			where 1=1
+		 <if test="tmPathUlocId !=null and tmPathUlocId!='' ">
+      		and b.id = #{tmPathUlocId}
+      </if>
+	</select>
+	
+	<!--查询参数列表  -->
+	<select id="getParameterPageResult" resultType="com.wis.basis.configuration.entity.TsParameter" parameterType="java.util.HashMap">
+		SELECT
+			a.id as id,
+			a.`CODE` as code,
+			a.DEFAULT_VALUE as defaultValue,
+			a.`NAME` as name,
+			a.NOTE as note,
+			a.REGULAR_EXPRESSION as regularExpression,
+			a.VARIUABLE_NAME as variuableName
+		FROM
+			ts_parameter a
+		LEFT JOIN tm_equipment_param b ON a.ID = b.TS_PARAMETER_ID
+		LEFT JOIN tm_equipment c ON b.TM_EQUIPMENT_ID = c.ID
+		<if test="tmPathUlocId!=null and tmPathUlocId!='' ">
+			LEFT JOIN tm_path_uloc d ON d.TM_ULOC_ID = c.TM_ULOC_ID
+		</if>
+		WHERE 1=1
+			<if test="tmPathUlocId!=null and tmPathUlocId!='' ">
+				AND d.ID=#{tmPathUlocId}
+			</if>
+			<if test="tmUlocId!=null and tmUlocId!='' ">
+				AND c.TM_ULOC_ID = #{tmUlocId}
+			</if>
+			  AND c.ENABLED='ON'
+			<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			<if test="tmPathUlocId!=null and tmPathUlocId!='' ">
+				AND a.ID NOT IN(SELECT q.TS_PARAMETER_ID from tm_path_uloc_parameter q  WHERE q.TM_PATH_ULOC_ID =#{tmPathUlocId})
+			</if>
+			<if test="tsParameterIds!=null and tsParameterIds!='' ">
+				AND a.id NOT IN
+				<foreach item="item" index="index" collection="tsParameterIds" open="(" separator="," close=")">  
+ 					#{item}
+				</foreach> 
+			</if>
+			LIMIT #{firstRow}, #{pageSize}
+	</select>
+	<!--查询参数列表Count  -->
+	<select id="getParameterCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			ts_parameter a
+		LEFT JOIN tm_equipment_param b ON a.ID = b.TS_PARAMETER_ID
+		LEFT JOIN tm_equipment c ON b.TM_EQUIPMENT_ID = c.ID
+		<if test="tmPathUlocId!=null and tmPathUlocId!='' ">
+			LEFT JOIN tm_path_uloc d ON d.TM_ULOC_ID = c.TM_ULOC_ID
+		</if>
+		WHERE 1=1
+			<if test="tmPathUlocId!=null and tmPathUlocId!='' ">
+				AND d.ID=#{tmPathUlocId}
+			</if>
+			<if test="tmUlocId!=null and tmUlocId!='' ">
+				AND c.TM_ULOC_ID = #{tmUlocId}
+			</if>
+			  AND c.ENABLED='ON'
+			<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			<if test="tmPathUlocId!=null and tmPathUlocId!='' ">
+				AND a.ID NOT IN(SELECT q.TS_PARAMETER_ID from tm_path_uloc_parameter q  WHERE q.TM_PATH_ULOC_ID =#{tmPathUlocId})
+			</if>
+			<if test="tsParameterIds!=null and tsParameterIds!='' ">
+				AND a.id NOT IN
+				<foreach item="item" index="index" collection="tsParameterIds" open="(" separator="," close=")">  
+ 					#{item}
+				</foreach> 
+			</if>
+	</select>
+		<!-- 查询质检项 Count-->
+	<select id="getEquipmentAndUlocParameterCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT  
+			count(*)
+		FROM(
+			SELECT
+				a.*
+			FROM
+				ts_parameter a
+			LEFT JOIN tm_equipment_param b ON b.TS_PARAMETER_ID = a.ID
+			LEFT JOIN tm_equipment c ON b.TM_EQUIPMENT_ID = c.ID
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+			LEFT JOIN tm_path_uloc d ON d.TM_ULOC_ID = c.TM_ULOC_ID
+			</if>
+			WHERE b.TYPE='QUALITY' AND c.ENABLED='ON' 
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+				AND d.ID = #{tmPathUlocId} 
+			</if>
+			<if test="tmUlocId!=null and tmUlocId!='' ">
+				AND c.TM_ULOC_ID = #{tmUlocId}
+			</if>
+			<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+				AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  tm_path_uloc_sip h  WHERE h.TM_PATH_ULOC_ID =#{tmPathUlocId})
+			</if>
+			<if test="tsParameterIds!=null and tsParameterIds!='' ">
+				AND a.id NOT IN
+				<foreach item="item" index="index" collection="tsParameterIds" open="(" separator="," close=")">  
+ 					#{item}
+				</foreach> 
+			</if>
+		UNION	
+			SELECT a.*
+		FROM ts_parameter a
+		LEFT JOIN tm_uloc_sip b ON b.TS_PARAMETER_ID = a.ID
+		<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+		LEFT JOIN tm_path_uloc d ON b.TM_ULOC_ID = d.TM_ULOC_ID
+		</if>
+		WHERE	b.IS_EXAMINE !='YES' 
+		<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+			AND d.ID = #{tmPathUlocId}  
+		</if>
+		<if test="tmUlocId!=null and tmUlocId!='' ">
+				AND b.TM_ULOC_ID = #{tmUlocId}
+			</if>
+		<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+				AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  tm_path_uloc_sip h  WHERE h.TM_PATH_ULOC_ID =#{tmPathUlocId})
+			</if>
+			<if test="tsParameterIds!=null and tsParameterIds!='' ">
+				AND a.id NOT IN
+				<foreach item="item" index="index" collection="tsParameterIds" open="(" separator="," close=")">  
+ 					#{item}
+				</foreach> 
+			</if>
+		)tab
+	</select>
+	
+	<!-- 查询质检项 -->
+	<select id="getEquipmentAndUlocParameter" resultType="com.wis.basis.configuration.entity.TsParameter" parameterType="java.util.HashMap">
+		SELECT  
+			tab.id as id,
+			tab.code as code,
+			tab.defaultValue as defaultValue,
+			tab.name as name,
+			tab.note as note,
+			tab.regularExpression as regularExpression,
+			tab.variuableName as variuableName
+		FROM(
+			SELECT
+				a.id as id,
+				a.`CODE` as code,
+				a.DEFAULT_VALUE as defaultValue,
+				a.`NAME` as name,
+				a.NOTE as note,
+				a.REGULAR_EXPRESSION as regularExpression,
+				a.VARIUABLE_NAME as variuableName
+			FROM
+				ts_parameter a
+			LEFT JOIN tm_equipment_param b ON b.TS_PARAMETER_ID = a.ID
+			LEFT JOIN tm_equipment c ON b.TM_EQUIPMENT_ID = c.ID
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+			LEFT JOIN tm_path_uloc d ON d.TM_ULOC_ID = c.TM_ULOC_ID
+			</if>
+			WHERE b.TYPE='QUALITY' AND c.ENABLED='ON' 
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+				AND d.ID = #{tmPathUlocId} 
+			</if>
+			<if test="tmUlocId!=null and tmUlocId!='' ">
+				AND c.TM_ULOC_ID = #{tmUlocId}
+			</if>
+			<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+				AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  tm_path_uloc_sip h  WHERE h.TM_PATH_ULOC_ID =#{tmPathUlocId})
+			</if>
+			<if test="tsParameterIds!=null and tsParameterIds!='' ">
+				AND a.id NOT IN
+				<foreach item="item" index="index" collection="tsParameterIds" open="(" separator="," close=")">  
+ 					#{item}
+				</foreach> 
+			</if>
+		UNION 	
+			SELECT 
+				a.id as id,
+				a.`CODE` as code,
+				a.DEFAULT_VALUE as defaultValue,
+				a.`NAME` as name,
+				a.NOTE as note,
+				a.REGULAR_EXPRESSION as regularExpression,
+				a.VARIUABLE_NAME as variuableName
+		FROM ts_parameter a
+		LEFT JOIN tm_uloc_sip b ON b.TS_PARAMETER_ID = a.ID
+		<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+		LEFT JOIN tm_path_uloc d ON b.TM_ULOC_ID = d.TM_ULOC_ID
+		</if>
+		WHERE	b.IS_EXAMINE !='YES' 
+		<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+			AND d.ID = #{tmPathUlocId}  
+		</if>
+		<if test="tmUlocId!=null and tmUlocId!='' ">
+				AND b.TM_ULOC_ID = #{tmUlocId}
+			</if>
+		<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+				AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  tm_path_uloc_sip h  WHERE h.TM_PATH_ULOC_ID =#{tmPathUlocId})
+			</if>
+			<if test="tsParameterIds!=null and tsParameterIds!='' ">
+				AND a.id NOT IN
+				<foreach item="item" index="index" collection="tsParameterIds" open="(" separator="," close=")">  
+ 					#{item}
+				</foreach> 
+			</if>
+		)tab
+		LIMIT #{firstRow}, #{pageSize}
+	</select>
+	<!-- 查询必检项-->
+	<select id="getSipParameterExamine" resultType="com.wis.basis.configuration.entity.TsParameter" parameterType="java.util.HashMap">
+		SELECT 
+			a.* 
+		FROM 
+			ts_parameter a
+			LEFT JOIN tm_uloc_sip b ON a.ID = b.TS_PARAMETER_ID
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+			LEFT JOIN tm_path_uloc c ON b.TM_ULOC_ID = c.TM_ULOC_ID
+			</if>
+		WHERE  1=1
+			<if test="tmPathUlocId!=null and tmPathUlocId!=''">
+			AND c.ID =#{tmPathUlocId} 
+			</if>
+			<if test="tmUlocId!=null and tmUlocId!='' ">
+				AND b.TM_ULOC_ID = #{tmUlocId}
+			</if>
+			AND b.IS_EXAMINE ='YES'
+			<if test="notIN !=null and notIN =='YES' and tmPathUlocId!=null and tmPathUlocId!=''">
+			AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  tm_path_uloc_sip h  WHERE h.TM_PATH_ULOC_ID =#{tmPathUlocId})
+			</if>
+			<if test="tsParameterIds!=null and tsParameterIds!='' ">
+				AND a.id NOT IN
+				<foreach item="item" index="index" collection="tsParameterIds" open="(" separator="," close=")">  
+ 					#{item}
+				</foreach> 
+			</if>
+	</select>
+	
+	<delete id="deletePathUlocChilds" parameterType="java.util.HashMap">
+		DELETE FROM tm_path_uloc_part WHERE tm_path_uloc_id IN ${tmPathUlocIds};
+		DELETE FROM tm_path_uloc_parameter WHERE tm_path_uloc_id IN ${tmPathUlocIds};
+		DELETE FROM tm_path_uloc_sip WHERE tm_path_uloc_id IN ${tmPathUlocIds};
+	</delete>
+	<delete id="deleteAllPathsByTmPathId" parameterType="java.util.HashMap">
+		DELETE FROM tm_path_ligature WHERE tm_path_id =#{tmPathId};
+	</delete>
+	
+	<select id="queryTmPathUlocParamList" resultType="java.util.HashMap"  parameterType="java.util.HashMap" >
+		SELECT * FROM
+				(
+					SELECT
+						t.*,rownum as rownum_
+					FROM
+						(
+							SELECT
+								E.NO AS equipmentNo,
+								e.name as equipmentName,
+								pup.id as id,
+								ep.parameter_name as parameterName,
+								ep.parameter_explain as parameterExplain,
+								ep.id as equipmentParamId 
+							FROM
+								TM_PATH_ULOC_PARAMETER pup
+							LEFT JOIN TM_EQUIPMENT_PARAM ep ON pup.TM_EQUIPMENT_PARAM_ID = ep. ID
+							LEFT JOIN TM_EQUIPMENT E ON ep.tm_equipment_id = E . ID
+							WHERE
+								pup.tm_path_uloc_id = #{tmPathUlocId}
+						) t where 
+						<![CDATA[
+						ROWNUM <=#{pageSize}
+						]]>
+				) a 
+		WHERE a.rownum_ >#{firstRow}
+	</select>
+	
+	<select id="queryTmPathUlocParamCount" resultType="java.lang.Integer"  parameterType="java.util.HashMap" >
+		SELECT count(1) FROM
+							TM_PATH_ULOC_PARAMETER pup
+							LEFT JOIN TM_EQUIPMENT_PARAM ep ON pup.TM_EQUIPMENT_PARAM_ID = ep. ID
+							LEFT JOIN TM_EQUIPMENT E ON ep.tm_equipment_id = E . ID
+							WHERE
+							pup.tm_path_uloc_id = #{tmPathUlocId}		
+	</select>
+	
+	<select id="queryEquipmentByParameterCount" resultType="java.lang.Integer"  parameterType="java.util.HashMap" >
+		select count(1) from TM_EQUIPMENT_PARAM ep 
+						left join TM_EQUIPMENT e on e.id=ep.tm_equipment_id
+						where 1=1
+						<if test="parameterName!=null and parameterName!='' ">
+							 and ep.PARAMETER_NAME like '%'||#{parameterName}||'%'
+						</if>
+						 <if test="tmEquipmentName!=null and tmEquipmentName!='' ">
+							and  e.NAME  like  '%'||#{tmEquipmentName}||'%'
+						</if>
+						and ep.id not in (select TM_EQUIPMENT_PARAM_ID from TM_PATH_ULOC_PARAMETER pup where  pup.tm_path_uloc_id= #{tmPathUlocId})	
+	</select>
+	<select id="queryEquipmentByParameter" resultType="java.util.HashMap"  parameterType="java.util.HashMap">
+		select * from (			
+			select t.*,rownum as rownum_ from (
+						select ep.ID as id,
+							ep.PARAMETER_NAME as parameterName,
+							ep.PARAMETER_EXPLAIN as parameterExplain,
+							e.name tmEquipmentName,
+							e.NO as tmEquipmentNo,
+					        e.ID as tmEquipmentId,
+					        e.NO ||'-'||e.name as tmEquipmentNoAndName
+						from TM_EQUIPMENT_PARAM ep 
+						left join TM_EQUIPMENT e on e.id=ep.tm_equipment_id
+						where 1=1
+						<if test="parameterName!=null and parameterName!='' ">
+							 and ep.PARAMETER_NAME like '%'||#{parameterName}||'%'
+						</if>
+						 <if test="tmEquipmentId!=null and tmEquipmentId!='' ">
+							and  e.id =#{tmEquipmentId}
+						</if>
+						and ep.id not in (select TM_EQUIPMENT_PARAM_ID from TM_PATH_ULOC_PARAMETER pup where  pup.tm_path_uloc_id= #{tmPathUlocId})
+			) t  where
+			<![CDATA[ ROWNUM<=#{pageSize} ]]>
+		) a where a.rownum_>#{firstRow}
+	</select>
+	
+	<delete id="deleteBatchPathUlocId" parameterType="java.util.HashMap">
+		DELETE FROM tm_path_uloc_parameter WHERE tm_path_uloc_id IN ${tmPathUlocIds}
+	</delete>
+	
+	<select id="selectTmPathIdsByTmPathUlocIds" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select id from tm_path_uloc t where tm_path_id in ${tmPathIds}
+	</select>
+</mapper>

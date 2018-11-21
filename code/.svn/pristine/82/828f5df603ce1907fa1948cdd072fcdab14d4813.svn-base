@@ -1,0 +1,308 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<script src="././res/js/echarts.min.js"></script>
+<script type="text/javascript">
+/* $('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+    $.ajax({
+        url: "${baseUrl}/path/uloc/part/listInput.do?currentPageId=pathUlocPartGridId&params=queryCondition[tmPathUlocId]="+row.id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmPathUlocId":row.id},
+        success: function(html){
+            $("#pathUlocPart").html(html);
+        }
+    }); */
+    
+/*     $.ajax({
+        url: "${baseUrl}/path/uloc/parameter/listInput.do?currentPageId=pathUlocParameterGridId&params=queryCondition[tmPathUlocId]="+row.id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmPathUlocId":row.id},
+        success: function(html){
+            $("#pathUlocParameter").html(html);
+        }
+    }); 
+});
+*/
+$(function(){
+	$("#echarts").hide();
+});
+
+function getEchartsData(){
+	var myChart = echarts.init(document.getElementById('echarts'));
+	var option = getOption();
+	myChart.showLoading();
+	$.ajax({
+		data:{
+			tmPathId:$("#tmPathId").val()
+		},
+		url:"${baseUrl}/pathUloc/getEchartsData.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执
+			myChart.hideLoading();
+			option = getOption($.parseJSON(result.datas),$.parseJSON(result.links));
+			myChart.setOption(option);
+		}
+	});
+}
+
+function getOption(datas,links){
+	var option = {
+		    title: {
+		        text: '工艺路径图表展示'
+		    },
+		    tooltip: {
+		    	show:false
+		    },
+		    animationDurationUpdate: 1500,
+		    animationEasingUpdate: 'quinticInOut',
+		    series : [
+		        {
+		            type: 'graph',
+		            layout: 'none',
+		            symbolSize: 50,
+		            roam: true,
+		            focusNodeAdjacency: true,
+		            label: {
+		                normal: {
+		                    show: true
+		                }
+		            },
+			   	    edgeSymbol: ['circle','arrow'],
+			   	    draggable : true,
+		            data:datas,
+		            links:links,
+			        lineStyle: {
+		                normal: {
+		                    opacity: 0.9,
+		                    width: 2,
+		                    curveness: 0
+		                }
+		            }
+		        }
+		    ]
+		};
+	return option;
+}
+
+function showView(){
+	if($("#showOrHide").val() ==1){
+		$("#dataGrid").hide();
+		getEchartsData();
+		$("#echarts").show();
+		$("#showOrHide").val(0);
+	}else{
+		$("#dataGrid").show();
+		$("#echarts").hide();
+		$("#showOrHide").val(1);
+	}
+}
+
+function showPart(value){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+ 	if (!rowsData || rowsData.length == 0) {
+ 		infoTip("请先选择站点!");
+ 		$("#tabPart").hide();
+		$("#tabParameter").hide();
+ 		return;
+ 	}
+ 	if (rowsData.length > 1) {
+ 		infoTip(commons_msg.plsSelOne);
+ 		$("#tabPart").hide();
+		$("#tabParameter").hide();
+ 		return;
+ 	}
+ 	if(value!="tab"){
+ 		$("#viewPart").click();
+ 	}
+ 	
+  $.ajax({
+        url: "${baseUrl}/path/uloc/part/listInput.do?currentPageId=pathUlocPartGridId&params=queryCondition[tmPathUlocId]="+rowsData[0].id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmPathUlocId":rowsData[0].id},
+        success: function(html){
+            $("#tabPart").html(html);
+        }
+    });
+}
+
+function showParameter(value){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+ 	if (!rowsData || rowsData.length == 0) {
+ 		infoTip("请先选择站点!");
+ 		$("#tabPart").hide();
+		$("#tabParameter").hide();
+ 		return;
+ 	}
+ 	if (rowsData.length > 1) {
+ 		infoTip(commons_msg.plsSelOne);
+ 		$("#tabPart").hide();
+		$("#tabParameter").hide();
+ 		return;
+ 	}
+ 	if(value!="tab"){
+ 		$("#viewParameter").click();
+ 	}
+ 	
+    $.ajax({
+        url: "${baseUrl}/path/uloc/parameter/listInput.do?currentPageId=pathUlocParameterGridId&params=queryCondition[tmPathUlocId]="+rowsData[0].id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmPathUlocId":rowsData[0].id},
+        success: function(html){
+            $("#tabParameter").html(html);
+        }
+    });
+}
+
+function showSip(value){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+ 	if (!rowsData || rowsData.length == 0) {
+ 		infoTip("请先选择站点!");
+ 		$("#tabPart").hide();
+		$("#tabParameter").hide();
+		$("#tabSip").hide();
+ 		return;
+ 	}
+ 	if (rowsData.length > 1) {
+ 		infoTip(commons_msg.plsSelOne);
+ 		$("#tabPart").hide();
+		$("#tabParameter").hide();
+		$("#tabSip").hide();
+ 		return;
+ 	}
+ 	if(value!="tab"){
+ 		$("#viewSip").click();
+ 	}
+ 	
+    $.ajax({
+        url: "${baseUrl}/path/uloc/sip/listInput.do?currentPageId=pathUlocSipGridId&params=queryCondition[tmPathUlocId]="+rowsData[0].id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmPathUlocId":rowsData[0].id},
+        success: function(html){
+            $("#tabSip").html(html);
+        }
+    });
+}
+
+function deleatePathUloc(){
+	var rowsData = getSelectedRows('dg${currentPageId}');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	var ids = [];
+	$(rowsData).each(function(i,item){
+		ids.push(item.id);
+	});
+	var url="${baseUrl}/pathUloc/delete.do?ids="+JSON.stringify(ids);
+	createConfirmWindow("删除","删除时会把对应的子信息一起删除，确定删除吗?",url, 'dg${currentPageId}');
+}
+function doParameter(){
+	var rows = getSelectedRows('dg${currentPageId}');
+    if (!rows || rows.length==0) {
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+        return;
+    }
+    if (rows.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+	createChildwindow('<@s.m code="PATH_COPY_LIST_TITLE" />', '${baseUrl}/path/uloc/parameter/listInput.do?tmPathUlocId='+rows[0].id+'&params=queryCondition[tmPathUlocId]='+rows[0].id,'','','param_sett_gridId');
+}
+</script>
+<@p.body title="PATH_LIST_TITLE" permissionModule="PATH_ULOC" noBreadcrumbs="true">	
+<div style="color: #428bca;text-align:center; margin:10px" >工艺路径站点信息</div>
+<input id="tmPathId" type="hidden" value="${tmPathId!}" />
+<input type="hidden" id="showOrHide" value="1">
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathUlocAdd" iconCls="plus" url="${baseUrl}/pathUloc/addInput.do?tmPathId="+"${tmPathId}" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathUlocUpdate" iconCls="edit" url="${baseUrl}/pathUloc/updateInput.do" type="update"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathUlocDelete" iconCls="trash" onclick="deleatePathUloc();" type="button"></@p.button>
+			<@p.button title="PATH_ULOC_PARAM_SETT" permissionCode="PathCopy" onclick="doParameter();" type="button"></@p.button>
+		<#--
+			<@p.button title="PATH_CHANGE_VIEW" permissionCode="PathCopy" iconCls="copy"  onclick="showView();" type="button"></@p.button>
+			<@p.button title="PATH_ULOC_SHOW_PART" permissionCode="PathUlocPartView" onclick="showPart();" iconCls="eye-open"></@p.button>
+			<@p.button title="PATH_ULOC_SHOW_PARAMETER" permissionCode="PathUlocParameterView" onclick="showParameter();" iconCls="eye-open"></@p.button>
+			<@p.button title="PATH_ULOC_SHOW_SIP" permissionCode="PathUlocSipView" onclick="showSip();" iconCls="eye-open"></@p.button>
+		-->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<div id="dataGrid">
+	<@p.dataGrid url="${baseUrl}/pathUloc/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_ULOC" field="uloc.no" permissionCode="PATH_ULOC_ULOC" ></@p.column>
+		<@p.column title="PATH_ULOC_ULOC_NAME" field="uloc.name" permissionCode="PATH_ULOC_ULOC_NAME"></@p.column>
+		<@p.column title="PATH_ULOC_SEQ" field="seq" permissionCode="PATH_ULOC_SEQ" formatter="renderNULL"></@p.column>
+		<#--
+			<@p.column title="PATH_ULOC_PARENT" field="parentId" permissionCode="PATH_ULOC_PARENT" ></@p.column>
+			<@p.column title="PATH_ULOC_IS_SIP" field="isSip" permissionCode="PATH_ULOC_IS_SIP"  formatter="renderYesOrNo"></@p.column>
+			<@p.column title="PATH_ULOC_IS_AUTO_INSTORAGE" field="isAutoInstorage" permissionCode="PATH_ULOC_IS_AUTO_INSTORAGE" formatter="renderYesOrNo"></@p.column>
+			<@p.column title="PATH_ULOC_INSTORAGE_TIME" field="instorageTime" permissionCode="PATH_ULOC_INSTORAGE_TIME" formatter="renderNULL"></@p.column>
+			<@p.column title="PATH_ULOC_IS_REPORTED" field="isReported" permissionCode="PATH_ULOC_IS_REPORTED" formatter="renderYesOrNo"></@p.column>
+			<@p.column title="PATH_ULOC_ERP_ULOC_CODE" field="erpUlocCode" permissionCode="PATH_ULOC_ERP_ULOC_CODE" ></@p.column>
+			<@p.column title="PATH_ULOC_OPERATE_TIME" field="operateTime" permissionCode="PATH_ULOC_OPERATE_TIME" formatter="renderNULL"></@p.column>
+			<@p.column title="PATH_ULOC_INTERVAL_TIME" field="intervalTime" permissionCode="PATH_ULOC_INTERVAL_TIME" formatter="renderNULL"></@p.column>
+			
+			<@p.column title="PATH_ULOC_ISENTRANCE" field="uloc.isEntrance" permissionCode="PATH_ULOC_ISENTRANCE" formatter="renderEntrance"></@p.column>
+			<@p.column title="PATH_ULOC_IS_ONLINE" field="isOnline" permissionCode="PATH_ULOC_IS_ONLINE" formatter="renderYesOrNo"></@p.column>
+			<@p.column title="PATH_ULOC_IS_OFFLINE" field="isOffline" permissionCode="PATH_ULOC_IS_OFFLINE" formatter="renderYesOrNo"></@p.column>
+		-->
+		
+		
+		<@p.column title="PATH_ULOC_NOTE" field="note" permissionCode="PATH_ULOC_NOTE"></@p.column>
+	</@p.dataGrid>
+	</div>
+	<div id="echarts" style="width: 1000px;height:400px;"></div>
+		<div id="pathUlocPart"></div>
+		<div id="pathUlocParameter"></div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+function renderNULL(value){
+	if(value){
+		return value;
+	}
+	return "";
+}
+function renderEntrance(value) {
+	return entryRenderer('IS_ENTRANCE', value);
+}
+
+function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+function renderUlocType(value){
+	return entryRenderer('ULOC_TYPE', value);
+}
+function renderUloc(value,record){
+	if(record.uloc&&record.uloc.no){
+		return record.uloc.no+ " - " + record.uloc.name;
+	}
+}
+
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl = "${baseUrl}/pathUloc/exportTemplate.do";
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/pathUloc/importData.do", "dg${currentPageId}",obj);
+}
+</script>

@@ -1,0 +1,63 @@
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="FILE_TITLE" permissionModule="TS_FILE">
+  <@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="ULOC_STATUS_BEGIN_TIME_START" field="createTimeStart" id="createTimeStart"></@p.input>
+			<@p.input title="ULOC_STATUS_BEGIN_TIME_END" field="createTimeEnd" id="createTimeEnd"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="PLANT_DELETE" permissionCode="FileEdit"  iconCls="trash" url="${baseUrl}/tsFile/delete.do" type="delete" ></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tsFile/list.do">
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="FILE_FILENAME" field="fileName" permissionCode="TS_FILE" ></@p.column>
+			<@p.column title="FILE_CREATETIME" field="createTime" permissionCode="TS_FILE" ></@p.column>
+			<@p.column title="FILE_UPDATETIME" field="updateTime" permissionCode="TS_FILE"></@p.column>
+			<@p.column title="FILE_CREATEUSER" field="employee.name" permissionCode="TS_FILE"></@p.column>
+			<@p.column title="FILE_FILEPATH" field="filePath" permissionCode="TS_FILE" formatter="downLoadFile" ></@p.column>
+			<@p.column title="FILE_QUERYCONDITION" field="queryCondition" permissionCode="TS_FILE"></@p.column>
+			<@p.column title="FILE_IS_SUCCESS" field="isSuccess" permissionCode="TS_FILE"></@p.column>
+	</@p.dataGrid>  
+</@p.body>	
+<script type="text/javascript">
+$(function(){
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	};
+	$('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+});
+function downLoadFile(value,row){
+	var a = "<a onclick='doDownLoad("+row.id+",0);' >"+value+"</a>";
+	if(row.updateTime){
+		var a =  '<a onclick="doDownLoad('+row.id+',1 );" >'+value+"</a>";
+	}
+	return a;
+}
+function doDownLoad(id,isFinish){
+	if(isFinish=="1"){
+		window.open('${baseUrl}/tsFile/downLoad.do?id='+id);
+	}else{
+		infoTip("还没有导出完成，请稍等!");
+	}
+}
+</script>

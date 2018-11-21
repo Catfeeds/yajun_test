@@ -1,0 +1,189 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body title="METALPLATEPRODUCTIONRECORD_LIST_TITLE" permissionModule="PRODUCTION_RECORD">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PRODUCTIONSCHEDULE_DATE" field="productionDate" id="productionDate"></@p.input>
+			<@p.input title="METALPLATEPRODUCTIONRECORD_BATCHNUMBER" field="batchNumber"></@p.input>
+			<@p.input title="METALPLATEPRODUCTIONRECORD_MODEL"  field="model"></@p.input>
+			<@p.input title="QUALITY_SUBMIT_BEGIN_TIME" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="QUALITY_SUBMIT_FINISH_TIME" id="createTimeEnd"  field="createTimeEnd"  ></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="METALPLATEPRODUCTIONRECORD_DYSVIEW" permissionCode="ProductionRecordDYSVIEW" iconCls="edit" url="${baseUrl}/mpProductionRecord/viewInput.do" type="update"></@p.button>
+			<@p.button title="METALPLATEPRODUCTIONRECORD_DYSADD" permissionCode="ProductionRecordDYSADD" iconCls="plus" type="button" onclick="updateCheck()"></@p.button>
+			<@p.button title="METALPLATEPRODUCTIONRECORD_DYS_UPDATE" permissionCode="ProductionRecordDYS_UPDATE" iconCls="plus" type="button" onclick="updateDefectiveRecord()"></@p.button>
+			<@p.button title="METALPLATEPRODUCTIONRECORD_DYS_CONFIRM" permissionCode="ProductionRecordDYS_CONFIRM" iconCls="plus" type="button" onclick="confirmDefectiveRecord()"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/mpProductionRecord/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_PRODUCTIONDATE" field="productionDate" permissionCode="PRODUCTIONDATE"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_PRODUCTIONMODEL" field="model" permissionCode="MODEL"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_BATCHNUMBER" field="batchNumber" permissionCode="BATCHNUMBER"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_WORKPEOPLE" field="workPeople" permissionCode="WORKPEOPLE"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_WORKSCHEDULE" field="workSchedule" permissionCode="WORKSCHEDULE"  formatter="renderWorkSchedule"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_REGIONMARK" field="regionMark" permissionCode="REGIONMARK" formatter="renderRegionMark"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_PUNCH_PRESS" field="press" permissionCode="PRESS"  formatter="renderPress"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_MOULDS" field="moulds" permissionCode="MOULDS" formatter="renderMoulds"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_PLANNEDCYCLES" field="plannedCycles" permissionCode="PLANNEDCYCLES"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_PRACTICALCYCLES" field="practicalCycles" permissionCode="PRACTICALCYCLES"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_DEFECTIVENUMBER" field="defectiveNumber" permissionCode="DEFECTIVENUMBER"  formatter="renderBatchQty"></@p.column>
+		<!-- <@p.column title="METALPLATEPRODUCTIONRECORD_INVENTORYCONSUMPTION" field="inventoryConsumption" permissionCode="INVENTORYCONSUMPTION"  formatter="renderBatchQty"></@p.column> -->
+		<@p.column title="METALPLATEPRODUCTIONRECORD_PRODUCTIONTIME" field="productionTime" permissionCode="PRODUCTIONTIME"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_PERIODTAKETIME" field="periodTakeTime" permissionCode="PERIODTAKETIME" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_PLACETIME" field="placeTime" permissionCode="PLACETIME"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_VELOCITY" field="velocity" permissionCode="PLACETIME"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_CYCLETIME" field="cycleTime" permissionCode="PLACETIME"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_STOPANGLE" field="stopAngle" permissionCode="PLACETIME"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_ALARMNUMBER" field="alarmNumber" permissionCode="ALARMNUMBER"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_STATUS" field="status" permissionCode="ALARMNUMBER"  formatter="renderStatus"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_STARTTIME" field="startTime" permissionCode="STARTTIME"  formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATEPRODUCTIONRECORD_ENDTIME" field="endTime" permissionCode="ENDTIME" formatter="renderBatchQty"></@p.column>
+	</@p.dataGrid>
+	<div id ="PARTDetail"></div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+})
+$('#productionDate').focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true});
+});
+function renderBatchQty(value){return value == null ? "" : value;}
+function renderWorkSchedule(value){return entryRenderer('SHIFT_TYPE', value);}
+function renderRegionMark(value){return entryRenderer('SM_REGION_MARK', value);}
+function renderStatus(value,row,index){return entryRenderer('BJ_BAD_STATUS', value);}
+
+function updateCheck() {
+	var title="<@s.m code='METALPLATEPRODUCTIONRECORD_DYSADD'/>";
+	var url="${baseUrl}/mpProductionRecord/addInput.do";
+	var gridId="dg${currentPageId}";
+	var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	} 
+	if (url.indexOf('?') != -1) {
+		url += '&id=' + rowsData[0].id;
+	} else {
+		url += '?id=' + rowsData[0].id;
+	}
+	ajaxRequest("${baseUrl}/mpProductionRecord/checkoutStatus.do",{id:rowsData[0].id,type:'add'},function(res){
+		if(res.success){
+			createwindow(title, url, gridId,'','dysAddSubmit');
+		}
+	},false);
+}
+
+function updateDefectiveRecord() {
+	var title="<@s.m code='METALPLATEPRODUCTIONRECORD_DYS_UPDATE'/>";
+	var url="${baseUrl}/mpProductionRecord/updateDefectiveRecordInput.do";
+	var gridId="dg${currentPageId}";
+	var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	} 
+	if (url.indexOf('?') != -1) {
+		url += '&id=' + rowsData[0].id;
+	} else {
+		url += '?id=' + rowsData[0].id;
+	}
+	ajaxRequest("${baseUrl}/mpProductionRecord/checkoutStatus.do",{id:rowsData[0].id,type:'update'},function(res){
+		if(res.success){
+			createwindow(title, url, gridId,'','dysUpdateSubmit');
+		}
+	},false);
+}
+function renderPress(value,row,index){
+	if(row.schedul.verify){
+		var press = "";
+ 		var pressArray = value.split(",");
+ 		for(var i in pressArray){
+ 			if(row.schedul.verify.indexOf(pressArray[i]) != -1){
+ 				press+=pressArray[i]+'√,';
+ 			}else{
+ 				press+=pressArray[i]+',';
+ 			}
+ 		}
+ 		if(press){
+ 			press = press.substr(0,press.length-1);
+ 		}
+ 		return press;
+	}
+	return value;
+}
+function renderMoulds(value,row,index){
+  if(!value)return '';
+  if(value.indexOf("~") != -1){
+    var toolNumbers = value.split("~")
+    var equipmentMoulds = eval('(' + '${equipments!}' + ')');
+    var toolVal = "";
+    for(var i in toolNumbers){
+      var modelNames="";
+      var toolSrc = toolNumbers[i].split(":");
+      var modelArray = keysValue(equipmentMoulds,toolSrc[1]).split(",");
+      for(var i in modelArray){
+ 			if(row.schedul.verify && row.schedul.verify.indexOf(modelArray[i]) != -1){
+ 				modelNames+=modelArray[i]+'√,';
+ 			}else{
+ 				modelNames+=modelArray[i]+',';
+ 			}
+ 	  }
+      if(modelNames){
+    	  modelNames = modelNames.substr(0,modelNames.length-1);
+ 	  }
+      toolVal += modelNames+"~";
+    }
+    if(toolVal.length>0){
+      toolVal = toolVal.substring(0, toolVal.length - 1);
+    }
+  }
+  return toolVal;
+}
+
+
+function confirmDefectiveRecord(){
+	var gridId="dg${currentPageId}";
+	var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	if (rowsData.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	} 
+	ajaxRequest("${baseUrl}/mpProductionRecord/confirmDefectiveRecord.do",{id:rowsData[0].id},function(res){
+		if(res.success){
+			$('#dg${currentPageId}').bootstrapTable('refresh');
+		}
+	},true);
+}
+
+</script>

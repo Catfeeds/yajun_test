@@ -1,0 +1,5 @@
+create table SAMPLE
+(
+	ID  VARCHAR(10) PRIMARY KEY,
+	VAL VARCHAR(100)
+);

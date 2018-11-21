@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/path/uloc/part/add.do" class="form-horizontal"   permissionModule="PATH_ULOC_PART">
+		<input type ="hidden" name="tmPathUlocId" value="${tmPathUlocId}"/>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_PART" permissionCode="PATH_ULOC_PART_ULOC_PART">
+				 <@p.input type="select" id="ulocPartId" datatype="*" field="tmPartId" options=partOptions ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_QTY" permissionCode="PATH_ULOC_PART_ULOC_QTY">
+				<input name="qty" class="inputxt" datatype="n" maxlength='16' />
+			</@p.formColmd>
+			
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_SEQ" permissionCode="PATH_ULOC_PART_ULOC_SEQ">
+				<input name="seq" class="inputxt" datatype="n" maxlength='16' datatype="*"/>
+			</@p.formColmd>
+		<@p.formColmd title="PATH_ULOC_PART_ULOC_ISBATCHTRAC" permissionCode="PATH_ULOC_PART_ULOC_ISBATCHTRAC">
+				 <@p.input type="select" id="add_isBatchTrac"  field="isBatchTrac" datatype="*" options=yesOrNoOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+				<@p.formColmd title="PATH_ULOC_PART_ULOC_NOTE" permissionCode="PATH_ULOC_PART_NOTE">
+					<input name="note" class="inputxt"  maxlength='150' />
+				</@p.formColmd>
+			</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	if($("#isTrac").val()=="YES"){
+		$("#isBatchTrac").show();
+	}else{
+		$("#isBatchTrac").hide();
+	}
+	
+	var optionSize = $("#ulocPartId option").size();
+	if(optionSize==2){
+		$('#ulocPartId option:eq(1)').prop("selected",true);
+	}
+});
+
+function changeIstrac_add(value){
+	if(value=="YES"){
+		$("#add_isBatchTrac").attr("datatype","*");
+		$("#isBatchTrac").show();
+	}else{
+		$("#add_isBatchTrac").removeAttr("datatype");
+		$("#isBatchTrac").hide();
+		$("#isBatchTrac").val("");
+	}
+}
+</script>
+

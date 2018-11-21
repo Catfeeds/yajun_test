@@ -1,0 +1,95 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+function  addRole() {
+	BootstrapDialog.show({
+		size : BootstrapDialog.SIZE_WIDE,
+		title : '<@s.m code="ROLE_SELECT" />',
+		message : function(dialog) {
+			var $message = $('<div></div>');
+			var pageToLoad = dialog.getData('pageToLoad');
+			$message.load(pageToLoad);
+
+			return $message;
+		},
+		buttons : [ {
+			label : commons_msg.btnConfirm,
+			cssClass : 'btn-primary',
+			action : function(dialogRef) {
+			    var rows=getSelectedRows('roleSelectGrid');
+				if (rows.length > 0) {
+					var ids =getSelectedIds('roleSelectGrid'); 
+					ajaxRequest('${baseUrl}/user/addUserRole.do', {
+						'roleIds' : JSON.stringify(ids),'userId' :'${userId}'
+					}, function() {
+						reloadTable('userSelectRoleSetGrid');
+						dialogRef.close();
+					});
+				
+				}else{
+					infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+				}
+
+			}
+		}, {
+			label : commons_msg.btnClose,
+			cssClass : 'btn-default',
+			action : function(dialogRef) {
+				dialogRef.close();
+			}
+		} ],
+		data : {
+			'pageToLoad' : '${baseUrl}/user/userSelectRole.do'
+		}
+	});
+
+}
+function  deleteRole() {
+    var rows=getSelectedRows('userSelectRoleSetGrid');
+	if (!rows || rows.length == 0) {
+		infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+    if (rows.length > 0) {
+    	BootstrapDialog.confirm({
+   		title:commons_msg.btnDelete,
+    	message:commons_msg.deleteConfirm, 
+    	closable: true,
+    	draggable: true,
+    	btnCancelLabel: commons_msg.btnCancel,
+    	btnOKLabel: commons_msg.btnConfirm, 
+    	callback:function(result) {
+    		if (result) {
+		    	var ids = getSelectedIds('userSelectRoleSetGrid');
+				var url = '${baseUrl}/user/deleteUserRole.do?userId=${userId}';
+				ajaxRequest(url,{'ids' : JSON.stringify(ids)},function(){
+					reloadTable('userSelectRoleSetGrid');
+				});
+    		}
+    	  }
+    	});
+	} 
+}
+</script>
+
+<@p.body title='USER_SELECT_ROLE'  permissionModule="ROLE" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="userSelectRoleSetGrid">
+		<@p.searchColumns>
+			<@p.input title="ROLE_CODE" field="code"  permissionCode="ROLE_CODE"></@p.input>
+			<@p.input title="ROLE_NAME" field="name"  permissionCode="ROLE_NAME"></@p.input>
+			<@p.input title="ROLE_DESC" field="desc"  permissionCode="ROLE_DESC"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar   id="tbUserSelectRoleSetGrid">
+			<@p.button title="BTN_DIALOG_ADD"     iconCls="plus" onclick="addRole()"></@p.button>
+			<@p.button title="BTN_MOVE"  iconCls="trash" onclick="deleteRole()"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/role/list.do?queryCondition[userId]=${userId}"  id="userSelectRoleSetGrid" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="ROLE_CODE" width="100"  field="code"   permissionCode="ROLE_CODE"></@p.column><#t/>
+		<@p.column title="ROLE_NAME" width="150" field="name"    permissionCode="ROLE_NAME"></@p.column><#t/>
+		<@p.column title="ROLE_DESC" width="200"  field="desc"    permissionCode="ROLE_DESC"></@p.column><#t/>
+	</@p.dataGrid>
+</@p.body>	
+

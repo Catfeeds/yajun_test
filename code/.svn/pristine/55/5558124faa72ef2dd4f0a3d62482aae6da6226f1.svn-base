@@ -1,0 +1,35 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body permissionModule="PRODUCT_STATION"  noBreadcrumbs="true">	
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/tbProductStation/list.do?queryCondition[tbProductTracingId]=${tbProductTracingId}" id="product_part_sett_gridid">
+		<@p.column title="PRODUCT_STATION_ULOC_NO" field="uloc.no" permissionCode="PRODUCT_STATION_ULOC_NO" ></@p.column>
+		<@p.column title="PRODUCT_STATION_WORK_STAFF" field="employee.account" permissionCode="PRODUCT_STATION_WORK_STAFF"></@p.column>
+		<@p.column title="PRODUCT_STATION_ENTER_TIME_START" field="enterBeginTime" permissionCode="PRODUCT_STATION_ENTER_TIME" ></@p.column>
+		<@p.column title="PRODUCT_STATION_ENTER_TIME_END" field="enterFinishTime" permissionCode="PRODUCT_STATION_ENTER_TIME" ></@p.column>
+		<@p.column title="PRODUCT_STATION_OUT_TIME_START" field="outBeginTime" permissionCode="PRODUCT_STATION_OUT_TIME" ></@p.column>
+		<@p.column title="PRODUCT_STATION_OUT_TIME_END" field="outFinishTime" permissionCode="PRODUCT_STATION_OUT_TIME" ></@p.column>
+		<@p.column title="PRODUCT_STATION_ULOC_WORK_TIME" field="stationWorkDuration" permissionCode="PRODUCT_STATION_ULOC_WORK_TIME" ></@p.column>
+		<@p.column title="PRODUCT_STATION_EQUIPMENT_WORK_TIME" field="equipmentWorkDuration" permissionCode="PRODUCT_STATION_EQUIPMENT_WORK_TIME" formatter="renderBatchQty"></@p.column>
+		<@p.column title="PRODUCT_STATION_STAFF_WORK_TIME" field="staffWorkDuration" permissionCode="PRODUCT_STATION_STAFF_WORK_TIME" ></@p.column>
+		<@p.column title="PRODUCT_STATION_ERROR_TIME" field="abnormalDuration" permissionCode="PRODUCT_STATION_ERROR_TIME"></@p.column>
+		<@p.column title="PRODUCT_STATION_FQW_TIME" field="frontWaitDuration" permissionCode="PRODUCT_STATION_ERROR_TIME"></@p.column>
+		<@p.column title="PRODUCT_STATION_PW_TIME" field="backWaitDuration" permissionCode="PRODUCT_STATION_ERROR_TIME"></@p.column>
+		<@p.column title="PRODUCT_STATION_W_TIME" sortable="false" field="wTime" permissionCode="PRODUCT_STATION_ERROR_TIME" formatter="getWTime"></@p.column>
+<!-- 		<@p.column title="PRODUCT_STATION_W_TIME" field="wTime" permissionCode="PRODUCT_STATION_ERROR_TIME" formatter="getWTime"></@p.column> -->
+		<@p.column title="PRODUCT_STATION_WARN_TIME" field="warningDuration" permissionCode="PRODUCT_STATION_ERROR_TIME"></@p.column>
+	</@p.dataGrid>
+	<div id ="PARTDetail"></div>
+</@p.body>
+<script type="text/javascript">
+ function getWTime(val,row,index){
+	 var frontWaitDuration = 0;
+	 var backWaitDuration = 0;
+	 if(row.frontWaitDuration){
+		 frontWaitDuration = parseInt(row.frontWaitDuration)
+	 }
+	 if(row.backWaitDuration){
+		 backWaitDuration = parseInt(row.backWaitDuration)
+	 }
+	 return frontWaitDuration+backWaitDuration;
+ }
+</script>

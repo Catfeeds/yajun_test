@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<script type="text/javascript">
+var index = 1;
+var addRowHtml = "";
+$(document).ready(function(){
+	addRowHtml = $("#contenId0").html();
+	addRowHtml = addRowHtml.replace("+","-");
+	index = parseInt('${indexSize!}');
+});
+function addRow(){
+	$("#recordFrom").append(addRowHtml.replace("id=\"rowId_0\"","id=\"rowId_"+index+"\"").
+			replace("addRow()","delRow("+index+")").
+			replace("id=\"defectiveProject0\"","id=\"defectiveProject"+index+"\"").
+			replace("#defectiveProject0","#defectiveProject"+index).
+			replace("不良原因","不良原因"+index).
+			replace("不良数量","不良数量"+index).
+			replace("id=\"defectiveNumber0\"","id=\"defectiveNumber"+index+"\"")
+	);
+	index++;
+}
+function delRow(delIndex){
+	$("#rowId_"+delIndex).remove();
+}
+var practicalCycles = parseInt(${practicalCycles!0});
+function dysUpdateSubmit(dialogRef) {
+	var formDataAll = document.getElementById("recordFrom");
+	var defectiveProjectArrays = [];
+	var defectiveNumberArrays = [];
+	var parameters = [];
+    for(var i=0;i<formDataAll.length;i++){
+	  if(formDataAll.elements[i].name!="" && formDataAll.elements[i].value=="" && (formDataAll.elements[i].name=="defectiveProject"||formDataAll.elements[i].name=="defectiveNumber")){
+		  formDataAll.elements[i].focus();
+		  if(formDataAll.elements[i].name="defectiveProject"){
+			  errorTip("不良原因不能为空。");
+		  }else{
+			  errorTip("不良数量不能为空。");
+		  }
+		  return ;
+	  }else if(formDataAll.elements[i].name!="" &&formDataAll.elements[i].id.indexOf("defectiveNumber") != -1 && $("#"+formDataAll.elements[i].id).val()){
+		  var idSrc = formDataAll.elements[i].id;
+		  var name=idSrc.substring(idSrc.length-1,idSrc.length);
+		  var obj = {};
+		  obj[name]=$("#"+formDataAll.elements[i].id).val();
+		  defectiveNumberArrays.push(obj);
+	  }else if(formDataAll.elements[i].name!="" && formDataAll.elements[i].id.indexOf("defectiveProject") != -1 && $("#"+formDataAll.elements[i].id).val()){
+		  var idSrc = formDataAll.elements[i].id;
+		  var name=idSrc.substring(idSrc.length-1,idSrc.length);
+		  var obj = {};
+		  var options = $("#"+formDataAll.elements[i].id+" option:selected");
+		  var defectiveProjectText = '';
+		  var defectiveProjectValue = '';
+		  for(var k=0;k<options.length;k++){
+			  defectiveProjectText+=options[k].text+",";
+			  defectiveProjectValue+=options[k].value+",";
+		  }
+		  if(defectiveProjectText.length>0){
+			  defectiveProjectText=defectiveProjectText.substring(0,defectiveProjectText.length-1);
+			  defectiveProjectValue=defectiveProjectValue.substring(0,defectiveProjectValue.length-1);
+		  }
+		  obj[name]=defectiveProjectValue;
+		  obj['defectiveProjectText']=defectiveProjectText;
+		  defectiveProjectArrays.push(obj);
+	  }
+    } 
+    for(var i in defectiveProjectArrays){
+    	for(var j in defectiveNumberArrays){
+    		if(i == j){
+    			var obj = {};
+    			obj['defectiveProject']=defectiveProjectArrays[i][i];
+    			obj['defectiveProjectText']=defectiveProjectArrays[i].defectiveProjectText;
+    			obj['defectiveNumber']=defectiveNumberArrays[j][j];
+    			parameters.push(obj);
+    			break;	
+    		}
+    	}
+    }
+	var arr=$("input[name='defectiveNumber']");
+	var sumDefective = 0;
+	for(var i=0;i<arr.length;i++){
+		sumDefective += parseInt($(arr[i]).val());
+	}
+	if(sumDefective>practicalCycles){
+		infoTip("不良品数总和不能大于实际生产数["+practicalCycles+"]");
+		return false;
+	}
+	$('#parameters').val(JSON.stringify(parameters));
+	$("input[id='btn_sub']").click();
+	dialogRef.close();
+}
+</script>
+</head>	
+<body id="recordBody" style="overflow-y: hidden" scroll="no" id="recordBody">
+<@p.editForm url="${baseUrl}/mpProductionRecord/updateDefectiveRecord.do" formId="recordFrom" class="form-horizontal" idValue=recordId permissionModule="PRODUCTION_RECORD">
+	<input name="parameters" id="parameters" type="hidden" />
+		<#list defectiveRecords as defectiveRecord>
+			<div id="contenId${defectiveRecord_index}">
+				<div class="row" id="rowId_${defectiveRecord_index}">
+					<@p.formColmd title="METALPLATEPRODUCTIONRECORD_BADTYPE" permissionCode="PRODUCTIONDATE">
+						<@p.input type="multiple"  id="defectiveProject${defectiveRecord_index}" values="${defectiveRecord.tmBadpartsIds}" field="defectiveProject" options=smBadType datatype="*"></@p.input>
+					</@p.formColmd>
+					<@p.formColmd title="METALPLATEPRODUCTIONRECORD_BADNUMBER" permissionCode="PRODUCTIONDATE">
+						<input name="defectiveNumber" id="defectiveNumber${defectiveRecord_index}" style="width: 75%" class="inputxt" value="${defectiveRecord.defectiveNumber}" datatype="*" errormsg="<@s.m code='ERROR_NUMBER'/>" maxlength='10' onkeyup="value=value.replace(/[^\d]/g,'')"/>
+						<#if defectiveRecord_index==0>
+							<input type="button" value="+" style="width: 15%;text-align: center;margin-left: 10px;" onclick="addRow()"/>
+							<#else>
+							<input type="button" value="-" style="width: 15%;text-align: center;margin-left: 10px;" onclick="delRow(${defectiveRecord_index})"/>
+						</#if>
+					</@p.formColmd>
+				</div>
+		    </div>
+		</#list>
+</@p.editForm>
+</body>
+</html>

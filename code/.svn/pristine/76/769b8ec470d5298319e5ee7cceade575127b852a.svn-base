@@ -1,0 +1,103 @@
+<script type="text/javascript">
+	$(".page-content").toggleClass("page-content");
+	var operateParam=new Object();
+	operateParam.id=0;
+	var operateParamRight=new Object();
+	operateParamRight.id=0;
+	var selectedOrg = 0;
+	var selectedNode = 0;
+	jQuery(function($) {
+		$("#viewPart").hide();
+		$("#viewParameter").hide();
+		$("#viewSip").hide();
+		loadPathDiv();
+		$("#widget-collapse").click(function() {
+			if ($("#org_tab_left_body").is(":hidden")) {
+				$("#org_tab_right").removeClass("widget-box-max");
+				$("#org_tab_left_body").show();
+			} else {
+				$("#org_tab_right").addClass("widget-box-max");
+				$("#org_tab_left_body").hide();
+			}
+		});
+ 		$("#myTab4 li").click(function() {
+ 			reLoadTree(operateParam.id, $(this).index());
+ 		});
+	});
+	
+	function loadPathDiv(){
+		$.ajax({
+	        url: '${baseUrl}/path/pathListInput.do?',
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:false,
+	        data : {
+	        	currentPageId:"${currentPageId}"
+	        },
+	        success: function(html){
+        		$("#tabPath").html(html);
+	        }
+	    });
+	}
+	function reLoadTree(orgId, lindex) {
+		if (lindex == undefined) {
+			lindex = $("#myTab4 li.active").index();
+		}
+		switch (lindex) {
+		case 0: {
+			$("#tabSip").hide();
+			$("#tabPath").show();
+			$("#tabPart").hide();
+			$("#tabParameter").hide();
+		}
+			break;
+		case 1: {
+			$("#tabSip").hide();
+			$("#tabPath").hide();
+			$("#tabPart").show();
+			$("#tabParameter").hide();
+			showPart("tab");
+		}
+			break;
+		case 2: {
+			$("#tabSip").empty();
+			$("#tabPath").hide();
+			$("#tabPart").hide();
+			$("#tabParameter").show();
+			showParameter("tab");
+		}
+			break;
+		case 3:{
+			$("#tabSip").show();
+			$("#tabPath").hide();
+			$("#tabPart").hide();
+			$("#tabParameter").hide();
+			showSip("tab");
+		}
+		break;
+		default:
+			break;
+		}
+	}
+	
+</script>
+<@p.body title="PORDER_LIST_TITLE" noBreadcrumbs="false" permissionModule="PATH">
+<div id="org_tab_right" style="width: 100%;margin-left: 0px;margin-top: 0px;"  class="tabbable org_tab_right" >
+<#--
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue"	id="myTab4" >
+		<li class="active"><a data-toggle="tab" href="#tabUser">工艺路径</a></li>
+		<li><a data-toggle="tab" href="#tabPart" id="viewPart">关键件信息</a></li>
+		<li><a data-toggle="tab" href="#tabParameter"id="viewParameter">参数信息</a></li>
+		<li><a data-toggle="tab" href="#tabSip"id="viewSip">质检项信息</a></li> 
+	</ul>
+	-->
+	<div class="tab-content" >
+		<div id="tabPath" class="tab-pane in active"></div>
+		<div id="tabPart" class="tab-pane"></div>
+		<div id="tabParameter" class="tab-pane"></div>
+		<div id="tabSip" class="tab-pane"></div>
+	</div>
+</div>
+</@p.body>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/workshop/add.do" class="form-horizontal" permissionModule="WORKSHOP">
+		<@p.formRow>
+			<@p.formColmd title="WORKSHOP_PLANT" checktip="PLSASE_SELECT_PLANT" permissionCode="WORKSHOP_PLANT">
+				<@p.input type="select" datatype="*" id="plantSelect" field="tmPlantId" options=plant ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="WORKSHOP_NO" permissionCode="WORKSHOP_NO">
+				 <input name="no"  class="inputxt" datatype="no" maxlength='100'>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORKSHOP_NAME_CN" permissionCode="WORKSHOP_NAME_CN">
+				<input name="nameCn"  maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="WORKSHOP_NAME_EN" permissionCode="WORKSHOP_NAME_EN">
+				  <input name="nameEn"  class="inputxt" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORKSHOP_NAME_CN_S" permissionCode="WORKSHOP_NAME_CN_S">
+				<input name="nameCnS" class="inputxt"  errormsg="<@s.m code='ERROR_CHINESE'/>"  ignore="ignore" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="WORKSHOP_NAME_EN_S" permissionCode="WORKSHOP_NAME_EN_S">
+				  <input name="nameEnS" class="inputxt"  datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORKSHOP_ENABLED" permissionCode="WORKSHOP_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	var optionSize = $("#plantSelect option").size();
+	if(optionSize==2){
+		$('#plantSelect option:eq(1)').prop("selected",true);
+	}
+});
+</script>

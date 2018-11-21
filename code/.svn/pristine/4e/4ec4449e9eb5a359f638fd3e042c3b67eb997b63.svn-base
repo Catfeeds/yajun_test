@@ -1,0 +1,314 @@
+INDEX_PAGE = Home 
+INDEX_TITLE = DAE QIS-&gt;Login 
+MAIN_TITLE = DAE QIS
+PLEASE_CHOOSE = ----- Please select ----- 
+FRAME_NOT_CHOOSE_DATA = Please select the data 
+FRAME_RESET = Reset 
+FRAME_SEARCH = Query 
+FRAME_CHOOSE = Select 
+FRAME_CLEAN = Empty 
+FRAME_CLOSE = off 
+Id = No. 
+# Public 
+COMFIRM_DELETE_DATA = Are you sure to delete the data? 
+NO_CHOOSE_DATA = Please select the data! 
+OPERATE_SUCCESS = operation is successful! 
+SELECT_ONE_ONLY = only choose a data! 
+# Landing 
+LOGIN_USER_NAME_CHECK = Please enter your user name! 
+LOGIN_USER_PASSWORD_CHECK = Please enter your password! 
+LOGIN_USER_LANG_CHECK = Select your language! 
+LOGIN_REMEMBER_USER = whether Remember username? 
+LOGIN_LOGIN = landing 
+LOGIN_RESET = Reset 
+LOGIN_COPYRIGHT = Copyright 
+LOGIN_ERROR_CODE_1 = user name or password is incorrect! 
+LOGIN_ERROR_CODE_2 = login timed out, please re-login system! 
+LOGIN_ERROR_CODE_3 = You have successfully logged out system! 
+LOGIN_ERROR_CODE_4 = login state failure, possible reason: your account from the same IP address login system! 
+LOGIN_ERROR_CODE_5 = Login your account has been more than the largest number of limitation, please try again in other client after!
+LOGIN_ERROR_CODE_6 = exceeds the maximum number of login attempts! The user has been locked 
+LOGIN_ERROR_CODE_10 = your account has been locked, temporarily cannot login!
+LOGIN_ERROR_CODE_ERROR = system is busy, please try again later! 
+LOGIN_ERROR_CODE_DEFAULT = Please enter your username and password! 
+
+# Home 
+INDEX_CURRENT_USER = current user 
+INDEX_CONTROL_PANEL = Control Panel 
+INDEX_LOGIN_OUT = logout 
+INDEX_SELF_INFOMATION = Personal Information 
+INDEX_UPDATE_PASSWORD = Change Password 
+INDEX_SYSTEM_CONTROL = System Monitoring 
+INDEX_EXIT = exit system 
+INDEX_EXIT_CONFIRM = OK to exit the system? 
+INDEX_MENU = navigation menu 
+
+# Button 
+BTN_ADD = new 
+BTN_UPDATE = Edit 
+BTN_VIEW = View 
+BTN_DELETE = Delete 
+BTN_UP = Upload 
+BTN_DOWN = Download 
+BTN_USER_SET = set user 
+BTN_POSITION_SET = Setting posts 
+BTN_DIALOG_ADD = add 
+BTN_DIALOG_DELETE = Delete 
+
+# User Management 
+USER_LIST_TITLE = Your current location of the user management - & gt; User List 
+USER_SELECT = Please select users 
+USER_NAME = name 
+LOGIN_STATUS = login status 
+USER_ADD = new users 
+USER_EDIT = Edit User 
+USER_VIEW = View user 
+USER_DELETE = delete users 
+RESET_PASSWORD = Reset Password 
+USER_ACCOUNT_NUMBER = Account 
+USER_PURCHASE_GROUP = Purchasing Group 
+USER_STATUS = status 
+USER_SEX = sex 
+USER_MAIL = Mailbox 
+USER_PHONE = Phone 
+USER_FAX = fax 
+USER_ADDRESS = address 
+LAST_LOGIN_DATE = last login date 
+USER_ACCOUNT_SCOPE = user accounts range from 2 to 10 characters 
+REAL_NAME = real name 
+FILL_IN_THE_PERSONAL_NAMES = fill in personal real name 
+PASSWORD = password 
+PASSWORD_CHARACTERS_SPECIFICATION = password at least six characters and a maximum of 18 characters! 
+VERIFY_PASSWORD = Repeat password 
+REPEAT_YOUR_PASSWORD = Repeat personal password 
+USER_STATUS = user status 
+PLEASE_SELECT_STATUS = Please select state 
+ROLE_NAME = role name 
+ROLES_CAN_BE_ALTERNATIVE = Role multiple choice 
+ORIGINAL_PASSWORD = original password 
+PLEASE_IMPORT_ORIGINAL_PASSWORD = Please enter the original password 
+NEW_PASSWORD = new password 
+USER_ROLE_SET = setting role 
+USER_NAME_NULL_TIP = Please fill in the user name! 
+USER_PASSWORD_LEVEL_LOW = weak 
+USER_PASSWORD_LEVEL_NORMAL = in 
+USER_PASSWORD_LEVEL_HIGN = strong 
+USER_PASSWORD_INCONFORMITY = two passwords do not match! 
+USER_PHONE_CHECK_TIP = phone number is incorrect! 
+USER_FAX_CHECK_TIP = Fax number is incorrect! 
+USER_MAIL_CHECK_TIP = mail format is incorrect! 
+USER_RESET_PASSWORD_INPUT_PASSWORD = Please enter the original password! 
+USER_RESET_PASSWORD_PASSWORD_TIP = password at least six characters and a maximum of 18 characters! 
+USER_RESET_PASSWORD_PASSWORD_LEVEL = password strength 
+USER_LOCK = Lock 
+USER_UNLOCK = Unlock 
+USER_TYPE = User Type 
+PLEASE_SELECT_TYPE = Please select the type of user 
+ALLOT_FROM_PERMISSION = assign permission sets form 
+ALLOT_DATA_PERMISSION = assign permission sets of data 
+
+
+
+# Purchasing Group Management 
+PROCUREMENT_SECTION = Please select Purchasing Group 
+PURCHASEGROUP_LIST_TITLE = Your current location: Master Data Management -> Purchasing Group Management -> Purchasing Group List 
+PURCHASEGROUP_NAME = name 
+PURCHASEGROUP_CODE = code 
+PURCHASEGROUP_ADD = new Purchasing Group 
+PURCHASEGROUP_EDIT = Edit Purchasing Group 
+PURCHASEGROUP_DELETE = delete Purchasing Group 
+PURCHASEGROUP_PHONE = Phone 
+PURCHASEGROUP_FAX = fax 
+PURCHASEGROUP_DESCRIBE = description 
+PURCHASEGROUP_CODE_STANDARD = Purchasing group code ranges from 2 to 10 characters 
+PURCHASEGROUP_NAME_WRITE = Fill Purchasing Group Name 
+PURCHASEGROUP_CODE_NULL_TIP = Please fill in the parameters of the code! 
+PURCHASEGROUP_PHONE_ERROR_TIP = phone number is incorrect! 
+PURCHASEGROUP_FAX_ERROR_TIP = Fax number is incorrect! 
+
+
+# Role Management 
+ROLE_LIST_TITLE = Location: Role Management -> list of roles 
+ROLE_MANAGE = Role Management 
+ROLE_SELECT = Please select a role 
+ROLE_CODE = code 
+ROLE_NAME = name 
+ROLE_DESC = description 
+ROLE_VIEW = View Roles 
+ROLE_ADD = new role 
+ROLE_EDIT = Edit Role 
+ROLE_DELETE = Delete Role 
+FRAME_SELECT_ALL = Select 
+ROLE_PERMISSION_SET = permission settings 
+ROLE_CATEGORY_LIST = menu list 
+ROLE_FUNCTION_LIST = Feature List 
+ROLE_CODE_CHECK_TIP = character code between 2 to 15 characters, not empty 
+ROLE_NAME_CHECK_TIP = role name between 2 to 8 characters, not empty 
+
+# Dictionary type management 
+TYPE_LIST_TITLE = Your current location: a dictionary management -> List Type 
+TYPE_SELECT = Please choose a dictionary 
+TYPE_CODE = Type Code 
+TYPE_NAME = Type Name 
+TYPE_DELETE = Delete Type 
+TYPE_ADD = new type 
+TYPE_UPDATE = Edit Type 
+TYPE_CODE_CHECK_TIP = type code between 2 to 15 characters, not empty 
+Between the type name TYPE_NAME_CHECK_TIP = 2 to 8 characters, not empty 
+
+# Dictionary parameter management 
+ENTRY_LIST_TITILE = Your current location: System Management -> Dictionary Parameter Management -> parameter list 
+ENTRY_MANAGE = dictionary parameter management 
+ENTRY_CODE = parameter code 
+ENTRY_NAME = parameter name 
+ENTRY_DELETE = delete parameters 
+ENTRY_ADD = new parameters 
+ENTRY_UPDATE = edit parameters 
+ENTRY_SORT = order 
+ENTRY_CODE_CHECK_TIP = parameter code in the range of 2 to 10 characters 
+ENTRY_NAME_CHECK_TIP = parameter names between 2 to 8 characters, not empty 
+ENTRY_SORT_TIP = only fill in numbers! 
+ENTRY_CODE_NULL_TIP = Please fill in the parameter code 
+
+# Organization Management 
+ORGNIZATION_LIST_TITLE = Your current position: Organization Management -> Organization List 
+ORGNIZATION_TITLE_UPDATE = update organizational structure 
+ORGNIZATION_TITLE_ADD = add organizational structure 
+ORGNIZATION_DETAIL = Details 
+ORGNIZATION_CODE = No. 
+ORGNIZATION_NAME = name 
+ORGNIZATION_TYPE = type 
+ORGNIZATION_DELETE = Delete 
+ORGNIZATION_GROUP_ADD = new Group 
+ORGNIZATION_GROUP_UPDATE = Modify Group 
+ORGNIZATION_COMPNAY_ADD = new company 
+ORGNIZATION_COMPNAY_UPDATE = modification company 
+ORGNIZATION_DEPT_ADD = new department 
+ORGNIZATION_DEPT_UPDATE = modification department 
+ORGNIZATION_DEPT_ADD_SON = new sub-sector 
+ORGNIZATION_TYPE_DEPT = department 
+ORGNIZATION_TYPE_GROUP = Group 
+ORGNIZATION_TYPE_COMPANY = Company 
+ORGNIZATION_DELETE_CONFIRM = Make sure that no child, whether to continue? 
+
+ORGNIZATION_GROUP_CODE = Group Code 
+ORGNIZATION_GROUP_NAME = Group Name 
+ORGNIZATION_GROUP_DESC = Group Description 
+ORGNIZATION_GROUP_CODE_TIP = Group code ranges from 2 to 10 characters 
+ORGNIZATION_GROUP_NAME_TIP = Group names range from 2 to 30 characters 
+ORGNIZATION_GROUP_CODE_NULL_TIP = Please fill in the Group code! 
+ORGNIZATION_GROUP_NAME_NULL_TIP = Please fill in the group name! 
+
+ORGNIZATION_DEPT_SELECT = Please select sectors 
+ORGNIZATION_DEPT_CODE = department code 
+ORGNIZATION_DEPT_NAME = department name 
+ORGNIZATION_DEPT_PHONE = department phone 
+ORGNIZATION_DEPT_DESC = department description 
+ORGNIZATION_DEPT_CODE_TIP = department code in the range of 2 to 10 characters 
+ORGNIZATION_DEPT_NAME_TIP = Group names range from 2 to 30 characters 
+ORGNIZATION_DEPT_CODE_NULL_TIP = Please fill in the department code! 
+ORGNIZATION_DEPT_NAME_NULL_TIP = Please fill in the name of the department! 
+ORGNIZATION_DEPT_PHONE_TIP = department phone incorrectly completed 
+
+COMPANY_CODE = company code 
+COMPANY_CODE_STANDARD = company code in the range of 2 to 10 characters 
+COMPANY_NAME = Company Name 
+COMPANY_NAME_STANDARD = company name range from 2 to 40 characters 
+REGISTERED_CAPITAL = registered capital 
+BANK_ACCOUNT = bank account 
+TYPE_OF_ENTERPRISE = Business Type 
+COMPANY_MAIL = Mailbox 
+COMPANY_BANK = Bank 
+CORPORATE_REP = legal representative 
+COMPANY_ADDRES = address 
+COMPANY_PHONE = Phone 
+COMPANY_POSTCODE = Zip 
+COMPANY_FAX = fax 
+COMPANY_DESCRIPTION = Company description 
+
+
+# Audit log management 
+AUDIT_LIST_TITLE = Your current location: Audit Log Management -> Audit Log List 
+OPERATOR_ID = operator ID 
+OPERATE_DATE = operating time 
+AUDIT_TYPE_NAME = Operation object 
+OPERATION_NAME = operation type 
+AUDIT_SYSTEM_NAME = Operating System 
+BEFORE_OPERATE_OBJ = operator before information 
+AFTER_OPERATE_OBJ after the = operator information 
+OPERATOR_NAME = User Name 
+OPERATOR_ACCOUNT = account 
+OPERATE_START_TIME = Start Time 
+OPERATE_END_TIME = End Time 
+
+
+# Organizational structure 
+ORG_TITLE = organizational structure 
+ORG_USER = organization personnel 
+DIMENSION_NAME = dimension name 
+ORG_PARENT_NAME = parent organization 
+ORG_CODE = Organization Code 
+ORG_NAME = Organization Name 
+ORG_TYPE = tissue types 
+ORG_DESCRIPTION = organization described 
+ORG_LEADER = organization responsible 
+ORG_CODE_NULL = Please fill in the organization code 
+ORG_NAME_NULL = Please fill in the name of the organization 
+ORG_TYPE_NULL = Please select the type of organization 
+ORG_USER_ADD = new officers 
+BTN_POSITION_SET = job settings 
+ORG_POSITION_ADD = new jobs 
+POSITION_TITLE = jobs 
+POSITION_CODE = post code 
+POSITION_NAME = Job Title 
+POSITION_DESCRIPTION = job description 
+POSITION_PARENT = higher posts 
+ORG_ADD = new organization 
+ORG_UPDATE = modify tissue 
+ORG_DELETE = delete organization 
+ORG_VIEW = View Organization 
+ORG_REFRESH = refresh organization 
+NO_CHOOSE_ORG = Please select the organization 
+POSITION_PARENT_NULL = Please choose the higher posts 
+POSITION_CODE_NULL = Please fill in the post code 
+POSITION_NAME_NULL = Please fill job name 
+POSITION_CODE_CHECK_TIP = post code between 2 to 50 characters, not empty 
+POSITION_NAME_CHECK_TIP = between positions 2 to 50 characters in the name, not empty 
+ORG_CHECK_TIP = 2 to 50 characters, not empty 
+ORG_TYPE_CHECK_TIP = Please select the type of organization 
+POSITION_SELECT = Please select jobs 
+POSITION_ORGNAME = affiliation 
+
+# Forms rights management 
+FORM_PERMISSION_LIST_TITILE = Your current location: Forms rights management 
+PERMISSION_CODE = permission code 
+PERMISSION_NAME = permission name 
+PERMISSION_MODULE = module 
+PERMISSION_DESCRIPTION = privileges Description 
+PERMISSION_CODE_CHECK_TIP = permission code in the range of 2 to 10 characters 
+Permission name between PERMISSION_NAME_CHECK_TIP = 2 to 50 characters 
+PERMISSION_MODULE_NULL = Please fill in the security module 
+PERMISSION_DESCRIPTION_NULL = Please fill in the permission description 
+
+# Data Rights Management 
+DATA_PERMISSION_LIST_TITILE = Your current position: Data Rights Management 
+DATA_PERMISSION_SET_LIST_TITILE = Your current position: data set of permissions management 
+PERMISSION_CODE = permission code 
+PERMISSION_RELATION_CODE = reference field name 
+PERMISSION_SET = Authorization 
+PERMISSION_URL = Request path 
+PERMISSION_TYPE = Data Types 
+PERMISSION_VALUE = configuration values 
+PERMISSION_SELECT = Please select the data authority 
+PERMISSION_SELECT_VALUE = Please select the permissions configuration values \u200b\u200bas row 
+PERMISSION_SQL_TEST = test 
+PERMISSION_SQL = SQL way you chose, after careful testing, please save not lead to system instability 
+PERMISSION_SQL_NULL = Please fill in the SQL 
+# The form the permission set management 
+FORM_PERMISSION_SET_LIST_TITILE = Your current location: Form Permission Set Management 
+PERMISSION_SET_CODE = permissions set code 
+PERMISSION_SET_NAME = permission set name 
+PERMISSION_SET_DESCRIPTION = Permission Set Description 
+PERMISSION_SET_CODE_CHECK_TIP = permissions set codes range from 2 to 10 characters 
+Between privilege set name = 2 to 50 characters PERMISSION_SET_NAME_CHECK_TIP 
+PERMISSION_SET_DESCRIPTION_NULL = Please fill in the permission set description 

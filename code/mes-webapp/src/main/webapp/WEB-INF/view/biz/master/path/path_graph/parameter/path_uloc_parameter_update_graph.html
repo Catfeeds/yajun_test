@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../../include/editorCommons.html"> 
+<script type="text/javascript">
+$(function(){
+	$("#display_updateParameterId").val("${tsParameter.code}-${tsParameter.name}");
+});
+	function clickUpdateParameterCallback(dialog){
+		var rowsData = getSelectedRows('dgUpdateParameterGridId');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		$("#tsParameterId").val(rowsData[0].id);
+		$("#display_updateParameterId").val(rowsData[0].code+"-"+rowsData[0].name);
+		dialog.close();
+	}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/path/uloc/parameter/graph_update.do" class="form-horizontal" idValue=bean.id  permissionModule="PATH_ULOC_PARAMETER">
+		<input type ="hidden" id="pathUlocUpdateParameterId" name="tmPathUlocId" value="${tmPathUlocId!}"/>
+		<input type="hidden" id ="parameterUpdateRectSeq" name="rectSeq" value="${rectSeq!}">
+		<input type="hidden" value="pathUlocParameterUpdateCallBack" id="callback">
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PARAMETER_PARAMETER" permissionCode="PATH_ULOC_PART_ULOC_PARAMETER">
+<!-- 				 <@p.input type="select"  datatype="*" field="tsParameterId" options=parameterOptions  value="${bean.tsParameterId}"></@p.input> -->
+					<input name="tsParameterId" id="tsParameterId"class="inputxt"  type="hidden" value="${bean.tsParameterId!}"/>
+<!-- 					<input  class="inputxt" readonly ="readonly" datatype="*" value="${tsParameter.code}-${tsParameter.name}"/> -->
+					 <@p.magnify  id="updateParameterId" url="${baseUrl}/path/uloc/parameter/selectParameterList.do?currentPageId=UpdateParameterGridId&tmPathUlocId=${tmPathUlocId!}&tmUlocId=${tmUlocId!}&tsParameterIds=${tsParameterIds!}" callback="clickUpdateParameterCallback" datatype="*"></@p.magnify>
+			</@p.formColmd>
+		
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_IS_REQUIRED" permissionCode="PATH_ULOC_PART_ULOC_IS_REQUIRED">
+				<@p.input type="select"  datatype="*" field="isRequired" options=yesOrNoOptions excludeSelectOption="true" value="${bean.isRequired}"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_ENABLED" permissionCode="PATH_ULOC_PART_ULOC_ENABLED">
+				<@p.input type="select"  datatype="*" field="enabled" options=enabledOptions  excludeSelectOption="true" value="${bean.enabled}"></@p.input>
+			</@p.formColmd>
+				<@p.formColmd title="PATH_ULOC_PART_ULOC_NOTE" permissionCode="PATH_ULOC_PART_ULOC_NOTE">
+					<input name="note" class="inputxt" datatype="*" maxlength='150' ignore="ignore" value="${bean.note!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+function pathUlocParameterUpdateCallBack(result){
+	if($("#pathUlocUpdateParameterId").val()!=""){
+		return;	
+	}
+	var bean = result.data;
+	$(parameterArray).each(function(i,parameterObject){
+		if(parameterObject.key == bean.rectSeq){
+			$(parameterObject.value).each(function(j,item){
+				if(item.id == bean.id){
+					item = bean;
+					parameterObject.value.splice(j,1,bean);
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	loadParameterArray(bean.rectSeq);
+}
+</script>

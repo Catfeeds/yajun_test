@@ -1,0 +1,199 @@
+<style>
+	fieldset{padding:.35em .625em .75em;margin:0 2px;border:1px solid #ccc}
+	legend{padding:.5em;border:0;width:auto;font-size: 20px;font-family: 微软雅黑;color: #ccc;}
+	.parameter-setting lable{
+		width: 100px;
+    	display: inline-flex;
+	}
+	.parameter-setting input{
+		width: 200px;
+	}
+	.parameter-setting div{
+		height:40px;
+		float: left;
+    	width: 33%;
+	}
+	.parameter-setting label{
+		width:100px;
+	}
+	.fixed-table-toolbar{
+		height:0px;
+	}
+	
+</style>
+<div class="breadcrumbs">
+	<ul class="breadcrumb">
+		<li><i class="icon-home home-icon"></i>PMC管理&emsp;>&emsp;PMC参数设置</li>
+	</ul>
+</div>
+<div class="page-content" fit="true">
+ <div id="org_tab_right" style="width: 100%;margin-left: 0px;margin-top: 0px;"  class="tabbable org_tab_right" >
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue">
+		<li class="active"><a data-toggle="tab" href="#pmcR5">R5线PMC参数管理</a></li>
+		<li><a data-toggle="tab"  href="#pmcFin">翅片冲床PMC参数管理</a></li>
+	</ul>
+	<div class="tab-content" >
+		<div id="pmcR5" class="tab-pane in active">
+		<form id="afficheFrom">
+			<fieldset>
+				<legend>公告管理</legend>
+				<input type="hidden" id="addicheModelId" value="${pmstAffiche.id!}"/>
+				<input type="hidden" id="addicheModelTyle" value="PMST_AFFICHE"/>
+				<div style="height:50px;">
+					<label>有效时间：</label><input name='activeTimebegin'  id='activeTimebeginId'  <#if pmstAffiche.activeTimebegin??>value="${pmstAffiche.activeTimebegin?string('yyyy-MM-dd HH:mm')}"</#if> />
+					<label>~</label><input name='activeTimefinish'  id='activeTimefinishId'  <#if pmstAffiche.activeTimefinish??>value="${pmstAffiche.activeTimefinish?string('yyyy-MM-dd HH:mm')}" </#if>/>
+				</div>
+				<textarea name="content" class="inputxt inputForbidden" ignore="ignore" id="afficheEditor" rows="20">${pmstAffiche.content!}</textarea>
+				<div style="float: right;"><button type="button" onclick="afficheFrom();" class="btn btn-primary" style="margin: 10px 0px 0px 10px;">发布</button></div>
+			</fieldset>
+		</form>
+			<fieldset>
+				<legend>早会点检时长</legend>
+				<form id="earlyInspectionTimeForm">
+					<div class="parameter-setting">
+						<input type="hidden"  name="id" value="${earlyInspectionBean.id!}"/>
+						<input type="hidden"  name="modelType" value="EARLY_INSPECTION_TIME"/>
+						<div><label>早会点检时长:</label><input type="text" name="earlyInspectionTime" onkeyup="value=value.replace(/[^\d]/g,'')" maxLength="2" value="${earlyInspectionBean.earlyInspectionTime!}"/><span>min</span> </div>
+					</div>
+				</form>
+				<div style="float: right;"><button type="button" onclick="earlyInspectionTimeForm();"  class="btn btn-primary" style="margin: 10px 0px 0px 10px;">发布</button></div>
+			</fieldset>
+			<fieldset>
+				<legend>工作时间能耗阈值</legend>
+				<!-- <div>
+					<table class="table table-striped" id="pmstParameter" align="center" striped="true"  data-click-to-select="true"></table>
+				</div> -->
+				<form id="pmstWorkParameterFrom">
+					<div class="parameter-setting">
+						<input type="hidden"  name="id" value="${pmstWorkParameter.id!}"/>
+						<input type="hidden"  name="modelType" value="PMST_WORK_PARAMETER"/>
+						<div><label>目标可动率:</label><input type="text" name="targetMobility"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${pmstWorkParameter.targetMobility!}"/><span></span> </div>
+						<div><label>空调能耗阈值:</label><input type="text" name="airConditionerEc"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${pmstWorkParameter.airConditionerEc!}" maxlength="20" /><span>kw/h</span> </div>
+						<div><label>设备能耗阈值:</label><input type="text" name="equipmentEc"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${pmstWorkParameter.equipmentEc!}" maxlength="20" /><span>kw/h</span> </div>
+						<div><label>照明能耗阈值:</label><input type="text" name="lightingEc"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${pmstWorkParameter.lightingEc!}" maxlength="20" /><span>kw/h</span> </div>
+					</div>
+				</form>
+				<div style="float: right;"><button type="button" onclick="pmstWorkParameterFrom();" class="btn btn-primary" style="margin: 10px 0px 0px 10px;">发布</button></div>
+			</fieldset>
+			<fieldset>
+				<legend>休息时间能耗阈值</legend>
+				<!-- <div>
+					<table class="table table-striped" id="pmstParameter" align="center" striped="true"  data-click-to-select="true"></table>
+				</div> -->
+				<form id="pmstRecessParameterFrom">
+					<div class="parameter-setting">
+						<input type="hidden"  name="id" value="${pmstRecessParameter.id!}"/>
+						<input type="hidden"  name="modelType" value="PMST_RECESS_PARAMETER"/>
+						<div><label>空调能耗阈值:</label><input type="text" name="airConditionerEc"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${pmstRecessParameter.airConditionerEc!}" maxlength="20" /><span>kw/h</span> </div>
+						<div><label>设备能耗阈值:</label><input type="text" name="equipmentEc"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${pmstRecessParameter.equipmentEc!}" maxlength="20" /><span>kw/h</span> </div>
+						<div><label>照明能耗阈值:</label><input type="text" name="lightingEc"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${pmstRecessParameter.lightingEc!}" maxlength="20" /><span>kw/h</span> </div>
+					</div>
+				</form>
+				<div style="float: right;"><button type="button" onclick="pmstRecessParameterFrom();" class="btn btn-primary" style="margin: 10px 0px 0px 10px;">发布</button></div>
+			</fieldset>
+		</div>
+		<div id="pmcFin" class="tab-pane">
+<!-- 			<form id="pmcFinAfficheFrom"> -->
+<!-- 				<fieldset> -->
+<!-- 					<legend>公告管理</legend> -->
+<!-- 					<input type="hidden" id="pmcFinId" value="${finPunchAffiche.id!}"/> -->
+<!-- 					<input type="hidden" id="pmcFinModelTyle" value="FIN_PUNCH_AFFICHE"/> -->
+<!-- 					<textarea name="content" class="inputxt inputForbidden" ignore="ignore" id="pmcFineditor" rows="20">${finPunchAffiche.content!}</textarea> -->
+<!-- 				</fieldset> -->
+<!-- 			</form> -->
+<!-- 			<div style="height:50px;"><button type="button" onclick="pmcFinAfficheFrom();" class="btn btn-primary" style="margin: 10px 0px 0px 10px;">发布</button></div> -->
+			<fieldset>
+				<legend>参数设置</legend>
+				<form id="pmcFinParameterFrom">
+					<div class="parameter-setting">
+						<input type="hidden"  name="id" value="${finPunchPAarameter.id!}"/>
+						<input type="hidden"  name="modelType" value="FIN_PUNCH_PARAMETER"/>
+						<div><label>目标可动率:</label><input type="text" name="targetMobility"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${finPunchPAarameter.targetMobility!}" maxlength="10" /><span>%/班</span> </div>
+						<div><label>目标冲速:</label><input type="text" name="targetImpulse"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${finPunchPAarameter.targetImpulse!}" maxlength="10" /><span>SPM</span> </div>
+						<div><label>屏保间隔时间:</label><input type="text" name="spacingInterval"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${finPunchPAarameter.spacingInterval!}" maxlength="10" /><span>分钟</span> </div>
+						<div><label>屏保保持时间:</label><input type="text" name="retentionTime"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${finPunchPAarameter.retentionTime!}" maxlength="10"/><span>秒</span> </div>
+						<div><label>可动率警界值:</label><input type="text" name="pbTargetMobility"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${finPunchPAarameter.pbTargetMobility!}" maxlength="10" /><span></span> </div>
+						<div><label>可动率极限值:</label><input type="text" name="mobilityExtreme"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${finPunchPAarameter.mobilityExtreme!}" maxlength="10" /><span></span> </div>
+						<div><label>冲速警界值:</label><input type="text" name="pbTargetImpulse"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${finPunchPAarameter.pbTargetImpulse!}" maxlength="10" /><span></span> </div>
+						<div><label>冲速极限值:</label><input type="text" name="impulseExtreme"  onkeyup="value=value.replace(/[^\d]/g,'')" value="${finPunchPAarameter.impulseExtreme!}" maxlength="10" /><span></span> </div>
+					</div>
+				</form>
+				<div style="float: right;"><button type="button" onclick="pmcFinParameterFrom();" class="btn btn-primary" style="margin: 10px 0px 0px 10px;">发布</button></div>
+			</fieldset>
+		</div>
+	</div>
+  </div>
+</div>
+<script type="text/javascript">
+CKEDITOR.replace('afficheEditor', { height: '300px'});
+// CKEDITOR.replace('pmcFineditor', { height: '300px'});
+$(function(){
+	$('#activeTimebeginId').click(function(){
+		var activeTimefinish=$dp.$('activeTimefinishId');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm',
+			onpicked:function(){
+				activeTimefinish.click();
+			},
+			maxDate:'#F{$dp.$D(\'activeTimefinishId\')}'
+		})
+	});
+	$('#activeTimefinishId').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm',
+			minDate:'#F{$dp.$D(\'activeTimefinishId\')}'
+		})
+	});
+	//getQuery();
+})
+function afficheFrom(){
+	var data = {};
+	data.content = CKEDITOR.instances.afficheEditor.getData();
+	data.modelType = $('#addicheModelTyle').val();
+	data.id = $('#addicheModelId').val();
+	data.activeTimebegin = $('#activeTimebeginId').val();
+	data.activeTimefinish = $('#activeTimefinishId').val();
+	$("#afficheFrom").submit( 
+		ajaxRequest('${baseUrl}/tbPmcPmst/updatePmcParameter.do',data,function() {})
+     ); 
+  }
+function updateParameter(id){
+	createwindow("编辑", "${baseUrl}/tbPmcPmst/pmstr5UpdateInput.do?id="+id, "pmstParameter");
+}
+
+function pmcFinAfficheFrom(){
+	var data = {};
+	data.content = CKEDITOR.instances.pmcFineditor.getData();
+	data.modelType = $('#pmcFinModelTyle').val();
+	data.id = $('#pmcFinId').val();
+	$("#pmcFinAfficheFrom").submit( 
+		ajaxRequest('${baseUrl}/tbPmcPmst/updatePmcParameter.do',data,function() {})
+    ); 
+}
+function pmcFinParameterFrom(){
+	$("#pmcFinParameterFrom").submit( 
+		ajaxRequest('${baseUrl}/tbPmcPmst/updatePmcParameter.do',$('#pmcFinParameterFrom').serialize(),function() {})
+    ); 
+}
+function pmstRecessParameterFrom(){
+	$("#pmstRecessParameterFrom").submit( 
+		ajaxRequest('${baseUrl}/tbPmcPmst/updatePmcParameter.do',$('#pmstRecessParameterFrom').serialize(),function() {})
+    ); 
+}
+function pmstWorkParameterFrom(){
+	$("#pmstWorkParameterFrom").submit( 
+		ajaxRequest('${baseUrl}/tbPmcPmst/updatePmcParameter.do',$('#pmstWorkParameterFrom').serialize(),function() {})
+    ); 
+}
+function earlyInspectionTimeForm(){
+	$("#earlyInspectionTimeForm").submit( 
+		ajaxRequest('${baseUrl}/tbPmcPmst/updatePmcParameter.do',$('#earlyInspectionTimeForm').serialize(),function() {})
+    ); 
+}
+</script>
+
+
+
+

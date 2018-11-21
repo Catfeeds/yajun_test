@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/classManagerDetail/add.do" class="form-horizontal"   permissionModule="CLASS_MANAGER_DETAIL">
+		<input type="hidden" name ="tmClassManagerId" value="${tmClassManagerId!}"/>
+		<@p.formRow>
+			<@p.formColmd title="CLASS_MANAGER_DETAIL_ULOC_NAME" permissionCode="CLASS_MANAGER_DETAIL_ULOC_NAME">
+				<@p.input type="select" datatype="*" field="tmUlocId" options=ulocOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="CLASS_MANAGER_DETAIL_USER_ACCOUNT" permissionCode="CLASS_MANAGER_DETAIL_USER_NAEM">
+				<@p.input type="select" field="tmEmployeeNoId" options=employeeNos datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="CLASS_MANAGER_DETAIL_REMARK" permissionCode="CLASS_MANAGER_DETAIL_REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250"></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+
+</script>
+

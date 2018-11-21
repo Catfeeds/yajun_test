@@ -1,0 +1,65 @@
+
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body title="PART_LIST_TITLE" permissionModule="PART">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PART_PLANT" id="list_plant"  type="select" field="tmPlantId" options=plantOptions ></@p.input>
+			<@p.input title="PART_NO" field="no"></@p.input>
+			<@p.input title="PART_NAME_CN" field="nameCn"></@p.input>
+			<@p.input title="PART_TYPE"   field="type"  type="select" options=typeOptions></@p.input>
+			<@p.input title="PART_ENABLED"  field="enabled"  type="select" options=enabledOptions></@p.input>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="PART_ADD" permissionCode="PartAdd" iconCls="plus" url="${baseUrl}/part/addInput.do" type="add"  ></@p.button>
+			<@p.button title="PART_UPDATE" permissionCode="PartUpdate" iconCls="edit" url="${baseUrl}/part/updateInput.do" type="update"></@p.button>
+			<@p.button title="PART_DELETE" permissionCode="PartDelete" iconCls="trash" url="${baseUrl}/part/delete.do" type="delete"></@p.button>
+			<@p.button title="PART_IMPORT" permissionCode="PartImport" downName="PART_IMPORT_NAME" onclick="importData();" iconCls="signin" />
+			<@p.button title="PART_EXPORT" permissionCode="PartExport" downName="PART_EXPORT_NAME" url="${baseUrl}/part/exportData.do" iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/part/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PART_PLANT" field="plant.no" permissionCode="PART_PLANT"></@p.column>
+		<@p.column title="PART_NO" field="no" permissionCode="PART_NO"></@p.column>
+		<@p.column title="PART_NAME_CN" field="nameCn" permissionCode="PART_NAME_CN" formatter="renderBatchQty"></@p.column>
+		<@p.column title="PART_TYPE" field="type" permissionCode="PART_TYPE"  formatter="renderType"></@p.column>
+		<@p.column title="PART_BASE_UNIT" field="baseUnit" permissionCode="PART_BASE_UNIT" formatter="renderBaseUnit"></@p.column>
+		<@p.column title="PART_SPECTYP" field="spectyp" permissionCode="PART_SPECTYP" formatter="renderBatchQty"></@p.column>
+		<@p.column title="PART_UKUNIT" field="ukunit" permissionCode="PART_UKUNIT" formatter="renderUkUnit"></@p.column>
+		<@p.column title="PART_UKTIME" field="uktime" permissionCode="PART_UKTIME" formatter="renderBatchQty"></@p.column>
+		<@p.column title="PART_ENABLED" field="enabled" permissionCode="PART_ENABLED" formatter="renderGenderEnabled"></@p.column>
+		<@p.column title="PART_REMARKS" field="remarks" permissionCode="PART_REMARKS"  formatter="renderBatchQty"></@p.column>
+	</@p.dataGrid>
+	<div id ="PARTDetail"></div>
+</@p.body>
+<script type="text/javascript">
+
+
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+
+function renderBatchQty(value){
+	return value == null ? "" : value;
+}
+
+function renderType(value){
+	return entryRenderer('PART_TYPE', value);
+}
+
+function renderBaseUnit(value){
+	return entryRenderer('BASE_UNIT', value);
+}
+
+function renderUkUnit(value){
+	return entryRenderer('EQUIPMENT_MAINTENANCE_TIME_TYPE', value);
+}
+
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/part/exportTemplate.do";
+    importFile("<@s.m code="PART_IMPORT" />", "${baseUrl}/part/importData.do", "dg${currentPageId}",obj);
+}
+</script>

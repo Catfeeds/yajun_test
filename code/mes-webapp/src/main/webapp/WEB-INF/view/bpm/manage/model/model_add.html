@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+</script>
+<body style="overflow-y: hidden" scroll="no" >
+<@p.editForm url="${baseUrl}/bpm/model/manage/add.do" class="form-horizontal"  permissionModule="MODEL_DEFINITION_LIST" >
+		<@p.formRow>
+			<@p.formColmd title="MODEL_COL_KEY" permissionCode="MODEL_COL_KEY">
+				<input name="key"  class="inputxt" datatype="*" >
+			</@p.formColmd>
+			<@p.formColmd title="MODEL_COL_NAME"   permissionCode="MODEL_COL_NAME">
+				  <input name="name" class="inputxt" datatype="*" nullmsg="<@s.m code='MODEL_NAME_NULL_TIP'/>" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd class="col-md-8" title="MODEL_COL_DESCRIPTION"  permissionCode="MODEL_COL_DESCRIPTION" >
+				<textarea name="description"  class="inputxt" ignore="ignore" ></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<form id="id-message-form" class="form-horizontal" action="${baseUrl}/notification/add.do" method="post" enctype="multipart/form-data">
+	<input class="btn_sub" id="btn_sub" type="hidden" />
+	<div>
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right" for="title"><@s.m code='NOTIFICATION_TITLE'/>:</label>
+
+			<div class="col-sm-6 col-xs-12">
+				<div class="input-icon block col-xs-12 no-padding">
+					<input maxlength="100" type="text" class="col-xs-12" name="title" id="title" placeholder="<@s.m code='NOTIFICATION_TITLE'/>" /> <i
+						class="icon-comment-alt"></i>
+				</div>
+			</div>
+		</div>
+
+		<div class="hr hr-18 dotted"></div>
+
+		<div class="form-group">
+			<label class="col-sm-2 control-label no-padding-right"> <span class="inline space-24 hidden-480"></span> <@s.m
+				code='NOTIFICATION_CONTENT'/>:
+			</label>
+
+			<div class="col-sm-9">
+				<div class="wysiwyg-editor"></div>
+			</div>
+		</div>
+
+		<div class="hr hr-18 dotted"></div>
+
+		<div class="form-group no-margin-bottom">
+			<label class="col-sm-2 control-label no-padding-right"><@s.m code='NOTIFICATION_ATTACHEMENT' />:</label>
+
+			<div class="col-sm-9">
+				<input id="attachments" type="file" name="attachments[]" class="file" multiple="true">
+			</div>
+		</div>
+	</div>
+</form>
+<script src="${baseUrl}/res/bootstrap/js/bootstrap-tag.min.js"></script>
+<script src="${baseUrl}/res/bootstrap/js/jquery.hotkeys.min.js"></script>
+<script src="${baseUrl}/res/bootstrap/js/bootstrap-wysiwyg.js"></script>
+<script src="${baseUrl}/res/bootstrap/js/jquery.base64.js"></script>
+
+<script type="text/javascript">
+	function beforeNotificationSubmit(curform) {
+		var wysiwygEditor = $('#id-message-form .wysiwyg-editor');
+		var editor = "<input type='hidden' name='content' value='"
+				+ $.base64.btoa(wysiwygEditor.html()) + "' />";
+		curform.append(editor);
+		return true;
+	}
+	jQuery(function($) {
+		initValidForm(beforeNotificationSubmit);
+		//$('#id-message-form input[type=file]').ace_file_input();
+		initFileInput('attachments', '${baseUrl}/attachment/upload.do','${baseUrl}/attachment/delete.do');
+		//intialize wysiwyg editor
+		$('#id-message-form .wysiwyg-editor').ace_wysiwyg(
+				{
+					toolbar : [ 'bold', 'italic', 'strikethrough', 'underline',
+							null, 'justifyleft', 'justifycenter',
+							'justifyright', null, 'insertImage', null,
+							'createLink', 'unlink', null, 'undo', 'redo' ]
+				}).prev().addClass('wysiwyg-style1');
+	});
+</script>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/plant/add.do" class="form-horizontal" permissionModule="PLANT">
+		<@p.formRow>
+		    <@p.formColmd title="PLANT_NAME_CN" permissionCode="PLANT_NAME_CN">
+				<input name="nameCn" class="inputxt" maxlength='150' datatype="*" />
+			</@p.formColmd>
+			<@p.formColmd title="PLATN_NO"  permissionCode="PLANT_NO">
+				<input name="no" class="inputxt"   datatype="no" maxlength='100'>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+		     <@p.formColmd title="PLANT_COMPANY_ADDRESS"  permissionCode="PLANT_COMPANY_ADDRESS">
+		        <input name="companyAddress" class="inputxt"  errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='200' />
+		     </@p.formColmd>
+		     <@p.formColmd title="PLANT_CONTACT"  permissionCode="PLANT_CONTACT">
+		        <input name="contact" class="inputxt"  errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='20' />
+		     </@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PLANT_ENABLED" permissionCode="PLANT_ENABLED">
+					  <@p.input type="select" excludeSelectOption="true" field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+		     <@p.formColmd title="PLANT_REMARK"  permissionCode="PLANT_REMARK">
+		        <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250"></textarea>
+		     </@p.formColmd>
+		</@p.formRow>
+	<#--	<@p.formRow>
+			<@p.formColmd title="PLANT_NAME_CN" permissionCode="PLANT_NAME_CN">
+				<input name="nameCn" class="inputxt" maxlength='150' datatype="*" />
+			</@p.formColmd>
+			<@p.formColmd title="PLANT_NAME_EN" permissionCode="PLANT_NAME_EN">
+				  <input name="nameEn" class="inputxt" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore"  maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PLANT_NAME_CN_S" permissionCode="PLANT_NAME_CN_S">
+				<input name="nameCnS" class="inputxt"   errormsg="<@s.m code='ERROR_CHINESE'/>"  maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="PLANT_NAME_EN_S" permissionCode="PLANT_NAME_EN_S">
+				  <input name="nameEnS" class="inputxt" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PLANT_ADDR_CN1" permissionCode="PLANT_CN_ADDRESS_ONE">
+				<input name="addrCn1" class="inputxt" errormsg="<@s.m code='ERROR_CHINESE'/>"  ignore="ignore" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="PLANT_ADDR_CN2"  permissionCode="PLANT_CN_ADDRESS_TWO">
+				 <input name="addrCn2" class="inputxt" errormsg="<@s.m code='ERROR_CHINESE'/>"  ignore="ignore" maxlength='150' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PLANT_ADDR_EN1" permissionCode="PLANT_EN_ADDRESS_ONE">
+				<input name="addrEn1" class="inputxt" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="PLANT_ADDR_EN2" permissionCode="PLANT_EN_ADDRESS_TWO">
+				<input name="addrEn2" class="inputxt" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore"  maxlength='150' />
+			</@p.formColmd>
+		</@p.formRow>
+		-->
+</@p.editForm>
+</body>
+</html>

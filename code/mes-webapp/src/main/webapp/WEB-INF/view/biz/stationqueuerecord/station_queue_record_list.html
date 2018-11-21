@@ -1,0 +1,69 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	$(function(){
+		$('#createTimeStart').click(function(){
+			var createTimeEnd=$dp.$('createTimeEnd');
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm:ss',
+				onpicked:function(){
+					createTimeEnd.click();
+				},
+				maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+			})
+		});
+		$('#createTimeEnd').click(function(){
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm:ss',
+				minDate:'#F{$dp.$D(\'createTimeStart\')}'
+			})
+		});
+		initQueryTime();
+	})
+
+	function initQueryTime(){
+		var date = new Date();
+		var year = date.getFullYear();
+		var month = date.getMonth()+1;
+		var day  = date.getDate();
+		var hour = date.getHours();
+		var minute = date.getMinutes();
+		var seconds = date.getSeconds();
+		$("#createTimeEnd").val(year+"-"+caseLessTen(month)+"-"+caseLessTen(day)+" "+caseLessTen(hour)+":"+caseLessTen(minute)+":"+caseLessTen(seconds));
+		date = new Date(date.getTime()-1000*24*60*60*7);
+		year = date.getFullYear();
+		month = date.getMonth()+1;
+		day  = date.getDate();
+		hour = date.getHours();
+		minute = date.getMinutes();
+		seconds = date.getSeconds();
+		$("#createTimeStart").val(year+"-"+caseLessTen(month)+"-"+caseLessTen(day)+" "+caseLessTen(hour)+":"+caseLessTen(minute)+":"+caseLessTen(seconds));
+	}
+</script>
+
+<@p.body title="QUALITY_TRACING_LIST_TITLE" permissionModule="QUEUE_RECORD">
+  <@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="QUEUE_RECORD_PLC_SN" field="plcSn"></@p.input>
+			<@p.input title="QUEUE_RECORD_READ_TAG_SN" field="readTagSn"></@p.input>
+			<@p.input title="QUEUE_RECORD_ULOC_NO" field="ulocNo"></@p.input>
+			<@p.input title="QUEUE_RECORD_FRUIT" field="fruit"></@p.input>
+			<@p.input title="QUEUE_RECORD_RFID_READ_FRUIT" field="rfidReadFruit"></@p.input>
+			<@p.input title="QUEUE_RECORD_CREATE_BEGIN_TIME" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="QUEUE_RECORD_CREATE_FINISH_TIME" id="createTimeEnd"  field="createTimeEnd"  ></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tbStationQueueRecord/list.do"  >
+			<@p.column title="QUEUE_RECORD_ULOC_NO" field="ulocNo" permissionCode="QUEUE_RECORD_ALL"></@p.column>
+			<@p.column title="QUEUE_RECORD_PLC_SN" field="plcSn" permissionCode="QUEUE_RECORD_ALL" ></@p.column>
+			<@p.column title="QUEUE_RECORD_READ_TAG_SN" field="readTagSn" permissionCode="QUEUE_RECORD_ALL"></@p.column>
+			<@p.column title="QUEUE_RECORD_FRUIT" field="fruit" permissionCode="QUEUE_RECORD_ALL"></@p.column>
+			<@p.column title="QUEUE_RECORD_RFID_READ_FRUIT" field="rfidReadFruit" permissionCode="QUEUE_RECORD_ALL"></@p.column>
+			<@p.column title="QUEUE_RECORD_CREATE_TIME" field="createTime" permissionCode="QUEUE_RECORD_ALL"></@p.column>
+	</@p.dataGrid>  
+</@p.body>	
+

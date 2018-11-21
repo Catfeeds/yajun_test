@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<div style="text-align: center">
+	<input type="text" value="${SN!}" readonly="readonly"  style="width: 500px;height: 50px;margin-bottom: 10px;"/>
+</div>
+<div style="text-align: center">
+	<input type="text" id="partBarCode" style="width: 500px;height: 50px;margin-bottom: 10px;"onkeydown="scanPartBarCode(this.value)"/>
+</div>
+<@p.editForm url="${baseUrl}/onLine/bindPartEnd.do" class="form-horizontal"   permissionModule="ONLINE">
+<input type="hidden" name="recordId" value="${recordId}">
+<input type="hidden" name="shiftNo" value="${shiftNo!}">
+<input type="hidden" name="tmUlocId" value="${tmUlocId}">
+<input type="hidden" name="currentUlocSeq" value="${currentUlocSeq}">
+<input type="hidden" name="toPorderAviId" value="${toPorderAviId}"/>
+<input type="hidden" id="beforeSubmit" value="checkValue"/>
+</@p.editForm>
+<div style="width: 49%;float: left;">
+<table class="table table-bordered  table-hover table-condensed">
+	<thead><tr><th>物料</th><th>用量</th><th>描述</th></tr></thead>
+	<tbody id="needBindPartTable">
+	</tbody>
+</table>
+</div>
+
+<div style="width: 49%;float: right;">
+<table class="table table-bordered  table-hover table-condensed">
+	<thead><tr><th>物料</th><th>用量</th><th>操作</th></tr></thead>
+	<tbody id="alreadyBindPart">
+	</tbody>
+</table>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+var partNeedCount = "";
+$(function(){
+	$(".close").hide();
+	$(".btn-default").hide();
+	$(".form_required_flag").attr("style","position:relative;");
+	$(".inputxt").attr("style","width:200px;");
+	$(".bootstrap-dialog-footer-buttons").append("<button class='btn btn-primary' onclick='goGackPart()'>返回</button>");
+	getNeedAndAreadyBindPart();
+	
+	setTimeout('$("#partBarCode").focus()',500);
+})
+
+function scanPartBarCode(partBarCode){
+	if(event.keyCode==13){
+		ajaxRequest("${baseUrl}/onLine/scanPartBarCode.do", {
+			"SN":"${SN}",
+			"toPorderAviId":"${toPorderAviId}",
+			"tmUlocId":"${tmUlocId}",
+			"currentUlocSeq":"${currentUlocSeq}",
+			"partBarCode":partBarCode,
+			"recordId":"${recordId}",
+			"tpRecordUlocId":"${tpRecordUlocId}"
+		}, function(result){
+			$("#partBarCode").val("");
+			$("#partBarCode").focus();
+			getNeedAndAreadyBindPart();
+		}, true);
+	}
+}
+
+function bindPartEnd(){
+	ajaxRequest(baseUrl+"/onLine/bindPartEnd.do", {
+		recordId:"${recordId}",
+		shiftNo:"${shiftNo}",
+		tmUlocId:"${tmUlocId}",
+		currentUlocSeq:"${currentUlocSeq}"
+	}, function(result){
+		if(result.success){
+			$(".close").click();
+		//	infoTip("不需要再绑定关键件了!");
+			clickSN("${SN}");
+		}
+	}, false);
+}
+
+
+function getNeedAndAreadyBindPart(){
+	$.ajax({
+		url:"${baseUrl}/onLine/getNeedAndAreadyBindPart.do",
+		type:"post",
+		data:{
+			"SN":"${SN}",
+			"toPorderAviId":"${toPorderAviId}",
+			"tmUlocId":"${tmUlocId}",
+			"currentUlocSeq":"${currentUlocSeq}"
+		},
+		dataType:"json",
+		success:function(result){
+			if(result){
+				var table="";
+				if(result.needBind){
+					var beans = result.needBind;
+					$(beans).each(function(i,item){
+						var part = item.part;
+						var note= "";
+						if(item.note){
+							note = item.note;
+						}
+						table+="<tr><td>"+part.no+"-"+part.nameCn+"</td><td>"+item.qty+"</td><td>"+note+"</td></tr>";
+					});
+				}
+				if(table ==""){
+					bindPartEnd();
+				}
+				partNeedCount = table;
+				$("#needBindPartTable").html(table);
+				var table="";
+				if(result.alreadyBind){
+					var beans = result.alreadyBind;
+					$(beans).each(function(i,item){
+						table+="<tr><td>"+item.partNo+"-"+item.partName+"</td><td>"+item.qty+"</td><td><button onclick='cancelBind("+item.id+")' class='btn btn-info'>取消</button></td></tr>";
+					});
+				}
+				$("#alreadyBindPart").html(table);
+				
+			}
+		}
+	});
+}
+function cancelBind(id){
+	ajaxRequestSync("${baseUrl}/onLine/cancelBindPart.do",{
+		tpRecordUlocPartId:id
+	},function(result){
+		getNeedAndAreadyBindPart();
+		$("#partBarCode").focus();
+	},true);
+}
+
+function checkValue(){
+	var isTrue =true;
+	if(partNeedCount!=""){
+		isTrue=false;
+	}
+	if(!isTrue){
+		if(confirm("有物料没有装配，确认保存吗？")){
+			isTrue = true;
+		}
+	}
+	return isTrue;
+}
+
+function goGackPart(){
+	ajaxRequest(baseUrl+"/onLine/bindPartGoBack.do", {
+		recordId:"${recordId}",
+		shiftNo:"${shiftNo}",
+		tmUlocId:"${tmUlocId}",
+		currentUlocSeq:"${currentUlocSeq}"
+	}, function(result){
+		$(".close").click();
+	}, true);
+}
+</script>

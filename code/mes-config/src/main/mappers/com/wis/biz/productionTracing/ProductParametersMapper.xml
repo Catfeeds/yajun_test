@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProductParametersMapper">
+	<select id="queryProductParameters"
+		resultType="com.wis.mes.dakin.production.tracing.vo.ProductParameterVo"
+		parameterType="java.util.HashMap">
+		 select a.sebango         backNumber,
+		       a.kiban           machineName,
+		       a.equipmentType   equipmentType,
+		       a.equipmentNo     equipmentNo,
+		       a.params          params,
+		       a.paramsValue     paramsValue,
+		       b.machine_of_name machineOfName,
+		       b.tp_id pId,
+		       c.no              plantNo,
+		       c.name_cn         plantName,
+		       d.no              lineNo,
+		       d.name_cn         lineName,
+		       e.shiftno         shiftNo,
+		       b.create_time     createTime,
+		       b.update_time  updateTime,
+		       b.begin_time      beginTime,
+		       b.finish_time     finishTime
+		  from ${productParameterViewName} a
+		  left join tb_product_tracing b
+		    on a.sebango = b.back_number
+		   and a.kiban = b.machine_name
+		  left join tm_plant c
+		    on c.id = b.tm_plant_id
+		  left join tm_line d
+		    on d.id = b.tm_line_id
+		  left join tm_worktime e
+		    on e.id = b.tm_worktime_id
+		where b.id is not null
+		<if test="backNumber!=null and backNumber!='' ">
+			and b.back_number like  '%'||#{backNumber}||'%'
+		</if>
+		<if test="machineOfName!=null and machineOfName!='' ">
+			 and b.machine_of_name like  '%'||#{machineOfName}||'%'
+		</if>
+		<if test="machineName!=null and machineName!='' ">
+			and b.machine_name like '%'||#{machineName}||'%'
+		</if>
+		<if test="tmWorktimeId!=null and tmWorktimeId!='' ">
+			and b.tm_worktime_id =#{tmWorktimeId}
+		</if>
+		<if test="createTimeStart!=null and createTimeStart!='' ">
+			and b.create_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd hh24:mi:ss')
+		</if>
+		<if test="createTimeEnd!=null and createTimeEnd!='' ">
+			and b.create_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd hh24:mi:ss')
+		</if>
+		<if test="idIN!=null and idIN!='' ">
+			and b.id in ${idIN}
+		</if>
+	</select>
+</mapper>

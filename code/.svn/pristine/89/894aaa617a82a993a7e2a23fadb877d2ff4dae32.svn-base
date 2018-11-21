@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+<script type="text/javascript">
+function checkParameterIdIsHave(id){
+	if($("#parameterIds").val()!=""){
+		var parameterIds=$("#parameterIds").val().split(",");
+		for(var i =0;i<parameterIds.length;i++){
+			if(parameterIds[i] == id){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+function clickParameterCallback(dialog){
+	var rowsData = getSelectedRows('dgParameterGridId');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	$("#display_tsParameterId").val("以下是参数信息");
+	
+	var tbody = "";
+	var parameterIdValue="";
+	for(var i =0;i< rowsData.length ;i++){
+		parameterIdValue =(parameterIdValue==""?rowsData[i].id:(parameterIdValue+","+rowsData[i].id));
+		if(checkParameterIdIsHave(rowsData[i].id)){
+			continue;
+		}
+		tbody+="<tr id="+rowsData[i].id+"><td style='display: none'><input type='hidden' value="+rowsData[i].id+" name='tsParameterId'></td><td>"+rowsData[i].code+"</td><td>"+rowsData[i].name+"</td><td>"+rowsData[i].variuableName+"</td><td>"+rowsData[i].defaultValue+"</td>"
+					+"<td>"+rowsData[i].note+"</td><td>"+getYesOrNoOptions()+"</td><td>"+getEnabledOptions()+"</td><td><input type='text' name='note' width='200px'></td><td style='width:30px;'><button value="+rowsData[i].id+" class='btn btn-primary  btn-sm' onclick='clickDeleateParameter(this.value)'>删除</button></td></tr>";
+	}
+	$("#parameterIds").val(parameterIdValue);
+	$("#parameterBody").append(tbody);
+	dialog.close();
+}
+function getYesOrNoOptions(){
+	return "<select style='width:100px;' name='isRequeired'><option value='YES'>是</option><option value='NO'>否</option></select>";
+}
+function getEnabledOptions(){
+	return "<select style='width:100px;' name='enabled'><option value='ON'>是</option><option value='OFF'>否</option></select>";
+}
+
+function frame_cleanSelect(){
+	$("#parameterBody").empty();
+	$("#parameterIds").val("");
+	$("#display_tsParameterId").val("");
+}
+
+function clickDeleateParameter(obj){
+	$("#"+obj).remove();
+	if($("input[name='tsParameterId']").length == 0){
+		$("#parameterIds").val("");
+		$("#display_tsParameterId").val("");
+	}else{
+		var parameterIdValue="";
+		$("input[name='tsParameterId']").each(function(i,item){
+			parameterIdValue =(parameterIdValue==""?item.value:(parameterIdValue+","+item.value));
+		});
+		$("#parameterIds").val(parameterIdValue);
+	}
+}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/path/uloc/parameter/add.do" class="form-horizontal"   permissionModule="PATH_ULOC_PARAMETER">
+		<input type ="hidden" name="tmPathUlocId" value="${tmPathUlocId}"/>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PARAMETER_PARAMETER" permissionCode="PATH_ULOC_PART_ULOC_PARAMETER">
+				 <@p.magnify  id="tsParameterId" url="${baseUrl}/path/uloc/parameter/selectParameterList.do?currentPageId=ParameterGridId&params=queryCondition[tmPathUlocId]="+"${tmPathUlocId}" callback="clickParameterCallback" datatype="*"></@p.magnify>
+			</@p.formColmd>
+		
+			<!-- <@p.formColmd title="PATH_ULOC_PART_ULOC_IS_REQUIRED" permissionCode="PATH_ULOC_PART_ULOC_IS_REQUIRED">
+				<@p.input type="select"  datatype="*" field="isRequired" options=yesOrNoOptions excludeSelectOption="true"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_ENABLED" permissionCode="PATH_ULOC_PART_ULOC_ENABLED">
+				<@p.input type="select"  datatype="*" field="enabled" options=enabledOptions  excludeSelectOption="true"></@p.input>
+			</@p.formColmd>
+				<@p.formColmd title="PATH_ULOC_PART_ULOC_NOTE" permissionCode="PATH_ULOC_PART_ULOC_NOTE">
+					<input name="note" class="inputxt" datatype="*" maxlength='150' ignore="ignore"/>
+			</@p.formColmd>-->
+		</@p.formRow> 
+		
+		<div>
+		<input type="hidden" id="parameterIds">
+		<table class="table table-bordered table-hover table-condensed	">
+			<thead>
+				<tr style="height: 40px;text-align: center"><th style="display: none">id</th><th>编号</th><th>名称</th><th>变量名</th><th>默认值</th><th>参数备注</th><th>是否必填</th><th>是否启用</th><th width='200px'>备注</th><th>删除</th></tr>
+			</thead>
+			<tbody id="parameterBody"></tbody>
+		</table>
+	</div>
+	</@p.editForm>
+</body>
+</html>

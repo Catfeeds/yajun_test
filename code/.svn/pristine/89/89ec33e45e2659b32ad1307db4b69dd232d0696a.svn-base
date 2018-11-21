@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SheetMetalMaterialMapper">
+	<select id="findByMachiningSurface" resultType="com.wis.mes.master.metalPlate.entity.TmSheetMetalMaterial" parameterType="java.util.HashMap">
+		select t.* from tm_sheet_metal_material t where t.program_number like  '%'|| #{machiningSurface} || '%' and t.mark_for_delete=0
+	</select>
+	
+	<select id="findSourceDataByCollectEg" resultType="com.wis.mes.production.metalplate.entity.TbMetalPlateSourceData" parameterType="com.wis.mes.production.metalplate.entity.TbMetalPlateSourceData">
+		select * from TB_MP_SOURCE_DATA t 
+		where <!-- t.work_schedule= #{workSchedule}
+		and --> t.data_type=#{dataType}
+		and t.task_date=#{taskDate}
+		and t.model in (${model})
+	</select>
+	
+	<select id="findMaintenanceWarningNotice" resultType="java.lang.Integer">
+		<![CDATA[select count(*) from TM_DEVICE_MAINTENANCE t where t.maintenance_value<=t.current_value]]>
+	</select>
+	<select id="findMaintainList" resultType="com.wis.mes.master.maintenance.entity.TmDeviceMaintenance">
+		<![CDATA[select * from TM_DEVICE_MAINTENANCE t where t.maintenance_value<=t.current_value]]>
+	</select>
+
+	<select id="findBySumPlannedProductionByModel" resultType="java.lang.Integer" parameterType="com.wis.mes.production.metalplate.entity.TbMetalPlateSourceData">
+		select NVL(sum(t.planned_production),0) from TB_MP_SOURCE_DATA t 
+		where <!-- t.work_schedule= #{workSchedule}
+		and --> t.data_type=#{dataType}
+		and t.task_date=#{taskDate}
+		and t.model in (${model})
+	</select>
+	<select id="findRelevanceById" resultType="com.wis.mes.production.metalplate.entity.TbMetalPlateSchedul" parameterType="java.util.HashMap">
+		select * from TB_MP_SCHEDUL t where id  = 
+		(select c.p from (select id,${sign}(id,1,0) over (order by sort) as p from TB_MP_SCHEDUL) c where c.id=#{id}) 
+	</select>
+	<select id="queryPMCBoardProductionInfo" resultType="java.util.HashMap">
+		with t1 as 
+			(select 'TYPE_0' as TYPE_NO,schedul.status status,material.standard_ct*schedul.dispatch_number plannedTime,material.component component,
+			to_number(pr.production_time) as practicalTime,schedul.finish_number practicalNumber,material.model_Type modelType,
+			to_number(pr.period_take_time) verifyDuration,schedul.batch_number batchNumber,schedul.region_mark regionMark
+			from tb_mp_schedul schedul
+			inner join tb_mp_source_data sourcedata on sourcedata.id=schedul.source_data_id
+			inner join tm_sheet_metal_material material on material.id=sourcedata.material_id and schedul.mark_for_delete=0
+			inner join tb_mp_production_record pr on pr.schedul_id=schedul.id
+			where schedul.id in 
+			(select max(t.id) from (select * from tb_mp_schedul order by sort desc) t where t.status=2 group by t.region_mark)
+			order by schedul.region_mark asc
+			),
+			t2 as 
+			(select 'TYPE_1' as TYPE_NO,schedul.status status,material.standard_ct*schedul.dispatch_number plannedTime,material.component component,
+			(case when schedul.status=1 then schedul.PRODUCTION_TIME else 0 end) as practicalTime,
+			schedul.finish_number practicalNumber,material.model_Type modelType,
+			case when schedul.status in (1,2,4) then schedul.VERIFY_DURATION else 0 end verifyDuration,
+			schedul.batch_number batchNumber,schedul.region_mark regionMark
+			from tb_mp_schedul schedul
+			inner join tb_mp_source_data sourcedata on sourcedata.id=schedul.source_data_id
+			inner join tm_sheet_metal_material material on material.id=sourcedata.material_id and schedul.mark_for_delete=0
+			where schedul.id in 
+			(select max(t.id) from (select * from tb_mp_schedul order by sort desc) t where t.status in (1,3,4) group by t.region_mark)
+			order by schedul.region_mark asc
+			),
+			t3 as 
+			(select 'TYPE_2' as TYPE_NO,schedul.status status,material.standard_ct*schedul.dispatch_number plannedTime,material.component component,
+			0 practicalTime,schedul.finish_number practicalNumber,material.model_Type modelType,
+			0 verifyDuration,schedul.batch_number batchNumber,schedul.region_mark regionMark
+			from tb_mp_schedul schedul
+			inner join tb_mp_source_data sourcedata on sourcedata.id=schedul.source_data_id
+			inner join tm_sheet_metal_material material on material.id=sourcedata.material_id and schedul.mark_for_delete=0
+			where schedul.id in 
+			(select max(t.id) from (select * from tb_mp_schedul order by sort desc) t where t.status=0 group by t.region_mark)
+			order by schedul.region_mark asc
+			)
+		select * from t1 
+		union all 
+		select * from t2 
+		union all 
+		select * from t3
+	</select>
+	<select id="findSchedulEgByPress" resultType="java.util.HashMap" parameterType="java.lang.String">
+		select LISTAGG(t.id,'/') WITHIN GROUP (ORDER BY id) id,
+		LISTAGG(t.batch_number,'/') WITHIN GROUP (ORDER BY id) batch_number,
+		LISTAGG(t.model,'/') WITHIN GROUP (ORDER BY id) model,t.region_mark,t.press,t.moulds
+		from TB_MP_SCHEDUL t where t.mark_for_delete=0 and t.status=3 
+	    and t.press like '%'|| #{press} || '%'
+		GROUP BY t.region_mark,t.press,t.moulds
+	</select>
+	
+	<select id="findSourceDataByRecordId" resultType="com.wis.mes.production.metalplate.entity.TbMetalPlateSourceData" parameterType="java.lang.Integer">
+		select t.* from TB_MP_SOURCE_DATA t
+		left join TB_MP_SCHEDUL ms on t.id=ms.source_data_id
+		left join TB_MP_PRODUCTION_RECORD pr on pr.schedul_id=ms.id
+		where pr.id=#{recordId}
+	</select>
+
+	<select id="findConsumeApcTotalBySourceDataId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+		select NVL(sum(ms.consume_apc_total),0) from TB_MP_SCHEDUL ms where ms.source_data_id=#{sourceDataId} and ms.mark_for_delete=0
+	</select>
+	
+	<select id="findInProductionNumBySourceDataId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+		select count(ms.id) from TB_MP_SCHEDUL ms where ms.source_data_id=#{sourceDataId} and ms.mark_for_delete=0 and ms.status!=2
+	</select>
+
+	<select id="findFinishedNumberBySourceDataId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+		select (NVL(sum(pr.practical_cycles),0) - NVL(sum(pr.defective_number),0)) from TB_MP_PRODUCTION_RECORD pr 
+		where pr.schedul_id in (select ms.id from TB_MP_SCHEDUL ms where ms.source_data_id=#{sourceDataId}) and pr.mark_for_delete=0
+	</select>
+	<select id="findInventoryNumberByDate" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		select NVL(NVL(sum(re.practical_cycles),0)+max(mm.inventory_number)-sum(NVL(sc.consume_apc_total,sd.apc_total_number)),max(mm.inventory_number)) 
+		from tm_sheet_metal_material mm
+		left join TB_MP_SOURCE_DATA sd on mm.id=sd.material_id and sd.task_date=#{taskDate}
+		left join tb_mp_schedul sc on sd.id=sc.source_data_id and sc.status=2
+		left join tb_mp_production_record re on sc.id=re.schedul_id
+		where mm.mark_for_delete=0 AND mm.machining_surface=#{model}
+	</select>
+    <select id="pmcReport" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        SELECT  * 	FROM  ( SELECT  ROW_.*,  ROWNUM ROWNUM_  FROM  (
+		SELECT schedule.SCHEDUL_DATE,schedule.WORK_SCHEDULE,schedule.DISPATCH_NUMBER,schedule.FINISH_NUMBER,schedule.WORK_TIME_ID,worktime.TM_CLASS_MANAGER_ID
+		from TB_MP_SCHEDUL schedule
+        LEFT JOIN tm_worktime worktime  on schedule.WORK_TIME_ID = worktime.ID
+        <include refid="pmcReportWhere" />
+        ) ROW_ )
+        WHERE  <![CDATA[ ROWNUM_ >  #{firstRow}	AND  ROWNUM_ <=#{pageSize} ]]>
+	</select>
+    <select id="pmcReportCnt" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+        SELECT count(1)
+        from TB_MP_SCHEDUL schedule
+        LEFT JOIN tm_worktime worktime  on schedule.WORK_TIME_ID = worktime.ID
+        <include refid="pmcReportWhere" />
+    </select>
+    <sql id="pmcReportWhere">
+        <!--<where>-->
+            <!--<if test="no !=null and no!='' ">-->
+                <!--AND t.NO LIKE CONCAT('%',#{no},'%')-->
+            <!--</if>-->
+        <!--</where>-->
+    </sql>
+    <select id="queryBeProductionNumberByRegionMark" resultType="java.lang.Integer">
+        select count(schedul.id) from tb_mp_schedul schedul 
+		where schedul.status in (1,3,4) 
+		and schedul.region_mark=#{regionMark}
+		<!-- and schedul.schedul_date=to_char(sysdate,'yyyy-MM-dd') -->
+    </select>
+    <select id="queryNextSchedulByRegionMark" resultType="com.wis.mes.production.metalplate.entity.TbMetalPlateSchedul">
+        select * from (select 
+	      schedul.* 
+	    from tb_mp_schedul schedul 
+			where schedul.status = 0
+			      and schedul.region_mark=#{regionMark}
+			      <!-- and schedul.schedul_date=to_char(sysdate,'yyyy-MM-dd') -->
+	    order by schedul.sort asc) t  
+	    where rownum = 1 
+    </select>
+    
+    
+    <update id="doLock" parameterType="com.wis.mes.production.metalplate.entity.TbMetalPlateSchedul">
+    	UPDATE TB_MP_SCHEDUL SET STATUS=#{status} WHERE ID=#{id}
+    </update>
+    
+     <update id="doWorkOrderStick" parameterType="com.wis.mes.production.metalplate.entity.TbMetalPlateSchedul">
+    	update TB_MP_SCHEDUL set sort = (select min(sort)-1 from TB_MP_SCHEDUL) where id = #{id}
+    </update>
+    
+   <!--  <update id="doUnLock" parameterType="com.wis.mes.production.metalplate.entity.TbMetalPlateSchedul">
+    	UPDATE TB_MP_SCHEDUL
+    	<set>
+    		<if test="null != status and '' != status">STATUS=#{status}</if>
+    	</set>
+    	WHERE ID=#{id}
+    </update> -->
+     <select id="getInventoryNumber" resultType="java.lang.Integer">
+       <![CDATA[SELECT T2.INVENTORY_NUMBER
+		  FROM TB_MP_SOURCE_DATA T
+		  left join TM_SHEET_METAL_MATERIAL T2
+		    on T.MATERIAL_ID = T2.ID
+		 where T.status < 2
+		   and T.MARK_FOR_DELETE = 0
+		   and T.MODEL = #{model}
+		   and rownum=1
+		 ORDER BY T.ID DESC]]>
+    </select>
+</mapper>

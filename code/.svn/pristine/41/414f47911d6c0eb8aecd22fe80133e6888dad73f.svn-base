@@ -1,0 +1,92 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+	function deleteOrg(){
+	    var rows =getSelectedRows('dgOrgnization');
+	    if (rows.length > 0) {
+	    	var ids = [];
+	    	BootstrapDialog.confirm({
+	    	title:commons_msg.btnDelete,
+	    	message:'<@s.m code="ORGNIZATION_DELETE_CONFIRM"/>', 
+	    	closable: true,
+	    	draggable: true,
+	    	btnCancelLabel: commons_msg.btnCancel,
+	    	btnOKLabel: commons_msg.btnConfirm, 
+	    	callback:function(r) {
+			   if (r) {
+					for ( var i = 0; i < rows.length; i++) {
+						if(rows[i].id != null){
+							ids.push(rows[i].id);
+						}
+					}
+					ajaxRequest("${baseUrl}/orgnization/delete.do",{'ids' : JSON.stringify(ids)},function(){
+						reloadTable('dgOrgnization');
+						initOrgTree();
+					});
+					
+				}
+	    	  }
+			});
+		} else {
+			infoTip('<@s.m code="NO_CHOOSE_DATA"/>');
+		}
+	}
+	function showListUpdate(){
+		var url = "${baseUrl}/orgnization/updateInput.do";
+		var rowsData = getSelectedRows('dgOrgnization');
+		if (!rowsData || rowsData.length==0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		if (rowsData.length>1) {
+			infoTip(commons_msg.plsSelOne);
+			return;
+		}
+		if(url.indexOf('?') != -1){
+			url += '&id='+rowsData[0].id;
+		}else{
+			url += '?id='+rowsData[0].id;
+		}
+		createwindow("<@s.m code='BTN_UPDATE' />",url,"dgOrgnization");
+	}
+</script>
+<@p.body permissionModule="ORGNIZATION" noBreadcrumbs="true">	
+	<@p.searchPanel gridId="dgOrgnization">
+		<@p.searchColumns>
+			<@p.input title="ORG_CODE" field="code"  permissionCode="ORG_CODE"></@p.input>
+			<@p.input title="ORG_NAME" field="name" permissionCode="ORG_NAME"></@p.input>
+	    </@p.searchColumns>
+		<@p.toolbar id="dtOrgnization">
+			<@p.button title="BTN_ADD" permissionCode="OrgnizationAdd" iconCls="plus" url="${baseUrl}/orgnization/addInput.do?parentId=${parentId}&dimension=${dimension}" type="add"></@p.button>
+			<@p.button title="BTN_UPDATE" permissionCode="OrgnizationEdit" iconCls="edit" onclick="showListUpdate()"></@p.button>
+			<@p.button title="BTN_DELETE" permissionCode="OrgnizationDelete" iconCls="trash" onclick="deleteOrg()" type="button"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/orgnization/list.do?queryCondition[parentId]=${parentId}&queryCondition[dimension]=${dimension}" id="dgOrgnization">
+		<@p.column title="Id" checkbox="true"></@p.column>
+		<@p.column title="ORG_CODE" width="100" field="code"    permissionCode="ORG_CODE"></@p.column>
+		<@p.column title="ORG_NAME" width="150" field="name"   permissionCode="ORG_NAME"></@p.column>
+		<@p.column title="ORG_PARENT_NAME" width="100" field="parent.name" permissionCode="ORG_PARENT_NAME"></@p.column>
+		<@p.column title="ORG_TYPE" width="100" field="type"  formatter="renderOrgnizationtype"    permissionCode="ORG_TYPE"></@p.column>
+		<@p.column title="ORG_LEADER" width="100" field="leader.name"    permissionCode="ORG_LEADER"></@p.column>
+		<@p.column title="ORG_DESCRIPTION" width="300" field="description"    permissionCode="ORG_DESCRIPTION"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+
+<script type="text/javascript">
+	function renderGender(value) {
+		return entryRenderer('GENDER', value);
+	}
+	function renderStatus(value) {
+		return entryRenderer('LOGINSTATUS', value);
+	}
+	function renderSysdata(value) {
+		return entryRenderer('YESORNO', value);
+	}
+	function renderUsertype(value) {
+		return entryRenderer('USER_TYPE', value);
+	}
+	function renderOrgnizationtype(value) {
+		return entryRenderer('ORGNIZATION_TYPE', value);
+	}
+</script>

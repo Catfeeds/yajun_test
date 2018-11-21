@@ -1,0 +1,73 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html">
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/parameter/add.do" class="form-horizontal" permissionModule="PARAMETER">
+<input id="beforeSubmit" value="validation" style="display: none"/>
+		<@p.formRow>
+			<@p.formColmd title="PARAMETER_CODE" permissionCode="PARAMETER_CODE">
+				 <input name="code" class="inputxt" maxlength="36" datatype="*" />
+			</@p.formColmd>
+			<@p.formColmd title="PARAMETER_NAME" permissionCode="PARAMETER_NAME">
+				 <input name="name" class="inputxt" maxlength="36" datatype="*" />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PARAMETER_REGULAREXPRESSION" permissionCode="PARAMETER_REGULAR_EXPRESSION">
+				<input name='regularExpression' class="inputxt" maxlength='1000' datatype='*' />
+				<div id="reg"></div>
+			</@p.formColmd>
+			<@p.formColmd title="PARAMETER_PARAMETER_EXPLAIN" permissionCode="PARAMETER_PARAMETER_EXPLAIN">
+				 <input name="parameterExplain" class="inputxt" maxlength="100"  />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PARAMETER_UNIT" permissionCode="PARAMETER_UNIT">
+				 <input name="unit" class="inputxt" maxlength="100" />
+			</@p.formColmd>
+			<@p.formColmd title="PARAMETER_CONTROL_POST_NO" permissionCode="PARAMETER_CONTROL_POST_NO">
+				 <input name="controlPostNo" class="inputxt" maxlength="20" />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PARAMETER_CONTROL_POST_NAME" permissionCode="PARAMETER_CONTROL_POST_NAME">
+				 <input name="controlPostName" class="inputxt" maxlength="100" />
+			</@p.formColmd>
+			<@p.formColmd title="PARAMETER_NOTE" permissionCode="PARAMETER_NOTE">
+				 <input name="note" class="inputxt" maxlength="100" />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+	//表达式生成方式
+	function generation(){
+		var value = $("#expressionSelect option:selected").val();
+		if (value == "oneself") {
+			$("[name='regularExpression']").show();
+			$("#reg").html("");
+		}
+		if (value == "generate") {
+			$("[name='regularExpression']").hide();
+			$("#reg").html(
+					"最小值：<input  id='min' name='min' datatype='n'/>&nbsp;"+
+					"最大值：<input  id='max' name='max' datatype='n' onblur='validation()'/>");
+		}
+	}
+	function validation(){
+		var min = $("#min").val();
+		var max = $("#max").val();
+		if (max-min<0) {
+			errorTip("最大值必须 >=最小值");
+			$("[name='regularExpression']").val("");
+			return false;
+		}
+	}
+</script>
+<style type="text/css" >
+	#min{width:45px;height:32px;border: 1px solid #CCCCCC;background-color:#ffffff}
+	#max{width:45px;height:32px;border: 1px solid #CCCCCC;background-color:#ffffff}
+</style> 

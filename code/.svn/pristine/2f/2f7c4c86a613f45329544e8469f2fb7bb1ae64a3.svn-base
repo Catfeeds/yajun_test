@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MetalPlateReportMapper">
+	<!-- 设备异常分析报表 start -->
+	<select id="getMetalPlateReport" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select to_number(to_char(t.create_time,'mm')) times,count(*)
+		totalcount from TMP_EQUIPMENT_STATUS t where 1=1
+		<if test="createTime!= null and createTime != ''">
+			and to_char(t.create_time, 'yyyy') = #{createTime}
+		</if>
+		<if test="runingState != null and runingState != ''">
+			and substr(t.running_state,#{runingState},1) = 1
+		</if>
+		group by to_char(t.create_time,'mm')
+		order by
+		to_char(t.create_time,'mm')
+	</select>
+
+	<select id="getMetalPlateReportWarnByMouth" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select t1.no as EQUIPMENTNO, to_char(t.create_time,'yyyy-MM-dd')
+		TIMES,count(t.running_state) TOTALNUM
+		from tmp_equipment_status t
+		left
+		join tm_equipment t1 on t.tm_equipment_id = t1.id
+		where 1=1
+		<if test="createTime!= null and createTime != ''">
+			and to_char(t.create_time,'yyyy-MM') = #{createTime}
+		</if>
+		<if test="runningState != null and runningState != ''">
+			and substr(t.running_state,#{runningState},1) = 1
+		</if>
+		and t.is_rest = 'N'
+		group by
+		to_char(t.create_time,'yyyy-MM-dd'),t1.no,t.running_state
+		order by
+		to_char(t.create_time,'yyyy-MM-dd')
+	</select>
+
+	<select id="getTmpEquipmentNos" resultType="java.lang.String"
+		parameterType="java.util.HashMap">
+		select t1.no from tmp_equipment_status t
+		left join
+		tm_equipment t1 on t.tm_equipment_id = t1.id
+		group by t1.no order by
+		to_number(regexp_substr(t1.no,'[0-9]*[0-9]',1))
+	</select>
+
+
+	<select id="getMetalPlateFaultedDetailReport" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select t.status_number, sum(t.duration) duration,t1.code_desc,count(1)
+		numbers
+		from tmp_equipment_status t join TM_CODE_RULE t1 on
+		t.status_number =
+		SUBSTR(t1.plc_code, INSTR(t1.plc_code, ' ') + 1,
+		length(t1.plc_code))
+		LEFT JOIN TM_WORKTIME T2
+		ON t.tm_work_time_id =
+		T2.ID
+		WHERE 1=1 and t.is_rest = 'N'
+		<if test="whitOrNight!=null and whitOrNight!='' ">
+			AND T2.SHIFTNO=#{whitOrNight}
+		</if>
+
+		<if test="beginTime!=null and beginTime!='' ">
+			and t.create_time &gt;= to_date(#{beginTime},'yyyy-MM-dd
+			HH24:mi')
+		</if>
+		<if test="endTime!=null and endTime!='' ">
+			and t.update_time &lt;= to_date(#{endTime},'yyyy-MM-dd
+			HH24:mi')
+		</if>
+		<if test="shiftNo != null and shiftNo != ''">
+			and t.tm_line_id=#{shiftNo}
+		</if>
+		group by t.status_number,t1.code_desc
+		order by sum(t.duration) asc
+	</select>
+	<!-- 设备异常分析报表 End -->
+
+	<!-- 钣金年表start -->
+	<select id="getMetalPlateYearDetailearShiftReport" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		SELECT T.RUNNING_STATE,COUNT(*) TOTALCOUNT,T2.CODE_DESC,
+		COUNT(T.DURATION) DURATION,TO_NUMBER(TO_CHAR(T.CREATE_TIME, 'mm'))
+		MOUTH FROM tmp_equipment_status T, TM_CODE_RULE T2,TM_WORKTIME T3
+		WHERE T.RUNNING_STATE =substr(T2.plc_code, instr(T2.plc_code, ' ', 1)
+		+ 1) AND T.TM_WORK_TIME_ID = T3.ID
+		AND CODE LIKE 'BJ%'
+
+		<if test="whitOrNight != null and whitOrNight!='' ">
+			AND T3.SHIFTNO=#{whitOrNight}
+		</if>
+		<if test="year != null and year != ''">
+			and TO_CHAR(T.CREATE_TIME, 'yyyy') = #{year}
+		</if>
+		<if test="beginTime!=null and beginTime!='' ">
+			and TO_CHAR(T.CREATE_TIME, 'yyyy-MM-dd') &gt;=
+			#{beginTime}
+		</if>
+		<if test="endTime!=null and endTime!='' ">
+			and TO_CHAR(T.update_time, 'yyyy-MM-dd') &lt;= #{endTime}
+		</if>
+
+		group by T.RUNNING_STATE,TO_CHAR(T.CREATE_TIME, 'mm'),T2.CODE_DESC
+		order by mouth
+	</select>
+
+
+	<select id="getMetalPlateYearDetailPieReportInfo" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		SELECT count(*) TOTALNUM,'故障' gz FROM tmp_equipment_status T where
+		T.RUNNING_STATE in ('0000000000100000','0000000000000100')
+		AND 1=1
+		<if test="year != null and year != ''">
+			and TO_CHAR(T.CREATE_TIME, 'yyyy') = #{year}
+		</if>
+		<if test="beginTime!=null and beginTime!='' ">
+			and TO_CHAR(T.CREATE_TIME, 'yyyy-MM-dd') &gt;=
+			#{beginTime}
+		</if>
+		<if test="endTime!=null and endTime!='' ">
+			and TO_CHAR(T.update_time, 'yyyy-MM-dd') &lt;= #{endTime}
+		</if>
+		union all
+		select count(*) TOTALNUM,'非故障' gz from tmp_equipment_status T
+		where
+		 <![CDATA[running_state <> '0000000000000100' and
+		 running_state <> '0000000000100000']]>
+		and 1=1
+		<if test="year != null and year != ''">
+			and TO_CHAR(T.CREATE_TIME, 'yyyy') = #{year}
+		</if>
+		<if test="beginTime!=null and beginTime!='' ">
+			and TO_CHAR(T.CREATE_TIME, 'yyyy-MM-dd') &gt;=
+			#{beginTime}
+		</if>
+		<if test="endTime!=null and endTime!='' ">
+			and TO_CHAR(T.update_time, 'yyyy-MM-dd') &lt;= #{endTime}
+		</if>
+	</select>
+
+	<select id="getMetalPlateYearDetailearReport" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select count(1) TOTALNUM,T2.CODE_DESC from tmp_equipment_status
+		T,TM_CODE_RULE T2
+		where T.RUNNING_STATE =
+		substr(T2.plc_code,
+		instr(T2.plc_code, ' ', 1) + 1)
+		AND CODE LIKE 'BJ%' AND <![CDATA[T.running_state <>'0000000000000100' and T.running_state <> '0000000000100000']]>
+		and 1=1
+		<if test="year != null and year != ''">
+			and TO_CHAR(T.CREATE_TIME, 'yyyy') = #{year}
+		</if>
+		<if test="beginTime!=null and beginTime!='' ">
+			and TO_CHAR(T.CREATE_TIME, 'yyyy-MM-dd') &gt;=
+			#{beginTime}
+		</if>
+		<if test="endTime!=null and endTime!='' ">
+			and TO_CHAR(T.update_time, 'yyyy-MM-dd') &lt;= #{endTime}
+		</if>
+		group by T.running_state,T2.CODE_DESC
+		order by T.running_state
+	</select>
+
+	<select id="getMetalPlateYearListReport" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select decode(a.workTimeTotal,null,0,a.workTimeTotal) as workTime,
+		b.yearMonth
+		from (select sum(decode(t.shiftno, 'MORNINGSHIFT', 0.5,
+		'NIGHTSHIFT', 0) +
+		decode(t.shiftno, 'NIGHTSHIFT', 0.5, 'MORNINGSHIFT',
+		0)) as
+		workTimeTotal,
+		to_char(t.work_date, 'yyyy-MM') as yearMonth
+		from
+		tm_worktime t
+		where t.enabled = 'ON'
+		<if test="beginTime!=null and beginTime!='' ">
+			and t.work_date &gt;= to_date(#{beginTime},'yyyy-MM-dd')
+		</if>
+		<if test="endTime!=null and endTime!='' ">
+			and t.work_date &lt;= to_date(#{endTime},'yyyy-MM-dd')
+		</if>
+		group by to_char(t.work_date, 'yyyy-MM')) a
+		right join (SELECT DISTINCT
+		TO_CHAR(T.ROWDATE, 'yyyy-mm') as yearMonth
+		FROM (SELECT ROWNUM,
+		TO_DATE(CONCAT(#{year},'-01'), 'yyyy-mm') + ROWNUM - 1 ROWDATE
+		FROM
+		DUAL
+		CONNECT BY ROWNUM &lt; TO_DATE(CONCAT(#{year},'-12'), 'yyyy-mm') -
+		TO_DATE(CONCAT(#{year},'-01'), 'yyyy-mm') + 2) T
+		ORDER BY yearMonth
+		ASC) b
+		on a.yearMonth = b.yearMonth
+		order by b.yearMonth
+	</select>
+	<!-- 钣金年表 end -->
+
+	<select id="getfaultedDetailsInfo" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		SELECT TRUNC(SUM(T.duration) / 60, 2) as minute,
+		TO_CHAR(T.CREATE_TIME, 'YYYY-MM-DD') createTime,
+		COUNT(T.ID) count
+		FROM tmp_equipment_status T
+		WHERE 1=1 AND T.STATUS_NUMBER IN (0000000000000100,0000000000100000)
+		<if test="null != beginTime and '' != beginTime">
+			AND TO_CHAR(T.CREATE_TIME, 'YYYY-mm-dd HH24:mi') &gt;= #{beginTime}
+		</if>
+		<if test="null != endTime and '' != endTime">
+			AND TO_CHAR(T.UPDATE_TIME, 'YYYY-mm-dd HH24:mi') &lt;= #{endTime}
+		</if>
+		group by TO_CHAR(T.CREATE_TIME, 'YYYY-MM-DD')
+		ORDER BY TO_CHAR(T.CREATE_TIME, 'YYYY-MM-DD')
+	</select>
+	
+	<!-- BJ-生产状态年报 -->
+	<select id="productionStateYearData" resultType="java.util.HashMap"
+		parameterType="java.util.HashMap">
+		select tab.running_state as running_state,
+		 	  <if test="null != timeYear and '' != timeYear">
+		       	to_char(tab.create_time,'MM') as time,
+		      </if>
+		       <if test="null != timeMoon and '' != timeMoon">
+		       	to_char(tab.create_time,'dd') as time,
+		       </if>
+		       TRUNC(SUM((tab.update_time - tab.create_time) * 24 * 60 * 60) / 60, 2) minute  
+		       from (
+		       select 
+		        CASE t.running_state  
+		        WHEN '1' THEN '10'  
+		        WHEN '3' THEN '10'
+		        WHEN '4' THEN '10'  
+		        WHEN '5' THEN '10'
+		        WHEN '6' THEN '10'  
+		        ELSE t.running_state  
+		        END as running_state,
+		        t.update_time,
+		        t.create_time,
+		        t.region_no
+		      from TMP_REGION_STATUS t 
+		      where 1=1
+		      <if test="null != regionNo and '' != regionNo">
+		      	and t.region_no = #{regionNo}
+		      </if>
+		      <if test="null != timeYear and '' != timeYear">
+		      	and to_char(t.create_time,'yyyy') = #{timeYear}
+		      </if>
+		      <if test="null != timeMoon and '' != timeMoon">
+		      	and to_char(t.create_time,'yyyy-MM') = #{timeMoon} 
+		      </if>
+		      and t.update_time is not null
+		      and t.is_rest = 'N'
+		) tab
+		group by 
+		      <if test="null != timeYear and '' != timeYear">
+		      	to_char(tab.create_time,'MM'),
+		      </if>
+		      <if test="null != timeMoon and '' != timeMoon">
+		      	to_char(tab.create_time,'dd'),
+		      </if>
+		      tab.running_state
+	</select>
+	
+	<!-- BJ-非故障停机明细 -->
+	<select id="noFaultDetailsReportData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select 
+		       tab.region_no as region_no,
+		       tab.running_state as running_state,
+		       TRUNC(SUM((tab.update_time - tab.create_time) * 24 * 60 * 60) / 60, 2) minute  
+		       from (
+		       select 
+		        t.running_state,  
+		        t.update_time,
+		        t.create_time,
+		        t.region_no
+		      from TMP_REGION_STATUS t 
+		      where 1=1
+		      and t.running_state in (1,3,4,5,7)
+		      <if test="null != createTimeStart and '' != createTimeStart">
+		      	and to_char(t.create_time,'yyyy-MM-dd hh24:mi') &gt;=#{createTimeStart}
+		      </if>
+		      <if test="null != createTimeEnd and '' != createTimeEnd">
+      		  	and to_char(t.create_time,'yyyy-MM-dd hh24:mi') &lt;= #{createTimeEnd}
+      		  </if>
+		      and t.update_time is not null
+		      and t.is_rest = 'N'
+		) tab
+		group by 
+		      tab.running_state,
+		      tab.region_no
+	</select>
+	<!-- BJ-障停停机明细 -->
+	<select id="noHaltReportData" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		 select 
+		       t1.code_desc as code_desc,
+		       max(tab.status_number) as status_number,
+		       TRUNC(SUM((tab.update_time - tab.create_time) * 24 * 60 * 60) / 60, 2) minute ,
+		       count(tab.status_number) as count_number
+		  from (
+		         select 
+		           t.running_state,  
+		           t.update_time,
+		           t.create_time,
+		           t.status_number
+		         from tmp_equipment_status  t
+		         where 1=1
+		         <if test="null != createTimeStart and '' != createTimeStart">
+		      	  	and to_char(t.create_time,'yyyy-MM-dd hh24:mi') &gt;=#{createTimeStart}
+		      	 </if>
+		      	 <if test="null != createTimeEnd and '' != createTimeEnd">
+      		  		and to_char(t.create_time,'yyyy-MM-dd hh24:mi') &lt;= #{createTimeEnd}
+      		  	 </if>
+		         and t.update_time is not null
+		         and t.is_rest = 'N'
+		         and t.running_state = '6'
+		 )tab left join tm_code_rule t1 on substr(t1.plc_code,instr(t1.plc_code, ' ', 1) + 1) = tab.status_number
+		 group by  t1.code_desc
+	</select>
+	
+</mapper>  

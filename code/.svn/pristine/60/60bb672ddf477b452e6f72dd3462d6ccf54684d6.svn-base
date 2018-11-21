@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>RFIDtest</title>
+ 
+<link href="${baseUrl}/res/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="${baseUrl}/res/bootstrap/css/font-awesome.min.css" />
+<link rel="stylesheet" href="${baseUrl}/res/css/wis.css" />
+<link rel="stylesheet" href="${baseUrl}/res/bootstrap/css/jquery.gritter.css" type="text/css"/>
+<script type="text/javascript" src="${baseUrl}/res/js/jquery-1.8.0.min.js"></script> 
+<script src="${baseUrl}/res/bootstrap/js/jquery.gritter.min.js" type="text/javascript"></script>
+<script src="${baseUrl}/res/js/rfid/rfid.js" type="text/javascript"></script>
+<style>
+	fieldset{padding:.35em .625em .75em;margin:0 2px;border:1px solid silver}
+	legend{padding:.5em;border:0;width:auto;font-size: 20px;font-family: 微软雅黑;color: #0000FF;}
+	.input-class{
+		width:40rem;
+		height:4rem;
+		border: 1px #ccc solid;
+		border-radius: 7px;
+		margin-left: 10px;
+		font-size: 16px;
+	}
+</style>
+</head>
+<body style="overflow-x:hidden;margin:0;">
+   	 <div style="margin-top: 20px;">
+   	 	 <label>工位编号: </label><input  class="input-class" id="ulocNo" type="text" />
+	   	 <label>发送命令: </label><input  class="input-class"  id="command" type="text" onkeydown="if(event.keyCode==13)doReaderCommand();"/>
+	   	 <button type="button" onclick="doReaderCommand();" class="btn btn-primary" style="height: 3.5rem;margin-left: 10px;">发送命令</button>
+	     <fieldset>
+			    <legend>接收信息</legend>
+			   	<textarea id="fruitMsg" class="form-control" rows="10" style="font-size: 16px;font-weight:600;" name=textarea></textarea>
+		</fieldset>
+   	 </div>
+<script type="text/javascript">
+ function doReaderCommand(){
+	 var data = {};
+	 data.ulocNo = $('#ulocNo').val();
+	 data.command = $('#command').val();
+	 if(data.ulocNo && data.command){
+		ajaxRequest("${baseUrl}/rfid/rfidTest.do", data,  function(val) {
+			$('#fruitMsg').text(val);
+		},false,true); 
+	 }else{
+		 infoTip('不能为空！');
+	 }
+ }
+</script>
+</body>
+</html>

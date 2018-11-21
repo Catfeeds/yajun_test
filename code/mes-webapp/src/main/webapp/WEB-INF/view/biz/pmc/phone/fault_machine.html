@@ -1,0 +1,26 @@
+<#include "../phone_main/head.html"/>
+	<header class="mui-bar mui-bar-nav">
+		<h1 class="mui-title">故障机管理</h1>
+	</header>
+	<div class="mui-content">
+			<div class="mui-content-padded">
+		        <button type="button" style="margin-top: 20%;" onclick="faultMachineAdd();" class="mui-btn mui-btn-primary mui-btn-block">新增故障机</button>
+		        <button type="button" style="margin-top: 3rem;" onclick="faultMachineList();" class="mui-btn mui-btn-primary mui-btn-block">查询故障机</button>
+		        <button type="button" style="margin-top: 3rem;" onclick="queueCorrection();" class="mui-btn mui-btn-primary mui-btn-block">队列校正</button>
+		    </div>
+	</div>
+	<#include "../phone_main/footer.html"/>
+	<script>
+			mui.init({
+				statusBarBackground: '#f7f7f7',
+			});
+			function faultMachineAdd(){
+				mui.openWindow({url: "${baseUrl}/faultMachine/faultMachineAddInput.do",id: "faultMachineAdd"});  
+			}
+			function faultMachineList(){
+				mui.openWindow({url: "${baseUrl}/faultMachine/faultMachineListInput.do",id: "faultMachineList"});  
+			}
+			function queueCorrection(){
+				mui.openWindow({url: "${baseUrl}/faultMachine/queueCorrectionInput.do",id: "queueCorrection"});  
+			}
+	</script>

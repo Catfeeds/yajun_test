@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OrgnizationMapper">
+    <resultMap id="OrgnizationResult" type="com.wis.basis.systemadmin.entity.Orgnization">
+        <id column="ID" property="id" />
+        <result column="DIMENSION" property="dimension" />
+        <result column="ORGNIZATION_NAME" property="name" />
+        <result column="ORGNIZATION_CODE" property="code" />
+        <result column="PARENT_ID" property="parentId" />
+        <result column="ORGNIZATION_TYPE" property="type" />
+        <result column="ORGNIZATION_DESCRIPTION" property="description" />
+        <result column="LEADER_ID" property="leaderId" />
+        <result column="SYSTEM_CODE" property="systemCode" />
+     </resultMap>
+    <select id="findParent" resultType="java.util.Map" parameterType="map">
+     	SELECT t.ORGNIZATION_NAME as "name",t.ORGNIZATION_CODE as "code",t.PARENT_ID as "parentId",t.ID as "id",t.ORGNIZATION_TYPE as "type" from TS_ORGNIZATION t  where t.PARENT_ID is null
+    	<if test="dimension != null and dimension != '' ">
+	       and t.dimension = #{dimension}
+	     </if>
+    </select>
+    <delete id="deleteUserOrgnizationById" parameterType="java.util.Map">
+        delete from TR_USER_ORGNIZATION where ORGNIZATION_ID=#{orgnizationId} and USER_ID=#{userId}
+   </delete>
+    <insert id="addUser" parameterType="java.util.Map">
+   	INSERT INTO TR_USER_ORGNIZATION(USER_ID,ORGNIZATION_ID)VALUES(#{userId,jdbcType=INTEGER},#{orgnizationId,jdbcType=INTEGER})
+   	</insert>
+    <select id="findPostionByUerId" resultType="java.util.Map" parameterType="java.lang.Integer">
+     	SELECT t.ID as "id",t.POSITION_NAME as "name",t.POSITION_DESCRIPTION as "description",t.ORGNIZATION_ID as "orgnizationId",t.PARENT_ID as "parentId" FROM TS_POSITION t WHERE
+     	 t.ID IN(SELECT r.POSITION_ID FROM TR_USER_POSITION r where r.USER_ID=#{id,jdbcType=INTEGER})
+    </select>
+    <select id="findOrgByAccount" resultType="java.util.Map" parameterType="map">
+     	select distinct tp.orgnization_id as "id" from ts_position tp where tp.id in (
+             select tup.position_id from tr_user_position tup where tup.user_id = (select id from ts_user u where account= #{account} and u.mark_for_delete=0)
+        )
+    </select>
+   <select id="getAccountByRole" resultType="java.util.Map"  parameterType="java.util.Map" >
+		select account from ts_user where id in(
+			select tru.user_id from tr_role_user tru where tru.role_id = (select r.id from ts_role r where r.role_code=#{roleCode}) and tru.user_id in (
+			select trup.user_id from tr_user_position trup where trup.position_id in (
+			select id from ts_position  where mark_for_delete=0 and orgnization_id in 
+				 <foreach item="item" index="index" collection="orgIds" open="(" separator="," close=")">
+		            #{item}
+		        </foreach> 
+		        <if test="positionCodes != null">
+		        	and POSITION_CODE in 
+		        	<foreach item="item" index="index" collection="positionCodes" open="(" separator="," close=")">
+			            #{item}
+			        </foreach> 
+		        </if>
+			)
+			)
+		)
+   </select>
+	<select id="findByUserId" resultMap="OrgnizationResult" parameterType="java.lang.Integer">
+	    select t1.* from TS_ORGNIZATION t1 left join TR_USER_ORGNIZATION t2 on t1.id=t2.orgnization_id left join TS_USER t3 on
+	    t2.user_id=t3.id where t3.id=#{userId,jdbcType=INTEGER}
+	</select>
+</mapper>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TmpEquipmentStatusMapper">
+    <resultMap id="BaseResultMap" type="com.wis.mes.master.equipment.entity.TmpEquipmentStatus">
+        <id column="ID" jdbcType="DECIMAL" property="id"/>
+        <result column="TM_WORK_TIME_ID" jdbcType="DECIMAL" property="tmWorkTimeId"/>
+        <result column="TM_LINE_ID" jdbcType="DECIMAL" property="tmLineId"/>
+        <result column="TM_EQUIPMENT_ID" jdbcType="DECIMAL" property="tmEquipmentId"/>
+        <result column="RUNNING_STATE" jdbcType="VARCHAR" property="runningState"/>
+        <result column="STATUS_NUMBER" jdbcType="VARCHAR" property="statusNumber"/>
+        <result column="STATUS_CONTENT" jdbcType="VARCHAR" property="statusContent"/>
+        <result column="BEGIN_TIME" jdbcType="VARCHAR" property="beginTime"/>
+        <result column="FINISH_TIME" jdbcType="VARCHAR" property="finishTime"/>
+        <result column="DURATION" jdbcType="VARCHAR" property="duration"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="UPDATE_USER" jdbcType="DECIMAL" property="updateUser"/>
+        <result column="UPDATE_TIME" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="OPT_COUNTER" jdbcType="DECIMAL" property="optCounter"/>
+        <result column="CREATE_USER" jdbcType="DECIMAL" property="createUser"/>
+        <result column="TM_CLASS_MANAGER_ID" jdbcType="DECIMAL" property="tmClassManagerId"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    ID, TM_WORK_TIME_ID, TM_LINE_ID, TM_EQUIPMENT_ID, RUNNING_STATE, STATUS_NUMBER, STATUS_CONTENT, 
+    BEGIN_TIME, FINISH_TIME, DURATION, CREATE_TIME, UPDATE_USER, UPDATE_TIME, OPT_COUNTER, 
+    CREATE_USER, TM_CLASS_MANAGER_ID
+  </sql>
+    <select id="warmReport" parameterType="java.util.Map" resultType="java.util.Map">
+    SELECT  * 	FROM  ( SELECT  ROW_.*,  ROWNUM ROWNUM_  FROM  (
+         SELECT dev.NO,
+                dev.DESCRIPTION,max(dev.name) EQUIPMENT_NAME,
+                STATUS.RUNNING_STATE,
+                status.STATUS_CONTENT,
+                count(1) as cnt,
+                max(to_char(status.CREATE_TIME,'yyyy-MM-dd hh24:mi:ss')) lst_time
+             from TMP_EQUIPMENT_STATUS status
+        LEFT JOIN  TM_EQUIPMENT dev on status.TM_EQUIPMENT_ID = dev.ID
+        <include refid="warmReportWhere" />
+        GROUP BY dev.NO,dev.DESCRIPTION,STATUS.RUNNING_STATE,status.STATUS_CONTENT
+        ORDER BY  dev.no,cnt desc
+    ) ROW_ )  t left join tm_code_rule t1 on t.no||' '||t.RUNNING_STATE = t1.plc_code
+    WHERE  <![CDATA[ ROWNUM_ >  #{firstRow}	AND  ROWNUM_ <=#{pageSize} ]]>
+  </select>
+
+  <select id="warmReportCnt" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+        SELECT count(1) from (
+          SELECT dev.NO
+          from TMP_EQUIPMENT_STATUS status
+          LEFT JOIN  TM_EQUIPMENT dev on status.TM_EQUIPMENT_ID = dev.ID
+          <include refid="warmReportWhere" />
+          GROUP BY dev.NO,dev.DESCRIPTION,STATUS.RUNNING_STATE,status.STATUS_CONTENT
+      )
+  </select>
+
+  <sql id="warmReportWhere">
+    where 1=1
+      <if test="equipmentNo !=null and equipmentNo!='' ">
+          AND dev.NO = #{equipmentNo}
+      </if>
+      <if test="createTimeStart !=null and createTimeStart!='' ">
+          <![CDATA[ AND status.CREATE_TIME >= to_date(#{createTimeStart},'yyyy-MM-dd') ]]>
+      </if>
+      <if test="createTimeEnd !=null and createTimeEnd!='' ">
+         <![CDATA[ AND status.CREATE_TIME <= to_date(#{createTimeEnd},'yyyy-MM-dd') ]]>
+      </if>
+  </sql>
+  
+  <select id="queryPageTbEquipmentStatusCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+ select count(*)
+  from tmp_equipment_status t
+      left join tm_equipment et on et.id = t.tm_equipment_id
+	  left join tm_line le on le.id = t.tm_line_id
+	  left join tm_worktime wt on wt.id = t.tm_work_time_id
+	  left join tm_class_manager cm on cm.id = t.tm_class_manager_id
+   where exists (select 1
+            from (select max(tt.id) tid
+                    from tmp_equipment_status tt
+                   group by tt.tm_equipment_id) tbl
+           where tbl.tid = t.id)
+        <if test="tmLineId!=null and tmLineId!='' ">
+          and le.id like #{tmLineId}
+        </if>
+		<if test="runningState!=null and runningState!='' ">
+			and t.running_state = #{runningState}
+		</if>
+		<if test="runningStateIN!=null and runningStateIN!='' ">
+          and t.running_state IN (${runningStateIN})
+        </if>
+		<if test="tmEquipmentId!=null and tmEquipmentId!='' ">
+          and t.TM_EQUIPMENT_ID = #{tmEquipmentId}
+        </if>
+	</select>
+	
+	<select id="queryPageTbEquipmentStatus" resultType="com.wis.mes.master.equipment.entity.TmpEquipmentStatus" parameterType="java.util.HashMap">
+		SELECT
+        	*
+        FROM
+        (
+        SELECT
+        ROW_.*,
+        ROWNUM ROWNUM_
+        FROM
+        (
+           select t.*,
+		       et.no   "tmEquipment.no",
+		       et.name "tmEquipment.name", 
+		       et.tm_plant_id "tmEquipment.tmPlantId",
+		       cm.class_group "tmClassManager.classGroup",
+		       le.no "tmline.no",
+		       le.name_cn "tmline.nameCn", 
+		       wt.shiftno "tmWorktime.shiftno",
+		       coderule.code as"codeRule.code",
+        	   coderule.code_desc as "codeRule.codeDesc"
+		  from tmp_equipment_status t
+		  left join tm_equipment et on et.id = t.tm_equipment_id
+		  left join tm_line le on le.id = t.tm_line_id
+		  left join tm_worktime wt on wt.id = t.tm_work_time_id
+		  left join tm_class_manager cm on cm.id = t.tm_class_manager_id
+		  left join tm_code_rule coderule  on coderule.plc_code = et.no || ' ' || t.status_number
+			   and coderule.tm_line_id = t.tm_line_id
+		 where exists (select 1
+		          from (select max(tt.id) tid
+		                  from tmp_equipment_status tt
+		                 group by tt.tm_equipment_id) tbl
+		         where tbl.tid = t.id)
+		        <if test="tmLineId!=null and tmLineId!='' ">
+		          and le.id like #{tmLineId}
+		        </if>
+		        <if test="runningState!=null and runningState!='' ">
+		          and t.running_state = #{runningState}
+		        </if>
+		        <if test="runningStateIN!=null and runningStateIN!='' ">
+		          and t.running_state IN (${runningStateIN})
+		        </if>
+		        <if test="tmEquipmentId!=null and tmEquipmentId!='' ">
+		          and t.TM_EQUIPMENT_ID = #{tmEquipmentId}
+		        </if>
+		          order by ${orderField} ${orderDirection}
+		    ) ROW_
+		    )
+		    WHERE
+		   ROWNUM_ > #{firstRow}
+		   AND #{pageSize} >= ROWNUM_
+	</select>
+
+
+<!--TODO:-->
+    <select id="getTbNoFaultStopDetails" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+        select   a.dt                 as dateShow,
+        a.dayofweek          as weekShow,
+        sum(decode(b.whiteShift,null,0,b.whiteShift)) as whiteShift,
+        sum( decode(b.nightShift,null,0,b.nightShift)) as nightShift,
+        sum( decode(b.whiteDurationCount,null,0,b.whiteDurationCount) )as whiteDurationCount,
+        sum(decode(b.nightDurationCount,null,0,b.nightDurationCount)) as nightDurationCount
+        from (select to_char(everyDay, 'MM-dd') as dt,
+        to_char(everyday, 'dy') as dayofweek
+        from (select to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd') - 1 + level as everyDay
+        from dual
+        connect by level &lt;= ((to_date(substr(#{createTimeEnd},0,10), 'yyyy-mm-dd') + 1) -
+        to_date(substr(#{createTimeStart},0,10), 'yyyy-mm-dd')))) a
+        left join (select to_char(f.work_calendar_begin, 'day') as weekShow,
+        to_char(f.work_calendar_begin, 'MM-DD') as dateShow,
+        sum(decode(f.shift_no, '1', 1, 0)) as whiteShift,
+        sum(decode(f.shift_no, '2', 1, 0)) as nightShift,
+        sum(decode(f.shift_no, '1', f.duration, 0)) as whiteDurationCount,
+        sum(decode(f.shift_no, '2', f.duration, 0)) as nightDurationCount
+        from fin_no_fault_stop f
+        where f.shift_no != '0'
+        and f.work_calendar_begin is not null
+        -- 			                and f.is_rest = 'N'
+        <if test="createTimeStart!=null and createTimeStart!='' ">
+            and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+        </if>
+        <if test="createTimeEnd!=null and createTimeEnd!='' ">
+            and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+        </if>
+        group by f.work_calendar_begin
+        order by f.work_calendar_begin) b
+        on a.dt = b.dateShow
+        and a.dayofweek = b.weekShow
+        group by a.dt ,a.dayofweek
+        order by a.dt
+    </select>
+</mapper>

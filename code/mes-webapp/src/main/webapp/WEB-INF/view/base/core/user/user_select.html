@@ -1,0 +1,42 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body   permissionModule="USER" noBreadcrumbs="true">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="USER_NAME" field="name" permissionCode="USER_NAME"></@p.input>
+			<@p.input title="USER_ACCOUNT_NUMBER" field="account" permissionCode="USER_ACCOUNT_NUMBER"></@p.input>
+			<@p.input title="LOGIN_STATUS" type="select" field="status" options=options permissionCode="LOGIN_STATUS"></@p.input>
+			<#if orgnizations??>
+				<span class="frameInputSpan">
+					<span  class="frameInputLabel" ><@s.m code="USER_DEPARTMENT_OR_SECTION" />:</span>
+					<select name="selectOrgId" id="selectOrgId"> 
+					<option value ="" ><@s.m code="PLEASE_CHOOSE" /></option>
+					<#if orgnizations?is_sequence>
+						<#list orgnizations as org>
+								<option value ="${org.id}" >${org.name}</option>
+						</#list>
+					</#if>
+				</select>
+				</span>
+			</#if>
+		</@p.searchColumns>
+	</@p.searchPanel>
+    <@p.dataGrid url="${baseUrl}/user/list.do?${params!}"  singleSelect=singleSelect>
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="USER_NAME" field="name"   permissionCode="USER_NAME"></@p.column>
+		<@p.column title="USER_ACCOUNT_NUMBER" field="account"   permissionCode="USER_ACCOUNT_NUMBER"></@p.column>
+		<@p.column title="USER_STATUS" width="80"field="status"  permissionCode="USER_STATUS"  formatter="renderStatus"  ></@p.column>
+		<@p.column title="USER_SEX" width="80" field="gender"    permissionCode="USER_SEX"  formatter="renderGender"  ></@p.column>
+		<@p.column title="USER_MAIL" field="email"  permissionCode="USER_MAIL"></@p.column>
+		<@p.column title="USER_PHONE" field="phone"  permissionCode="USER_PHONE"></@p.column>
+		<@p.column title="USER_FAX" field="fax"  permissionCode="USER_FAX"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+	function renderGender(value) {
+		return entryRenderer('GENDER', value);
+	}
+	function renderStatus(value) {
+		return entryRenderer('LOGINSTATUS', value);
+	}
+</script>

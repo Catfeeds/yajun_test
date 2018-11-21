@@ -1,0 +1,87 @@
+<script type="text/javascript">
+	$(".page-content").toggleClass("page-content");
+	var operateParam=new Object();
+	operateParam.id=0;
+	var operateParamRight=new Object();
+	operateParamRight.id=0;
+	var selectedOrg = 0;
+	var selectedNode = 0;
+	jQuery(function($) {
+		loadPorderDiv();
+		$("#widget-collapse").click(function() {
+			if ($("#org_tab_left_body").is(":hidden")) {
+				$("#org_tab_right").removeClass("widget-box-max");
+				$("#org_tab_left_body").show();
+			} else {
+				$("#org_tab_right").addClass("widget-box-max");
+				$("#org_tab_left_body").hide();
+			}
+		});
+ 		$("#faultFradeTab li").click(function() {
+ 			reLoadTree(operateParam.id, $(this).index());
+ 		});
+	});
+	
+	function loadPorderDiv(){
+		$.ajax({
+	        url: '${baseUrl}/ncGroup/ncGroupInput.do?',
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:false,
+	        data : {
+	        	currentPageId:"${currentPageId}"
+	        },
+	        success: function(html){
+        		$("#ncGroupList").html(html);
+	        }
+	    });
+	}
+	function reLoadTree(orgId, lindex) {
+		if (lindex == undefined) {
+			lindex = $("#faultFradeTab li.active").index();
+		}
+		operateParam.id = orgId;
+	 	switch (lindex) {
+		case 0: {
+			$("#ncGroupList").show();
+			$("#ncLevelList").hide();
+		}
+			break;
+		case 1: {
+			$("#ncGroupList").hide();
+			$("#ncLevelList").show();
+			loadFaultGradeDiv();
+		}
+		default:
+			break;
+		} 
+	}
+	function loadFaultGradeDiv(){
+		$.ajax({
+	        url: '${baseUrl}/faultGrade/listInput.do?currentPageId=faultGradeGridId',
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:false,
+	        success: function(html){
+        		$("#ncLevelList").html(html);
+	        }
+	    });
+	}
+	
+</script>
+<@p.body title="EQUIPMENT_LIST_TITLE" noBreadcrumbs="true" permissionModule="NC_GROUP">
+<div id="org_tab_right" style="width: 100%;margin-left: 0px;margin-top: 0px;"  class="tabbable org_tab_right" >
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue"	id="faultFradeTab" >
+		<li class="active"><a data-toggle="tab" href="#ncGroupList">故障机</a></li>
+		<li><a data-toggle="tab" id="viewNcLevel" href="#ncLevelList">故障等级</a></li>
+	</ul>
+	<div class="tab-content" >
+		<div id="ncGroupList" class="tab-pane in active"></div>
+		<div id="ncLevelList" class="tab-pane"></div>
+	</div>
+</div>
+</@p.body>

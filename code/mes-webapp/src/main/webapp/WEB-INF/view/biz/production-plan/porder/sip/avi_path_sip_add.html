@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/avi/path/sip/add.do" class="form-horizontal"   permissionModule="AVI_PATH_SIP">
+		<input type ="hidden" name="toPorderAviPathId" value="${toPorderAviPathId!}"/>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_SIP_PARAMETER_NO" permissionCode="AVI_PATH_SIP_CODE">
+			  <@p.magnify  id="sips" url="${baseUrl}/avi/path/sip/selectSipList.do?currentPageId=AviPathSelectSipGridId&params=queryCondition[toPorderAviPathId]="+"${toPorderAviPathId}" callback="clickAviPathSipcallback" datatype="*"></@p.magnify>
+			</@p.formColmd>
+		</@p.formRow>
+	<div>
+		<input type="hidden" id="sipIds">
+		<table class="table table-bordered table-hover table-condensed	">
+			<thead>
+				<tr style="height: 40px;text-align: center"><th style="display: none">id</th><th>编号</th><th>名称</th><th>变量名</th><th>默认值</th><th>参数备注</th><th width='200px'>备注</th><th>删除</th></tr>
+			</thead>
+			<tbody id="sipBody"></tbody>
+		</table>
+	</div>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$.ajax({
+		url:"${baseUrl}/avi/path/sip/getSipParameterExiame.do",
+		type:"GET",
+		dataType:"json",
+		data:{
+			toPorderAviPathId:"${toPorderAviPathId}"
+		},
+		success:function(result){
+			var sipIdValue="";
+			var tbody = "";
+			$(result).each(function(i,item){
+				sipIdValue =(sipIdValue==""?item.id:(sipIdValue+","+item.id));
+				tbody+="<tr id="+item.id+"><td style='display: none'><input type='hidden' value="+item.id+" name='tsParameterId' data-type='required'></td><td>"+item.code+"</td><td>"+item.name+"</td><td>"+item.variuableName+"</td><td>"+item.defaultValue+"</td><td>"+item.note+"</td><td><input type='text' name='note' width='200px'></td><td style='width:50px;'>必检项</td></tr>";
+			});
+			$("#sipIds").val(sipIdValue);
+			$("#sipBody").append(tbody);
+			if($("#sipIds").val()!=""){
+				$("#display_sips").val("以下为质检项信息");
+			}
+		}
+	});
+});
+function checkIdIsHave(id){
+	if($("#sipIds").val()!=""){
+		var sipIds=$("#sipIds").val().split(",");
+		for(var i =0;i<sipIds.length;i++){
+			if(sipIds[i] == id){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+function frame_cleanSelect(){
+	$("input[name='tsParameterId']").each(function(i,item){
+		if($(this).attr("data-type") != "required"){
+			clickDeleate(this.value);
+		}
+	});
+}
+function clickAviPathSipcallback(dialog){
+	var rowsData = getSelectedRows('dgAviPathSelectSipGridId');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	$("#display_sips").val("以下为质检项信息");
+
+	var tbody = "";
+	var sipIdValue="";
+	for(var i =0;i< rowsData.length ;i++){
+		sipIdValue =(sipIdValue==""?rowsData[i].id:(sipIdValue+","+rowsData[i].id));
+		if(checkIdIsHave(rowsData[i].id)){
+			continue;
+		}
+		tbody+="<tr id="+rowsData[i].id+"><td style='display: none'><input type='hidden' value="+rowsData[i].id+" name='tsParameterId'></td><td>"+rowsData[i].code+"</td><td>"+rowsData[i].name+"</td><td>"+rowsData[i].variuableName+"</td><td>"+rowsData[i].defaultValue+"</td><td>"+rowsData[i].note+"</td><td><input type='text' name='note' width='200px'></td><td style='width:30px;'><button value="+rowsData[i].id+" class='btn btn-primary  btn-sm' onclick='clickDeleate(this.value)'>删除</button></td></tr>";
+	}
+	$("#sipIds").val(sipIdValue);
+	$("#sipBody").append(tbody);
+	dialog.close();
+}
+
+function clickDeleate(obj){
+	$("#"+obj).remove();
+	if($("input[name='tsParameterId']").length == 0){
+		$("#sipIds").val("");
+		$("#display_sips").val("");
+	}else{
+		var sipIdValue="";
+		$("input[name='tsParameterId']").each(function(i,item){
+			sipIdValue =(sipIdValue==""?item.value:(sipIdValue+","+item.value));
+		});
+		$("#sipIds").val(sipIdValue);
+	}
+}
+</script>

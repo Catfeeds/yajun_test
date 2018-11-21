@@ -1,0 +1,158 @@
+
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="PRODUCT_TRACING_LIST_TITLE" permissionModule="PRODUCT_TRACING">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PRODUCT_TRACING_BACK_NUMBER" id="backNumber" field="backNumber"></@p.input>
+			<@p.input title="PRODUCT_TRACING_MACHINE_OF_NAME" field="machineOfName"></@p.input>
+			<@p.input title="PRODUCT_TRACING_MACHINE_NAME" field="machineName"></@p.input>
+			<@p.input title="PRODUCT_TRACING_CLASS_MANAGER"   field="tmWorktime.shiftno"  options=classOrderOptions type="select"></@p.input>
+			<@p.input title="PRODUCT_TRACING_BEGIN_DATE_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="PRODUCT_TRACING_BEGIN_DATE_END" id="createTimeEnd"  field="createTimeEnd"  ></@p.input>
+			<@p.input title="PRODUCT_TRACING_FINSH_DATE_START" id="updateTimeStart" field="updateTimeStart"></@p.input>
+			<@p.input title="PRODUCT_TRACING_FINSH_DATE_END" id="updateTimeEnd"  field="updateTimeEnd"  ></@p.input>
+			<@p.input title="PRODUCT_TRACING_UNHEALTHY_COUNT_BIG" type="select" field="unhealthyCount" options=yesOrNo></@p.input>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="PRODUCT_TRACING_PARAME" permissionCode="PARAMETERSELECT"  onclick="doOperation('parame')" type="button"  ></@p.button>
+			<@p.button title="PRODUCT_TRACING_KEYMODULE" permissionCode="KEYMODULESELECT" onclick="doOperation('keymodule')" type="button"></@p.button>
+			<@p.button title="PRODUCT_TRACING_POSTTIME" permissionCode="POSTTIMESELETE" onclick="doOperation('posttime')" type="button"></@p.button>
+			<@p.button title="PRODUCT_PARAMETER_EXPORT" permissionCode="PRODUCT_PARAMETER_EXPORT"  url="${baseUrl}/vbProductParameters/exportData.do" iconCls="upload-alt" type="down" />
+			<@p.button title="PRODUCT_PART_EXPORT" permissionCode="PRODUCT_PART_EXPORT"  url="${baseUrl}/dkDisZhTbl/exportData.do" iconCls="upload-alt" type="down" />
+			<@p.button title="PRODUCT_STATION_EXPORT" permissionCode="PRODUCT_STATION_EXPORT"  onclick="downLoadAjax()" iconCls="upload-alt" type="button" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/tbProductTracing/list.do">
+		<@p.column checkbox="true" ></@p.column>
+<!-- 		<@p.column title="PRODUCT_TRACING_DATE" field="createTime" permissionCode="PRODUCT_TRACING_DATE" ></@p.column> -->
+		<@p.column title="PRODUCT_TRACING_LINE" field="tmLine.nameCn" permissionCode="PRODUCT_TRACING_LINE"></@p.column>
+		<@p.column title="PRODUCT_TRACING_CLASS_MANAGER" field="tmWorktime.shiftno" permissionCode="PRODUCT_TRACING_CLASS_MANAGER" formatter="renderShiftNo"></@p.column>
+		<@p.column title="PRODUCT_TRACING_CLASS_MANAGER_CLASSGROUP" field="classManager.classGroup" permissionCode="PRODUCT_TRACING_CLASS_MANAGER" formatter="rendClassGroup"></@p.column>
+		<@p.column title="BIN_SN" field="sn" permissionCode="PRODUCT_TRACING_BACK_NUMBER"></@p.column>
+		<@p.column title="PRODUCT_TRACING_BACK_NUMBER" field="backNumber" permissionCode="PRODUCT_TRACING_BACK_NUMBER"></@p.column>
+		<@p.column title="PRODUCT_TRACING_MACHINE_OF_NAME" field="machineOfName" permissionCode="PRODUCT_TRACING_MACHINE_OF_NAME"></@p.column>
+		<@p.column title="PRODUCT_TRACING_MACHINE_NAME" field="machineName" permissionCode="PRODUCT_TRACING_MACHINE_NAME" formatter="renderBatchQty"></@p.column>
+		<@p.column title="PRODUCT_TRACING_UNHEALTHY_COUNT" field="unhealthyCount" permissionCode="PRODUCT_TRACING_BEGIN_TIME"></@p.column>
+		<@p.column title="PRODUCT_TRACING_BEGIN_TIME" field="createTime" permissionCode="PRODUCT_TRACING_BEGIN_TIME"></@p.column>
+		<@p.column title="PRODUCT_TRACING_FINISH_TIME" field="updateTime" permissionCode="PRODUCT_TRACING_FINISH_TIME"></@p.column>
+	</@p.dataGrid>
+	<div id ="PARTDetail"></div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	};
+	$('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+	
+	$('#updateTimeStart').click(function(){
+		var createTimeEnd=$dp.$('updateTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'updateTimeEnd\')}'
+		})
+	});
+	$('#updateTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			minDate:'#F{$dp.$D(\'updateTimeStart\')}'
+		})
+	});
+	initQueryTime();
+	pushMessage($("#userId").val());
+});
+
+function initQueryTime(){
+	var date = new Date();
+	var year = date.getFullYear();
+	var month = date.getMonth()+1;
+	var day  = date.getDate();
+	var hour = date.getHours();
+	var minute = date.getMinutes();
+	var seconds = date.getSeconds();
+	$("#createTimeEnd").val(year+"-"+caseLessTen(month)+"-"+caseLessTen(day)+" "+caseLessTen(hour)+":"+caseLessTen(minute)+":"+caseLessTen(seconds));
+	date = new Date(date.getTime()-1000*24*60*60*7);
+	year = date.getFullYear();
+	month = date.getMonth()+1;
+	day  = date.getDate();
+	hour = date.getHours();
+	minute = date.getMinutes();
+	seconds = date.getSeconds();
+	$("#createTimeStart").val(year+"-"+caseLessTen(month)+"-"+caseLessTen(day)+" "+caseLessTen(hour)+":"+caseLessTen(minute)+":"+caseLessTen(seconds));
+}
+
+function downLoadAjax(){
+	downAjax("","${baseUrl}/tbProductTracing/exportData.do",'dg${currentPageId}');
+}
+
+function doOperation(type){
+	var rows = getSelectedRows('dg${currentPageId}');
+    if (!rows || rows.length==0) {
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+        return;
+    }
+    if (rows.length > 1) {
+		infoTip(commons_msg.plsSelOne);
+		return;
+	}
+    if(type=='parame'){
+    	createChildwindow('<@s.m code="PRODUCT_PARAMER_LIST_TITLE" />', '${baseUrl}/vbProductParameters/listInput.do?params=queryCondition[sebango]='+rows[0].backNumber+'%26queryCondition[kiban]='+rows[0].machineName+'&backNumber='+rows[0].backNumber,'','','product_paramer_sett_gridId');
+    }else if(type=='keymodule'){
+    	var dk = "";
+    	/* if(!rows[0].finishTime){
+    		dk="%26queryCondition[isDk]=DK"
+    	} */
+    	dk="%26queryCondition[isDk]=DK";
+    	createChildwindow('<@s.m code="PRODUCT_PART_LIST_TITLE" />', '${baseUrl}/dkDisZhTbl/listInput.do?params=queryCondition[bfid]='+rows[0].backNumber+'%26queryCondition[jh]='+rows[0].machineName+dk,'','','product_part_sett_gridid');
+    }else{
+    	createChildwindow('<@s.m code="PRODUCT_STATION_LIST_TITLE" />', '${baseUrl}/tbProductStation/listInput.do?tbProductTracingId='+rows[0].id,'','','product_paramer_sett_gridId');
+    }
+}
+function renderShiftNo(value){
+	return entryRenderer('SHIFT_TYPE', value);
+}
+
+function rendClassGroup(value) {
+	return entryRenderer('CLASS_GROUP', value);
+}
+
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+
+function renderBatchQty(value){
+	return value == null ? "" : value;
+}
+
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/part/exportTemplate.do";
+    importFile("<@s.m code="PART_IMPORT" />", "${baseUrl}/part/importData.do", "dg${currentPageId}",obj);
+}
+</script>

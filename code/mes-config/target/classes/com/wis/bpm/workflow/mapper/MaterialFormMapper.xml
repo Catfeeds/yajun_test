@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="MaterialFormMapper" >
+  
+  <select id="getMaterialFormsByFormId" resultType="java.util.HashMap"  parameterType="map">
+    <![CDATA[
+    select t1.id as "id",
+    		t1.APPLICATIONFORM_ID ad "applicationFormID",
+			t1.INDUSTRY_SECTOR as "industrySector",
+			t1.MATERIAL_TYPE as "materialType",
+			t1.MATERIAL_CODE as "materialCode",
+			t1.MATERIAL_DESC as "materialDesc",
+			t1.BASIC_MEASUREUNIT as "basicUnitOfMeasure",
+			t1.MATERIAL_GROUP as "materialGroup",
+			t1.OLD_MATERIAL_CODE as "oldMaterialCode",
+			t1.ORDER_UNIT as "orderUnit",
+			t1.PROCURE_UNIT_VALUE as "procureUnitValue",
+			t1.PROCURE_UNIT as "procureUnit",
+			t1.BASIC_UNIT_VALUE as "basicUnitValue",
+			t1.BASIC_UNIT as "basicUnit",
+			t1.CATEGORY_SPECIES as "categorySpecies",
+			t1.CATEGORY as "category",
+			t1.BATCH_MANAGE as "batchManage",
+			t1.STORAGE_CONDITION as "storageCondition",
+			t1.PRODUCT_GROUP as "productGroup",
+			t1.GENERAL_ITEM_CATEGORY as "generalItemCategory",
+			t1.TRANSPORT_GROUP as "transportationGroup",
+			t1.HUALAND_CODE as "hualandCode",
+			t1.MATERIAL_LONGDESC as "materialLongDesc",
+			t1.PDM_CODE as "pdmCode",
+			t1.PDM_STATUS as "pdmStatus",
+			t1.PDM_VERSION as "pdmVersion",
+			t1.TEMP_APPFORM_ID as "tempAppformId"
+      from wact_material_form t1
+      left join WACT_APPLICATION_FORM t2
+        on t1.APPLICATIONFORM_ID = t2.id
+    ]]>
+    <where>
+      <if test="formId != null and formId != '' ">
+       and t1.APPLICATIONFORM_ID = #{formId}
+      </if>
+     </where>
+     <![CDATA[ order by t1.id asc]]>
+  </select>
+  
+   <update id="updateTempRow" parameterType="java.util.HashMap">
+       UPDATE WACT_MATERIAL_FORM SET APPLICATIONFORM_ID=${appFormId} where TEMP_APPFORM_ID= ${tempAppformId}  
+    </update>
+   
+</mapper>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<style type="text/css">
+#myTable{
+width: 100%;
+}
+#myTable tr{
+ height:40px;
+}
+#myTable tr td{
+ width:33%;text-align: center;
+}
+</style>
+<script type="text/javascript">
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/metalPlate/mouldDieMaintenance.do" class="form-horizontal" idValue=bean.id permissionModule="SHEET_METAL_MATERIAL">
+	<#list tags?keys as key>
+			<@p.formRow>
+				<@p.formColmd title="METALPLATE_MACHINETAGS" permissionCode="MACHINE_TAGS">
+ 					<@p.input type="select" field="machineTags${key!}" disabled="disabled" value="${key!}" options=equipmentBoards></@p.input>
+				</@p.formColmd>
+				<@p.formColmd title="METALPLATE_TOOLNUMBER" permissionCode="TOOL_NUMBER">
+					<@p.input type="multiple" id="${key!}" field="${key!}" datatype="*" values="${tags[key]!}" options=equipmentMoulds excludeSelectOption="false"></@p.input>
+				</@p.formColmd>
+			</@p.formRow>
+	</#list>
+		<@p.formRow>&nbsp;</@p.formRow>
+		<@p.formRow>&nbsp;</@p.formRow>
+</@p.editForm>
+</body>
+</html>

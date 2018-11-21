@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/porder/add.do" class="form-horizontal"   permissionModule="PORDER">
+		<@p.formRow>
+			<@p.formColmd title="PORDER_PLANT" permissionCode="PORDER_PLANT">
+				<@p.input type="select" datatype="*" id="porderAddPlantId"onchange="porderAddPlantChange(this.value);" field="tmPlantId" options=plantOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_PART" permissionCode="PORDER_PART">
+				 <@p.input type="select" id="porderAddPart" datatype="*" field="tmPartId" onchange="porderAndPartChange(this.value)" options=partOptions></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PORDER_QTY" permissionCode="PORDER_QTY">
+				<input name="qty" class="inputxt" errormsg="填写大于0的数字"maxlength="36" datatype="/^[1-9]{1,}[0]{0,}$/" />
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_PATH" permissionCode="PORDER_PATH">
+				<@p.input type="select" id="porderAddPath" field="tmPathId" options=pathOptions></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PORDER_BOM" permissionCode="PORDER_BOM">
+				<@p.input type="select" id="porderAddBom" field="tmBomId" options=bomOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_PRIORITY" permissionCode="PORDER_PRIORITY">
+				 <@p.input type="radio" excludeSelectOption="true" field="priority" options=priorityOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PORDER_PLAN_START_TIME" permissionCode="PORDER_PLAN_START_TIME">
+				<input name="planStartTime" id="planStartTime" class="timepicker"  datatype="*" />
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_PLAN_END_TIME" permissionCode="PORDER_PLAN_END_TIME">
+				<input name="planEndTime" id="planEndTime"class="timepicker"  datatype="*" />
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PORDER_NOTE" permissionCode="PORDER_NOTE">
+				<input name="note" class="inputxt" maxlength="150" />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+/* 引用时间插件 定义时间格式 */
+$(function(){
+	var lang='${lang!}';
+	var params={};  
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#planStartTime').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+	});
+	$('#planEndTime').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'planStartTime\',{d:-1})}'});
+	}); 
+});
+
+function porderAddPlantChange(tmPlantId){
+	porderAddgetPart(tmPlantId);
+}
+
+function porderAndPartChange(tmPartId){
+	if(tmPartId==""){
+		return;
+	}
+	porderAddgetPath($("#porderAddPlantId").val(),tmPartId);
+	porderAddGetBom($("#porderAddPlantId").val(),tmPartId);
+}
+function porderAddgetPart(tmPlantId){
+	ajaxRequest(
+			"${baseUrl}/porder/getParts.do",
+			{
+				tmPlantId:tmPlantId
+			},
+			function(result){
+				$("#porderAddPart").empty();
+				$("#porderAddPart").append(" <option value=''>-----请选择-----</option>");
+				$(result.rows).each(function(i,item){
+					$("#porderAddPart").append(" <option value='" + item.code + "'>"+item.name + "</option>");
+				});
+			}, 
+			false);
+}
+function porderAddgetPath(tmPlantId,tmPartId){
+	$.ajax({
+		url:"${baseUrl}/porder/getPaths.do",
+		type:"post",
+		dataType:"json",
+		data:{
+			tmPlantId:tmPlantId,
+			tmPartId:tmPartId
+		},
+		success:function(result){
+			$("#porderAddPath").empty();
+			$("#porderAddPath").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(function(i,item){
+				$("#porderAddPath").append(" <option value='" + item.id + "'>"+item.no+"-"+item.name + "</option>");
+			});
+		}
+	});
+}
+function porderAddGetBom(tmPlantId,tmPartId){
+	$.ajax({
+		url:"${baseUrl}/porder/getBoms.do",
+		type:"post",
+		dataType:"json",
+		data:{
+			tmPlantId:tmPlantId,
+			tmPartId:tmPartId
+		},
+		success:function(result){
+			$("#porderAddBom").empty();
+			$("#porderAddBom").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(function(i,item){
+				$("#porderAddBom").append(" <option value='" + item.id + "'>"+item.bomversion + "</option>");
+			});
+		}
+	});
+}
+</script>
+

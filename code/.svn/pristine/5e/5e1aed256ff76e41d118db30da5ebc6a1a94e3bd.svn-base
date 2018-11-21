@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/badParts/add.do" class="form-horizontal" permissionModule="BAD_PARTS">
+		<@p.formRow>
+			<@p.formColmd title="BAD_PARTS_ILNE" permissionCode="BAD_PARTS_ILNE">
+				<@p.input type="select" datatype="*" field="tmLineId" options=lines></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="BAD_PARTS_NO" permissionCode="BAD_PARTS_ILNE">
+				<@p.input datatype="n" field="no" maxlength='3' ></@p.input>
+			</@p.formColmd> 
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BAD_PARTS_NAME" permissionCode="BAD_PARTS_NAME">
+				<input name="name" class="inputxt" datatype="*" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="BAD_PARTS_REMARKS" permissionCode="BAD_PARTS_REMARKS">
+				<input name="remarks" class="inputxt" maxlength='150' />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+

@@ -1,0 +1,55 @@
+<#include "../include/bootstrapTableCommons.html">
+
+<@p.body title="RFID_LOG_LIST_TITLE" permissionModule="RFID_LOG">
+  <@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="RFID_LOG_LINE" type="select" field="tmLineId" options=lineOptions></@p.input>
+			<@p.input title="RFID_LOG_SN" field="sn"></@p.input>
+			<@p.input title="RFID_LOG_BACKNUMBER" field="backNumber"></@p.input>
+			<@p.input title="RFID_LOG_MACHINENAME" field="machineName"></@p.input>
+			<@p.input title="RFID_LOG_FRUIT" field="fruit"></@p.input>
+			<@p.input title="RFID_LOG_EPC_INFO" field="epcInfo"></@p.input>
+			<@p.input title="ULOC_STATUS_BEGIN_TIME_START" field="createTimeStart" id="createTimeStart"></@p.input>
+			<@p.input title="ULOC_STATUS_BEGIN_TIME_END" field="createTimeEnd" id="createTimeEnd"></@p.input>
+			<@p.input title="QUEUE_RECORD_ULOC_NO" field="ulocNo"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tbRfidLog/list.do">
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="RFID_LOG_SN" field="sn" width="18%" permissionCode="RFID_LOG_SN" ></@p.column>
+			<@p.column title="RFID_LOG_PLANT" field="plant.no" permissionCode="RFID_LOG_PLANT"></@p.column>
+			<@p.column title="RFID_LOG_LINE" field="line.nameCn" permissionCode="RFID_LOG_LINE"></@p.column>
+			<@p.column title="QUEUE_RECORD_ULOC_NO" field="ulocNo" permissionCode="RFID_LOG_LINE"></@p.column>
+			<@p.column title="QUALITY_CLASSES" field="tmWorktime.shiftno" permissionCode="RFID_LOG_LINE"  formatter="renderShiftno"></@p.column>
+			<@p.column title="RFID_LOG_BACKNUMBER" field="backNumber" permissionCode="RFID_LOG_BACKNUMBER"></@p.column>
+			<@p.column title="RFID_LOG_MACHINENAME" field="machineName" permissionCode="RFID_LOG_MACHINENAME" ></@p.column>
+			<@p.column title="RFID_LOG_RFIDIP" field="rfidIp" permissionCode="RFID_LOG_RFIDIP" ></@p.column>
+			<@p.column title="RFID_LOG_FRUIT" field="fruit" permissionCode="RFID_LOG_FRUIT" ></@p.column>
+			<@p.column title="RFID_LOG_EPC_INFO" field="epcInfo" width="31%" permissionCode="RFID_LOG_FRUIT" ></@p.column>
+			<@p.column title="RFID_LOG_CREATE_TIME" field="createTime" permissionCode="RFID_LOG_PID" ></@p.column>
+	</@p.dataGrid>  
+</@p.body>	
+<script type="text/javascript">
+	$('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+	
+	function renderShiftno(value) {
+		return entryRenderer('SHIFT_TYPE', value);
+	}
+</script>

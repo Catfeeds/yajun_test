@@ -1,0 +1,117 @@
+<#include "../../include/bootstrapTableCommons.html">
+	<script src="././res/js/echarts.min.js"></script>
+<@p.body title="PECORD_ULOC_TP_RECORD_ID" permissionModule="RECORD" noBreadcrumbs="true">	
+	<div style="color: #428bca;text-align:center; margin:10px" >产品档案站点信息</div>
+   	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="RECORD_PART_VIEW" permissionCode="partView" iconCls="eye-open" onclick="partView()"></@p.button>
+			<@p.button title="RECORD_PARAMETER_VIEW" permissionCode="parameterView" iconCls="eye-open" onclick="parameterView()"></@p.button>
+			<@p.button title="RECORD_NC_VIEW" permissionCode="ncView" iconCls="eye-open" onclick="ncView()"></@p.button>
+			<@p.button title="RECORD_QUALITY_VIEW" permissionCode="qualityView" iconCls="eye-open" onclick="qualityView()"></@p.button>
+			<@p.button title="RECORD_SCRAP_VIEW" permissionCode="scrapView" iconCls="eye-open" onclick="scrapView()"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	
+	<div id="dataGrid">
+		<@p.dataGrid url="${baseUrl}/record/uloc/list.do?${params!}" singleSelect="true">
+			<@p.column checkbox="true" ></@p.column>
+			<@p.column title="PECORD_ULOC_ULOC_NO" field="ulocNo" permissionCode="PECORD_ULOC_ULOC_NO" ></@p.column>
+			<@p.column title="PECORD_ULOC_ULOC_NAME" field="ulocName" permissionCode="PECORD_ULOC_ULOC_NAME" ></@p.column>
+			<@p.column title="PECORD_ULOC_NEXT_ULOC" field="nextUloc" permissionCode="PECORD_ULOC_NEXT_ULOC"  formatter="renderRecordUloc"></@p.column>
+			<@p.column title="PECORD_ULOC_SHIFT_NO" field="shiftNo" permissionCode="PECORD_ULOC_SHIFT_NO" formatter="renderShiftNo"></@p.column>
+			<@p.column title="PECORD_ULOC_OPERATION_TYPE" field="operationType" permissionCode="PECORD_ULOC_OPERATION_TYPE" formatter="renderOperationType"></@p.column>
+			<@p.column title="PECORD_ULOC_ROUTING_SEQ" field="routingSeq" permissionCode="PECORD_ULOC_ROUTING_SEQ" formatter="renderNullValue"></@p.column>
+			<@p.column title="PECORD_ULOC_NOTE" field="note" permissionCode="PECORD_ULOC_NOTE" formatter="renderNullValue"></@p.column>
+		</@p.dataGrid>
+	</div>
+	<div id="echarts" style="width: 1000px;height:400px;"></div>
+</@p.body>
+<script type="text/javascript">
+	function renderOperationType(value){
+		return entryRenderer('PRODUCT_OPERTION_TYPE', value);
+	}
+	function renderRecordUloc(value,recordUloc) {
+		if (value != "") {
+			if(value && recordUloc.uloc.id){
+				return recordUloc.uloc.no + " - " + recordUloc.uloc.name;
+			}
+		}
+		return value;
+	}
+	function renderNullValue(value){
+		return value == null ? "" : value;
+	}
+	function renderShiftNo(value){
+		return entryRenderer('SHIFT_TYPE', value);
+	}
+	//查看物料
+	function partView(){
+		var rows=getSelectedRows('dg${currentPageId}');
+	    if(rows.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    if(rows.length!=1){
+		    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+	    	return;
+	    }
+	    var url = '${baseUrl}/record/uloc/part/listInput.do?id='+rows[0].id;
+	    createChildwindow('<@s.m code='RECORD_PART_VIEW'/>', url,'','','recordUlocPartGrid');
+	}
+	//查看参数
+	function parameterView(){
+		var rows=getSelectedRows('dg${currentPageId}');
+	    if(rows.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    if(rows.length!=1){
+		    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+	    	return;
+	    }
+	    var url = '${baseUrl}/record/uloc/parameter/listInput.do?id='+rows[0].id;
+	    createChildwindow('<@s.m code='RECORD_PARAMETER_VIEW'/>', url,'','','recordUlocParameterGrid');
+	}
+	//不合格查看
+	function ncView(){
+		var rows=getSelectedRows('dg${currentPageId}');
+	    if(rows.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    if(rows.length!=1){
+		    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+	    	return;
+	    }
+	    var url = '${baseUrl}/record/uloc/nc/listInput.do?id='+rows[0].id;
+	    createChildwindow('<@s.m code='RECORD_NC_VIEW'/>', url,'','','recordUlocNcGrid');
+	}
+	//质检信息查看
+	function qualityView(){
+		var rows=getSelectedRows('dg${currentPageId}');
+	    if(rows.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    if(rows.length!=1){
+		    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+	    	return;
+	    }
+	    var url = '${baseUrl}/record/uloc/quality/listInput.do?id='+rows[0].id;
+	    createChildwindow('<@s.m code='RECORD_QUALITY_VIEW'/>', url,'','','recordUlocQualityGrid');
+	}
+	//报废查看
+	function scrapView(){
+		var rows=getSelectedRows('dg${currentPageId}');
+	    if(rows.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    if(rows.length!=1){
+		    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+	    	return;
+	    }
+	    var url = '${baseUrl}/record/uloc/scrap/listInput.do?id='+rows[0].id;
+	    createChildwindow('<@s.m code='RECORD_SCRAP_VIEW'/>', url,'','','recordUlocScrapGrid');
+	}
+</script>

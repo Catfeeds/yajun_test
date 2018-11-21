@@ -1,0 +1,21 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+
+</script>
+
+<@p.body  permissionModule="RECORD" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="recordUlocScrapGrid">
+		<@p.searchColumns>
+			<@p.input title="PECORD_ULOC_SCRAP_SCRAP_CODE" field="scrapCode"  permissionCode="PECORD_ULOC_SCRAP_SCRAP_CODE"></@p.input>
+			<@p.input title="PECORD_ULOC_SCRAP_NOTE" field="note"  permissionCode="PECORD_ULOC_SCRAP_NOTE"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div style="color: #428bca;text-align:center; margin:10px" >产品档案报废信息</div>
+	<@p.dataGrid url="${baseUrl}/record/uloc/scrap/list.do?queryCondition[tpRecordUlocId]=${tpRecordUlocId}" id="recordUlocScrapGrid">
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="PECORD_ULOC_SCRAP_SCRAP_CODE" field="scrapCode" permissionCode="PECORD_ULOC_SCRAP_SCRAP_CODE" ></@p.column>
+			<@p.column title="PECORD_ULOC_SCRAP_NOTE" field="Note" permissionCode="PECORD_ULOC_SCRAP_NOTE" ></@p.column>
+		</@p.dataGrid>
+</@p.body>	
+

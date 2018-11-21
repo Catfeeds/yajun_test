@@ -1,0 +1,9 @@
+
+<#list ulocList as uloc>  
+	<span class="tree-icon tree-file role">&nbsp;</span>
+	<span >
+	<input style="vertical-align:middle;" type="checkbox" name="ulocIds" value='${uloc["id"]!}' <#if uloc.checked>checked='checked'</#if> />
+	</span><span style="vertical-align:middle;">${uloc["no"]!}-${uloc["name"]!}</span>
+	<br>
+</#list>
+

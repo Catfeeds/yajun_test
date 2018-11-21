@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="WorkScheduleRestMapper">
+
+	<select id="getTimeListMorOrNoon" resultType="com.wis.mes.master.workcalendar.entity.TmWorkscheduleRest"  parameterType="java.util.HashMap" >
+		SELECT ID as "id",START_TIME as "startTime",END_TIME AS "endTime" 
+		FROM  tm_workschedule_rest r 
+		WHERE
+ 			r.TM_WORKSCHEDULE_ID = #{tmWorkscheduleId}
+		AND <![CDATA[
+		(
+			(to_date(r.START_TIME,'hh24:mi') > to_date('${startTime}','hh24:mi') AND to_date(r.START_TIME,'hh24:mi')<to_date('${endTime}','hh24:mi')) 
+			OR 
+			(to_date(r.END_TIME,'hh24:mi') > to_date('${startTime}','hh24:mi') AND to_date(r.END_TIME,'hh24:mi') < to_date('${endTime}','hh24:mi'))
+			
+		)
+		OR
+		(
+			to_date(r.START_TIME,'hh24:mi') < to_date('${startTime}','hh24:mi')
+			AND
+			to_date(r.START_TIME,'hh24:mi') > to_date('${endTime}','hh24:mi')
+		)
+		]]> 
+	</select>
+	
+	<select id="getTimeListNight" resultType="com.wis.mes.master.workcalendar.entity.TmWorkscheduleRest"  parameterType="java.util.HashMap" >
+		SELECT ID as 'id', START_TIME as 'startTime',END_TIME AS 'endTime'  
+		FROM tm_workschedule_rest r 
+		WHERE r.TM_WORKSCHEDULE_ID = #{tmWorkscheduleId} 
+		AND (<![CDATA[
+				( ( resetTimeSection(r.START_TIME,r.END_TIME) > resetTimeSection(STR_TO_DATE('${startTime}',"%H:%i:%s"),STR_TO_DATE('${endTime}',"%H:%i:%s"))  
+				AND resetTimeSection(r.START_TIME,r.END_TIME)< TIME_TO_SEC(STR_TO_DATE('${endTime}',"%H:%i:%s")))) 
+			OR (TIME_TO_SEC(r.END_TIME) < TIME_TO_SEC(STR_TO_DATE('${endTime}',"%H:%i:%s"))   
+				AND TIME_TO_SEC(r.END_TIME) > resetTimeSection(STR_TO_DATE('${startTime}',"%H:%i:%s"), STR_TO_DATE('${endTime}',"%H:%i:%s")) )
+			OR ( resetTimeSection(r.START_TIME,r.END_TIME) < resetTimeSection(STR_TO_DATE('${startTime}',"%H:%i:%s"),STR_TO_DATE('${endTime}',"%H:%i:%s"))  
+				AND TIME_TO_SEC(r.END_TIME )> TIME_TO_SEC(STR_TO_DATE('${endTime}',"%H:%i:%s")) ) 
+		)
+		]]> 
+	</select>
+</mapper>

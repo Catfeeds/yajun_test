@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="format-detection" content="telephone=no" />
+	<link rel="stylesheet" href="../../mui/css/mui.min.css" />
+	<link rel="stylesheet" href="../../css/main-list.css" />
+	<script src="../../mui/js/mui.min.js"></script>
+	<script src="../../mui/js/app.js"></script>
+	<script src="../../js/jquery-1.8.0.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+<body>
+		<header class="mui-bar mui-bar-nav">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">故障机列表</h1>
+		</header>
+		<div class="page-content">
+			<div id="faultMachineListSlider" class="mui-slider" style="background: #F0F0F0;"> 
+				<div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+					<!--<div style="width: 4rem;" class="mui-control-div ">-->
+						<!--<a  class="mui-control-item mui-active">全部</a>-->
+					<!--</div>-->
+					<div style="width: 4rem;" class="mui-control-div">
+						<a class="mui-control-item mui-active">待维修</a>
+					</div>
+					<div style="width: 4rem;" class="mui-control-div">
+						<a class="mui-control-item">已完成</a>
+					</div>
+				  </div>
+			</div>
+			<div class="terms-search">
+			    <input type="search" class="mui-input-clear"  placeholder="搜索" id="faultSearchInput"/>
+				<button type="button" style="width: 23%;text-align:center;"  onclick="readTagSN()" class="mui-btn mui-btn-primary mui-icon">读取标签</button>
+			    <button type="button" style="width: 18%;"  onclick="searchSubmit()" class="mui-btn mui-btn-primary mui-icon mui-icon-search">搜索</button>
+		    </div>
+			<div id="pullrefresh" class="mui-content mui-scroll-wrapper" style="background: #FFFFFF; margin-top: 134px;">
+				<div class="mui-scroll">
+					<ul class="mui-table-view mui-table-view-chevron" style="margin:2px 5px 0px 5px;border-radius:5px;"></ul>
+				</div>
+			</div>
+		</div>
+	</div>
+<script>
+$(function(){
+    $("#faultSearchInput").val("");
+	var slider = document.getElementById('faultMachineListSlider');
+	var objs = slider.getElementsByTagName('a');
+	for(var j = 0 ; j < objs.length ; j++){
+		objs[j].index = j;
+	}
+	mui("#faultMachineListSlider").on('tap' , 'a' , function(){
+		var formData = {};
+		if (this.index == 0) {
+			formData.status='CREATED';
+		}else if(this.index == 1){
+			formData.status='CLOSED';
+		}
+		data.formData = formData;
+		pulldownRefresh();
+	});
+});
+mui.init({
+	pullRefresh: {
+			container: '#pullrefresh',
+			down: {
+				style:'circle',
+				callback: pulldownRefresh
+			},
+			up: {
+				auto:true,
+				contentrefresh: '正在加载...',
+				callback: pullupRefresh
+			}
+		}
+	});
+	var data = {
+        currentPage : 1,
+	    pageSize : 10,  // 一次显示多少条
+		searchSongList: [], //放置返回数据的数组
+	    isFromSearch: true, // 用于判断searchSongList数组是不是空数组，默认true，空的数组
+	    searchForm:false,
+	    formData:{
+	    	status:'CREATED'
+	    },
+	    scrollData:{
+	    	noFlag:false
+	    },
+	    apiUrl:'faultMachineApp/faultMachineList.do',
+	}
+	function initParameter(){
+		data.currentPage=1;
+		data.pageSize = 10;
+		data.searchSongList = [];
+		data.isFromSearch=true;
+		data.scrollData.noFlag = false;
+	}
+	function scanSN(sn){
+		searchSubmit(sn);
+	}
+	function searchSubmit(callbackSN){
+		if(callbackSN){
+			$("#faultSearchInput").val(callbackSN);
+		}
+		var sn = $('#faultSearchInput').val();
+		<!--data.formData={};-->
+		if(sn){
+			if(sn.length == 22){
+				data.formData.sn = sn;
+			}else{
+				mui.toast("SN码必须是22位字符编码",{ duration:'short', type:'div' });
+			}
+		}else{
+			data.formData.sn="";
+		}
+		pulldownRefresh();
+	}
+    function pulldownRefresh() {
+    	initParameter();
+		setTimeout(function() {
+			app.loadData(data,function(){
+			var html = "";
+			if(null != data.searchSongList && data.searchSongList.length >0){
+			 html= installHtml(data.searchSongList);
+			}else{
+			 html+="<div style=' align-items: center;text-align: center;height: 40px;display: grid;font-size: 20px;font-family: 微软雅黑;'>没有对应数据</div>";
+			}
+			$('.mui-table-view').html(html);
+			mui('#pullrefresh').pullRefresh().endPulldownToRefresh();
+			mui('#pullrefresh').pullRefresh().refresh(true);//重置pullRefresh
+			});
+		}, 1500);
+	}
+ 	function pullupRefresh() {
+ 		setTimeout(function() {
+	 		app.loadData(data,function(){
+				mui('#pullrefresh').pullRefresh().endPullupToRefresh(data.scrollData.noFlag);
+				var html = installHtml(data.searchSongList);
+				$('.mui-table-view').append(html);
+			});
+ 		}, 1500);
+ 	}
+ 	function installHtml(arrays) {
+ 		var html = "";
+		for(var i=0;i<arrays.length;i++) {
+			var bean = arrays[i];
+			html+="<li class='mui-table-view-cell' style='background:#F0F0F0;' data-id='"+bean.id+"'>"
+			var faultMachineDelete = app.buttonAuthority('FaultMachineDelete');
+			if(faultMachineDelete){
+				html+="<div class='mui-slider-right mui-disabled'><a class='mui-btn mui-btn-red' btn-id='"+bean.id+"' >删除</a></div>";
+			}
+			html+="<div class='list-item mui-slider-handle'>"
+			if(bean.sn){
+				html+="<div><label>SN：</label><span>"+bean.sn+"</span></div>"
+			}
+			if(bean.backNumber){
+				html+="<div><label>背番号：</label><span>"+bean.backNumber+"</span></div>"
+			}			
+			if(bean.machineOfName){
+				html+="<div><label>机种名：</label><span>"+bean.machineOfName+"</span></div>"
+			}
+			if(bean.machineName){
+				html+="<div><label>机号：</label><span>"+bean.machineName+"</span></div>"
+			}
+			if(bean.shiftno){
+				html+="<div><label>班次：</label><span>"+renderShiftno(bean.shiftno)+"</span></div>"
+			}
+			if(bean.tmNcGroup && bean.tmNcGroup.name){
+				html+="<div><label>故障类型：</label><span>"+renderTmNcGroup(bean)+"</span></div>"
+			}
+			if(bean.tmNc && bean.tmNc.name){
+				html+="<div><label>故障内容：</label><span>"+renderTmNc(bean)+"</span></div>"
+			}
+			if(bean.ncProcessMode){
+				html+="<div><label>故障处理方式：</label><span>"+renderNcStatus(bean.ncProcessMode)+"</span></div>"
+			}
+			<!--if(bean.infoSources){-->
+				<!--html+="<div><label>信息来源：</label><span>"+infoSources(bean.infoSources)+"</span></div>"-->
+			<!--}-->
+			if(bean.discoveryUloc && bean.discoveryUloc.no){
+				html+="<div><label>发现工位：</label><span>"+discoveryStation(bean.discoveryUloc)+"</span></div>"
+			}
+			if(bean.ngExit){
+				html+="<div><label>NG出口：</label><span>"+bean.ngExit+"</span></div>"
+			}
+			if(bean.status){
+				html+="<div><label>状态：</label><span>"+formatStatus(bean.status)+"</span></div>"
+			}
+			if(bean.createTime){
+				html+="<div><label>创建时间：</label><span>"+bean.createTime+"</span></div>"
+			}
+			if(bean.submitTime){
+				html+="<div><label>录入时间：</label><span>"+bean.submitTime+"</span></div>"
+			}
+			html+=" </div>"
+			html+=" </li>"
+		}
+ 		return html;
+ 	}
+ 	mui(".mui-table-view").on('tap','.mui-table-view-cell',function(){
+ 		var id = this.getAttribute('data-id');
+ 		window.location.href="./fault-machine-detail.html?id="+id;
+ 	})
+ 	mui(".mui-table-view").on('tap','.mui-btn',function(){
+ 		var id = this.getAttribute('btn-id');
+ 		mui.confirm("是否删除故障信息", "提示", ['取消','确认'], function(e){
+			if(e.index === 1){
+				 app.ajaxRequest({
+					url:'faultMachineApp/delete.do',
+					data:{id:id},
+					callback:function(res){
+						mui.toast("删除成功。",{ duration:'short', type:'div' });
+						pulldownRefresh();
+					}
+				});
+			}
+		});
+
+ 	})
+
+ 	function renderTmNcGroup(obj){
+ 		if(obj.tmNcGroup){
+ 			return obj.tmNcGroup.name?obj.tmNcGroup.name:'';
+ 		}
+ 		return '';
+ 	}
+ 	function renderTmNc(obj){
+ 		if(obj.tmNc){
+ 			return obj.tmNc.name?obj.tmNc.name:'';
+ 		}
+ 		return '';
+ 	}
+ 	function renderShiftno(value) {
+		return app.entryRenderer('SHIFT_TYPE', value);
+	}
+	function renderNcStatus(value) {
+		return app.entryRenderer('NC_STATUS', value);
+	}
+	function infoSources(value){
+		return app.entryRenderer('INFO_SOURCES', value);
+	}
+	function formatStatus(value){
+		return app.entryRenderer('UNQUALIFIED_STATE', value);
+	}
+	function readTagSN(){
+		app.readTag('readUser');
+	}
+	function readUserData(val){
+		searchSubmit(val);
+	}
+	function discoveryStation(discoveryUloc){
+		var no = "";
+		var name ="";
+		if(discoveryUloc.name){
+			name = discoveryUloc.name;
+		}
+		no = '['+discoveryUloc.no+']'+name;
+		return no;
+	}
+
+</script>
+<style lang="less" scoped>
+.page-content{
+	height:100%;
+	margin-top: 44px;
+}
+.terms-search input{
+	width: 56%;
+	float: left;
+}
+.mui-slider .mui-segmented-control.mui-segmented-control-inverted .mui-control-item.mui-active{
+	border-bottom: 2px solid #007aff !important;
+}
+.mui-control-div{
+	padding-left: 10PX; float: left;
+}
+.mui-table-view-chevron .mui-table-view-cell{
+	padding-right:5px;
+}
+</style>
+
+</body>
+</html>

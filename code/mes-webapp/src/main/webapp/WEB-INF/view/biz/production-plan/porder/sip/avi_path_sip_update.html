@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html">
+<script type="text/javascript">
+$(function(){
+	$("#display_updateTsParameterId").val("${bean.parameter.code}-${bean.parameter.name}");
+});
+function updateClickSipcallback(dialog){
+	var rowsData = getSelectedRows('dgUpdateAviPathSelectSipGridId');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	$("#display_updateTsParameterId").val(rowsData[0].code+"-"+rowsData[0].name);
+	$("#updateTsParameterId").val(rowsData[0].id);
+	dialog.close();
+}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/avi/path/sip/update.do" class="form-horizontal"   idValue=bean.id permissionModule="AVI_PATH_SIP">
+		<input type ="hidden" name="toPorderAviPathId" value="${toPorderAviPathId}"/>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_SIP_PARAMETER_NO" permissionCode="AVI_PATH_SIP_CODE">
+			  <@p.magnify  id="updateTsParameterId" url="${baseUrl}/avi/path/sip/selectSipList.do?currentPageId=UpdateAviPathSelectSipGridId&singleSelect=true&params=queryCondition[toPorderAviPathId]=${toPorderAviPathId}" callback="updateClickSipcallback" datatype="*"></@p.magnify>
+				<input name="tsParameterId" id="updateTsParameterId" class="inputxt"  type="hidden" value="${bean.tsParameterId!}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_SIP_NOTE" permissionCode="AVI_PATH_SIP_NOTE">
+				<input name="note" class="inputxt" datatype="*" maxlength='150'  ignore="ignore" value="${bean.note!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

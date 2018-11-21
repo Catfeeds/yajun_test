@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no" >
+<@p.editForm url="${baseUrl}/bpm/definition/manage/deployByFile.do" class="form-horizontal"  noPermissionModule="true" enctype="multipart/form-data">
+	<input type="hidden" id="beforeSubmit" value="beforeDefinitionAddSubmit" >
+	<@p.formRow>
+		<@p.formColmd title="PROCESS_COLUMN_HISTORY_URL">
+			<input name="historyUrl"  class="inputxt"  datatype="*">
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd class="col-md-8" title="PROCESS_COLUMN_XML">
+			<div class="file_input_box">
+				<input id="modelFile" name="modelFile" type="file" class="file" required="required">
+			</div>
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+</body>
+<script type="text/javascript">
+initFileInput("modelFile",{
+	showUpload : false,
+	showPreview : false,
+	allowedFileExtensions : [ 'zip','bar','bpmn','bpmn20.xml' ]
+});
+function beforeDefinitionAddSubmit(curform) {
+	curform.ajaxSubmit({
+		type : 'post',
+		url : '${baseUrl}/bpm/definition/manage/deployByFile.do',
+		success : function(data) {
+			initValidFormCallback(data);
+		}
+	});
+	return false;
+}
+</script>
+</html>

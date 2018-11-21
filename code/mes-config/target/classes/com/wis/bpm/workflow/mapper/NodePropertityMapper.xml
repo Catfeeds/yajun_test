@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="NodePropertityMapper" >
+
+  <select id="findByNodeIds" resultType="java.util.HashMap"  parameterType="java.util.HashMap" >
+  	SELECT wisnodepropertity_0.PROPERTITY_NAME as "name",wisnodepropertity_0.PROPERTITY_KEY as "key",wisnodepropertity_0.ID as "id",wisnodepropertity_0.PROPERTITY_TYPE as "type",wisnodepropertity_0.EXPRESSION as "expression",wisnodepropertity_0.VARIABLE as "variable",wisnodepropertity_0.DEFAULT_EXPRESSION as "defaultExpression",wisnodepropertity_0.DATE_PATTERN as "datePattern",wisnodepropertity_0.READABLE as "readable",wisnodepropertity_0.WRITEABLE as "writeable",wisnodepropertity_0.REQUIRED as "required",wisnodepropertity_0.NODE_ID as "nodeId",wisnodepropertity_0.OPT_COUNTER as "optCounter" FROM WACT_RU_NODE_PROPERTITY wisnodepropertity_0
+     WHERE wisnodepropertity_0.NODE_ID in
+        <foreach item="item" index="index" collection="nodeIds" open="(" separator="," close=")">
+            ${item}
+        </foreach> 
+  </select>
+</mapper>

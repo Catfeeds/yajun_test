@@ -1,0 +1,466 @@
+<#include "../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>故障机报表 </title>
+<style>
+	.report-panel{
+		width:100%;
+		height:70rem;
+	}
+	.report-panel .plnel-div{
+		width: 48%;
+		height: 48%;
+		float: left
+	}
+</style>
+
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<script type="text/javascript">
+    var infoOriginCoutChart = null;
+    var app = {};
+	$(function(){
+		initTime();
+		getFaultMachineData("NG_SHIFTNO_REALALATION","NG_SHIFTNO_REALALATION");
+		getFaultMachineData("NG_COUNT_REALATION","NG_COUNT_REALATION");
+		getFaultMachineData("NG_INFO_ORIGIN_COUNT","NG_INFO_ORIGIN_COUNT");
+		getFaultMachineData("NG_INFO_ORIGIN_COUNT_PIE","NG_INFO_ORIGIN_COUNT_PIE");
+	});
+/* 	$(window).resize(function () {          //当浏览器大小变化时
+		getFaultMachineData("NG_SHIFTNO_REALALATION","NG_SHIFTNO_REALALATION");
+		getFaultMachineData("NG_COUNT_REALATION","NG_COUNT_REALATION");
+		getFaultMachineData("NG_INFO_ORIGIN_COUNT","NG_INFO_ORIGIN_COUNT");
+		getFaultMachineData("NG_INFO_ORIGIN_COUNT_PIE","NG_INFO_ORIGIN_COUNT_PIE");
+	}); */
+	function initTime(){
+		var date = new Date();
+		var month = date.getMonth()+1;
+		var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		$("#createTimeEnd").val(endTime+" 23:59");
+		date = new Date(date.getTime()-1000*60*60*24*30);
+		month = date.getMonth()+1;
+		var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		$("#createTimeStart").val(startTime+" 00:00");
+	}
+	function caseLessTen(num){
+		if(num<10){
+			return '0'+num;
+		}else {
+			return num;
+		}
+	}
+function getNgGroupShiftnoRelationOption(ngName,time,series){
+	var option = {
+			title:{
+				text: '故障机每日台数统计',
+				x:'center',
+		        y:'top'
+			},
+		    tooltip : {
+		        trigger: 'axis',
+		        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+		            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+		        }
+		    },
+		    legend: {
+		        data:ngName,
+		        type: 'scroll',
+		        orient: 'vertical',
+		        right: 10,
+		        top: 30,
+		        bottom: 10
+		    },
+		    toolbox: {
+		        show : true,
+		        feature : {
+		            dataView : {show: true, readOnly: false},
+		            magicType : {show: true, type: ['line', 'bar']},
+		            restore : {show: true},
+		            saveAsImage : {show: true}
+		        }
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : time,
+		            axisLabel: {
+			            interval:0,
+			            rotate:50
+		            }
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value',
+		            name : "(台)",
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            }
+		        }
+		    ],
+		    grid:{
+		        bottom:'20%',
+		        right:'20%'
+		     },
+		    dataZoom: [
+       	           { show: true, realtime: true, start: 1,end: 100},
+                   {type: 'inside',realtime: true, start: 1,end: 100}
+	        ],
+		    series : series
+		};
+    return option;
+}	
+function getNgCountRealationOpt(count,ngName){
+	var option = {
+		    color: ['#3398DB','#3398DB'],
+		    title:{
+				text: '故障类型分类统计',
+	            left: 'center'
+			},
+		    tooltip : {
+		        trigger: 'item',
+		        formatter: "{a} <br/>{b}: {c}(台)"
+		    },
+		   /*  legend: {
+		        data:['故障机组台数'],
+		        top:30
+		    }, */
+		    toolbox: {
+		        show : true,
+		        feature : {
+		            dataView : {show: true, readOnly: false},
+		            magicType : {show: true, type: ['line', 'bar']},
+		            restore : {show: true},
+		            saveAsImage : {show: true}
+		        }
+		    },
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : ngName,
+		            axisTick: {
+		                alignWithLabel: true
+		            },
+		            axisLabel: {
+			            interval:0,
+			            rotate:50
+		            }
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value',
+		            name : "(台)",
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		        }
+		    ],
+		    series : [
+		        {
+		            name:'故障机组台数',
+		            type:'bar',
+		            barWidth: '40%',
+		            data:count
+		        }
+		        /* ,
+		        {
+		            name:'故障机组次数line',
+		            type:'line',
+		            data:count
+		        } */
+		    ]
+		};
+	return option;
+}
+function getNgInfoOriginOpt(infoSource,content,series){
+	for(var i in series){
+		series[i].barWidth = "40%";
+	}
+	var option = {
+			title:{
+				text: '故障明细台数统计',
+	            left: 'center'
+			},
+		    tooltip: {},
+		    legend: {
+		        data:infoSource,
+		        top:30
+		    },
+		    toolbox: {
+		        show : true,
+		        feature : {
+		            dataView : {show: true, readOnly: false},
+		            magicType : {show: true, type: ['line', 'bar']},
+		            restore : {show: true},
+		            saveAsImage : {show: true}
+		        }
+		    },
+		    calculable : true,
+		    xAxis : [
+		        {
+		            type : 'category',
+		            data : content,
+		            axisLabel: {
+			            interval:0,
+			            rotate:50
+		            }
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value',
+		            name : "(台)",
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            }
+		        }
+		    ],
+		    series: series
+		    };     
+	return option; 
+}
+function getNgInfoOriginOptPIE(infoSourceArray,ngCountArray,infoSourceCountArray,namesSelectedData){
+	var option = {
+			title:{
+				text: '故障类型/明细占比',
+	            left: 'center'
+			},
+		    tooltip: {
+		        trigger: 'item',
+		        formatter: "{a} <br/>{b}: {c} ({d}%)"
+		    },
+		    legend: {
+		        type: 'scroll',
+		        orient: 'vertical',
+		        right: 20,
+		        top: 20,
+		        bottom: 30,
+		        data:infoSourceArray,
+		        selected: namesSelectedData
+		    },
+		    toolbox: {
+		    	feature: {
+		        	  myTool : {
+		                 show : true,
+		                 title : '是否显示注释',
+		                 icon : 'image://${baseUrl}/res/images/annotate.png',
+		                 onclick : function (event){
+		    	            var labelLine = false;
+		    	            var label = false;
+		                	if(app.isPercent){
+		                		 app.isPercent = false;
+		                		 label = {show:true,normal:{show:true}}
+	                		  	 labelLine = {
+	                		         normal: {
+	                		        	  show:true,
+                                          smooth: 0.2,
+                                          length: 10,
+                                          length2: 20
+                                      }
+                                  };
+		                	 }else{
+		                		 app.isPercent = true;
+		                		 label ={show:false,normal: {show:false}};
+		                		 labelLine = {
+		                				 normal: {
+		                					  show:false,
+	                                          smooth: 0.2,
+	                                          length: 10,
+	                                          length2: 20
+	                                      }
+		                		 };
+		                	 }
+		                	infoOriginCoutChart.setOption({
+		                	     series:[
+		                	    	{	
+		                	    		label:label,
+		                	        	labelLine:labelLine
+		                	        },
+		                	        {
+		                	            label:label,
+		                	        	labelLine:labelLine
+		                	        }
+		                	    ]
+		                	 });
+		                 }
+		             },
+		            saveAsImage: {show: true}
+		        },
+		        top:30
+		    },
+		    series: [
+		        {
+		            name:'判定类型',
+		            type:'pie',
+		            selectedMode: 'single',
+		            radius: [0, '30%'],
+		            label: {
+		                normal: {
+		                    position: 'inner'
+		                }
+		            },
+		            labelLine: {
+		                normal: {
+		                    show: false
+		                }
+		            },
+		            center:['38%','55%'],
+		            data:infoSourceCountArray
+		        },
+		        {
+		            name:'访问来源',
+		            type:'pie',
+		            radius: ['40%', '55%'],
+		            center: ['38%', '55%'],
+		            label: {
+		                normal: {show:true}
+		            },
+		            labelLine: {
+		                normal: {
+		                    smooth: 0.2,
+		                    length: 10,
+		                    length2: 20
+		                }
+		            },
+		            data:ngCountArray
+		        }
+		    ]
+		};
+	return option;
+}
+function getFaultMachineData(type,id){
+	var myChart = echarts.init(document.getElementById(id));
+	ajaxRequest("${baseUrl}/report/faultMachineData.do", {
+		"type":type,
+		"createTimeStart":$("#createTimeStart").val(),
+		"createTimeEnd":$("#createTimeEnd").val(),
+	}, function(result){
+		var data = result.data;
+		if(data){
+			if(type=="NG_SHIFTNO_REALALATION"){
+				myChart.showLoading();
+				var option = getNgGroupShiftnoRelationOption(JSON.parse(data.ngName),JSON.parse(data.time),JSON.parse(data.series));
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(type=="NG_COUNT_REALATION"){
+				myChart.showLoading();
+				var option = getNgCountRealationOpt(JSON.parse(data.count),JSON.parse(data.ngName));
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(type=="NG_INFO_ORIGIN_COUNT"){
+				myChart.showLoading();
+				var option = getNgInfoOriginOpt(JSON.parse(data.infoSourceName),JSON.parse(data.content),JSON.parse(data.series));
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(type=="NG_INFO_ORIGIN_COUNT_PIE"){
+				infoOriginCoutChart = echarts.init(document.getElementById(id));
+				infoOriginCoutChart.showLoading();
+				var infoSourceArray = JSON.parse(data.infoSourceArray);
+				var ngCountArray = JSON.parse(data.ngCountArray);
+				var infoSourceCountArray = JSON.parse(data.infoSourceCountArray);
+				var namesSelectedData = {};
+				var otherval = 0;
+				infoSourceArray.push('其他');
+				ngCountArray.push({'name':'其他','value':otherval});
+				var option = getNgInfoOriginOptPIE(infoSourceArray,ngCountArray,infoSourceCountArray,namesSelectedData);
+				infoOriginCoutChart.on('legendselectchanged', function (param){
+					 var selected = param.selected;
+					 var legend = param.name;
+					 var otherval = 0;
+					 if(legend == "其他"){//如果是其他就把所有项都显示,其他置为0
+						 for(var name in selected){
+							 selected[name] = true; 
+							 if(name == "其他"){
+								 for(var i in ngCountArray){
+									if(ngCountArray[i].name == '其他'){
+										ngCountArray[i].value = 0;
+										break;
+									}
+								}
+							 }
+						 }
+					 }else if(selected[legend]){
+						 //选中项为true其他--
+						for(var j in ngCountArray){
+							if(ngCountArray[j].name==legend){
+								for(var i in ngCountArray){
+									if(ngCountArray[i].name == '其他'){
+										ngCountArray[i].value = ngCountArray[i].value-ngCountArray[j].value;
+										break;
+									}
+								}
+								break;
+							}
+						}
+					}else{
+						 //选中项为false其他++
+						for(var j in ngCountArray){
+							if(ngCountArray[j].name==legend){
+								for(var i in ngCountArray){
+									if(ngCountArray[i].name == '其他'){
+										ngCountArray[i].value = ngCountArray[i].value+ngCountArray[j].value;
+										break;
+									}
+								}
+								break;
+							}
+						}
+					}
+					var option = getNgInfoOriginOptPIE(infoSourceArray,ngCountArray,infoSourceCountArray,selected);
+					infoOriginCoutChart.setOption(option);
+			     });  
+				infoOriginCoutChart.hideLoading();
+				infoOriginCoutChart.setOption(option,true);
+			}
+		}
+	}, false);
+}
+</script>
+</head>
+<body>
+	<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>	
+	<div  class="report-panel">
+		<div class="plnel-div" id="NG_SHIFTNO_REALALATION" ></div>
+		<div class="plnel-div" id="NG_COUNT_REALATION" ></div>
+		<div class="plnel-div" id="NG_INFO_ORIGIN_COUNT" ></div>
+		<div class="plnel-div" id="NG_INFO_ORIGIN_COUNT_PIE" ></div>
+	</div>
+<script type="text/javascript">
+	function conditionalQuery(searchBtnObj){
+		getFaultMachineData("NG_SHIFTNO_REALALATION","NG_SHIFTNO_REALALATION");
+		getFaultMachineData("NG_COUNT_REALATION","NG_COUNT_REALATION");
+		getFaultMachineData("NG_INFO_ORIGIN_COUNT","NG_INFO_ORIGIN_COUNT");
+		getFaultMachineData("NG_INFO_ORIGIN_COUNT_PIE","NG_INFO_ORIGIN_COUNT_PIE");
+	}
+	$('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+	</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body title="AUDIT_LIST_TITLE"    permissionModule="IMPORT_LOG">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="IMPORT_lOG_OPERATOR_NAME" field="operatorName"  permissionCode="OPERATOR_NAME" />
+			<@p.input title="IMPORT_lOG_OPERATE_ENTITY" field="operateEntityName"  permissionCode="OPERATE_ENTITY" />
+			<@p.input title="IMPORT_lOG_OPERATE_START_TIME" id="beginTime" field="createTimeStart"   permissionCode="OPERATE_START_TIME"/>
+			<@p.input title="IMPORT_lOG_OPERATE_END_TIME" id="endTime" field="createTimeEnd"  permissionCode="OPERATE_END_TIME"/>
+			<@p.input title="ERROR_RECORD_DETAIL" field="errorDesc"  permissionCode="OPERATOR_NAME" /> 	
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/importLog/list.do">
+		<@p.column title="IMPORT_lOG_OPERATOR_NAME" field="operatorName" width="150"  permissionCode="OPERATOR_NAME"></@p.column>
+		<@p.column title="IMPORT_lOG_OPERATE_ENTITY" field="operateEntityName" width="150"  permissionCode="OPERATE_ENTITY"></@p.column>
+		<@p.column title="IMPORT_lOG_OPERATE_TIME" field="createTime" width="250"   permissionCode="OPERATE_DATE"></@p.column>
+        <@p.column title="ERROR_RECORD_DETAIL" field="errorDesc"  width="1000" permissionCode="ERROR_DESC" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+
+<script>
+$("#beginTime,#endTime").focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'});
+});
+</script>

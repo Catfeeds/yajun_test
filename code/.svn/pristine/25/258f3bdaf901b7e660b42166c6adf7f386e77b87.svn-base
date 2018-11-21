@@ -1,0 +1,43 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	function rendStatus(value) {
+		return entryRenderer('SM_CIRCULATE_STATE', value);
+	}
+	function rendClassGroup(value){
+		return entryRenderer('CLASS_GROUP', value);
+	}
+	function rendShiftno(value){
+		return entryRenderer('SHIFT_TYPE', value);
+	}
+</script>
+
+<@p.body title="REGION_STATUS_LIST_TITLE" permissionModule="REGION_STATUS">
+  <@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="REGION_STATUS_NO"></@p.input>
+			<@p.input title="REGION_STATUS_STATUS"></@p.input>
+			<@p.input title="REGION_STATUS_BEGIN_TIME_START" ></@p.input>
+			<@p.input title="REGION_STATUS_BEGIN_TIME_END"  ></@p.input>
+			<@p.input title="REGION_STATUS_FINISH_TIME_START" ></@p.input>
+			<@p.input title="REGION_STATUS_FINISH_TIME_END" ></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+			<!-- <@p.button title="BTN_EXPORT" permissionCode="regionStatusexport"  onclick="downLoadAjax()" iconCls="upload-alt" type="button" /> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/regionStatus/list.do"  >
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="REGION_STATUS_DATE" field="createTime" permissionCode="REGION_STATUS_DATE" ></@p.column>
+			<@p.column title="REGION_STATUS_PLANT" field="tmPlant.no" permissionCode="REGION_STATUS_PLANT"></@p.column>
+			<@p.column title="REGION_STATUS_LINE" field="tmLine.nameCn" permissionCode="REGION_STATUS_LINE"></@p.column>
+			<@p.column title="REGION_STATUS_CLASSES" field="tmWorktime.shiftno" permissionCode="REGION_STATUS_CLASSES" formatter="rendShiftno"></@p.column>
+			<@p.column title="REGION_STATUS_CLASSES_GROUP" field="tmClassManager.classGroup" permissionCode="REGION_STATUS_CLASSES_GROUP" formatter="rendClassGroup"></@p.column>
+			<@p.column title="REGION_STATUS_NO" field="regionNo" permissionCode="REGION_STATUS_NO" ></@p.column>
+			<@p.column title="REGION_STATUS_STATUS" field="runningState" permissionCode="REGION_STATUS_STATUS" formatter="rendStatus"></@p.column>
+			<@p.column title="REGION_STATUS_BEGIN_TIME" field="beginTime" permissionCode="REGION_STATUS_BEGIN_TIME" ></@p.column>
+			<@p.column title="REGION_STATUS_FINISH_TIME" field="finishTime" permissionCode="REGION_STATUS_FINISH_TIME" ></@p.column>
+			<@p.column title="REGION_STATUS_DURATION" field="duration" permissionCode="REGION_STATUS_DURATION" ></@p.column>
+	</@p.dataGrid>  
+</@p.body>	
+

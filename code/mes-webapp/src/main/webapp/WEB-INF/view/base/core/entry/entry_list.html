@@ -1,0 +1,37 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+
+function renderSysdata(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+</script>
+<@p.body title="ENTRY_LIST_TITILE" permissionModule="DICT_ENTRY">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="ENTRY_CODE" field="code" permissionCode="ENTRY_CODE"></@p.input>
+			<@p.input title="ENTRY_NAME_CN" field="name" permissionCode="ENTRY_NAME"></@p.input>
+			<@p.input title="ENTRY_NAME_EN" field="enName" permissionCode="ENTRY_NAME"></@p.input>
+			<@p.input title="TYPE_NAME_CN" field="type.name" permissionCode="TYPE_NAME_"></@p.input>
+			<@p.input title="TYPE_NAME_EN" field="type.enName" permissionCode="TYPE_NAME"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar"> 
+			<@p.button title="ENTRY_ADD" iconCls="plus" url="${baseUrl}/entry/addInput.do" type="add"></@p.button>
+			<@p.button title="ENTRY_UPDATE" iconCls="edit" url="${baseUrl}/entry/updateInput.do" type="update"></@p.button>
+			<@p.button title="ENTRY_DELETE" iconCls="trash" url="${baseUrl}/entry/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	
+	<@p.dataGrid url="${baseUrl}/entry/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="TYPE_CODE" field="type.code" permissionCode="TYPE_CODE"></@p.column>
+		<@p.column title="TYPE_NAME_CN" field="type.name" permissionCode="TYPE_NAME"></@p.column>
+		<@p.column title="TYPE_NAME_EN" field="type.enName" permissionCode="TYPE_NAME"></@p.column>
+		<@p.column title="ENTRY_CODE" field="code" permissionCode="ENTRY_CODE"></@p.column>
+		<@p.column title="ENTRY_NAME_CN" field="name" permissionCode="ENTRY_NAME"></@p.column>
+		<@p.column title="ENTRY_NAME_EN" field="enName" permissionCode="ENTRY_NAME"></@p.column>
+		<@p.column title="ENTRY_SORT" field="sortNo" permissionCode="ENTRY_SORT"></@p.column>
+<!-- 		<@p.column title="FRAME_SYSTEM_DATA" field="systemData" formatter="renderSysdata"  permissionCode="ENTRY_CODE"></@p.column> -->
+		<@p.column title="ENTRY_NOTE" field="systemData" formatter="renderSysdata"  permissionCode="ENTRY_CODE"></@p.column>
+	</@p.dataGrid>
+</@p.body>

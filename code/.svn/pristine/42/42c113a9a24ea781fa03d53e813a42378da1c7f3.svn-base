@@ -1,0 +1,254 @@
+<#include "../../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>故障机报表 </title>
+<style>
+.report-panel{
+	width:100%;
+	height:70rem;
+}
+.report-panel .plnel-div{
+	width: 48%;
+	height: 50%;
+	float: left
+}
+</style>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<script type="text/javascript">
+    function unitExceptionBarOption(warnData,unusualData){
+    	var mouthShow = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+//      	var warnData = [0,1,0,0,0,1,3,104961,14305,1,0,1];
+//     	var unusualData = [150,190, 110, 80, 70,120,120,110, 130,150,89,14];
+
+    	var option = {
+	    	    title:{
+	    	        text:'设备异常分析年报',
+	    	        left:'center'
+	    	    },
+	    	    grid: {
+	    	        right: 10,
+	    	        top: "25%",
+	    	        bottom: "5%",
+	    	        containLabel: true
+	    	    },
+	    	    xAxis: {
+	    	        type: 'category',
+	    	        data: mouthShow
+	    	    },
+	    	    legend:{
+	    	      data:['警告','异常'] ,
+	    	      top:30
+	    	    },
+	    	    yAxis: {
+	    	        name:'每月异常/警告次数',
+	    	        nameTextStyle : {
+	    	            fontSize : 12
+	    	        },
+	    	        type: 'value'
+	    	    },
+	    	    toolbox: {
+	    	        feature: {
+	    	            dataView: {show: true, readOnly: false},
+	    	            magicType: {show: true, type: ['line', 'bar']},
+	    	            restore: {show: true},
+	    	            saveAsImage: {show: true}
+	    	        }
+	    	    },
+	    	    series: [{
+	    	        name:'警告',
+	    	        data: warnData,
+	    	        type: 'bar',
+	    	         itemStyle:{
+	    	            normal: {
+	    	                color: '#EECB5F'
+	    	            }
+	    	        }
+	    	    },{
+	    	        name:'异常',
+	    	        data: unusualData,
+	    	        type: 'bar',
+	    	        itemStyle:{
+	    	            normal: {
+	    	                color: '#FF6600'
+	    	            }
+	    	        }
+	    	    }]
+	    	};
+    	return option;
+    }
+    function unitExceptionWarnHeatmapOption(yAxisData,xAxisData,dataArrays){
+		var option = {
+	        title:{
+	            text:'设备异常分析-月报(警告)',
+	            left:'center'
+	        },
+	        tooltip: {
+	            position: 'top'
+	        },
+	        grid: {
+	        	right: 10,
+    	        bottom: "5%",
+    	        containLabel: true
+	        },
+	        xAxis: {
+	            type: 'category',
+	            data: xAxisData
+	        },
+	        yAxis: {
+	            type: 'category',
+	            data: yAxisData
+	        },
+	        visualMap: {
+	            min: 1,
+	            max: 10,
+	            calculable: true,
+	            orient: 'vertical',
+	            left: 'right',
+	            bottom: '50%'
+	        },
+	        series: [{
+	            name: '警告',
+	            type: 'heatmap',
+	            data: dataArrays,
+	            label: {
+	                normal: {
+	                    show: true
+	                }
+	            }
+	        }]
+	    };
+	    return option;
+    }
+    
+    function unitExceptionUnusualHeatmapOption(yAxisData,xAxisData,dataArrays){
+		var option = {
+	        title:{
+	            text:'设备异常分析-月报(异常)',
+	            left:'center'
+	        },
+	        tooltip: {
+	            position: 'top'
+	        },
+	        grid: {
+	        	right: 10,
+    	        bottom: "5%",
+    	        containLabel: true
+	        },
+	        xAxis: {
+	            type: 'category',
+	            data: xAxisData
+	        },
+	        yAxis: {
+	            type: 'category',
+	            data: yAxisData
+	        },
+	        visualMap: {
+	            min: 1,
+	            max: 10,
+	            calculable: true,
+	            orient: 'vertical',//horizontal
+	            left: 'right',
+	            bottom: '50%'
+	        },
+	        series: [{
+	            name: '异常',
+	            type: 'heatmap',
+	            data: dataArrays,
+	            label: {
+	                normal: {
+	                    show: true
+	                }
+	            }
+	        }]
+	    };
+	    return option;
+    }
+</script>
+</head>
+<body>
+	<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="WORK_TIME_WORK_DATA" id="createTime" field="createTime"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>	
+	<div class="report-panel">
+		<div style="width:80%;height:50%;float: left" id="UNIT_EXCEPTION_BAR" ></div>
+		<div class="plnel-div" id="UNIT_EXCEPTION_WARN_HEATMAP" ></div>
+		<div class="plnel-div" id="UNIT_EXCEPTION_UNUSUAL_HEATMAP" ></div>
+	</div>
+<script type="text/javascript">
+
+var unitExceptionBarChart = null;
+var unitExceptionWarnHeatmapChart = null;
+var unitExceptionUnusualHeatmapChart = null;
+
+$(function(){
+	initUnitExeption('UNIT_EXCEPTION_BAR');//设备异常分析年报/柱状
+	initUnitExeption('UNIT_EXCEPTION_WARN_HEATMAP');//设备异常分析月报(警告)/密度图
+	initUnitExeption('UNIT_EXCEPTION_UNUSUAL_HEATMAP');//设备异常分析月报(异常)/密度图
+	initTime();
+})
+
+function initUnitExeption(type){
+	ajaxRequest("${baseUrl}/metalPlateReport/unitExceptionDataReport.do", {
+		"type":type,
+		"createTime":$("#createTime").val()
+	}, function(result){
+		 if(result){
+			if(type=='UNIT_EXCEPTION_BAR'){
+				unitExceptionBarChart = echarts.init(document.getElementById(type));
+				unitExceptionBarChart.showLoading();
+				var option = unitExceptionBarOption(JSON.parse(result.warnData),result.unusualData);
+				unitExceptionBarChart.hideLoading();
+				unitExceptionBarChart.setOption(option,true);
+			}else if(type=='UNIT_EXCEPTION_WARN_HEATMAP'){
+				unitExceptionWarnHeatmapChart = echarts.init(document.getElementById(type));
+				unitExceptionWarnHeatmapChart.showLoading();
+				var option = unitExceptionWarnHeatmapOption(JSON.parse(result.yAxisData),JSON.parse(result.xAxisData),JSON.parse(result.dataArrays));
+				unitExceptionWarnHeatmapChart.hideLoading();
+				unitExceptionWarnHeatmapChart.setOption(option,true);
+			}else if(type=='UNIT_EXCEPTION_UNUSUAL_HEATMAP'){
+				unitExceptionUnusualHeatmapChart = echarts.init(document.getElementById(type));
+				unitExceptionUnusualHeatmapChart.showLoading();
+				var option = unitExceptionUnusualHeatmapOption(JSON.parse(result.yAxisData),JSON.parse(result.xAxisData),JSON.parse(result.dataArrays));
+				unitExceptionUnusualHeatmapChart.hideLoading();
+				unitExceptionUnusualHeatmapChart.setOption(option,true);
+			}
+		} 
+  	}, false);
+}
+
+$('#createTime').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM'
+	})
+});
+
+function initTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)
+	$("#createTime").val(endTime);
+}
+function caseLessTen(num){
+	if(num<10){
+		return '0'+num;
+	}else {
+		return num;
+	}
+}
+function conditionalQuery(){
+	initUnitExeption('UNIT_EXCEPTION_BAR');//设备异常分析年报/柱状
+	initUnitExeption('UNIT_EXCEPTION_WARN_HEATMAP');//设备异常分析月报(警告)/密度图
+	initUnitExeption('UNIT_EXCEPTION_UNUSUAL_HEATMAP');//设备异常分析月报(异常)/密度图
+}
+</script>
+</body>
+</html>

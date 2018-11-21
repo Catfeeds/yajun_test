@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+
+<script type="text/javascript">
+$(function(){
+
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#startTime,#endTime').mousedown(function(){
+		WdatePicker({dateFmt:'HH:mm',minDate:'00:00',maxDate:'24:00'});
+	});
+	var date = new Date();
+	var currentdate = date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
+	$('#workDate').mousedown(function(){
+		WdatePicker({
+			dateFmt:'yyyy-MM-dd',
+			minDate:currentdate,
+			onpicked:function(){
+				//selectWeekDay(parseInt($dp.cal.getP('w')));
+			}
+		});
+	});
+});
+</script>
+
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/worktime/update.do" class="form-horizontal" idValue=worktime.id  permissionModule="WORKTIME">
+		<@p.formRow>
+			<@p.formColmd title="WORK_TIME_LINE" permissionCode="WORK_TIME_LINE">
+				<@p.input type="select" id="line_Id" disabled="disabled" value="${worktime.tmLineId!}" datatype="*" field="tmLineId" options=line disabled="disabled" ></@p.input>
+				<input type="hidden"  name="tmLineId" value="${worktime.tmLineId!}" >
+			</@p.formColmd>
+			<@p.formColmd title="WORK_TIME_SHIFTNO_NO" permissionCode="WORK_TIME_SHIFTNO_NO">
+				  <@p.input type="select" datatype="*" disabled="disabled" id="shiftno" value="${worktime.shiftno!}" field="shiftno" options=classOrderOptions ></@p.input>
+					<input type="hidden"  name="shiftno" value="${worktime.shiftno!}" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_TIME_CLASS_GROUP" permissionCode="WORK_TIME_CLASS_GROUP">
+				<@p.input type="select" field="tmClassManagerId" id="tmClassManagerId" value="${worktime.tmClassManagerId!}" options=classGroupOptions datatype="*"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="WORK_TIME_PLAN_ONLINE_QTY" permissionCode="WORK_TIME_PLAN_ONLINE_QTY">
+				  <input name="planOnlineQty" class="inputxt" id="planOnlineQtyId" value="${worktime.planOnlineQty!}" datatype="n" errormsg="<@s.m code='ERROR_NUMBER'/>" maxlength='9'>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_TIME_ENABLED" permissionCode="WORK_TIME_ENABLED">
+				  <@p.input type="select" excludeSelectOption="true" id="enabledNo" value="${worktime.enabled!}" field="enabled" options=enabled ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="WORK_TIME_WORK_DATA" permissionCode="WORK_TIME_WORK_DATA">
+			       <input name="workDate" id="workDate" class="inputxt"  datatype="*" value="${worktime.workDate?date}" class="timepicker">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_TIME_START_TIME" permissionCode="WORK_TIME_START_TIME">
+				  <input name="startTime" id="startTime"  value="${worktime.startTime!}"  class="timepicker" datatype="*" > 
+			</@p.formColmd>
+			<@p.formColmd title="WORK_TIME_END_TIME" permissionCode="WORK_TIME_END_TIME">
+				  <input name="endTime" id="endTime"  value="${worktime.endTime!}"  class="timepicker" datatype="*" >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_TIME_REMARK" permissionCode="WORK_TIME_REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250">${worktime.remark!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+$('#workDate').focus(function(){
+		WdatePicker({
+			dateFmt:'yyyy-MM-dd',
+			onpicked:function(){
+				selectWeekDay(parseInt($dp.cal.getP('w')));
+			}
+		});
+	});
+//是否与夜班以外的班次有重合段
+function isOverlapOther(nowTimes,times){
+	if((nowTimes[0]>toSec(times[0])&&nowTimes[0]<toSec(times[1]))||
+	(nowTimes[1]>toSec(times[0])&&nowTimes[1]<toSec(times[1]))||
+	(nowTimes[0]<=toSec(times[0])&&nowTimes[1]>=toSec(times[1]))){
+		return true;
+	}
+	return false;
+}
+//是否有和夜班时间重合段
+function isOverlapNight(nowTimes,times){
+	if(toSec(times[0])>toSec(times[1])){
+		if((nowTimes[0]<toSec(times[1])||nowTimes[0]>toSec(times[0]))||
+		(nowTimes[1]<toSec(times[1])||nowTimes[1]>toSec(times[0]))){
+			return true;
+		}
+	}else{
+		if((nowTimes[0]>toSec(times[0])&& nowTimes[0]<toSec(times[1]))||
+		(nowTimes[1]>toSec(times[0])&& nowTimes[1]<toSec(times[1]))||
+		(nowTimes[0]<= toSec(times[0])&& nowTimes[1]>=toSec(times[1]))){
+			return true;
+		}
+	}
+	return false;
+}
+
+//是否在夜班时间段内
+function isInnerNight(nowTimes,times){
+	if(toSec(times[0])>toSec(times[1])){
+		if((nowTimes[0]<=toSec(times[1])||nowTimes[0]>=toSec(times[0]))&&
+		(nowTimes[1]<=toSec(times[1])||nowTimes[1]>=toSec(times[0]))){
+			return true;
+		}
+	}else{
+		if((nowTimes[0]>=toSec(times[0])&&nowTimes[0]<=toSec(times[1]))&&
+		(nowTimes[1]>=toSec(times[0])&&nowTimes[1]<=toSec(times[1]))){
+			return true;
+		}
+	}
+	return false;
+}
+
+//将"HH:mm:ss" 转化成millis
+var toSec = function (time) {
+   var s = '';
+   var hour = time.split(':')[0];
+   var min = time.split(':')[1];
+   var sec = time.split(':')[2];
+   s = Number(hour*3600) + Number(min*60) + Number(sec);
+   return s;
+};
+
+function checkShiftTimeOverlapped(data,dialogRef){
+	ajaxRequestSync(
+			"${baseUrl}/worktime/getShiftAndTimeByConditions.do",
+			{
+				"tmLineId": data.tmLineId,
+			    "workDate": data.workDate,
+			    "shiftno":data.shiftno,
+			    "workTimeId":data.workTimeId,
+			    "enabledNo":data.enabledNo
+			},function(r){
+			var result = r.data;
+			if(!result.existed){
+				wisConfirm({
+					message:'系统中已存在相同班次，是否把上一条启用状态修改为关闭',
+					callback:function(res){
+						if(res){
+							if(verifyTime(data,result)){
+								$("input[id='btn_sub']").click();
+								dialogRef.close();
+							}else{
+								return false;
+							}
+						}else{
+							errorTip("系统中已存在相同班次，不能重复保存!");
+							return false;
+						}
+					}
+				});
+			}else{
+				if(verifyTime(data,result)){
+					$("input[id='btn_sub']").click();
+					dialogRef.close();
+				}else{
+					return false;
+				}
+			}
+		},false);
+}
+
+function verifyTime(data,result){
+	var FLAG = true;
+	var nowTimes = [data.startTime,data.endTime];
+	var morningTimes = result.morning;
+	var nightTimes = result.night;
+	//判断晚班
+	if(shiftno=="NIGHTSHIFT"){
+		if(!isInnerNight(nowTimes,nightTimes)){
+			errorTip("晚班时间不在系统配置的晚班时间区间内!");
+			$('#endTime').focus();
+			FLAG = false;
+		}
+	}else{
+		if(morningTimes && isOverlapOther(nowTimes,morningTimes)){
+			errorTip("班次时间不能与当天早班时间重合!");
+			$('#endTime').focus();
+			FLAG = false;
+		}
+		if(isOverlapNight(nowTimes,nightTimes)){
+			errorTip("班次时间不能与系统配置的晚班时间区间重合!");
+			$('#endTime').focus();
+			FLAG = false;
+		}
+	}
+	return FLAG;
+}
+
+function workTimeUpdateSubmit(dialogRef) {
+		var data = getData();
+		if(data.tmLineId && data.shiftno && data.startTime && data.endTime && data.workDate && data.tmClassManagerId && data.planOnlineQtyId){
+			var dateStartTime = data.workDate+" "+data.startTime;
+			var dateEndTime = data.workDate+" "+data.endTime;
+			if(Date.parse(dateStartTime)>Date.parse(dateEndTime)){
+				 if(data.shiftno=="MORNINGSHIFT"){
+			　 　 　	warningTip('早班开始时间必须早于结束时间');	
+				        return false;
+				 }
+			}
+			checkShiftTimeOverlapped(data,dialogRef);
+		}else{
+			$("input[id='btn_sub']").click();
+		}
+	}
+
+function getData(){
+	return {
+		tmLineId: $("#line_Id").val(),
+		shiftno: $('#shiftno').val(),
+		startTime: $('#startTime').val(),
+		endTime: $('#endTime').val(),
+		workDate: $('#workDate').val(),
+		workTimeId: $("input[name='id']").val(),
+		enabledNo:$('#enabledNo').val(),
+		tmClassManagerId:$("#tmClassManagerId").val(),
+		planOnlineQtyId:$("#planOnlineQtyId").val()
+	}
+}
+$(function(){
+	lineIdToClass_lisAdd('${worktime.tmLineId!}')
+})
+function lineIdToClass_lisAdd(val){
+	var tmClassManagerId = $('#tmClassManagerId').val();
+	$.ajax({
+		data:{lineId:val},
+		url:"${baseUrl}/classManager/selectLineIdClassManager.do", //通过产线id得到所属班组
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#tmClassManagerId").empty(); //清空班组列表
+				$("#tmClassManagerId").append("<option value=''>-----请选择-----</option>");
+				$(result).each(function(i,item){
+					$("#tmClassManagerId").append(" <option value='" + item.code + "'>"+item.name+ " </option>");
+				});
+				document.getElementById("tmClassManagerId").value = tmClassManagerId;
+				} catch (e) {
+					alert(e);
+				return;
+				} 
+				
+			}
+	});
+}
+</script>

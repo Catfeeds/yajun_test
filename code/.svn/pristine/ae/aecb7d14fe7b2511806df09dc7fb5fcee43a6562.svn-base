@@ -1,0 +1,39 @@
+# ---------------- Custom Error ------------------- # 
+# - System 
+ERROR_SYSTEM = user requests an exception occurs, please refresh the page after retry! 
+ERROR_NO_FORM_PERMISSION = Sorry! You have not been granted permission to the current operation, please contact your system administrator! 
+# - type 
+ERROR_TYPE_DELETED_HAS_ENTRY = I'm sorry, please delete:! {0} parameter retry after a dictionary! 
+
+# --- user 
+ERROR_USER_RAW_PASSWORD_WRONG = original password input error! 
+ERROR_USER_NOT_RESET_SELF_PASSWORD = not reset your password! 
+ERROR_DELETE_NOT_DELETE_SELF = You can not delete your own! 
+ERROR_NOT_LOCK_SELF = You can not lock! 
+ERROR_NOT_UNLOCK_SELF = can not unlock your locked! 
+# --- orgnization 
+ERROR_GROUP_DELETE_HAS_COMPANY = Delete Group subsidiaries and try again! 
+ERROR_GROUP_DELETE_NO_GROUP = must retain a group! 
+
+ERROR_COMPANY_DELETE_HAS_DEPARTMENT = Please retry after removing the lower sector! 
+ERROR_DEPARTMENT_DELETE_HAS_SON_DEPARTMENT = Please retry after deleting sub-sector! 
+ERROR_DEPARTMENT_DELETE_HAS_USER = Please retry after removing the department staff! 
+
+# --- data permission 
+ERROR_TEST_CUSTOM_SQL_FAILED = Query failed: exception message is: {0} 
+# ---------------- Custom warning ------------------- # 
+# --- report type 
+ERROR_REPORT_TYPE_HAS_SON = has children under the type Please delete retry! 
+
+# ---- task reminder 
+ERROR_TASK_REMIND_VIEW_CONTENT_FAILURE = get content fails, the exception information is as follows: {0} 
+
+
+# ---------------- Custom Infomation ------------------- #
+
+PLANT_FKS=FK_TM_WORKSHOP_PLANT_ID,FK_TM_LINE_PLANT_ID
+WORKSHOP_FKS=FK_TM_LINE_WORKSHOP_ID
+
+FK_TM_LINE_PLANT_ID=There is a production line under the factory and cannot be delete!
+FK_TM_WORKSHOP_PLANT_ID=The factory is under the workshop and cannot be delete!
+FK_TM_LINE_WORKSHOP_ID=The production line under the workshop, can not be delete!

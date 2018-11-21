@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<style type="text/css">
+#myTable{
+width: 100%;
+}
+#myTable tr{
+ height:40px;
+}
+#myTable tr td{
+ width:33%;text-align: center;
+}
+</style>
+<script type="text/javascript">
+function workScheduleOncheng(){
+	if($("#workSchedule").val()==""){
+		return;
+	}
+	$.ajax({
+		data:{workSchedule:$("#workSchedule").val(),taskDate:'${taskDate!}'},
+		url:"${baseUrl}/mpSourceData/workScheduleChange.do",
+		dataType : 'json', 
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.msg){
+					errorTip(result.msg);
+					$("#tmWorktimeId").val("");
+				}
+			} else {
+				$("#tmWorktimeId").val(result.tmWorktimeId);
+			}
+		},
+		error : function(result, status) {}
+	});
+}
+function checkValue(){
+	var isSubmit = true;
+	if(!$("#tmWorktimeId").val()){
+		infoTip("<@s.m code='PRODUCTIONSCHEDULE_TMWORKTIMEID_ERROR'/>");
+		return false;
+	}
+	if($("input[name='selectIds']:checked").length!=2){
+		errorTip("<@s.m code='PRODUCTIONSCHEDULE_SELECT_ERROR'/>");
+		return false;
+	}
+	var selectIds = new Array();
+	var groupCheckbox=$("input[name='selectIds']");
+	var index=0;
+    for(i=0;i<groupCheckbox.length;i++){
+        if(groupCheckbox[i].checked){
+            selectIds[index]=groupCheckbox[i].value;
+            index++;
+        }
+    }
+    var dispatchNumber = parseInt($("#dispatchNumber").val());
+    if(dispatchNumber<=0){
+    	errorTip("<@s.m code='PRODUCTIONSCHEDULE_DISPATCHNUMBER_ERROR'/>");
+		return false;
+    }
+    for(i=0;i<selectIds.length;i++){
+    	var plannedProduction=parseInt($("#plannedProduction"+selectIds[i]).val());
+    	if(dispatchNumber>plannedProduction){
+	    	errorTip("<@s.m code='PRODUCTIONSCHEDULE_DISPATCHNUMBER_VALUE_ERROR'/>");
+			return false;
+    	}
+    }
+    //进入后台校验处理
+    $.ajax({
+		data:{selectIds:JSON.stringify(selectIds),dispatchNumber:dispatchNumber},
+		url:"${baseUrl}/mpSchedul/checkMultiDispatchNumber.do",
+		dataType : 'json', 
+		async:false,
+		success : function(result) { 
+			if(result.status == "n") {
+				if(result.info){
+					errorTip(result.info);
+					isSubmit=false;
+					return false;
+				}
+			}
+		},
+		error : function(result, status) {}
+	});
+	return isSubmit;
+}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/mpSchedul/singleMulti.do" class="form-horizontal" permissionModule="PRODUCTION_SCHEDULE">
+	<input type="hidden" id="beforeSubmit" value="checkValue">
+	<table id="myTable">
+		<tr>
+			<td style="width: 5%;"><@s.m code='FRAME_CHOOSE'/></td>
+			<td><@s.m code='METALPLATE_MACHININGSURFACE'/></td>
+			<td><@s.m code='PRODUCTIONSCHEDULE_APCTOTALNUMBER'/></td>
+			<td><@s.m code='PRODUCTIONSCHEDULE_PLANNEDPRODUCTION'/></td>
+		</tr>
+		<#list beans as bean>
+			<tr>
+				<td style="width: 5%;">
+					<#if bean.plannedProduction!=0>
+						<input type="checkbox" name="selectIds" value="${bean.id!}" style="width: 25px;height: 25px;"/>
+					</#if>
+				</td>
+				<td>${bean.model!}</td>
+				<td>${bean.apcTotalNumber!}</td>
+				<td>${bean.plannedProduction!}
+					<input type="hidden" id="plannedProduction${bean.id!}" value="${bean.plannedProduction!}">
+				</td>
+			</tr>
+		</#list>
+	</table>
+	<div style="height: 30px;"></div>
+		<@p.formRow>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_WORKSCHEDULE" permissionCode="WORKSCHEDULE">
+				<@p.input type="select" id="workSchedule" value="" field="workSchedule" datatype="*" options=smCodeClassOrder onchange="workScheduleOncheng()"></@p.input>
+				<input name="tmWorktimeId" type="hidden" id="tmWorktimeId"/>
+			</@p.formColmd>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_S_DISPATCHNUMBER" permissionCode="S_DISPATCHNUMBER">
+				 <input name="dispatchNumber" type="text" value="" id="dispatchNumber" datatype="*"  errormsg="<@s.m code='ERROR_NUMBER'/>" maxlength='10' onkeyup="value=value.replace(/[^\d]/g,'')"/>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

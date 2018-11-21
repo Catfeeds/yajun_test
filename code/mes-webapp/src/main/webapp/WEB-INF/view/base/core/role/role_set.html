@@ -1,0 +1,302 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript">
+	$(function() {
+		initTreeData();
+		initTreeEvents();
+	});
+	function initTreeEvents() {
+		$(".nav-role-set").children("li").children("a").click(function() {
+				var element = $(this).parent();
+				if ($(element).hasClass("open")) {
+					$(element).removeClass("open");
+					$(element).children("ul").hide("slow");
+				} else {
+					$(element).addClass("open");
+					$(element).children("ul").show("slow");
+				}
+		});
+		$(".checkAllSub").click(function(e) {
+			e.stopPropagation();
+			if (this.checked) {
+				$(this).parent().parent().find("input[type='checkbox']").prop("checked", true);
+			} else {
+				$(this).parent().parent().find("input[type='checkbox']").removeAttr("checked");
+			}
+		});
+		$(".subCheckbox").click(function(e) {
+			e.stopPropagation();
+			if (this.checked) {
+				var l = $(this).parent().parent().parent().parent().find("input.subCheckbox[type='checkbox']").length;
+				var ll = $(this).parent().parent().parent().parent().find("input.subCheckbox[type='checkbox']:checked").length;
+				if (l == ll) {
+					$(this).parent().parent().parent().parent().find("input.checkAllSub[type='checkbox']").prop("checked", true);
+				}
+			} else {
+				$(this).parent().parent().parent().parent().find("input.checkAllSub[type='checkbox']").removeAttr("checked");
+			}
+			loadPermission(this.value);
+		});
+		$("#selectAllBtn").click(function(e) {
+			e.stopPropagation();
+			$(this).parent().parent().find("#functionid input[type='checkbox']").prop("checked", true);
+		});
+		$("#resetBtn").click(function() {
+			$(this).parent().parent().find("#functionid input[type='checkbox']").prop("checked", false);
+		});
+	}
+	function initTreeData() {
+		var menuData = getTreeData();
+		if (menuData && menuData.length > 0) {
+				var menuHtml = '';
+				menuHtml += '<ul class="nav nav-list nav-role-set">';
+			for (var i = 0; i < menuData.length; i++) {
+				var menu = menuData[i];
+				var children = menu.children;
+				menuHtml += '	<li class="open">';
+				menuHtml += '		<a href="javascript:void(0);" class="dropdown-toggle"> ';
+				menuHtml += '			<input value="'+menu.id+'" ';
+				if (menu.checked) {
+					menuHtml += 'checked';
+				}
+				menuHtml += ' class="checkAllSub" type="checkbox">';
+				menuHtml += '			<i class="icon-'+menu.iconCls+'"></i>';
+				menuHtml += '			<span class="menu-text">'+menu.text+' </span> ';
+				menuHtml += '		</a>';
+			if (children.length > 0) {
+				for (var j = 0; j < children.length; j++) {
+					var child = children[j];
+					menuHtml += '		<ul class="submenu" style="display: block;">';
+					menuHtml += '			<li>';
+					menuHtml += '				<a href="javascript:loadPermission('+child.id+');" node-id="'+child.id+'">';
+					menuHtml += '					<i class="icon-double-angle-right"></i> ';
+					menuHtml += '					<input value="'+child.id+'" ';
+					if (child.checked) {
+						menuHtml += 'checked';
+					}
+					menuHtml += ' type="checkbox" class="subCheckbox">';
+					menuHtml += '					<i class="icon-'+child.iconCls+'"></i>'+child.text;
+					menuHtml += '					</a>';
+					menuHtml += '			</li>';
+					menuHtml += '		</ul>';
+				}
+			}
+				menuHtml += '	</li>';
+			}
+				menuHtml += '</ul>';
+				$("#functionid").html(menuHtml);
+		}
+	}
+	function getTreeData() {
+		var tree_data = {};
+		$.ajax({
+		    url: '${baseUrl}/role/menuList.do?id=' + $("#rid").val(),
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    dataType: "json",
+		    async:false,
+		    success: function(data){
+		    	if(data!=null){
+		    		tree_data = data;
+		    	}else{
+		      	}
+		    }
+		});
+		return tree_data;
+	}
+	
+	function loadPermission(menuId) {
+		loadFunctionPermission(menuId);
+		loadFormPermission(menuId);
+		loadDataPermission(menuId);
+	}
+	
+	function loadFunctionPermission(menuId) {
+		$.ajax({
+		    url: '${baseUrl}/role/functionPermissionList.do?menuId='+menuId+'&roleId='+$("#rid").val(),
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#functionListPanel").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	
+	function loadFormPermission(menuId) {
+		$.ajax({
+		    url: '${baseUrl}/role/formPermissionList.do?menuId='+menuId+'&roleId='+$("#rid").val(),
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#formListPanel").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	
+	function loadDataPermission(menuId) {
+		$.ajax({
+		    url: '${baseUrl}/role/dataPermissionList.do?menuId='+menuId+'&roleId='+$("#rid").val(),
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    dataType: "html",
+		    async:false,
+		    success: function(html){
+		    	if(html){
+		    		$("#dataListPanel").html(html);
+		    	}else{
+		      	}
+		    }
+		});
+	}
+	
+	function selectAll() {
+		$(this).parent().find("input[type='checkbox']").prop("checked", true);
+	}
+	function reset() {
+		initTreeData();
+		initTreeEvents();
+	}
+
+  function saveMenu(){
+	    var roleId = $("#rid").val();
+	    var menuIds = getNode();
+	    ajaxRequest('${baseUrl}/role/saveMenu.do',{'menuIds' : JSON.stringify(menuIds),'roleId':roleId},
+	    function(){
+	    	var selectedNode = $("#hiddenMenuId");
+	    	if (selectedNode && undefined != selectedNode.val()) {
+		    	loadPermission(selectedNode.val());
+	    	}
+	  });
+	} 
+
+   function getNode() {
+	    var checkedNodes = $('#functionid').find("input[type='checkbox']");
+	    var nodeIds = [];
+	    for (var i = 0; i < checkedNodes.length; i++) {
+	        if (checkedNodes[i].checked) {
+	            nodeIds.push(checkedNodes[i].value);
+	        }
+	    }
+	    return nodeIds;
+	}   
+	function saveFunction(){
+		var permissionIds = [];
+    	$("input[name='functionPermissionIds']").each(function(i){
+    		   if(this.checked){
+    			   permissionIds.push(this.value);
+    		   }
+    	 });
+    	 ajaxRequest('${baseUrl}/role/saveFunctionPermission.do',{
+    	 					'menuId' : $('#hiddenMenuId').val(),
+    	 					'roleId':$("#rid").val(),
+    	 					'ids':JSON.stringify(permissionIds)
+    	  });
+	}
+	function saveForm(){
+		var permissionIds = [];
+    	$("input[name='formPermissionIds']").each(function(i){
+    		   if(this.checked){
+    			   permissionIds.push(this.value);
+    		   }
+    	 });
+    	 ajaxRequest('${baseUrl}/role/saveFormPermission.do',{
+    	 					'menuId' : $('#hiddenMenuId').val(),
+    	 					'roleId':$("#rid").val(),
+    	 					'ids':JSON.stringify(permissionIds)
+    	  });
+	}
+	function saveData(){
+		var dataPermissionType = '';
+    	$("input[name='dataPermissionType']").each(function(i){
+    		   if(this.checked){
+    			   dataPermissionType = (this.value);
+    			   return;
+    		   }
+    	 });
+    	 ajaxRequest('${baseUrl}/role/saveDataPermission.do',{
+    	 					'permissionId' : $('#dataPermissionId').val(),
+    	 					'roleId':$("#rid").val(),
+    	 					'permissionType':dataPermissionType,
+    	 					'script':$('#script').val()
+    	  });
+	}
+	$("#selectAllFunctionBtn").click(function(e) {
+		e.stopPropagation();
+		$(this).parent().parent().find("#functionListPanel input[type='checkbox']").prop("checked", true);
+	});
+	$("#resetFunctionBtn").click(function() {
+		$(this).parent().parent().find("#functionListPanel input[type='checkbox']").prop("checked", false);
+	});
+	$("#selectAllFormBtn").click(function(e) {
+		e.stopPropagation();
+		$(this).parent().parent().find("#formListPanel input[type='checkbox']").prop("checked", true);
+	});
+	$("#resetFormBtn").click(function() {
+		$(this).parent().parent().find("#formListPanel input[type='checkbox']").prop("checked", false);
+	});
+</script>
+</head>
+<body style="overflow-y: hidden" scroll="no">
+	<div style="width: 100%;height: 367px;position: relative;">
+	   <div id="role_set_menu" class="widget-box role_set_menu">	
+		  	<div class="widget-header header-color-blue2">
+				<h4 class="lighter smaller"><@s.m code="ROLE_CATEGORY_LIST"/></h4>
+				<a class="save-btn" href="javascript:saveMenu()"><i class="icon-save"></i></a>
+			</div>
+			<div class="widget-body" id="menuListPanel">
+				<input type="hidden" name="id" value="${id}" id="rid">
+				<a href="javascript:void(0);" id="selectAllBtn"><@s.m code="FRAME_SELECT_ALL"/></a> 
+				<a id="resetBtn" href="javascript:void(0);"><@s.m code="FRAME_RESET"/></a>
+				<div id="functionid" class="role_set_menu_content">
+				</div>
+			</div>
+	   </div>
+	   <div id="role_set_func" class="tabbable role_set_func">
+	   	  	<div class="widget-header header-color-blue2" >
+				<h4 class="lighter smaller"><@s.m code="ROLE_FUNCTION_LIST"/></h4>
+				<a class="save-btn" href="javascript:saveFunction()"><i class="icon-save"></i></a>
+			</div>
+			<a href="javascript:void(0);" id="selectAllFunctionBtn"><@s.m code="FRAME_SELECT_ALL"/></a> 
+			<a id="resetFunctionBtn" href="javascript:void(0);"><@s.m code="FRAME_RESET"/></a>
+			<div id="functionListPanel" class="role_set_func_content">
+		
+			</div>
+	   </div>
+	   <div id="role_set_form" class="tabbable role_set_form">
+	   	  	<div class="widget-header header-color-blue2" >
+				<h4 class="lighter smaller"><@s.m code="ROLE_FORM_LIST"/></h4>
+				<a class="save-btn" href="javascript:saveForm()"><i class="icon-save"></i></a>
+			</div>
+			<a href="javascript:void(0);" id="selectAllFormBtn"><@s.m code="FRAME_SELECT_ALL"/></a> 
+			<a id="resetFormBtn" href="javascript:void(0);"><@s.m code="FRAME_RESET"/></a>
+			<div id="formListPanel" class="role_set_form_content">
+		
+			</div>
+	   </div>
+	   <div id="role_set_data" class="tabbable role_set_data">
+	   	  	<div class="widget-header header-color-blue2" >
+				<h4 class="lighter smaller"><@s.m code="ROLE_DATA_LIST"/></h4>
+				<a class="save-btn" href="javascript:saveData()"><i class="icon-save"></i></a>
+			</div>
+			<div id="dataListPanel" class="role_set_data_content">
+		
+			</div>
+	   </div>
+	</div>
+</body>
+</html>

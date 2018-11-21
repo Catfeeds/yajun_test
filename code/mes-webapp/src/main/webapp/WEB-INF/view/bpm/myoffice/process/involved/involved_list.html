@@ -1,0 +1,48 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function operatorHistory(){
+	var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var id = rows[0].id;
+    showProcHistory(id, 'dg${currentPageId}');
+}
+$(function(){
+	$("#start").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'end\')}'});
+	});
+	$("#end").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'start\')}'});
+	});
+});
+</script>
+<@p.body title="PROCESS_INSTANCE_MYOFFICE_INVOLVED_TITLE" permissionModule="INVOLVED">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="HISTORIC_PROCESS_PROCESSDEFINITION_NAME"  permissionCode="HISTORIC_PROCESS_INSTANCE_NAME"   field="processInstanceNameLike"></@p.input>
+            <@p.input title="START_TIME"  permissionCode="START_TIME"   field="startedAfter" id="start"></@p.input>
+			<@p.input title="END_TIME"  permissionCode="END_TIME"  field="finishedBefore"   id="end"></@p.input>
+			<@p.input title="HISTORIC_PROCESS_STARTUSERID" permissionCode="HISTORIC_PROCESS_STARTUSERID" field="initiatorNameLike"></@p.input>	
+		</@p.searchColumns>
+		<@p.toolbar>
+			<@p.button title="PROCESS_VALUE_PICTURE" permissionCode="PartakeProcessPicture" onclick="operatorHistory()" iconCls="h-sign"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/instance/personal/involved/list.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_PROCESS" sortable="false" width="300" permissionCode="PROCESS_INSTANCE_PROCESS" field="name"></@p.column>
+		<!-- 
+		<@p.column title="PROCESS_INSTANCE_ID" sortable="false" permissionCode="PROCESS_INSTANCE_ID" field="processInstanceId"></@p.column>
+		<@p.column title="PROCESS_COLUMN_DEF_ID" sortable="false" permissionCode="PROCESS_COLUMN_DEF_ID" field="processDefinitionId"></@p.column>
+		<@p.column title="BPM_TASK_COL_DESCRIPTION" sortable="false" permissionCode="BPM_TASK_COL_DESCRIPTION" field="description" width="200"></@p.column>
+		<@p.column title="BPM_TASK_COL_DELETEREASON" sortable="false" permissionCode="PROCESS_INSTANCE_DELETEREASON" field="deleteReason" formatter="entryRenderer('PROCESS_DELETEREASON')"></@p.column>
+		 -->
+		<@p.column title="HISTORIC_PROCESS_STARTUSERID" sortable="false" permissionCode="PROCESS_INSTANCE_OWNER" field="processInitiator"></@p.column>
+		<@p.column title="START_TIME" width="100" sortable="false" permissionCode="START_TIME_" field="startTime"></@p.column>
+		<@p.column title="END_TIME" width="100" sortable="false" permissionCode="END_TIME_" field="endTime"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+

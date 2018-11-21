@@ -1,0 +1,7 @@
+
+scanningGun_wsdl=http://192.168.90.12:8080/mes-webapp/webservice/scanningGun?wsdl
+scanningGun_method=acceptBarCode
+
+
+serial_port_name=COM_4
+is_port_name=COM4

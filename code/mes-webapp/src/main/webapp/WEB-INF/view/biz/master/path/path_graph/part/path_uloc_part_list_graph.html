@@ -1,0 +1,173 @@
+<#include "../../../../include/bootstrapTableCommons.html">
+<@p.body title="PATH_LIST_TITLE" permissionModule="PATH_ULOC_PART" noBreadcrumbs="true">	
+<!-- <div style="color: #428bca;text-align:center; margin:10px" >关键件信息</div> -->
+<input id="tmPathUlocId" type="hidden" value="${tmPathUlocId!}" />
+<input id="rectSeq" type="hidden" value="${rectSeq!}" />
+<span></span>
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathUlocPartAdd" iconCls="plus" url="${baseUrl}/path/uloc/part/graph_addInput.do?tmPathUlocId=${tmPathUlocId!}&rectSeq=${rectSeq!}&tmPlantId=${tmPlantId!}" type="add"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathUlocPartEdit" iconCls="edit"  type="button" onclick="partDoUpdate();"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathUlocPartDelete" iconCls="trash"  type="button" onclick="partDoDelete();"></@p.button>
+<!-- 			<@p.button title="PATH_IMPORT" permissionCode="PathUlocPartImport" downName="PATH_ULOC_PART_IMPORT_NAME" onclick="importData();" iconCls="signin" /> -->
+<!-- 			<@p.button title="PATH_EXPORT" permissionCode="PathUlocPartExport" downName="PATH_ULOC_PART_EXPORT_NAME" url="${baseUrl}/path/uloc/part/exportData.do?tmPathUlocId=${tmPathUlocId!}&rectSeq=${rectSeq!}"  iconCls="upload-alt" type="down" /> -->
+<!-- 			<@p.button title="PATH_EXPORT_TEMPLTE" permissionCode="PathUlocPartImport" iconCls="upload-alt"  url="${baseUrl}/path/uloc/part/exportTemplate.do" type="down"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<div id="partTable" style="display: none">
+		<table class="table table-bordered table-hover table-condensed	">
+			<thead >	
+				<tr><th><input type="checkbox" id="allChecked"onclick="clickPartAllCheckBox(this)"></th><th>物料</th><th>数量</th><th>顺序号</th><th>是否批次追溯</th></tr>
+			</thead>
+			<tbody id="pathUlocPartTable" >
+			</tbody>
+		</table>
+	</div>
+	<div id="partDataGrid" style="display: none">
+	 <@p.dataGrid url="${baseUrl}/path/uloc/part/graph_list.do?tmPathUlocId=${tmPathUlocId!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_PART" field="part.nameCn" permissionCode="PATH_ULOC_PART_ULOC_PART" formatter="renderPart"></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_QTY" field="qty" permissionCode="PATH_ULOC_PART_ULOC_QTY" ></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_SEQ" field="seq" permissionCode="PATH_ULOC_PART_ULOC_SEQ" ></@p.column>
+		<@p.column title="PATH_ULOC_PART_ULOC_ISBATCHTRAC" field="isBatchTrac" permissionCode="PATH_ULOC_PART_ULOC_ISBATCHTRAC" formatter="renderYesOrNo"></@p.column>
+	</@p.dataGrid>
+	</div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+	if($("#tmPathUlocId").val()==""){
+		loadPartArray($("#rectSeq").val());
+		$("#partTable").show();
+	}else{
+		$("#partDataGrid").show();
+	}
+	
+});
+function loadPartArray(rectSeq){
+	$(partArray).each(function(i,partObject){
+		if(partObject.key ==rectSeq){
+			var tableStr = "";
+			$(partObject.value).each(function(j,bean){
+				tableStr += "<tr id="+bean.id+"><td><input type='checkbox' id="+bean.id+" name='partCheckbox' onclick='clickPartCheckBox(this.id)'></td><td>"+bean.part.no+"-"+bean.part.nameCn+"</td><td>"+bean.qty+"</td><td>"+bean.seq+"</td><td>"+renderYesOrNo(bean.isBatchTrac)+"</td></tr>";
+			});
+			$("#pathUlocPartTable").html(tableStr);
+			$("#pathUlocPartTable").find("tr td").not("tr td:first-child").bind('click',function(){
+				clickTr($(this).parent("tr").attr("id"));
+			});
+			return false;
+		}
+	});
+}
+
+ function clickTr(checkId){
+	$("#allChecked").attr("checked",false);
+	$("input[name='partCheckbox']").each(function(){
+		if(this.id == checkId){
+			this.checked=true;
+		}else{
+			this.checked =false;
+		}
+	});
+} 
+function clickPartAllCheckBox(obj){
+	if(obj.checked){
+		$("input[name='partCheckbox']").each(function(){
+			this.checked =true;
+		});
+	}else{
+		$("input[name='partCheckbox']").each(function(){
+			this.checked =false;
+		});
+	}
+}
+function clickPartCheckBox(id){
+	if(this.checked){
+		this.checked=false;
+	}else{
+		this.checked=true;
+	}
+}
+
+function partDoUpdate(){
+	if($("#tmPathUlocId").val()!=""){
+		var url="${baseUrl}/path/uloc/part/graph_updateInput.do?tmPathUlocId=${tmPathUlocId!}&rectSeq=${rectSeq!}&tmPlantId=${tmPlantId!}";
+		update("<@s.m code="PATH_UPDATE" />",url,"dg${currentPageId}");
+	}else{
+		var checkdCount = 0;
+		var id;
+		$("input[name='partCheckbox']").each(function(){
+			if(this.checked){
+				checkdCount++;
+				id= this.id;
+			}
+		});
+		if(checkdCount == 0){
+			infoTip("请选择数据!");
+			return;
+		}
+		if(checkdCount >1){
+			infoTip("请选择一条数据!");
+			return;
+		}
+		var partObj ="";
+		$(partArray).each(function(i,partObject){
+			if(partObject.key ==$("#rectSeq").val()){
+				$(partObject.value).each(function(j,bean){
+					if(bean.id == id){
+						partObj = bean;
+						return false;
+					}
+				});
+				return false;
+			}
+		});
+		var url="${baseUrl}/path/uloc/part/graph_updateInput.do?tmPathUlocId=${tmPathUlocId!}&rectSeq=${rectSeq!}&tmPlantId=${tmPlantId!}&id="+partObj.id+"&tmPartId="+partObj.tmPartId+"&qty="+partObj.qty+"&seq="+partObj.seq+"&isBatchTrac="+partObj.isBatchTrac;
+		createwindow("<@s.m code="PATH_UPDATE" />", url, "dg${currentPageId}");
+	}
+}
+
+function partDoDelete(){
+	if($("#tmPathUlocId").val()!=""){
+		frame_grid_remove("${baseUrl}/path/uloc/part/delete.do","dg${currentPageId}");
+	} else {
+		var checkdCount = 0;
+		var ids = new Array();
+		$("input[name='partCheckbox']").each(function(){
+			if(this.checked){
+				checkdCount++;
+				ids.push(this.id);
+			}
+		});
+		if(checkdCount == 0){
+			infoTip("请选择数据!");
+			return;
+		}
+		if(confirm("确认要删除吗?")){
+			$(partArray).each(function(i,item){
+				if(item.key == $("#rectSeq").val()){
+					$(ids).each(function(k,id){
+						$(item.value).each(function(j,bean){
+							if(bean.id == id){
+								item.value.splice(j,1);
+								return false;
+							}
+						});
+					});
+					return false;
+				}
+			});
+			$("#allChecked").attr("checked",false);
+			loadPartArray($("#rectSeq").val());
+		}
+	}
+}
+
+function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+
+function importData(){
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

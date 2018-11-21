@@ -1,0 +1,162 @@
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+//  $(document).ready(function() {
+// 	  $(".js-example-basic-single").select2();
+// 	});  
+ $('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+	 var parameters = {
+			 params:'queryCondition[tmClassManagerId]='+row.id,
+		     tmClassManagerId:row.id,
+		     currentPageId:'classManagerDetailGridID'
+	 };
+	 ajaxResponseHtml('${baseUrl}/classManagerDetail/listInput.do',parameters,'classManagerDetail');
+});
+</script>
+<@p.body title="CLASS_MANAGER_LIST_TITLE" permissionModule="CLASS_MANAGER" >	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="CLASS_MANAGER_LINE" id="list_line" field="tmLineId"  type="select" options=lineOptions></@p.input>
+			<@p.input title="CLASS_MANAGER_CLASS_GROUP" field="classGroup" type="select" options=classGroupOptions></@p.input>
+			<@p.input title="CLASS_MANAGER_ENABLED" field="enabled" type="select" options=enabledOptions></@p.input>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="CLASS_MANAGER_ADD" permissionCode="CLASSADD" iconCls="plus" url="${baseUrl}/classManager/addInput.do" type="add"  ></@p.button>
+			<@p.button title="CLASS_MANAGER_UPDATE" permissionCode="CLASSUPDATE" iconCls="edit" url="${baseUrl}/classManager/updateInput.do" type="update"></@p.button>
+			<@p.button title="CLASS_MANAGER_DELETE" permissionCode="CLASSDELTE" iconCls="trash" url="${baseUrl}/classManager/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/classManager/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="CLASS_MANAGER_PLANT" field="tmPlant.no" permissionCode="CLASS_MANAGER_PLANT"></@p.column>
+		<@p.column title="CLASS_MANAGER_LINE" field="tmLine.nameCn" permissionCode="CLASS_MANAGER_LINE" formatter="renderLineNoOrName"></@p.column>
+<!-- 		<@p.column title="CLASS_MANAGER_CLASS_NAME" field="className" permissionCode="CLASS_MANAGER_CLASS_NAME" formatter="renderGenderClassOrder"></@p.column> -->
+		<@p.column title="CLASS_MANAGER_CLASS_GROUP" field="classGroup" permissionCode="CLASS_MANAGER_CLASS_GROUP" formatter="renderGenderClassGroup"></@p.column>
+		<@p.column title="CLASS_MANAGER_ENABLED" field="enabled" permissionCode="CLASS_MANAGER_ENABLED" formatter="renderGenderEnabled"></@p.column>
+		<@p.column title="CLASS_MANAGER_REMARK" field="remark" permissionCode="CLASS_MANAGER_REMARK" ></@p.column>
+	</@p.dataGrid>
+	<div id ="classManagerDetail"></div>
+</@p.body>
+<script type="text/javascript">
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+function renderGenderClassGroup(value) {
+	return entryRenderer('CLASS_GROUP', value);
+}
+function renderGenderClassOrder(value) {
+	return entryRenderer('SHIFT_TYPE', value);
+}
+function renderLineNoOrName(value,record) {
+	if(value && record.tmLine.no){
+		return record.tmLine.no+ " - " + value;
+	}
+	return record.tmLine.no+ " - ";
+}
+function renderPlantNoOrName(value,record) {
+	if(value && record.tmPlant.no){
+		return record.tmPlant.no+ " - " + value;
+	}
+	return record.tmPlant.no+ " - ";
+}
+
+
+function renderPart(value,record){
+	if(record.part&&record.part.no){
+		return record.part.no+ " - " + record.part.nameCn;
+	}
+	return "";
+}
+
+function renderPlant(value,record){
+	if(record.plant&&record.plant.no){
+		return record.plant.no+ " - " + record.plant.nameCn;
+	}
+	return "";
+}
+
+function renderWorkShop(value,record){
+	if(record.workshop&&record.workshop.no){
+		return record.workshop.no+ " - " + record.workshop.nameCn;
+	}
+	return "";
+}
+
+function renderLine(value,record){
+	if(record.line&&record.line.no){
+		return record.line.no+ " - " + record.line.nameCn;
+	}
+	return "";
+}
+
+function renderCopyPath(value,record){
+	if(record.copyPath&&record.copyPath.no){
+		return record.copyPath.no+ " - " + record.copyPath.name;
+	}
+	return "";
+}
+
+function list_changePlant(obj){
+	getPart(obj);
+	//getWorkShop(obj);
+	doGetLine(obj);
+	//getLine($("#list_plant").val(),$("#list_workshop").val());
+}
+function list_changeWorkshop(workShopId){
+	getLine($("#list_plant").val(),workShopId);
+}
+
+function getPart(obj){
+	$.ajax({
+		data:{
+			plantId:obj,
+			operate:"search"
+		},
+		url:"${baseUrl}/path/getPartByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			$("#list_part").empty(); //清空下拉列表
+			$("#list_part").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(
+				function(i, item) {
+					$("#list_part").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+				});
+			}
+	});
+}
+function doGetLine(obj){
+	if (obj == "" || null == obj) {
+		return false;
+	}else{
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/uloc/selectLintNameOrPlantId.do", //修改为通过公司id得到所属产线
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				$("#list_line").empty(); //清空下拉列表
+				$("#list_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#list_line").append(" <option  value='" + item.id + "'>"+item.nameCn + "</option>");
+					});
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+}
+
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/path/exportTemplate.do";
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/path/importData.do", "dg${currentPageId}",obj);
+}
+function importDataAll(){
+	alert("path im all");
+	importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/path/importData.do", "dg${currentPageId}","");
+}
+
+</script>

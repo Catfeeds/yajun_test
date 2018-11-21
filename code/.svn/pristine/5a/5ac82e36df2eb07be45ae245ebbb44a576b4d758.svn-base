@@ -1,0 +1,169 @@
+-- Merging decision tree log ---
+manifest
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+MERGED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\constraint-layout-1.0.2.aar\a21b909faed8c73ca28b8b35f6c9be85\AndroidManifest.xml:2:1-11:12
+MERGED from [com.android.support:animated-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\animated-vector-drawable-25.3.1.aar\7cc0a210156e8e5f9c546d9dea28ebcd\AndroidManifest.xml:17:1-28:12
+MERGED from [com.android.support:support-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-vector-drawable-25.3.1.aar\d9c0eb42764a96d6f6f64764785251c1\AndroidManifest.xml:17:1-28:12
+MERGED from [com.android.support:support-v4:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-v4-25.3.1.aar\b78c1e386b31e2ccb6d958338755809b\AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-fragment:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-fragment-25.3.1.aar\5b888f13bbe9a985fe2cd720a0e00102\AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-media-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-media-compat-25.3.1.aar\e6a820a9d2906e3131b54e31a32cbaa7\AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-core-utils:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-utils-25.3.1.aar\eafa7fe507286add6dafdf5b311e931a\AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-core-ui:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-ui-25.3.1.aar\905acfb3ee0681c21339e2547bf7ccea\AndroidManifest.xml:17:1-31:12
+MERGED from [com.android.support:support-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-compat-25.3.1.aar\458111cd3a1bd5bdc044212863ddfd40\AndroidManifest.xml:17:1-31:12
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+	package
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:3:5-42
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+	android:versionCode
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:1-30:12
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:2:11-69
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:5:5-79
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:5:22-76
+uses-permission#android.permission.INTERNET
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:6:5-67
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:6:22-64
+uses-permission#android.permission.WAKE_LOCK
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:7:5-68
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:7:22-65
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:8:5-80
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:8:22-77
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:9:5-81
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:9:22-78
+uses-permission#android.permission.WRITE_SETTINGS
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:10:5-73
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:10:22-70
+uses-permission#android.permission.ACCESS_LOCATION_EXTRA_COMMANDS
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:11:5-89
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:11:22-86
+application
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:12:5-28:19
+MERGED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\constraint-layout-1.0.2.aar\a21b909faed8c73ca28b8b35f6c9be85\AndroidManifest.xml:9:5-20
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\constraint-layout-1.0.2.aar\a21b909faed8c73ca28b8b35f6c9be85\AndroidManifest.xml:9:5-20
+MERGED from [com.android.support:animated-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\animated-vector-drawable-25.3.1.aar\7cc0a210156e8e5f9c546d9dea28ebcd\AndroidManifest.xml:26:5-20
+MERGED from [com.android.support:animated-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\animated-vector-drawable-25.3.1.aar\7cc0a210156e8e5f9c546d9dea28ebcd\AndroidManifest.xml:26:5-20
+MERGED from [com.android.support:support-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-vector-drawable-25.3.1.aar\d9c0eb42764a96d6f6f64764785251c1\AndroidManifest.xml:26:5-20
+MERGED from [com.android.support:support-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-vector-drawable-25.3.1.aar\d9c0eb42764a96d6f6f64764785251c1\AndroidManifest.xml:26:5-20
+MERGED from [com.android.support:support-v4:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-v4-25.3.1.aar\b78c1e386b31e2ccb6d958338755809b\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-v4:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-v4-25.3.1.aar\b78c1e386b31e2ccb6d958338755809b\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-fragment:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-fragment-25.3.1.aar\5b888f13bbe9a985fe2cd720a0e00102\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-fragment:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-fragment-25.3.1.aar\5b888f13bbe9a985fe2cd720a0e00102\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-media-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-media-compat-25.3.1.aar\e6a820a9d2906e3131b54e31a32cbaa7\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-media-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-media-compat-25.3.1.aar\e6a820a9d2906e3131b54e31a32cbaa7\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-core-utils:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-utils-25.3.1.aar\eafa7fe507286add6dafdf5b311e931a\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-core-utils:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-utils-25.3.1.aar\eafa7fe507286add6dafdf5b311e931a\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-core-ui:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-ui-25.3.1.aar\905acfb3ee0681c21339e2547bf7ccea\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-core-ui:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-ui-25.3.1.aar\905acfb3ee0681c21339e2547bf7ccea\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-compat-25.3.1.aar\458111cd3a1bd5bdc044212863ddfd40\AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-compat-25.3.1.aar\458111cd3a1bd5bdc044212863ddfd40\AndroidManifest.xml:29:5-20
+	android:supportsRtl
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:18:9-35
+	android:label
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:16:9-41
+	android:roundIcon
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:17:9-54
+	android:icon
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:15:9-43
+	android:allowBackup
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:14:9-35
+	android:theme
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:19:9-56
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:13:9-56
+activity#com.wis.mes.activity.MainActivity
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:20:9-26:20
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:20:19-67
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:21:13-25:29
+action#android.intent.action.MAIN
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:22:17-69
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:22:25-66
+category#android.intent.category.LAUNCHER
+ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:24:17-77
+	android:name
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml:24:27-74
+uses-sdk
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+MERGED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:21:5-23:78
+MERGED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:21:5-23:78
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\constraint-layout-1.0.2.aar\a21b909faed8c73ca28b8b35f6c9be85\AndroidManifest.xml:5:5-7:41
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\constraint-layout-1.0.2.aar\a21b909faed8c73ca28b8b35f6c9be85\AndroidManifest.xml:5:5-7:41
+MERGED from [com.android.support:animated-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\animated-vector-drawable-25.3.1.aar\7cc0a210156e8e5f9c546d9dea28ebcd\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\animated-vector-drawable-25.3.1.aar\7cc0a210156e8e5f9c546d9dea28ebcd\AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-vector-drawable-25.3.1.aar\d9c0eb42764a96d6f6f64764785251c1\AndroidManifest.xml:20:5-43
+MERGED from [com.android.support:support-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-vector-drawable-25.3.1.aar\d9c0eb42764a96d6f6f64764785251c1\AndroidManifest.xml:20:5-43
+MERGED from [com.android.support:support-v4:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-v4-25.3.1.aar\b78c1e386b31e2ccb6d958338755809b\AndroidManifest.xml:21:5-23:54
+MERGED from [com.android.support:support-v4:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-v4-25.3.1.aar\b78c1e386b31e2ccb6d958338755809b\AndroidManifest.xml:21:5-23:54
+MERGED from [com.android.support:support-fragment:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-fragment-25.3.1.aar\5b888f13bbe9a985fe2cd720a0e00102\AndroidManifest.xml:21:5-23:60
+MERGED from [com.android.support:support-fragment:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-fragment-25.3.1.aar\5b888f13bbe9a985fe2cd720a0e00102\AndroidManifest.xml:21:5-23:60
+MERGED from [com.android.support:support-media-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-media-compat-25.3.1.aar\e6a820a9d2906e3131b54e31a32cbaa7\AndroidManifest.xml:21:5-23:63
+MERGED from [com.android.support:support-media-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-media-compat-25.3.1.aar\e6a820a9d2906e3131b54e31a32cbaa7\AndroidManifest.xml:21:5-23:63
+MERGED from [com.android.support:support-core-utils:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-utils-25.3.1.aar\eafa7fe507286add6dafdf5b311e931a\AndroidManifest.xml:21:5-23:61
+MERGED from [com.android.support:support-core-utils:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-utils-25.3.1.aar\eafa7fe507286add6dafdf5b311e931a\AndroidManifest.xml:21:5-23:61
+MERGED from [com.android.support:support-core-ui:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-ui-25.3.1.aar\905acfb3ee0681c21339e2547bf7ccea\AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support:support-core-ui:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-ui-25.3.1.aar\905acfb3ee0681c21339e2547bf7ccea\AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support:support-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-compat-25.3.1.aar\458111cd3a1bd5bdc044212863ddfd40\AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support:support-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-compat-25.3.1.aar\458111cd3a1bd5bdc044212863ddfd40\AndroidManifest.xml:21:5-23:58
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+	tools:overrideLibrary
+		ADDED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:23:9-75
+	android:targetSdkVersion
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+		ADDED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+		INJECTED from D:\Software\DelelopmentTool\java_project\WorkSpace\daikin-project\code\mes-app\app\src\main\AndroidManifest.xml
+meta-data#android.support.VERSION
+ADDED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:animated-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\animated-vector-drawable-25.3.1.aar\7cc0a210156e8e5f9c546d9dea28ebcd\AndroidManifest.xml:22:5-24:34
+MERGED from [com.android.support:animated-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\animated-vector-drawable-25.3.1.aar\7cc0a210156e8e5f9c546d9dea28ebcd\AndroidManifest.xml:22:5-24:34
+MERGED from [com.android.support:support-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-vector-drawable-25.3.1.aar\d9c0eb42764a96d6f6f64764785251c1\AndroidManifest.xml:22:5-24:34
+MERGED from [com.android.support:support-vector-drawable:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-vector-drawable-25.3.1.aar\d9c0eb42764a96d6f6f64764785251c1\AndroidManifest.xml:22:5-24:34
+MERGED from [com.android.support:support-v4:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-v4-25.3.1.aar\b78c1e386b31e2ccb6d958338755809b\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-v4:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-v4-25.3.1.aar\b78c1e386b31e2ccb6d958338755809b\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-fragment:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-fragment-25.3.1.aar\5b888f13bbe9a985fe2cd720a0e00102\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-fragment:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-fragment-25.3.1.aar\5b888f13bbe9a985fe2cd720a0e00102\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-media-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-media-compat-25.3.1.aar\e6a820a9d2906e3131b54e31a32cbaa7\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-media-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-media-compat-25.3.1.aar\e6a820a9d2906e3131b54e31a32cbaa7\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-core-utils:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-utils-25.3.1.aar\eafa7fe507286add6dafdf5b311e931a\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-core-utils:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-utils-25.3.1.aar\eafa7fe507286add6dafdf5b311e931a\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-core-ui:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-ui-25.3.1.aar\905acfb3ee0681c21339e2547bf7ccea\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-core-ui:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-core-ui-25.3.1.aar\905acfb3ee0681c21339e2547bf7ccea\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-compat-25.3.1.aar\458111cd3a1bd5bdc044212863ddfd40\AndroidManifest.xml:25:5-27:34
+MERGED from [com.android.support:support-compat:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\support-compat-25.3.1.aar\458111cd3a1bd5bdc044212863ddfd40\AndroidManifest.xml:25:5-27:34
+	android:value
+		ADDED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:27:9-31
+	android:name
+		ADDED from [com.android.support:appcompat-v7:25.3.1] C:\Users\yajun_ren\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.3.1.aar\7568505477bceaede282b39825c5a1a3\AndroidManifest.xml:26:9-47

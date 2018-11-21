@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"> 
+	<title>流转卡</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../res/bootstrap/css/bootstrap.min.css">  
+	<script src="../res/bootstrap/js/jquery-1.10.2.min.js"></script>
+	<script src="../res/bootstrap/js/bootstrap.min.js"></script>
+<style type="text/css" media=print>  
+	.noprint{
+		display : none 
+	}   
+</style>  
+<style type="text/css">
+th,td{
+	text-align: center;
+}
+
+</style>
+</head>
+<body>
+	<div style="float: right"><span><input type="button"onclick="javascript:window.print();" value="打印" class="noprint"></span></div>
+	<div style="text-align: center;font-size: 25px;padding-bottom: 2px;">	流转卡</div>
+	<div style="float: right" >
+		<img src="${baseUrl}/porder/barStream.do?context=${bean.no}"><br>
+		<div style="text-align: center;font-size: 6px;">${bean.no}</div>
+	</div><br><br><br><br>
+		<div style="font-size: 15px;width: 100%">
+		<strong>
+			<span>工单编号：</span><span>${bean.no}</span>
+			<span>工艺路径编号：</span><span><#if bean.path.no??>${bean.path.no}</#if></span>
+			<span>产品：</span><span>${bean.part.no}</span>
+			</strong>
+		</div>
+		<table class="table table-striped table-bordered table-condensed table-hover">
+				<thead>
+					<tr>
+						<th>工位顺序</th>
+						<th>工位编号</th>
+						<th>工位名称</th>
+						<th>操作人员</th>
+						<th>不合格数量</th>
+						<th>检验员</th>
+						<th>日期</th>
+						<th>备注</th>
+					</tr>
+				</thead>
+				<tbody>
+				<#if pathUlocs??>
+					<#list pathUlocs as pathUloc>
+						<tr>
+							<td>${pathUloc.seq}</td>
+							<td>${pathUloc.uloc.no}</td>
+							<td>${pathUloc.uloc.name}</td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+					</#list>
+				</#if>
+			</tbody>
+		</table>
+	</body>
+</html>

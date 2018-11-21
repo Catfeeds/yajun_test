@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CrossPointMapper">
+	<select id="getCrossPointUlocByLineId" resultType="com.wis.mes.master.uloc.entity.TmUloc" parameterType="java.util.HashMap">
+	SELECT
+		a.*
+	FROM
+		tm_uloc a
+	LEFT JOIN to_porder_avi_path b ON b.TM_ULOC_ID = a.ID
+	WHERE
+		  a.TM_LINE_ID=#{tmLineId} AND b.IS_ONLINE = 'NO' 
+		<if test="tmUlocIds!=null and tmUlocIds!='' ">
+			AND a.id in (#{tmUlocIds})
+		</if>
+	GROUP BY a.ID
+	</select>
+	
+	<select id="getLastRountingSeq" resultType="java.lang.String" parameterType="java.util.HashMap">
+		SELECT
+			a.ROUTING_SEQ AS routingSeq
+		FROM
+			tp_record_uloc a
+		LEFT JOIN tp_record b ON a.TP_RECORD_ID = b.ID
+		WHERE
+			b.SN = #{SN}
+		AND a.OPERATION_TYPE = 'ULOC_END'
+		ORDER BY a.ID 
+		DESC LIMIT 1
+	</select>
+	
+	<delete id="deleteNotScanSNFromWip" parameterType="java.util.HashMap">
+		DELETE FROM tp_wip  WHERE SN=#{SN} AND id != #{id}
+	</delete>
+	
+	<select id="getWaitCrossSNByUlocId" resultType="com.wis.mes.production.wip.entity.TpWip" parameterType="java.lang.Integer">
+	SELECT
+			a.*
+	FROM
+		tp_wip a
+	LEFT JOIN tp_record b ON a.SN = b.SN
+	WHERE
+		b.ONLINE_TIME IS NOT NULL 
+		AND a.TM_ULOC_ID = #{tmUlocId}
+		limit 0,10
+	</select>
+</mapper>

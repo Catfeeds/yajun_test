@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="FinExportMapper" >
+	<select id="getFinExportInfo" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+    	SELECT * FROM ( 
+                   SELECT ROW_.* , ROWNUM ROWNUM_  
+                    FROM (
+                           select to_char(fds.create_time, 'yyyy/MM/dd') as dateShow,
+					       decode(fds.shift_no, '1', '白班', '2', '晚班') as shiftNo,
+					       fds.no as noShow,
+					       (select fs.columns from FIN_SPECIFICATIONS fs where fs.no = fds.no) as columnsShow,   
+					       (select fs.segment from FIN_SPECIFICATIONS fs where fs.no = fds.no) as segmentShow,
+					       (select fs.slices from FIN_SPECIFICATIONS fs where fs.no = fds.no)  as slicesShow,
+					       fds.device_status as deviceStatus,
+					       decode(fds.device_status,'1','停止','2','故障','3','运行','4','非故障停机','5','通讯丢失') as deviceStatusShow,
+					       to_char(fds.begin_time,'hh24:mi:ss') as beginTime,
+					       to_char(fds.finish_time,'hh24:mi:ss') as finishTime,
+					       to_char(fds.begin_time,'yyyy-MM-dd') as workTime,
+					       to_char(fds.begin_time,'yyyy-MM-dd hh24:mi:ss') as beginTimeAllShow,
+			               to_char(fds.finish_time,'yyyy-MM-dd hh24:mi:ss') as finishTimeAllShow,
+			               concat(ROUND(TO_NUMBER(fds.finish_time-fds.begin_time) * 24 * 60*60),'') as timeLong
+<!-- 					       concat(concat(trunc(ROUND(TO_NUMBER(fds.finish_time-fds.begin_time) * 24 * 60*60)/60),'min'), concat(mod(ROUND(TO_NUMBER(fds.finish_time-fds.begin_time) * 24 * 60*60),60),'s')) as timeLong -->
+					  from FIN_DEVICE_STATUS fds
+					  where 1=1
+					     and fds.finish_time is not null
+					  	 <if test="isRest!=null and isRest!='' and isRest=='YES'">
+							 and fds.shift_no != '0'
+						 </if>
+					     <if test="createTimeStart!=null and createTimeStart!='' ">
+							 and fds.begin_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd hh24:mi')
+						 </if>
+						 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+						 	and fds.finish_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd hh24:mi')
+						 </if>   
+						 <if test="shiftNo!=null and shiftNo!='' ">
+						 	and fds.shift_no = #{shiftNo}
+						 </if>
+						 <if test="noShow!=null and noShow!='' ">
+						 	and fds.no = #{noShow}
+						 </if>
+						 <if test="deviceStatus!=null and deviceStatus!='' ">
+							 and fds.device_status = #{deviceStatus}
+						 </if>
+						<!--  <if test="orderField!='oenLevelStatusContent' and orderField!='twoLevelStatusContent'">
+						 	order by ${orderField} ${orderDirection}
+						 </if> -->
+						  <choose>
+				                <when test="orderField!='oenLevelStatusContent' and orderField!='twoLevelStatusContent'">
+				                    order by ${orderField} ${orderDirection}
+				                </when>
+				                <otherwise>
+				                    order by ${orderField} ${orderDirection}
+				                </otherwise>
+				          </choose>
+                        )  ROW_ 
+                 )    
+      <!--   <if test="firstRow != null and lastRow != null">
+		WHERE ROWNUM_ <![CDATA[ > ]]> #{firstRow} AND #{lastRow} <![CDATA[ >= ]]> ROWNUM_
+	</if>     -->    
+	</select>
+	
+	<select id="getFinExportInfoCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		select count(*)
+		  from FIN_DEVICE_STATUS fds
+		  where 1=1
+		  	and fds.finish_time is not null
+		  	 <if test="isRest!=null and isRest!='' and isRest=='YES'">
+				  and fds.shift_no != '0'
+			 </if>
+		     <if test="createTimeStart!=null and createTimeStart!='' ">
+				 and fds.begin_time &gt;= to_date(#{createTimeStart},'yyyy-MM-dd hh24:mi')
+			 </if>
+			 <if test="createTimeEnd!=null and createTimeEnd!='' ">
+			 	and fds.finish_time &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd hh24:mi')
+			 </if>   
+	</select>
+	
+	<select id="getOneLevelStatusContent" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		   select decode(count(twr.id),0, '早会点检', '休息') as oneLevelStatusContent 
+		   	 from tm_worktime_rest twr 
+		   	 where twr.tm_worktime_id in (SELECT tw.id
+		     from tm_worktime tw, ts_global_configuration tgc
+		    where tw.enabled = 'ON'
+		      and tw.tm_line_id = tgc.sys_value
+		      and tgc.sys_value = '235'
+		      and tw.shiftno = #{shiftNo}
+		      and tw.work_date = to_date(#{workDate},'yyyy-MM-dd')) 
+		      and to_date(twr.start_time,'hh24:mi:ss') &lt;= to_date(#{beginTime},'hh24:mi:ss') 
+		      and to_date(twr.end_time,'hh24:mi:ss') &gt;= to_date(#{endTime},'hh24:mi:ss')
+	</select>
+	<select id="getFinFaultedCodeName" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		  select f.faulted_code as faultedCode,
+		       (select tde.entry_name
+		          from ts_dict_type tdt, ts_dict_entry tde
+		         where tdt.type_code = 'FAULTED_DETAILS_CODE'
+		           and tdt.id = tde.type_id
+		           and f.faulted_code = tde.entry_code) as entryName
+		  from fin_faulted f
+		 where  f.shift_no =  #{shiftNo} and f.faulted_code !='999' and f.faulted_code is not null
+		 and (to_date(to_char(f.create_time,'yyyy-MM-dd')||' '||f.begin,'yyyy-MM-dd HH24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') 
+		 and to_date(to_char(f.create_time,'yyyy-MM-dd')||' '||f.finish,'yyyy-MM-dd HH24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') 
+		 	or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(f.create_time,'yyyy-MM-dd')||' '||f.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(f.create_time,'yyyy-MM-dd')||' '||f.finish),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(f.create_time,'yyyy-MM-dd')||' '||f.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(f.create_time,'yyyy-MM-dd')||' '||f.finish),'yyyy-MM-dd hh24:mi:ss') )
+		 and rownum = 1
+	</select>
+	<select id="getFinNoFaultedName" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		 select a.noFalultStop noFalultStop,
+		     a.duration duration,
+		 	 a.beginTime beginTime,
+		 	 a.finishTime finishTime
+		 from 
+			(
+			select '切换停机' as noFalultStop,
+			    fss.duration duration,
+               fss.begin beginTime,
+               fss.finish finishTime
+			from FIN_SWITCH_STOP fss
+			 where 1=1 
+			 <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fss.shift_no = #{shiftNo}
+			 </if>
+			 and (to_date((to_char(fss.create_time,'yyyy-MM-dd')||' '||fss.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fss.create_time,'yyyy-MM-dd')||' '||fss.finish),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fss.create_time,'yyyy-MM-dd')||' '||fss.begin),'yyyy-MM-dd hh24:mi:ss')
+					and to_date((to_char(fss.create_time,'yyyy-MM-dd')||' '||fss.finish),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fss.create_time,'yyyy-MM-dd')||' '||fss.begin),'yyyy-MM-dd hh24:mi:ss')
+					and to_date((to_char(fss.create_time,'yyyy-MM-dd')||' '||fss.finish),'yyyy-MM-dd hh24:mi:ss'))
+			union all
+			select '换料停机' as noFalultStop,
+			fcms.duration duration,
+			fcms.begin beginTime,
+			fcms.finish finishTime
+			from FIN_CHANGE_MATERIAL_STOP fcms
+			 where 1=1 
+			 <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fcms.shift_no = #{shiftNo}
+			 </if>
+			 and (to_date((to_char(fcms.create_time,'yyyy-MM-dd')||' '||fcms.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fcms.create_time,'yyyy-MM-dd')||' '||fcms.finish),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or
+			 to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fcms.create_time,'yyyy-MM-dd')||' '||fcms.begin),'yyyy-MM-dd hh24:mi:ss')
+			 	and to_date((to_char(fcms.create_time,'yyyy-MM-dd')||' '||fcms.finish),'yyyy-MM-dd hh24:mi:ss')
+			 or to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fcms.create_time,'yyyy-MM-dd')||' '||fcms.begin),'yyyy-MM-dd hh24:mi:ss')
+			 	and to_date((to_char(fcms.create_time,'yyyy-MM-dd')||' '||fcms.finish),'yyyy-MM-dd hh24:mi:ss'))
+			union all
+			select '加油停机' as noFalultStop,
+			faos.duration duration, 
+			faos.begin beginTime,
+			faos.finish finishTime
+			from FIN_ADD_OIL_STOP faos
+			 where 1=1 
+			  <if test="shiftNo!=null and shiftNo!='' ">
+			 	and faos.shift_no = #{shiftNo}
+			 </if>
+			 	and (to_date((to_char(faos.create_time,'yyyy-MM-dd')||' '||faos.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+				and to_date((to_char(faos.create_time,'yyyy-MM-dd')||' '||faos.finish),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+				or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(faos.create_time,'yyyy-MM-dd')||' '||faos.begin),'yyyy-MM-dd hh24:mi:ss')
+					and to_date((to_char(faos.create_time,'yyyy-MM-dd')||' '||faos.finish),'yyyy-MM-dd hh24:mi:ss')
+				or to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(faos.create_time,'yyyy-MM-dd')||' '||faos.begin),'yyyy-MM-dd hh24:mi:ss')
+					and to_date((to_char(faos.create_time,'yyyy-MM-dd')||' '||faos.finish),'yyyy-MM-dd hh24:mi:ss'))
+			) a where a.noFalultStop is not null
+	</select>
+	<select id="getFinNoFaultSwitchStopName" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+	select a.twoLevelName twoLevelName,a.beginTime beginTime,a.finishTime finishTime,a.duration duration from (
+		select '等待集料架转动' as twoLevelName,
+		fwfr.begin beginTime,
+		fwfr.finish finishTime,
+		fwfr.duration duration
+		  from FIN_WAIT_FRAME_ROTATE fwfr
+		 where 1=1
+		  <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fwfr.shift_no = #{shiftNo}
+			 </if> 
+			and (to_date((to_char(fwfr.create_time,'yyyy-MM-dd')||' '||fwfr.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fwfr.create_time,'yyyy-MM-dd')||' '||fwfr.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fwfr.create_time,'yyyy-MM-dd')||' '||fwfr.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fwfr.create_time,'yyyy-MM-dd')||' '||fwfr.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fwfr.create_time,'yyyy-MM-dd')||' '||fwfr.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fwfr.create_time,'yyyy-MM-dd')||' '||fwfr.begin),'yyyy-MM-dd hh24:mi:ss'))
+		   union all
+		  select '集料架转动' as twoLevelName,
+		  	ffr.begin beginTime,
+			ffr.finish finishTime,
+			ffr.duration duration
+		    from FIN_FRAME_ROTATE ffr
+		   where 1=1
+		   	<if test="shiftNo!=null and shiftNo!='' ">
+			 	and ffr.shift_no = #{shiftNo}
+			 </if>  
+			and (to_date((to_char(ffr.create_time,'yyyy-MM-dd')||' '||ffr.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(ffr.create_time,'yyyy-MM-dd')||' '||ffr.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(ffr.create_time,'yyyy-MM-dd')||' '||ffr.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(ffr.create_time,'yyyy-MM-dd')||' '||ffr.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(ffr.create_time,'yyyy-MM-dd')||' '||ffr.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(ffr.create_time,'yyyy-MM-dd')||' '||ffr.begin),'yyyy-MM-dd hh24:mi:ss'))
+		     union all
+		  select  '取料' as twoLevelName,
+		  	ffm.begin beginTime,
+			ffm.finish finishTime,
+			ffm.duration duration
+		    from FIN_FETCH_MATERIAL ffm
+		   where 1=1
+		   	<if test="shiftNo!=null and shiftNo!='' ">
+			 	and ffm.shift_no = #{shiftNo}
+			 </if>   
+			and (to_date((to_char(ffm.create_time,'yyyy-MM-dd')||' '||ffm.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(ffm.create_time,'yyyy-MM-dd')||' '||ffm.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(ffm.create_time,'yyyy-MM-dd')||' '||ffm.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(ffm.create_time,'yyyy-MM-dd')||' '||ffm.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(ffm.create_time,'yyyy-MM-dd')||' '||ffm.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(ffm.create_time,'yyyy-MM-dd')||' '||ffm.begin),'yyyy-MM-dd hh24:mi:ss'))
+		     union all
+		  select '等待切换' as twoLevelName,
+		 	fws.begin beginTime,
+			fws.finish finishTime,
+			fws.duration duration
+		    from FIN_WAIT_SWITCH fws
+		   where 1=1
+		   <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fws.shift_no = #{shiftNo}
+			 </if>  
+			 and (to_date((to_char(fws.create_time,'yyyy-MM-dd')||' '||fws.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fws.create_time,'yyyy-MM-dd')||' '||fws.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fws.create_time,'yyyy-MM-dd')||' '||fws.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fws.create_time,'yyyy-MM-dd')||' '||fws.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fws.create_time,'yyyy-MM-dd')||' '||fws.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fws.create_time,'yyyy-MM-dd')||' '||fws.begin),'yyyy-MM-dd hh24:mi:ss'))
+		     union all
+		  select '切换' as twoLevelName,
+		  	fs.begin beginTime,
+			fs.finish finishTime,
+			fs.duration duration
+		    from FIN_SWITCH fs
+		   where 1=1
+		   <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fs.shift_no = #{shiftNo}
+			 </if>  
+			 and (to_date((to_char(fs.create_time,'yyyy-MM-dd')||' '||fs.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fs.create_time,'yyyy-MM-dd')||' '||fs.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fs.create_time,'yyyy-MM-dd')||' '||fs.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fs.create_time,'yyyy-MM-dd')||' '||fs.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fs.create_time,'yyyy-MM-dd')||' '||fs.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fs.create_time,'yyyy-MM-dd')||' '||fs.begin),'yyyy-MM-dd hh24:mi:ss'))
+		     ) a where a.twoLevelName is not null
+	</select>
+	<select id="getFinNoFaultChangeMaterial" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+	select a.twoLevelName from (
+		select  '等待换料' as twoLevelName,
+		 	fwcm.begin beginTime,
+			fwcm.finish finishTime,
+			fwcm.duration duration
+		  from FIN_WAIT_CHANGE_MATERIAL fwcm
+		 where 1=1
+		    <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fwcm.shift_no = #{shiftNo}
+			 </if>  
+			and (to_date((to_char(fwcm.create_time,'yyyy-MM-dd')||' '||fwcm.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fwcm.create_time,'yyyy-MM-dd')||' '||fwcm.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fwcm.create_time,'yyyy-MM-dd')||' '||fwcm.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fwcm.create_time,'yyyy-MM-dd')||' '||fwcm.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fwcm.create_time,'yyyy-MM-dd')||' '||fwcm.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fwcm.create_time,'yyyy-MM-dd')||' '||fwcm.begin),'yyyy-MM-dd hh24:mi:ss'))
+		    union all
+		  select '换料' as twoLevelName,
+		 	fcm.begin beginTime,
+			fcm.finish finishTime,
+			fcm.duration duration
+		    from FIN_CHANGE_MATERIAL fcm
+		   where  1=1
+		     <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fcm.shift_no = #{shiftNo}
+			 </if>
+			 and (to_date((to_char(fcm.create_time,'yyyy-MM-dd')||' '||fcm.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fcm.create_time,'yyyy-MM-dd')||' '||fcm.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fcm.create_time,'yyyy-MM-dd')||' '||fcm.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fcm.create_time,'yyyy-MM-dd')||' '||fcm.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fcm.create_time,'yyyy-MM-dd')||' '||fcm.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fcm.create_time,'yyyy-MM-dd')||' '||fcm.begin),'yyyy-MM-dd hh24:mi:ss'))
+		     )a where a.twoLevelName is not null
+	</select>
+	<select id="getFinNoFaultAddOil" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select a.twoLevelName,a.beginTime beginTime,a.finishTime finishTime,a.duration duration from (
+	    select '等待加油' as twoLevelName,
+	   		fwao.begin beginTime,
+			fwao.finish finishTime,
+			fwao.duration duration
+	      from FIN_WAIT_ADD_OIL fwao
+	     where 1=1
+	    	 <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fwao.shift_no = #{shiftNo}
+			 </if>
+            and (to_date((to_char(fwao.create_time,'yyyy-MM-dd')||' '||fwao.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fwao.create_time,'yyyy-MM-dd')||' '||fwao.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fwao.create_time,'yyyy-MM-dd')||' '||fwao.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fwao.create_time,'yyyy-MM-dd')||' '||fwao.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fwao.create_time,'yyyy-MM-dd')||' '||fwao.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fwao.create_time,'yyyy-MM-dd')||' '||fwao.begin),'yyyy-MM-dd hh24:mi:ss'))
+		     )a where a.twoLevelName is not null
+	       union all
+	      select '加油' as twoLevelName,
+	      		fao.begin beginTime,
+				fao.finish finishTime,
+				fao.duration duration
+	        from FIN_ADD_OIL fao
+	       where 1=1
+	       <if test="shiftNo!=null and shiftNo!='' ">
+			 	and fao.shift_no = #{shiftNo}
+			 </if>
+			 and (to_date((to_char(fao.create_time,'yyyy-MM-dd')||' '||fao.begin),'yyyy-MM-dd hh24:mi:ss') &gt;= to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss')
+			and to_date((to_char(fao.create_time,'yyyy-MM-dd')||' '||fao.begin),'yyyy-MM-dd hh24:mi:ss') &lt;= to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{beginTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fao.create_time,'yyyy-MM-dd')||' '||fao.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fao.create_time,'yyyy-MM-dd')||' '||fao.begin),'yyyy-MM-dd hh24:mi:ss')
+			or 
+				to_date(#{endTime},'yyyy-MM-dd hh24:mi:ss') between to_date((to_char(fao.create_time,'yyyy-MM-dd')||' '||fao.begin),'yyyy-MM-dd hh24:mi:ss') 
+				and to_date((to_char(fao.create_time,'yyyy-MM-dd')||' '||fao.begin),'yyyy-MM-dd hh24:mi:ss'))
+	         ) a where a.twoLevelName is not null
+	</select>
+</mapper>  

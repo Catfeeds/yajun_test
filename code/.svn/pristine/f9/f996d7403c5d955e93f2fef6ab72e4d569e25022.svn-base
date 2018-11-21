@@ -1,0 +1,109 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.baic</groupId>
+		<artifactId>mes</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>mes-config</artifactId>
+	<properties>
+		<!-- jdbc -->
+		<jdbc.driver.groupId>mysql</jdbc.driver.groupId>
+		<jdbc.driver.artifactId>mysql-connector-java</jdbc.driver.artifactId>
+		<jdbc.driver.version>5.1.31</jdbc.driver.version>
+		<!-- 
+		<jdbc.driver.groupId>oracle.jdbc</jdbc.driver.groupId>
+		<jdbc.driver.artifactId>ojdbc</jdbc.driver.artifactId>
+		<jdbc.driver.version>6.0</jdbc.driver.version> 
+		<jdbc.driver.groupId>com.microsoft.sqlserver</jdbc.driver.groupId>
+		<jdbc.driver.artifactId>sqljdbc4</jdbc.driver.artifactId>
+		<jdbc.driver.version>4.0</jdbc.driver.version>
+		-->
+	</properties>
+	<dependencies>
+		<!-- JDBC driver -->
+		<dependency>
+			<groupId>${jdbc.driver.groupId}</groupId>
+			<artifactId>${jdbc.driver.artifactId}</artifactId>
+			<version>${jdbc.driver.version}</version>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+			<id>refresh-db</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<configuration>
+							<target>
+								<taskdef resource="net/sf/antcontrib/antlib.xml" />
+								<property file="src/main/resources/dbconfig.properties" />
+								<property file="src/main/resources/sysconfig.properties" />
+								<propertyregex property="database.name" input="${master.database.url}"
+									regexp=":([^:]*):" select="\1" casesensitive="false" />
+								<property name="bmpmodule.dir" location="${basedir}\..\qis-bpm" />
+								<property name="bmp.sql.dir"
+									location="${bmpmodule.dir}/src/main/resources/sql/${database.name}" />
+
+								<echo message="clear redis cache" />
+								<exec executable="cmd.exe">
+									<arg line="/c redis-cli flushdb" />
+								</exec>
+
+								<echo message="running script for database: ${database.name}" />
+
+								<!-- 删除表 -->
+								<for param="file">
+									<fileset dir="src/main/resources/sql/drop/${database.name}" />
+									<sequential>
+										<sql driver="${database.driver}" url="${master.database.url}"
+											userid="${master.database.user}" password="${master.database.password}"
+											src="@{file}" encoding="utf-8" onerror="continue">
+											<classpath refid="maven.compile.classpath" />
+										</sql>
+									</sequential>
+								</for>
+								<!-- 创建表 -->
+								<for param="file">
+									<fileset dir="src/main/resources/sql/create/${database.name}" />
+									<sequential>
+										<sql driver="${database.driver}" url="${master.database.url}"
+											userid="${master.database.user}" password="${master.database.password}"
+											src="@{file}" encoding="utf-8" onerror="abort">
+											<classpath refid="maven.compile.classpath" />
+										</sql>
+									</sequential>
+								</for>
+								<!-- 初始化数据 -->
+								<for param="file">
+									<fileset dir="src/main/resources/sql/init/${database.name}" />
+									<sequential>
+										<sql driver="${database.driver}" url="${master.database.url}"
+											userid="${master.database.user}" password="${master.database.password}"
+											src="@{file}" encoding="utf-8" onerror="abort">
+											<classpath refid="maven.compile.classpath" />
+										</sql>
+									</sequential>
+								</for>
+								<!-- 初始化测试数据 -->
+								<for param="file">
+									<fileset dir="src/main/resources/sql/test/${database.name}" />
+									<sequential>
+										<sql driver="${database.driver}" url="${master.database.url}"
+											userid="${master.database.user}" password="${master.database.password}"
+											src="@{file}" encoding="utf-8" onerror="continue">
+											<classpath refid="maven.compile.classpath" />
+										</sql>
+									</sequential>
+								</for>
+							</target>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

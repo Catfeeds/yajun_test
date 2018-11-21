@@ -1,0 +1,137 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+$(function(){
+	$("#beginTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'endTime\')}'});
+	});
+	$("#endTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'beginTime\')}'});
+	});
+});
+function delegate(){
+    var rows = getSelectedRows('dg${currentPageId}');
+    if(rows.length<1){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    if(rows.length!=1){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    BootstrapDialog.show({
+		size : BootstrapDialog.SIZE_WIDE,
+		title : '<@s.m code="USER_SELECT" />',
+		message : function(dialog) {
+			var $message = $('<div></div>');
+			var pageToLoad = dialog.getData('pageToLoad');
+			$message.load(pageToLoad);
+
+			return $message;
+		},
+		buttons : [ {
+			label : commons_msg.btnConfirm,
+			cssClass : 'btn-primary',
+			action : function(dialogRef) {
+			    var selectedRows=getSelectedRows('dgUserSelectGrid');
+				if (selectedRows.length > 0) {
+					ajaxRequest('${baseUrl}/bpm/task/todo/manage/taskDelegate.do',{'userId' : selectedRows[0].id,'taskId' : rows[0].id},function(){
+						reloadTable('dg${currentPageId}');
+						dialogRef.close();
+					});
+				
+				}else{
+					infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+				}
+
+			}
+		}, {
+			label : commons_msg.btnClose,
+			cssClass : 'btn-default',
+			action : function(dialogRef) {
+				dialogRef.close();
+			}
+		} ],
+		data : {
+			'pageToLoad' : '${baseUrl}/user/listSelect.do?currentPageId=UserSelectGrid&singleSelect=true'
+		}
+	});        
+
+}
+
+function showHistory(){
+    var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var id = rows[0].processInstanceId;
+    showProcHistory(id, 'dg${currentPageId}');
+}
+function prepareJump(){
+    var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var id = rows[0].processInstanceId;
+    var url = '${baseUrl}/bpm/task/taskPrepareJump.do?executionId='+id;
+    createwindow('<@s.m code="BPM_TASK_TITLE_PREPAREJUMP" />', url,'dg${currentPageId}' );
+}
+function taskRollBack(){
+    var rows = getSelectedRows('dg${currentPageId}');
+    if(1 != rows.length){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var id = rows[0].id;
+    BootstrapDialog.confirm({
+    	title : commons_msg.btnDelete,
+		message : '<@s.m code="BPM_TASK_ROLLBACK"/>',
+		closable : true,
+		draggable : true, 
+		btnCancelLabel : commons_msg.btnCancel, 
+		btnOKLabel : commons_msg.btnConfirm,
+		callback : function(result) {
+        	if (result) {
+        		ajaxRequest('${baseUrl}/bpm/task/taskRollback.do', {
+        			'taskId' :  id
+      	      	}, function() {
+	      	    	reloadTable('dg${currentPageId}');
+	            });
+        	}
+		}
+    });
+}
+</script>
+<@p.body title="BPM_TASK_LIST_RUN_TASK_TITLE"   permissionModule="RUNNIG_TASK_MANAGEMENT">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="HISTORIC_PROCESS_STARTUSERID_ACCOUNT"  permissionCode="USER_ACCOUNT"  field="taskAssigneeLike"></@p.input>
+			<@p.input title="BPM_TASK_COL_NAME" field="taskNameLike"></@p.input>
+			<@p.input title="PROCESS_INSTANCE_PROCESS" field="processInstanceNameLike"></@p.input>
+			<@p.input title="BPM_TASK_COL_INITIATOR" field="initiatorNameLike"></@p.input>
+			<@p.input title="DATETIME_START" field="taskCreatedAfter" id="beginTime"></@p.input>
+			<@p.input title="DATETIME_END" field="taskCreatedBefore" id="endTime"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar>
+			<@p.button title="BPM_TASK_PROXY" permissionCode="RunningTaskDelegate" onclick="delegate()" iconCls="exchange"></@p.button>
+			<@p.button title="PROCESS_VALUE_PICTURE" permissionCode="RunningTaskPicture" onclick="showHistory()"  iconCls="h-sign"></@p.button>
+			<@p.button title="PROCESS_INSTANCE_BUTTON_JUMP" permissionCode="RunningTaskJump" onclick="prepareJump()" iconCls="retweet"></@p.button>
+			<!-- <@p.button title="PROCESS_INSTANCE_BUTTON_ROLLBACK" permissionCode="RunningTaskRollback" onclick="taskRollBack()"  iconCls="undo"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/task/manage/runList.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="BPM_TASK_COL_NAME" field="name"  permissionCode="NAME"  width="120"></@p.column>
+		<@p.column title="PROCESS_INSTANCE_PROCESS"   permissionCode="PROCESS_NAME" width="300" field="processInstanceName" ></@p.column>
+		<@p.column title="BPM_TASK_COL_CREATETIME"  permissionCode="CREATE_TIME"  field="createTime" width="120"></@p.column>
+		<@p.column title="BPM_TASK_COL_ASSIGNEE"  permissionCode="ASSIGNEE"    field="taskOwnersStr" width="120"></@p.column>
+		<@p.column title="BPM_TASK_COL_INITIATOR"  permissionCode="INITIATOR"    field="processInitiator" width="150"></@p.column>
+		<!-- 
+		<@p.column title="BPM_TASK_COL_DESCRIPTION"   permissionCode="DESCRIPTION" field="description" width="300"></@p.column>
+		 -->
+	</@p.dataGrid>
+</@p.body>
+

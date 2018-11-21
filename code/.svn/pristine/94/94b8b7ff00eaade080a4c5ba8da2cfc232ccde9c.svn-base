@@ -1,0 +1,72 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+	function renderFormPermission(value) {
+		return entryRenderer('FORM_PERMISSION_MODULE', value);
+	}
+function  addFormPermission() {
+		BootstrapDialog.show({
+			size : BootstrapDialog.SIZE_WIDE,
+			title : '<@s.m code="SELECT_PERMISSION" />',
+			message : function(dialog) {
+				var $message = $('<div></div>');
+				var pageToLoad = dialog.getData('pageToLoad');
+				$message.load(pageToLoad);
+
+				return $message;
+			},
+			buttons : [ {
+				label : commons_msg.btnConfirm,
+				cssClass : 'btn-primary',
+				action : function(dialogRef) {
+					var rows = getSelectedRows('dgFormPerSelectGrid');
+					if (rows.length > 0) {
+						var ids = getSelectedIds('dgFormPerSelectGrid');
+						ajaxRequest('${baseUrl}/formPermissionSet/savePermissionRelation.do', {
+							'permissionIds' : JSON.stringify(ids),'setId' :'${permissionSetId}'
+						}, function() {
+							reloadTable('formPermissionGrantGrid');
+							dialogRef.close();
+						});
+					
+					}else{
+						infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+					}
+
+				}
+			}, {
+				label : commons_msg.btnClose,
+				cssClass : 'btn-default',
+				action : function(dialogRef) {
+					dialogRef.close();
+				}
+			} ],
+			data : {
+				'pageToLoad' : '${baseUrl}/formPermissionSet/listSelect.do?currentPageId=FormPerSelectGrid'
+			}
+		});
+        
+}
+</script>
+<@p.body permissionModule="FORM_PERMISSION" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="formPermissionGrantGrid" >
+		<@p.searchColumns >
+	    	<@p.input title="PERMISSION_MODULE" type="select" field="module"  options=moduleOptions  permissionCode="PERMISSION_MODULE"></@p.input>
+			<@p.input title="PERMISSION_CODE" field="code"  permissionCode="PERMISSION_CODE"></@p.input>
+			<@p.input title="PERMISSION_NAME" field="name"  permissionCode="PERMISSION_NAME"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar   id="tbPermissionGrantGrid">
+			<@p.button title="BTN_ADD"  iconCls="plus"   onclick="addFormPermission()" ></@p.button>
+			<@p.button title="BTN_DELETE" iconCls="trash"  type="delete"   url="${baseUrl}/formPermissionSet/deletePermissionRelation.do?setId=${permissionSetId}" ></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/formPermission/list.do?queryCondition[permissionSetId]=${permissionSetId}"  id="formPermissionGrantGrid">
+		<@p.column title="Id" checkbox="true" field="Id" ></@p.column>
+		<@p.column title="PERMISSION_MODULE" field="module"  permissionCode="PERMISSION_MODULE"   formatter="renderFormPermission"></@p.column>
+		<@p.column title="PERMISSION_CODE" field="code"  permissionCode="PERMISSION_CODE" ></@p.column>
+		<@p.column title="PERMISSION_NAME" field="name"  permissionCode="PERMISSION_NAME" ></@p.column>
+		<@p.column title="PERMISSION_DESCRIPTION" field="description"  permissionCode="PERMISSION_DESCRIPTION" ></@p.column>
+	</@p.dataGrid>
+</@p.body>	
+

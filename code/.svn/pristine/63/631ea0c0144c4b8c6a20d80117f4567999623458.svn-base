@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="format-detection" content="telephone=no" />
+	<title>R5产线MES系统</title>
+	<!--<link rel="shortcut icon" href="${baseUrl}/res/images/main/parameter_title.jpg">-->
+	<link rel="stylesheet" href="../../mui/css/mui.min.css" />
+	<link href="../../mui/css/mui.picker.css" rel="stylesheet" />
+	<link href="../../mui/css/mui.poppicker.css" rel="stylesheet" />
+	<link href="../../mui/css/app.css" rel="stylesheet" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+</head>
+<style>
+	.page-content {
+		background: #FFFFFF;
+	}
+	.title-form-group {
+		border-radius: 5px;
+		margin: 0em 0em 1.5em 0em;
+		border: 0.5px solid #ccc;
+	}
+	.title-form-group label {
+		background: #F0F0F0;
+		border-radius: 5px;
+	}
+	.title-form-group div {
+		border-bottom: 1px solid #F2F2F2;
+	}
+	.edit-label-color {
+	 color: #0062cc;;
+	}
+	.nav-bth{
+		background: #FFFFFF;
+		height: 3.5em;
+		position: fixed;
+		bottom: 0;
+		width: 100%;
+		text-align: -webkit-center;
+		border-bottom: 1px solid #F0F0F0;
+		border-top: 1px solid #F0F0F0;
+	}
+	.nav-bth button{
+		height: 2.5em;
+		background: #007AFF;
+		color: #FFFFFF;
+		font-size: 14px;
+		border-radius: 10px;
+		padding: 5px;
+		margin-top: 9px;
+	}
+	.custom-search{
+		background:url(../../images/sweep_code.png) no-repeat left center;
+		background-color: #F2F2F2F2 !important;
+		border-radius: 5px !important;
+		text-indent: 20px;
+		margin-bottom: 5px;
+	}
+</style>
+<body>
+<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">队列较正</h1>
+</header>
+<div  style="background: #fff;height:100%;margin-bottom: 3.5em;">
+	<div class="page-content" style="margin-top:50px;margin-left:10px;margin-right:10px;">
+		<div class="title-form-group">
+			<div class="mui-input-row my-input-row">
+				<label>工&nbsp;位：</label>
+				<input type="text" onkeydown="getSNInfo('ULOC',this.value)" id="ulocNo"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>SN：</label>
+				<input type="text" id="getSN"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>背番号：</label>
+				<input type="text" id="getBackNumber"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机种名：</label>
+				<input type="text" id="getMachineOfName"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机&nbsp;&nbsp;号：</label>
+				<input type="text" id="getMachineName"/>
+			</div>
+		</div>
+		<div class="mui-input-row">
+			<input type="text" id="searchVal" class="mui-input-clear custom-search" placeholder="" onkeydown="getSNInfo('SN',this.value)" >
+		</div>
+		<div class="title-form-group">
+			<div class="mui-input-row my-input-row">
+				<label>SN：</label>
+				<input type="text" id="snInfo"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>背番号：</label>
+				<input type="text" id="backNumInfo"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机种名：</label>
+				<input type="text" id="machineOfNameInfo"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机&nbsp;&nbsp;号：</label>
+				<input type="text" id="machineNameInfo"/>
+			</div>
+		</div>
+
+		<div class="title-form-group">
+            <label> 标签信息</label>
+			<div class="mui-input-row my-input-row">
+				<label>标签ID：</label>
+				<input type="text" id="tagId"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>SN：</label>
+				<input type="text" id="tagSn"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>背番号：</label>
+				<input type="text" id="tagBackNum"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机种名：</label>
+				<input type="text" id="tagMachineOfName"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机&nbsp;&nbsp;号：</label>
+				<input type="text" id="tagMachineName"/>
+			</div>
+		</div>
+	</div>
+	<!--<input id="sn1" type="text"/>
+	<input type="text" id="sn2"/>
+    <input type="text" id="sn3"/>-->
+	<div class="nav-bth">
+		<button type="button" onclick="readTag('EPC_USER')">读取标签</button>
+		<!--<button type="button"  onclick="readTag('readEpc')">标签ID</button>
+		<button type="button"  onclick="readTag('readUser')">标签SN</button>-->
+        <button type="button"  onclick="writeUserTag()">写入SN</button>
+        <button type="button"  onclick="checkSN()">校验SN</button>
+        <button type="button"  onclick="clearInput()">清空</button>
+	</div>
+</div>
+<script src="../../mui/js/mui.min.js"></script>
+<script src="../../mui/js/app.js"></script>
+<script src="../../js/jquery-1.8.0.min.js"></script>
+<script>
+	function scanSN(value){
+	    $("#searchVal").val(value);
+		var data = {};
+        var url = "faultMachineApp/getSnInfo.do";
+        data.sn = value;
+        $("#searchVal").val("");
+        $("#snInfo").val("");
+        $("#backNumInfo").val("");
+        $("#machineOfNameInfo").val("");
+        $("#machineNameInfo").val("");
+         if(value.length<22){
+            mui.toast("SN长度不到22位!");
+            return;
+        }
+        getData('SN',url,data);
+	}
+function readTag(type){
+	if(type=="EPC_USER"){
+		app.readTag('readUser');
+		 $("#tagId").val("");
+        $("#tagSn").val("");
+	}
+}
+
+function readEpcData(val){
+	$("#tagId").val(val);
+}
+
+function readUserData(val){
+	$("#tagSn").val(val);
+	getSNInfo("TAG_SN",val);
+	app.readTag('readEpc');
+}
+function writeUserTag(){
+    var snInfo = document.getElementById("snInfo").value;
+    var ulocNo = $("#ulocNo").val();
+    if(!ulocNo){
+        mui.toast("工位号不能为空!");
+        return;
+    }
+    if(!snInfo){
+        mui.toast("请扫描SN!");
+        return;
+    }
+    app.ajaxRequest({
+            url:"faultMachineApp/plcWrite.do",
+            data:{
+                "ulocNo":ulocNo,
+                "sn":snInfo
+            },
+            callback:function(result){
+                if(result){
+                    app.writeTag("writeUser",snInfo);
+                }
+            }
+     });
+}
+function getSNInfo(type,value){
+    var data = {};
+    var url = "";
+    if(type=="ULOC"){
+        url = "faultMachineApp/ulocToPlcSn.do";
+        data.ulocNo = value;
+    }else if(type=="SN" || type=="TAG_SN"){
+        url = "faultMachineApp/getSnInfo.do";
+        data.sn = value;
+    }
+	if(event&&event.keyCode&&parseInt(event.keyCode)==13){
+	    if(type=="ULOC"){
+	        $("#getSN").val("");
+            $("#getBackNumber").val("");
+            $("#getMachineOfName").val("");
+            $("#getMachineName").val("");
+	    } else if(type=="SN"){
+	        $("#searchVal").val("");
+	        $("#snInfo").val("");
+	        $("#backNumInfo").val("");
+	        $("#machineOfNameInfo").val("");
+	        $("#machineNameInfo").val("");
+	         if(value.length<22){
+	            mui.toast("SN长度不到22位!");
+	            return;
+	        }
+	    }else if(type=="TAG_SN"){
+	        $("#tagBackNum").val("");
+	        $("#tagMachineOfName").val("");
+	        $("#tagMachineName").val("");
+	    }
+	    getData(type,url,data);
+	 }
+   if(type=="TAG_SN"){
+        $("#tagBackNum").val("");
+        $("#tagMachineOfName").val("");
+        $("#tagMachineName").val("");
+        getData(type,url,data);
+    }
+}
+
+function getData(type,url,data){
+    app.ajaxRequest({
+            url:url,
+            data:data,
+            callback:function(result){
+                if(result){
+                    if(result.success){
+                        mui.toast("操作执行成功!");
+                    }
+                    if(result.data){
+                        var data = result.data;
+                        if(type=="ULOC"){
+                            $("#getSN").val(data.sn);
+                            $("#getBackNumber").val(data.backNumber);
+                            $("#getMachineOfName").val(data.machineOfName);
+                            $("#getMachineName").val(data.machineName);
+                        } else if(type=="SN"){
+                            $("#snInfo").val(data.sn);
+                            $("#backNumInfo").val(data.backNumber);
+                            $("#machineOfNameInfo").val(data.machineOfName);
+                            $("#machineNameInfo").val(data.machineName);
+                        }else if(type=="TAG_SN"){
+                        	$("#tagBackNum").val(data.backNumber);
+	        				$("#tagMachineOfName").val(data.machineOfName);
+	        				$("#tagMachineName").val(data.machineName);
+                        }
+                    }
+                }
+            }
+       });
+}
+
+function checkSN(){
+    var sn1 = $("#getSN").val();
+    var sn2 = $("#snInfo").val();
+    var sn3 = $("#tagSn").val();
+    if(sn1&&sn2&&sn3){
+        if(sn1==sn2&&sn2==s3){
+            mui.toast("SN一致!");
+        }else if(sn1!=sn2){
+            mui.toast("PLC SN和制品卡SN不一致!");
+        }else if(sn1!=sn3){
+            mui.toast("PLC SN和标签SN不一致!");
+        }else if(sn2!=sn3){
+            mui.toast("制品卡SN和标签SN不一致!");
+        }
+    }else if(sn1 && sn2 && !sn3){
+        if(sn1!=sn2){
+            mui.toast("PLC SN和制品卡SN不一致!");
+        }else{
+        	mui.toast("SN一致!");
+        }
+    }else if(sn1&& !sn2 && sn3){
+         if(sn1!=sn3){
+            mui.toast("PLC SN和标签SN不一致!");
+         }else{
+        	mui.toast("SN一致!");
+        }
+    }else if(!sn1&&sn2&&sn3){
+        if(sn2!=sn3){
+            mui.toast("制品卡SN和标签SN不一致!");
+        }else{
+        	mui.toast("SN一致!");
+        }
+    }else{
+        mui.toast("至少有两个SN才能校验!");
+    }
+}
+function clearInput(){
+        $("#ulocNo").val("");
+        $("#getSN").val("");
+        $("#getBackNumber").val("");
+        $("#getMachineOfName").val("");
+        $("#getMachineName").val("");
+        $("#searchVal").val("");
+        $("#snInfo").val("");
+        $("#backNumInfo").val("");
+        $("#machineOfNameInfo").val("");
+        $("#machineNameInfo").val("");
+        $("#tagBackNum").val("");
+	    $("#tagMachineOfName").val("");
+	    $("#tagMachineName").val("");
+	    $("#tagId").val("");
+	    $("#tagSn").val("");
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="PMC_LIST_TITLE" permissionModule="PMC">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PMC_CLASSES" field="tmWorktime.shiftno" type="select" options=shiftnoOptions></@p.input>
+			<@p.input title="PMC_TIME_CLASS_GROUP" type="select" field="tmWorktime.tmClassManagerId"  options=classGroupOptions></@p.input>
+			<@p.input title="PMC_BEGIN_TIME" field="createTimeStart" id="createTimeStart"></@p.input>
+			<@p.input title="PMC_FINISH_TIME" field="createTimeEnd" id="createTimeEnd"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+			<@p.button title="BTN_EXPORT" permissionCode="PmcExort"  onclick="downLoadAjax()" iconCls="upload-alt" type="button" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tbPmc/list.do" singleSelect="true">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="PMC_DATE" field="createTime" width="13%" permissionCode="PMC_DATE" ></@p.column>
+		<@p.column title="PMC_LINE" field="tmWorktime.tmLineId"  width="13%" permissionCode="PMC_DATE" formatter="renderLine"></@p.column>
+		<@p.column title="PMC_CLASSES" field="tmWorktime.shiftno" width="13%" permissionCode="PMC_CLASSES" formatter="renderShiftType"></@p.column>
+		<@p.column title="PMC_TIME_CLASS_GROUP" field="tmWorktime.tmClassManagerId" width="13%" permissionCode="PMC_TIME_CLASS_GROUP" formatter="renderClassManagers"></@p.column>
+		<@p.column title="PMC_DAYPLAN" field="dayPlan" width="13%" permissionCode="PMC_DAYPLAN"></@p.column>
+		<@p.column title="PMC_REALITYPLAN" field="realityPlan" width="13%" permissionCode="PMC_REALITYPLAN" ></@p.column>
+		<@p.column title="PMC_REALITYCOMPLETION" field="realityCompletion" width="13%" permissionCode="PMC_REALITYCOMPLETION"></@p.column>
+		<@p.column title="PMC_DELAYTIME" field="delayTime" width="13%" permissionCode="PMC_DELAYTIME"></@p.column>
+		<@p.column title="PMC_AVAILABILITY_RATE" field="availabilityRate" width="13%" permissionCode="PMC_DELAYTIME"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+
+$(function(){
+	$('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd HH:mm:ss',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+	initQueryTime();
+})
+function renderShiftType(value) {
+	return entryRenderer('SHIFT_TYPE', value);
+}
+function renderLine(value) {
+	var lines = eval('(' + '${lines!}' + ')');
+	for(var i in lines){
+		if(lines[i].code == value){
+			return lines[i].name;
+		}
+	}
+}
+function renderClassManagers(value) {
+	var classManagers = eval('(' + '${classManagers!}' + ')');
+	for(var i in classManagers){
+		if(classManagers[i].code == value){
+			return classManagers[i].name;
+		}
+	}
+}
+
+function initQueryTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	endTime=endTime +" "+caseLessTen(date.getHours())+":"+caseLessTen(date.getMinutes())+":"+caseLessTen(date.getSeconds());
+	$("#createTimeEnd").val(endTime);
+	date = new Date();
+	month = month-1;
+	var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	startTime=startTime +" "+caseLessTen(date.getHours())+":"+caseLessTen(date.getMinutes())+":"+caseLessTen(date.getSeconds());
+	$("#createTimeStart").val(startTime);
+}
+
+function downLoadAjax(){
+	downAjax("","${baseUrl}/tbPmc/exportData.do",'dg${currentPageId}');
+}
+</script>

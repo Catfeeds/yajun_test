@@ -1,0 +1,135 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+function setSelectRole() {
+    var rows =getSelectedRows('dgUserOrg');
+    if(rows.length<1){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    if(rows.length!=1){
+	    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var url = '${baseUrl}/user/setSelectRole.do?id='+rows[0].id;
+    createdetailwindow('<@s.m code='USER_SELECT_ROLE'/>', url,'','','userSelectRoleSetGrid');
+}
+function setPosition() {
+    var rows = getSelectedRows('dgUserOrg');
+    if (!rows || rows.length==0) {
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+        return;
+    }
+    if(rows.length!=1){
+	    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    var url = '${baseUrl}/user/listPositionInput.do?id='+rows[0].id;
+    createdetailwindow('<@s.m code='BTN_POSITION_SET'/>', url,'','','dgPosition');
+}
+function addUser() {
+	
+	BootstrapDialog.show({
+		size : BootstrapDialog.SIZE_WIDE,
+		title : '<@s.m code="USER_SELECT" />',
+		message : function(dialog) {
+			var $message = $('<div></div>');
+			var pageToLoad = dialog.getData('pageToLoad');
+			$message.load(pageToLoad);
+
+			return $message;
+		},
+		buttons : [ {
+			label : commons_msg.btnConfirm,
+			cssClass : 'btn-primary',
+			action : function(dialogRef) {
+				var rows = getSelectedRows('dgUserSelectGrid');
+				if (rows.length > 0) {
+					var ids = [];
+					for (var i = 0; i < rows.length; i++) {
+						if (rows[i].id != null) {
+							ids.push(rows[i].id);
+						}
+					}
+					 ajaxRequest('${baseUrl}/orgnization/addUser.do',{'orgnizationId' : '${orgnizationId}','userIds' : JSON.stringify(ids)},function(){
+						reloadTable('dgUserOrg');
+						dialogRef.close();
+					});
+				
+				}else{
+					infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+				}
+
+			}
+		}, {
+			label : commons_msg.btnClose,
+			cssClass : 'btn-default',
+			action : function(dialogRef) {
+				dialogRef.close();
+			}
+		} ],
+		data : {
+			'pageToLoad' : '${baseUrl}/user/listSelect.do?currentPageId=UserSelectGrid'
+		}
+	});        
+}
+function removeUser(){
+    var rows =  getSelectedRows('dgUserOrg');
+    if (rows.length > 0) {
+    	var ids = getSelectedIds('dgUserOrg');
+    	BootstrapDialog.confirm({
+			title : commons_msg.btnDelete,
+			message : commons_msg.deleteConfirm,
+			closable : true,
+			draggable : true,
+			btnCancelLabel : commons_msg.btnCancel,
+			btnOKLabel : commons_msg.btnConfirm,
+			callback : function(result) {
+				if (result) {
+					ajaxRequest("${baseUrl}/orgnization/removeUser.do",{'orgnizationId' :'${orgnizationId}', 'userIds' : JSON.stringify(ids)},function(){
+						reloadTable('dgUserOrg');
+					});
+				}
+            }
+		 });
+    	
+	} else {
+		infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	}
+}
+</script>
+<@p.body title="USER_LIST_TITLE" permissionModule="USER" noBreadcrumbs="true">
+	<@p.searchPanel gridId="dgUserOrg">
+		<@p.searchColumns>
+			<@p.input title="USER_NAME" field="name"  permissionCode="USER_NAME"></@p.input>
+			<@p.input title="USER_ACCOUNT_NUMBER" field="account" permissionCode="USER_ACCOUNT_NUMBER"></@p.input>
+			<@p.input title="LOGIN_STATUS" type="select" field="status" options=options permissionCode="USER_STATUS"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="dtUserOrg">
+			<@p.button title="USER_VIEW" iconCls="eye-open" url="${baseUrl}/user/viewInput.do" type="view"></@p.button>
+			<@p.button title="BTN_POSITION_SET" permissionCode="UserOrgEdit" iconCls="cogs" onclick="setPosition()"></@p.button>
+		    <@p.button title="USER_ROLE_SET" permissionCode="UserOrgEdit" iconCls="cogs" onclick="setSelectRole()"></@p.button>
+		    <@p.button title="BTN_USER_ADD" permissionCode="UserOrgEdit" iconCls="plus" onclick="addUser()"></@p.button>
+		    <@p.button title="BTN_USER_REMOVE" permissionCode="UserOrgEdit" iconCls="trash" onclick="removeUser()"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/user/list.do?queryCondition[orgnizationId]=${orgnizationId}" id="dgUserOrg">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="USER_NAME" field="name"   permissionCode="USER_NAME"></@p.column>
+		<@p.column title="USER_ACCOUNT_NUMBER" field="account"   permissionCode="USER_ACCOUNT_NUMBER"></@p.column>
+		<@p.column title="USER_STATUS" width="80"field="status"  permissionCode="USER_STATUS"  formatter="renderStatus"  ></@p.column>
+		<@p.column title="USER_SEX" width="80" field="gender"    permissionCode="USER_SEX"  formatter="renderGender"  ></@p.column>
+		<@p.column title="USER_MAIL" field="email"  permissionCode="USER_MAIL"></@p.column>
+		<@p.column title="USER_PHONE" field="phone"  permissionCode="USER_PHONE"></@p.column>
+		<@p.column title="USER_FAX" field="fax"  permissionCode="USER_FAX"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+	function renderGender(value) {
+		return entryRenderer('GENDER', value);
+	}
+	function renderStatus(value) {
+		return entryRenderer('LOGINSTATUS', value);
+	}
+</script>

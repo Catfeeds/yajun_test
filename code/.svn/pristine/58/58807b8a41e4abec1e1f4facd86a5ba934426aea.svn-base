@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+	function checkPassword() {
+		var oldPassword = $("#oldPassword").val();
+		var newPassword = $("#newPassword").val();
+		if (oldPassword != "" && newPassword != "") {
+			if (oldPassword == newPassword) {
+				infoTip("新密码不能与原密码相同！");
+				$("#newPassword").focus();
+				return false;
+			}
+		}
+	}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/user/resetPwd.do" class="form-horizontal"    permissionModule="USER">
+	<@p.formRow>
+		<@p.formColmd title="ORIGINAL_PASSWORD" checktip="PLEASE_IMPORT_ORIGINAL_PASSWORD"    permissionCode="PASSWORD">
+			<input  type="password" name="oldPassword" id="oldPassword" datatype="*" errormsg="<@s.m code='USER_RESET_PASSWORD_INPUT_PASSWORD'/>" onblur="checkPassword();">
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="NEW_PASSWORD" checktip="PASSWORD_CHARACTERS_SPECIFICATION"   permissionCode="PASSWORD">
+			  <input type="password" name="newPassword" id="newPassword" datatype="${pwdRegExp!}" errormsg="<@s.m code='USER_RESET_PASSWORD_PASSWORD_TIP'/>" onblur="checkPassword();">
+		</@p.formColmd>
+		<@p.formColmd title="VERIFY_PASSWORD" permissionCode="VERIFY_PASSWORD">
+			<input type="password" recheck="newPassword" datatype="${pwdRegExp!}" errormsg="<@s.m code='USER_PASSWORD_INCONFORMITY'/>">
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+   
+</body>
+</html>

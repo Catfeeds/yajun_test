@@ -1,0 +1,69 @@
+<#include "../../../include/bootstrapTableCommons.html">
+	<script src="././res/js/echarts.min.js"></script>
+<@p.body title="DPATH_LIST_TITLE" permissionModule="ULOC_SIP" noBreadcrumbs="true">	
+	<div style="color: #428bca;text-align:center; margin:10px" >质检项参数信息</div>
+	<input id="tmUlocId" type="hidden" value="${tmUlocId!}" />
+	<input type="hidden" id="showOrHide" value="1">
+   	<@p.searchPanel >
+		<@p.toolbar> 
+	 	   	<@p.button title="ULOC_SIP_ADD" permissionCode="UlocSipAdd" iconCls="plus" url="${baseUrl}/ulocSip/addInput.do?tmUlocId="+"${tmUlocId}" type="add"  ></@p.button>
+			<@p.button title="ULOC_SIP_UPDATE" permissionCode="UlocSipUpdate" iconCls="edit" url="${baseUrl}/ulocSip/updateInput.do" type="update"></@p.button>
+			<@p.button title="ULOC_SIP_DELETE" permissionCode="UlocSipDelete" iconCls="trash" url="${baseUrl}/ulocSip/delete.do" type="delete"></@p.button>
+			<@p.button title="ULOC_SIP_IMPORT" permissionCode="UlocSipImport" iconCls="download-alt" onclick="importDataUlocSip()" ></@p.button>
+			<@p.button title="ULOC_SIP_EXPORT" permissionCode="UlocSipExport" downName="ULOC_SIP_EXPORT_NAME" iconCls="upload-alt" url="${baseUrl}/ulocSip/exportData.do?tmUlocId=${tmUlocId}" type="down"></@p.button>
+			<@p.button title="ULOC_SIP_IMPORT_ALL" permissionCode="UlocSipAndNcImportAll" iconCls="download-alt" onclick="importDataUlocSipAll()" ></@p.button>
+			<@p.button title="ULOC_SIP_EXPORT_ALL" downName="ULOC_SIP_NC_EXPORT_TITLE" permissionCode="UlocSipAndNcExportAll" iconCls="upload-alt"  url="${baseUrl}/ulocSip/exportDataAll.do?tmUlocId=${tmUlocId}" type="down"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<div id="dataGrid">
+		<@p.dataGrid url="${baseUrl}/ulocSip/list.do?${params!}">
+			<@p.column checkbox="true" ></@p.column>
+			<@p.column title="ULOC_SIP_TS_PARAMETER_ID" field="tsParameterId" permissionCode="ULOC_SIP_TS_PARAMETER_ID" formatter="renderUlocSip" ></@p.column>
+			<@p.column title="ULOC_SIP_DETAIL" field="detail" permissionCode="ULOC_SIP_DETAIL" formatter="renderNullValue"></@p.column>
+			<@p.column title="ULOC_SIP_ISEXAMINE" field="isExamine" permissionCode="ULOC_SIP_ISEXAMINE" formatter="renderIsExamine"></@p.column>
+		</@p.dataGrid>
+	</div>
+	<div id ="ulocSipNc"></div>
+</@p.body>
+<script type="text/javascript">
+	$(function(){
+		$(".clearfix").hide();
+	});
+	function renderUlocSip(value,record){
+		if(record.tsParameter&&record.tsParameter.code){
+			return record.tsParameter.code+ " - " + record.tsParameter.name;
+		}
+		return "";
+	}
+	function renderIsExamine(value){
+		return entryRenderer('YES_OR_NO', value);
+	}
+	function renderNullValue(value){
+		return value == null ? "" : value;
+	}
+	function importDataUlocSip(){
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/ulocSip/exportTemplate.do";
+		importFile("<@s.m code="ULOC_IMPORT" />", "${baseUrl}/ulocSip/importData.do?tmUlocId="+"${tmUlocId}", "dg${currentPageId}",obj);
+	}
+	function importDataUlocSipAll(){
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/ulocSip/exportAllTemplate.do";
+		importFile("<@s.m code="ULOC_SIP_IMPORT_ALL_FAIL" />", "${baseUrl}/ulocSip/importDataAll.do?tmUlocId="+"${tmUlocId}", "dg${currentPageId}",obj);
+	}
+	$('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+	    //工位质检不合格项信息的取得
+	    $.ajax({
+	        url: "${baseUrl}/ulocSipNc/listInput.do?currentPageId=ulocSipNcGrid&params=queryCondition[tmUlocSipId]="+row.id,
+	        cache: false,
+	        global:false,
+	        type: "GET",
+	        dataType: "html",
+	        async:true,
+	        data : {"tmUlocSipId":row.id},
+	        success: function(html){
+	            $("#ulocSipNc").html(html);
+	        }
+	    });
+	});
+</script>

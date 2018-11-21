@@ -1,0 +1,180 @@
+<script type="text/javascript">
+	var operateParam=new Object();
+	operateParam.id=0;
+	var operateParamRight=new Object();
+	operateParamRight.id=0;
+	var selectedOrg = 0;
+	var selectedNode = 0;
+
+	jQuery(function($) {
+		$("#widget-collapse").click(function() {
+			if ($("#org_tab_left_body").is(":hidden")) {
+				$("#org_tab_left").removeClass("widget-box-min");
+				$("#org_tab_right").removeClass("widget-box-max");
+				$("#org_tab_left_body").show();
+			} else {
+				$("#org_tab_left").addClass("widget-box-min");
+				$("#org_tab_right").addClass("widget-box-max");
+				$("#org_tab_left_body").hide();
+			}
+		});
+ 		$("#myTab4 li").click(function() {
+ 			reLoadTree(operateParam.id, $(this).index());
+ 		});
+ 		initOrgTree();
+	});
+	
+	function initOrgTree() {
+		$('#org_tree').treeview({
+			collapseIcon:"icon-caret-down",
+			expandIcon:"icon-caret-right",
+			data: getOrgTreeData(),
+			onNodeSelected: function(event, data) {
+				selectedOrg = data.id;
+				selectedNode = data.nodeId;
+				reLoadTree(data.id)
+			},
+			onNodeUnselected: function(event, data) {
+				selectedOrg = 0;
+				reLoadTree(0);
+			}
+		});
+		if(selectedOrg > 0) {
+			$('#org_tree').treeview("revealNode", selectedNode);
+			$('#org_tree').treeview('selectNode', selectedNode);
+		}else{
+			loadTree(selectedOrg);
+		}
+	}
+	
+	function reLoadTree(orgId, lindex) {
+		if (lindex == undefined) {
+			lindex = $("#myTab4 li.active").index();
+		}
+		operateParam.id = orgId;
+		switch (lindex) {
+		case 0: {
+			$.ajax({
+		        url: '${baseUrl}/user/listOrgInput.do?orgnizationId='+orgId,
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:false,
+		        data : {},
+		        success: function(html){
+	        		$("#tabUser").html(html);
+		        }
+		    });
+		}
+			break;
+
+		case 1: {
+			$.ajax({
+		        url: '${baseUrl}/position/listInput.do?orgnizationId='+orgId,
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:false,
+		        data : {},
+		        success: function(html){
+	        		$("#tabPosition").html(html);
+		        }
+		    });
+		}
+			break;
+
+		case 2: {
+			$.ajax({
+		        url: '${baseUrl}/orgnization/listInput.do?parentId='+orgId+"&dimension="+operateParam.dimension,
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:false,
+		        data : {},
+		        success: function(html){
+	        		$("#tabOrgView").html(html);
+		        }
+		    });
+		}
+			break;
+
+		default:
+			alert(lindex);
+			break;
+		}
+	}
+	function loadTree(orgId) {
+		var dimensionId = $("#dimensionId").val();
+		operateParam.dimension = dimensionId;
+		reLoadTree(orgId);
+	}
+	
+	//=====bootstrap-treeview
+	function getOrgTreeData() {
+		var tree_data = {};
+		$.ajax({
+		    url: $("#baseUrl").val()+"/orgnization/listTree.do",
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    data: {
+				"dimension":$("#dimensionId").val()
+			},
+		    dataType: "json",
+		    async:false,
+		    success: function(data){
+		    	if(data!=null){
+		    		tree_data = data;
+		    	}else{
+		      	}
+		    }
+		});
+		return tree_data;
+	}
+</script>
+<@p.body title="ORGNIZATION_LIST_TITLE" noPermissionModule="true">
+<div id="org_tab_left" class="widget-box org_tab_left">
+	<div class="sidebar-collapse" id="widget-collapse">
+		<i class="icon-double-angle-left"></i><i class="icon-double-angle-right"></i>
+	</div>
+	<div class="widget-header header-color-blue2">
+		<h4 class="lighter smaller"><@s.m code='ORG_TITLE' /></h4>
+	</div>
+
+	<div id="org_tab_left_body" class="widget-body">
+		<div class="widget-main padding-8" style="position: relative;">
+			<@p.editForm noPermissionModule="true">
+				<@p.input id="dimensionId" type="select" style="width: 165px;border:1px solid #a5aeb6;" onchange="initOrgTree()" excludeSelectOption="true" field="dimension" options=dimensions></@p.input>
+			</@p.editForm>
+			<div id="org_tree"></div>
+		</div>
+	</div>
+</div>
+<div id="org_tab_right" class="tabbable org_tab_right">
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue"
+		id="myTab4">
+		<li class="active"><a data-toggle="tab" href="#tabUser"><@s.m
+				code='ORG_USER'/></a></li>
+
+		<li><a data-toggle="tab" href="#tabPosition"><@s.m
+				code='POSITION_TITLE'/></a></li>
+
+		<li><a data-toggle="tab" href="#tabOrgView"><@s.m
+				code='ORG_TITLE'/></a></li>
+	</ul>
+
+	<div class="tab-content">
+		<div id="tabUser" class="tab-pane in active">
+		</div>
+
+		<div id="tabPosition" class="tab-pane">
+		</div>
+
+		<div id="tabOrgView" class="tab-pane">
+		</div>
+	</div>
+</div>
+</@p.body>

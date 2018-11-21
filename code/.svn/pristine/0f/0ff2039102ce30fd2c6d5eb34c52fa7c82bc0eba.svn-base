@@ -1,0 +1,30 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body title="JOB_LOG_DETAIL_LIST_TITLE"  noPermissionModule="true">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="JOB_LOG_DETAIL_NAME" type="text" field="taskName"></@p.input>
+			<@p.input title="OPERATE_START_TIME" type="text" field="executionTimeStart" id="executionTimeStart"></@p.input>
+			<@p.input title="OPERATE_END_TIME" type="text" field="executionTimeEnd" id="executionTimeEnd"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="BTN_VIEW" permissionCode="JobLogDetailView" iconCls="eye-open" url="${baseUrl}/jobLogDetail/viewInput.do" type="view"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid url="${baseUrl}/jobLogDetail/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="JOB_LOG_DETAIL_NAME" width="250"  field="taskName"  ></@p.column>
+		<@p.column title="JOB_LOG_DETAIL_CLASS_NAME" width="250" field="taskClassName" ></@p.column>
+		<@p.column title="JOB_LOG_DETAIL_EXECUTION_TIME" width="200"  field="executionTime"></@p.column>
+		<@p.column title="JOB_LOG_DETAIL_EXECUTION_RESULT" width="250"  field="executionResult"></@p.column>
+		<@p.column title="JOB_LOG_DETAIL_TIME_CONSUMING" width="100"  field="timeConsuming"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$("#executionTimeStart").focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'executionTimeEnd\')}'});
+});
+$("#executionTimeEnd").focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'executionTimeStart\')}'});
+});
+</script>

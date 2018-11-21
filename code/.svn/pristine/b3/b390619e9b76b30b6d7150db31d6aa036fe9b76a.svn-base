@@ -1,0 +1,26 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body permissionModule="ORGNIZATION" noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="ORG_PARENT_NAME" field="parent.name" permissionCode="ORG_PARENT_NAME"></@p.input>
+			<@p.input title="ORG_CODE" field="code"  permissionCode="ORG_CODE"></@p.input><br/>
+			<@p.input title="ORG_NAME" field="name" permissionCode="ORG_NAME"></@p.input>
+			<@p.input title="ORG_TYPE" type="select" field="type" value="PART" valueAll="all" options=options permissionCode="ORG_TYPE"></@p.input>
+	    </@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/orgnization/list.do?listSelect=true" singleSelect=singleSelect>
+		<@p.column title="Id" checkbox="true" field="id"></@p.column>
+		<@p.column title="ORG_PARENT_NAME" width="100" field="parentName" permissionCode="ORG_PARENT_NAME"></@p.column><#t/>
+		<@p.column title="ORG_CODE" width="100" field="code"    permissionCode="ORG_CODE"></@p.column><#t/>
+		<@p.column title="ORG_NAME" width="100" field="name"   permissionCode="ORG_NAME"></@p.column><#t/>
+		<@p.column title="ORG_TYPE" width="100" field="type"  formatter="renderOrgnizationType"    permissionCode="ORG_TYPE"></@p.column><#t/>
+		<@p.column title="ORG_DESCRIPTION" width="150" field="description"    permissionCode="ORG_DESCRIPTION"></@p.column><#t/>
+		<@p.column title="ORG_LEADER" width="150" field="leaderName"    permissionCode="ORG_LEADER"></@p.column><#t/>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+	function renderOrgnizationType(value) {
+		return entryRenderer('ORGNIZATION_TYPE', value);
+	}
+</script>

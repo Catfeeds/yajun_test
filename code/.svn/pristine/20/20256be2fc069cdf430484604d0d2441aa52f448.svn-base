@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<#include "../../include/editorCommons.html"> 
+<body style="overflow-y: hidden" scroll="no">
+	<form class="form-horizontal">
+		<input class="btn_sub" id="btn_sub" type="hidden" />
+		<div style="width:900px" id="itemContent">
+			<div style='width:45%;margin:5px;float: left;' class="formVal">
+				<div style='width:35%;margin-right:2%;float: left;'><label class='control-label' style='font-size:11px;'>背番号(<span style='color:red;'>*</span>): </label></div>
+				<div style='width:55%;float: left;'>
+					<input name='backNumber' class='inputxt'  maxlength='100' />
+				</div>
+			</div>
+			<div style='width:45%;margin:5px;float: left;' class="formVal">
+				<div style='width:35%;margin-right:2%;float: left;'><label class='control-label' style='font-size:11px;'>机种名(<span style='color:red;'>*</span>): </label></div>
+				<div style='width:55%;float: left;'>
+					<input name='machineOfName' class='inputxt' maxlength='100' />
+				</div>
+			</div>
+		</div>
+	</form>
+</body>
+</html>
+<script type="text/javascript">
+
+$(function(){
+	var parameterColumn = ${parameterColumn!};
+	var html = "";
+		if(null != parameterColumn){
+			for(var i in parameterColumn){
+				var label = parameterColumn[i].parameterExplain+"("+parameterColumn[i].equipmentName+")";
+				html+=" <div style='width:45%;margin:5px;float: left;' class='formVal'> ";
+				html+=" <div style='width:35%;margin-right:2%;float: left;'><label class='control-label' style='font-size:11px;'>"+label+": </label></div> ";
+				html+="<input type='hidden' data-parameterName='"+parameterColumn[i].parameterName+"' data-parameterId='"+parameterColumn[i].id+"' data-parameterExplain='"+parameterColumn[i].parameterExplain+"' />";
+				html+=" <div style='width:25%;float: left;'><input  class='inputxt col-xs-10 col-sm-5 form-control' maxlength='100' /></div> ";
+				html+="<div style='width:5%;float: left;text-align: -webkit-center;'>~</div>";
+				html+=" <div style='width:25%;float: left;'><input  class='inputxt col-xs-10 col-sm-5 form-control' maxlength='100' /></div> ";
+				html+="</div>";
+			}
+		}
+	$('#itemContent').append(html);
+});
+var parameterManage = {
+		'backNumber':'',
+		'machineOfName':'',
+		details:[]
+	};
+function parameterAddSubmit(dialogRef) {
+	$('.formVal').each(function(index){
+		if(index <= 1){
+		var inputObj = $(this).find('input')[0];
+			if(inputObj.name=="backNumber"){
+				parameterManage.backNumber = inputObj.value;
+			}else if(inputObj.name=="machineOfName"){
+				parameterManage.machineOfName = inputObj.value;
+			}
+		}else{
+			var parameter = $(this).find('input')[0];
+			var minVal = $(this).find('input')[1];
+			var maxVal = $(this).find('input')[2];
+			parameterManage.details.push({
+				parameterName:parameter.getAttribute('data-parameterName'),
+				parameterId:parameter.getAttribute('data-parameterId'),
+				parameterExplain:parameter.getAttribute('data-parameterExplain'),
+				maxVal:maxVal.value,
+				minVal:minVal.value
+			});
+		}
+	})
+	if(!parameterManage.backNumber){
+		warningTip("背番号不能为空");
+	}else if(!parameterManage.machineOfName){
+		warningTip("机种名不能为空");
+	}else{
+		ajaxRequest("${baseUrl}/parameterManage/add.do", {
+			'parameterManage' : JSON.stringify(parameterManage)
+		}, function() {
+			$('#parameter_manage').bootstrapTable('refresh');
+		});
+		dialogRef.close();
+	}
+}
+</script>

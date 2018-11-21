@@ -1,0 +1,44 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/parameter/update.do" class="form-horizontal" idValue=parameter.id  permissionModule="PARAMETER">
+		<@p.formRow>
+			<@p.formColmd title="PARAMETER_CODE" permissionCode="PARAMETER_CODE">
+				 <input name="code" readonly="true" class="inputxt" maxlength="36" value="${parameter.code}" datatype="*" />
+			</@p.formColmd>
+			<@p.formColmd title="PARAMETER_NAME" permissionCode="PARAMETER_NAME">
+				 <input name="name" class="inputxt" maxlength="36" datatype="*" value="${parameter.name!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PARAMETER_REGULAREXPRESSION" permissionCode="PARAMETER_REGULAR_EXPRESSION">
+				 <input name="regularExpression" class="inputxt" maxlength="1000" datatype="*" value="${parameter.regularExpression!}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PARAMETER_PARAMETER_EXPLAIN" permissionCode="PARAMETER_PARAMETER_EXPLAIN">
+				 <input name="parameterExplain" class="inputxt" maxlength="100"  value="${parameter.parameterExplain!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PARAMETER_UNIT" permissionCode="PARAMETER_UNIT">
+				 <input name="unit" class="inputxt" maxlength="100" value="${parameter.unit!}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PARAMETER_CONTROL_POST_NO" permissionCode="PARAMETER_CONTROL_POST_NO">
+				 <input name="controlPostNo" class="inputxt" maxlength="20" value="${parameter.controlPostNo!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PARAMETER_CONTROL_POST_NAME" permissionCode="PARAMETER_CONTROL_POST_NAME">
+				 <input name="controlPostName" class="inputxt" maxlength="100" value="${parameter.controlPostName!}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PARAMETER_NOTE" permissionCode="PARAMETER_NOTE">
+				 <input name="note" class="inputxt" maxlength="100" value="${parameter.note!}"  />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+</script>

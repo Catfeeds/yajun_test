@@ -1,0 +1,50 @@
+<#include "../phone_main/head.html"/>
+<style>
+			
+</style>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">个人中心</h1>
+	</header>
+	<div class="mui-content">
+		<ul class="mui-table-view mui-table-view-chevron">
+			<li class="mui-table-view-cell mui-media">
+				<a class="mui-navigate-right" href="#account">
+					<img class="mui-media-object mui-pull-left head-img" src="../res/mui/images/user_img.jpg">
+					<div class="mui-media-body">
+						${USER_NAME!}
+					</div>
+				</a>
+			</li>
+		</ul>
+		<ul class="mui-table-view" style="margin-top: 25px;">
+			<li class="mui-table-view-cell">
+				<a class="mui-navigate-right">
+					关于R5产线MES系统
+				</a>
+			</li>
+		</ul>
+		<ul class="mui-table-view" style="margin-top: 25px;">
+			<li class="mui-table-view-cell">
+				<a style="text-align: center;color: #FF3B30;" onclick="logOff();">
+					退出登录
+				</a>
+			</li>
+		</ul>
+	</div>
+<#include "../phone_main/footer.html"/>
+	<script>
+		mui.init({
+			swipeBack:true //启用右滑关闭功能
+		});
+		function logOff(){
+			var btnArray = ['否', '是'];
+			mui.confirm('确定要退出吗？', 'R5产线MES系统', btnArray, function(e) {
+				if (e.index == 1) {
+					window.location="${baseUrl}/j_spring_security_logout";
+				}
+			})
+		}
+	</script>
+
+</html>

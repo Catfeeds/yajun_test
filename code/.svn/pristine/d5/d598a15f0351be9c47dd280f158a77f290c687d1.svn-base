@@ -1,0 +1,46 @@
+<#include "../../../../include/bootstrapTableCommons.html">
+	<script src="././res/js/echarts.min.js"></script>
+<@p.body title="ULOC_SIP_NC_LIST_TITLE" permissionModule="ULOC_SIP_NC" noBreadcrumbs="true">	
+	<div style="color: #428bca;text-align:center; margin:10px" >质检项不合格信息</div>
+	<input type="hidden" id="showOrHide" value="1">
+   	<@p.searchPanel >
+		<@p.toolbar> 
+	 	   	<@p.button title="ULOC_SIP_NC_ADD" permissionCode="UlocSipNcAdd" iconCls="plus" url="${baseUrl}/ulocSipNc/addInput.do?tmUlocSipId=${tmUlocSipId}" type="add"  ></@p.button>
+			<@p.button title="ULOC_SIP_NC_UPDATE" permissionCode="UlocSipNcUpdate" iconCls="edit" url="${baseUrl}/ulocSipNc/updateInput.do?tmUlocSipId=${tmUlocSipId}" type="update"></@p.button>
+			<@p.button title="ULOC_SIP_NC_DELETE" permissionCode="UlocSipNcDelete" iconCls="trash" url="${baseUrl}/ulocSipNc/delete.do" type="delete"></@p.button>
+			<@p.button title="ULOC_SIP_NC_IMPORT" permissionCode="UlocSipNcImport" iconCls="download-alt" onclick="importDataUlocSipNc()" ></@p.button>
+			<@p.button title="ULOC_SIP_NC_EXPORT" permissionCode="UlocSipNcExport" iconCls="upload-alt" downName="ULOC_SIP_NC_EXPORT_TITLE" type="down" url="${baseUrl}/ulocSipNc/exportDate.do?tmUlocSipId=${tmUlocSipId}"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<div id="dataGrid">
+		<@p.dataGrid url="${baseUrl}/ulocSipNc/list.do?tmUlocSipId=${tmUlocSipId!}">
+			<@p.column checkbox="true" ></@p.column>
+			<@p.column title="ULOC_SIP_NC_TM_NC_GROUP_ID" field="ncGroup.name" permissionCode="ULOC_SIP_NC_TM_NC_GROUP_ID" formatter="renderNcGroup"></@p.column>
+			<@p.column title="ULOC_SIP_NC_TM_NC_ID" field="nc.name" permissionCode="ULOC_SIP_NC_TM_NC_ID" formatter="renderNc"></@p.column>
+			<@p.column title="ULOC_SIP_NC_NOTE" field="note" permissionCode="ULOC_SIP_NC_NOTE" formatter="renderNullValue"></@p.column>
+		</@p.dataGrid>
+	</div>
+	<div id="echarts" style="width: 1000px;height:400px;"></div>
+</@p.body>
+<script type="text/javascript">
+	function importDataUlocSipNc(){
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/ulocSipNc/exportTemplate.do";
+		importFile("<@s.m code="ULOC_SIP_NC_IMPORT" />", "${baseUrl}/ulocSipNc/importDataUlocSipNc.do?tmUlocSipId="+"${tmUlocSipId}", "dg${currentPageId}",obj);
+	}
+	function renderNcGroup(value,record) {
+		if(value && record.ncGroup.no){
+			return record.ncGroup.no+ " - " + value;
+		}
+		return record.ncGroup.no+ " - ";
+	}
+	function renderNc(value,record) {
+		if(value && record.nc.no){
+			return record.nc.no+ " - " + value;
+		}
+		return record.nc.no+ " - ";
+	}
+	function renderNullValue(value){
+		return value == null ? "" : value;
+	}
+</script>

@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="TpRecordMapper">
+	<!--查询SN已经绑定的关键件 -->
+	<select id="getUlocAlreadyBindPart" resultType="com.wis.mes.production.record.entity.TpRecordUlocPart" parameterType="java.util.HashMap">
+	SELECT
+		t.id AS id,
+		t.tpRecordUlocId AS tpRecordUlocId,
+		t.tpRecordId AS tpRecordId,
+		t.tmPartId AS tmPartId,
+		t.partNo AS partNo,
+		t.partName AS partName,
+		count(t.qty) AS qty
+	FROM
+		(
+			SELECT
+				a.ID AS id,
+				a.TP_RECORD_ULOC_ID AS tpRecordUlocId,
+				a.TP_RECORD_ID AS tpRecordId,
+				a.TM_PART_ID AS tmPartId,
+				a.PART_NO AS partNo,
+				a.PART_NAME AS partName,
+				(a.QTY -IFNULL(a.PERLACE_QTY,0) ) AS qty
+			FROM
+				tp_record_uloc_part a
+			LEFT JOIN tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+			LEFT JOIN tp_record c ON c.ID = b.TP_RECORD_ID
+			WHERE
+				c.SN = #{SN} 
+			AND b.TM_ULOC_ID = #{ulocId}
+			AND b.ROUTING_SEQ = #{routingSeq}
+			AND b.OPERATION_TYPE = 'PART_BINDING_START'
+			ORDER BY
+				a.ID DESC
+		) t
+	GROUP BY t.tmPartId
+	</select>
+	<!--查询SN已经绑定的参数  -->
+	<select id="getUlocAlreadyBindParameter" resultType="com.wis.mes.production.record.entity.TpRecordUlocParameter" parameterType="java.util.HashMap">
+	SELECT
+		a.*
+	FROM
+		tp_record_uloc_parameter a
+	LEFT JOIN tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+	LEFT JOIN tp_record c ON c.ID = b.TP_RECORD_ID
+	WHERE
+		c.SN = #{SN}
+	AND b.TM_ULOC_ID = #{ulocId}
+	AND b.ROUTING_SEQ = #{routingSeq}
+	AND b.OPERATION_TYPE IN ("PARAMETER_BINDING_START","PARAMETER_BINDING_END");
+	</select>
+		<!--查询SN已经绑定的质量项  -->
+	<select id="getUlocAlreadyBindQuality" resultType="com.wis.mes.production.record.entity.TpRecordUlocQuality" parameterType="java.util.HashMap">
+	SELECT
+		a.*
+	FROM
+		tp_record_uloc_quality a
+	LEFT JOIN tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+	LEFT JOIN tp_record c ON c.ID = b.TP_RECORD_ID
+	WHERE
+		c.SN = #{SN}
+	AND b.TM_ULOC_ID = #{ulocId}
+	AND b.ROUTING_SEQ = #{routingSeq}
+	AND b.OPERATION_TYPE='QUALITY_END'
+	</select>
+	
+	<!-- 产品档案：物料信息 -->
+	
+	<select id="getPartPageResult" resultType="com.wis.mes.production.record.entity.TpRecordUlocPart" parameterType="java.util.HashMap">
+		SELECT
+			a.ID as id,
+			a.TP_RECORD_ULOC_ID as tpRecordUlocId,
+			a.TM_PART_ID as tmPartId,
+			a.PART_NO as partNo,
+			a.PART_NAME as partName,
+			a.QTY as qty,
+			a.BAR_CODE as barCode,
+			a.NOTE as note,
+			a.IS_REPLACE as isReplace
+		FROM
+			tp_record_uloc_part a
+		LEFT JOIN 
+			tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="partNo!=null and partNo!='' ">
+				AND a.PART_NO = #{partNo}
+			</if>
+			<if test="partName!=null and partName!='' ">
+				AND a.PART_NAME = #{partName}
+			</if>
+		LIMIT #{firstRow}, #{pageSize}
+	</select>
+	
+	<!-- 物料总数 -->
+	
+	<select id="getPartCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			tp_record_uloc_part a
+		LEFT JOIN  
+		    tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="partNo!=null and partNo!='' ">
+				AND a.PART_NO = #{partNo}
+			</if>
+			<if test="partName!=null and partName!='' ">
+				AND a.PART_NAME = #{partName}
+			</if>
+	</select>
+	
+	<!-- 产品档案：参数信息 -->
+	
+	<select id="getParameterPageResult" resultType="com.wis.mes.production.record.entity.TpRecordUlocParameter" parameterType="java.util.HashMap">
+		SELECT
+			a.ID as id,
+			a.TP_RECORD_ULOC_ID as tpRecordUlocId,
+			a.PARAMETER_CODE as parameterCode,
+			a.PARAMETER_VALUE as parameterValue,
+			a.PARAMETER_TYPE as parameterType,
+			a.NOTE as note,
+			a.IS_REPLACE as isReplace
+		FROM
+			tp_record_uloc_parameter a
+		LEFT JOIN 
+			tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="parameterCode!=null and parameterCode!='' ">
+				AND a.PARAMETER_CODE = #{parameterCode}
+			</if>
+			<if test="parameterValue!=null and parameterValue!='' ">
+				AND a.PARAMETER_VALUE = #{parameterValue}
+			</if>
+		LIMIT #{firstRow}, #{pageSize}
+	</select>
+	
+	<!-- 参数总数 -->
+	
+	<select id="getParameterCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			tp_record_uloc_parameter a
+		LEFT JOIN  
+		    tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="parameterCode!=null and parameterCode!='' ">
+				AND a.PARAMETER_CODE = #{parameterCode}
+			</if>
+			<if test="parameterValue!=null and parameterValue!='' ">
+				AND a.PARAMETER_VALUE = #{parameterValue}
+			</if>
+	</select>
+	
+	<!-- 产品档案：不合格信息 -->
+	
+	<select id="getNcPageResult" resultType="com.wis.mes.production.record.entity.TpRecordUlocNc" parameterType="java.util.HashMap">
+		SELECT
+			a.ID as id,
+			a.TP_RECORD_ULOC_ID as tpRecordUlocId,
+			a.TM_NC_GROUP_ID as tmNcGroupId,
+			a.TM_NC_ID as tmNcId,
+			a.NOTE as note
+		FROM
+			tp_record_uloc_nc a
+		LEFT JOIN 
+			tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="tmNcGroupId!=null and tmNcGroupId!='' ">
+				AND a.TM_NC_GROUP_ID = #{tmNcGroupId}
+			</if>
+			<if test="tmNcId!=null and tmNcId!='' ">
+				AND a.TM_NC_ID = #{tmNcId}
+			</if>
+			<if test="note!=null and note!='' ">
+				AND a.NOTE = #{note}
+			</if>
+		LIMIT #{firstRow}, #{pageSize}
+	</select>
+	
+	<!-- 不合格总数 -->
+	
+	<select id="getNcCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			tp_record_uloc_nc a
+		LEFT JOIN  
+		    tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="tmNcGroupId!=null and tmNcGroupId!='' ">
+				AND a.TM_NC_GROUP_ID = #{tmNcGroupId}
+			</if>
+			<if test="tmNcId!=null and tmNcId!='' ">
+				AND a.TM_NC_ID = #{tmNcId}
+			</if>
+			<if test="note!=null and note!='' ">
+				AND a.NOTE = #{note}
+			</if>
+	</select>
+	
+	<!-- 产品档案：质检项信息 -->
+	
+	<select id="getQualityPageResult" resultType="com.wis.mes.production.record.entity.TpRecordUlocQuality" parameterType="java.util.HashMap">
+		SELECT
+			a.ID as id,
+			a.TP_RECORD_ULOC_ID as tpRecordUlocId,
+			a.CHECK_ITEM as checkItem,
+			a.CHECK_RESULT as checkResult,
+			a.NOTE as note
+		FROM
+			tp_record_uloc_quality a
+		LEFT JOIN 
+			tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="checkItem!=null and checkItem!='' "> 
+				AND a.CHECK_ITEM = #{checkItem}
+			</if>
+			<if test="checkResult!=null and checkResult!='' ">
+				AND a.CHECK_RESULT = #{checkResult}
+			</if>
+		LIMIT #{firstRow}, #{pageSize}
+	</select>
+	
+	<!-- 质检项总数 -->
+	
+	<select id="getQualityCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			tp_record_uloc_quality a
+		LEFT JOIN  
+		    tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="checkItem!=null and checkItem!='' "> 
+				AND a.CHECK_ITEM = #{checkItem}
+			</if>
+			<if test="checkResult!=null and checkResult!='' ">
+				AND a.CHECK_RESULT = #{checkResult}
+			</if>
+	</select>
+	
+	<!-- 产品档案：报废信息 -->
+	
+	<select id="getScrapPageResult" resultType="com.wis.mes.production.record.entity.TpRecordUlocScrap" parameterType="java.util.HashMap">
+		SELECT
+			a.ID as id,
+			a.TP_RECORD_ULOC_ID as tpRecordUlocId,
+			a.SCRAP_CODE as scrapCode,
+			a.NOTE as note
+		FROM
+			tp_record_uloc_scrap a
+		LEFT JOIN 
+			tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="scrapCode!=null and scrapCode!='' ">
+				AND a.SCRAP_CODE = #{scrapCode}
+			</if>
+			<if test="note!=null and note!='' ">
+				AND a.NOTE = #{note}
+			</if>
+		LIMIT #{firstRow}, #{pageSize}
+	</select>
+	
+	<!-- 报废总数 -->
+	
+	<select id="getScrapCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			tp_record_uloc_scrap a
+		LEFT JOIN  
+		    tp_record_uloc b ON a.TP_RECORD_ULOC_ID = b.ID
+		WHERE 1=1
+			<if test="tpRecordId!=null and tpRecordId!='' ">
+				AND b.TP_RECORD_ID = #{tpRecordId}
+			</if>
+			<if test="scrapCode!=null and scrapCode!='' ">
+				AND a.SCRAP_CODE = #{scrapCode}
+			</if>
+			<if test="note!=null and note!='' ">
+				AND a.NOTE = #{note}
+			</if>
+	</select>
+	
+	<select id="findByCondition" resultType="java.util.Map" parameterType="java.util.HashMap">
+		SELECT
+			a.SN AS SN,
+			b. NO AS PART_NO,
+			B.NAME_CN AS PART_NAME,
+			CASE
+		WHEN a.ONLINE_TIME IS NULL THEN
+			''
+		ELSE
+			DATE_FORMAT(
+				a.ONLINE_TIME,
+				'%Y-%m-%d %H:%m:%s'
+			)
+		END AS ONLINE_TIME,
+		 CASE
+		WHEN a.OFFLINE_TIME IS NULL THEN
+			''
+		ELSE
+			DATE_FORMAT(
+				a.OFFLINE_TIME,
+				'%Y-%m-%d %H:%m:%s'
+			)
+		END AS OFFLINE_TIME,
+		 a.AVI_NO AS AVI_NO,
+		 a.PORDER_NO AS PORDER_NO
+		FROM
+			TP_RECORD a,
+			TM_PART b
+		WHERE
+			a.TM_PART_ID = b.ID 
+		<if test="sn != null and sn != ''">
+			AND a.SN LIKE CONCAT('%',#{sn},'%')
+	    </if>
+		<if test="sn != null and sn != ''">
+			AND b.NO LIKE CONCAT('%',#{partNo},'%') 
+	    </if>
+		<if test="sn != null and sn != ''">
+			AND b.NAME_CN LIKE CONCAT('%',#{partName},'%') 
+	    </if>
+		<if test="sn != null and sn != ''">
+			AND a.PORDER_NO LIKE CONCAT('%',#{porder},'%') 
+	    </if>
+	    <if test="isAll == '0'">
+			AND b.TM_PLANT_ID IN (
+				SELECT
+					TM_PLANT_ID
+				FROM
+					TS_ROLE_MASTER_SET
+				WHERE
+					TM_PLANT_ID IS NOT NULL
+				AND TM_WORKSHOP_ID IS NULL
+				AND TM_LINE_ID IS NULL
+				AND TM_ULOC_ID IS NULL
+				AND ROLE_ID IN (
+					SELECT
+						ROLE_ID
+					FROM
+						TR_ROLE_USER
+					WHERE
+						USER_ID = #{currUser}
+				)
+			)
+	    </if>
+	    ;
+	</select>
+	<select id="StatisticByCondition" resultType="java.util.Map" parameterType="java.util.HashMap">
+		SELECT
+			DATE_FORMAT(
+				a.OFFLINE_TIME,
+				CASE
+			WHEN #{time} = 'month' THEN
+				'%Y-%m'
+			ELSE
+				'%Y-%m-%d'
+			END
+			) AS COL,
+			COUNT(*) AS VAL
+		FROM
+			TP_RECORD a 
+		LEFT JOIN TP_RECORD_ULOC b ON a.TM_PART_ID = b.ID 
+		WHERE
+			a.TM_PART_ID = #{partId} 
+		<if test="sn != null and sn != ''">
+			AND a.SN LIKE CONCAT('%',#{sn},'%') 
+	    </if>
+		<if test="startTime != null and startTime != ''">
+			AND a.OFFLINE_TIME &gt;= #{startTime}
+	    </if>
+		<if test="endTime != null and endTime != ''">
+			AND a.OFFLINE_TIME &lt;= #{endTime}
+	    </if>
+	    <if test="isAll == '0'">
+			AND b.TM_PLANT_ID IN (
+				SELECT
+					TM_PLANT_ID
+				FROM
+					TS_ROLE_MASTER_SET
+				WHERE
+					TM_PLANT_ID IS NOT NULL
+				AND TM_WORKSHOP_ID IS NULL
+				AND TM_LINE_ID IS NULL
+				AND TM_ULOC_ID IS NULL
+				AND ROLE_ID IN (
+					SELECT
+						ROLE_ID
+					FROM
+						TR_ROLE_USER
+					WHERE
+						USER_ID = #{currUser}
+				)
+			)
+	    </if>
+		GROUP BY
+			DATE_FORMAT(
+				a.OFFLINE_TIME,
+				CASE
+			WHEN 1 = 1 THEN
+				'%Y-%m'
+			ELSE
+				'%Y-%m-%d'
+			END
+			);
+	</select>
+	<select id="StatisticByShift" resultType="java.util.Map" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*) AS VAL
+		FROM
+			TP_RECORD a 
+		LEFT JOIN TP_RECORD_ULOC b ON a.TM_PART_ID = b.ID 
+		WHERE
+			a.TM_PART_ID = #{partId} 
+		AND (a.OFFLINE_TIME &lt;= #{shiftEnd} AND a.OFFLINE_TIME &gt;= #{shiftStart})
+		<if test="sn != null and sn != ''">
+			AND a.SN LIKE CONCAT('%',#{sn},'%') 
+	    </if>
+		<if test="startTime != null and startTime != ''">
+			AND a.OFFLINE_TIME &gt; #{startTime}
+	    </if>
+		<if test="endTime != null and endTime != ''">
+			AND a.OFFLINE_TIME &lt; #{endTime}
+	    </if>
+	    <if test="isAll == '0'">
+			AND b.TM_PLANT_ID IN (
+				SELECT
+					TM_PLANT_ID
+				FROM
+					TS_ROLE_MASTER_SET
+				WHERE
+					TM_PLANT_ID IS NOT NULL
+				AND TM_WORKSHOP_ID IS NULL
+				AND TM_LINE_ID IS NULL
+				AND TM_ULOC_ID IS NULL
+				AND ROLE_ID IN (
+					SELECT
+						ROLE_ID
+					FROM
+						TR_ROLE_USER
+					WHERE
+						USER_ID = #{currUser}
+				)
+			)
+	    </if>
+		;
+	</select>
+	<select id="StatisticByWeek" resultType="java.util.Map" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*) AS VAL
+		FROM
+			TP_RECORD a 
+		LEFT JOIN TP_RECORD_ULOC b ON a.TM_PART_ID = b.ID 
+		WHERE
+			a.TM_PART_ID = #{partId} 
+		AND a.CREATE_TIME BETWEEN #{weekStart} AND #{weekEnd} 
+		<if test="sn != null and sn != ''">
+			AND a.SN LIKE CONCAT('%',#{sn},'%') 
+	    </if>
+		<if test="startTime != null and startTime != ''">
+			AND a.OFFLINE_TIME &gt; #{startTime}
+	    </if>
+		<if test="endTime != null and endTime != ''">
+			AND a.OFFLINE_TIME &lt; #{endTime}
+	    </if>
+	    <if test="isAll == '0'">
+			AND b.TM_PLANT_ID IN (
+				SELECT
+					TM_PLANT_ID
+				FROM
+					TS_ROLE_MASTER_SET
+				WHERE
+					TM_PLANT_ID IS NOT NULL
+				AND TM_WORKSHOP_ID IS NULL
+				AND TM_LINE_ID IS NULL
+				AND TM_ULOC_ID IS NULL
+				AND ROLE_ID IN (
+					SELECT
+						ROLE_ID
+					FROM
+						TR_ROLE_USER
+					WHERE
+						USER_ID = #{currUser}
+				)
+			)
+	    </if>
+		;
+	</select>
+	
+	<!-- 查询订单的种类 -->
+	<select id="findPorderTypeSum" resultType="com.wis.mes.production.record.entity.TpRecord">
+		SELECT DISTINCT
+			PORDER_NO
+		FROM
+			tp_record
+		WHERE
+			OFFLINE_TIME BETWEEN #{startDate} AND #{endDate}
+	</select>
+	
+	<!-- 查询物料的种类 -->
+	<select id="findPartTypeSum" resultType="com.wis.mes.master.part.entity.TmPart">
+		SELECT DISTINCT
+			tp.ID,
+			tp.NAME_CN
+		FROM
+			tp_record tr
+		LEFT JOIN tm_part tp ON tr.TM_PART_ID = tp.ID
+		WHERE
+			tr.OFFLINE_TIME BETWEEN #{startDate} AND #{endDate}
+	</select>
+	
+	<!-- 查询产线的种类 -->
+	<select id="findLineTypeSum" resultType="com.wis.mes.master.line.entity.TmLine">
+		SELECT DISTINCT
+			li.ID,
+			li.NAME_CN
+		FROM
+			tp_record_uloc tc
+		LEFT JOIN tm_uloc c ON tc.TM_ULOC_ID = c.ID
+		LEFT JOIN tm_line li ON c.TM_LINE_ID = li.ID
+		LEFT JOIN tp_record td ON tc.TP_RECORD_ID = td.ID
+		WHERE
+			td.OFFLINE_TIME BETWEEN #{startDate} AND #{endDate}
+	</select>
+	
+	<!-- 查询工位的种类 -->
+	<select id="finUlocTypeSum" resultType="com.wis.mes.master.uloc.entity.TmUloc">
+		SELECT DISTINCT
+			tc.TM_ULOC_ID as id,
+			tc.ULOC_NAME as name
+		FROM
+			tp_record_uloc tc
+		LEFT JOIN tp_record td ON tc.TP_RECORD_ID = td.ID
+		WHERE
+			td.OFFLINE_TIME BETWEEN #{startDate}
+		AND #{endDate}
+	</select>
+	
+	<!-- 根据订单和班次查询一次合格率 -->
+	<select id="getOnepassRateByPorderAndShift" resultType="java.lang.Float">
+		select  ROUND(t1.co/t2.total*100,2)
+		from
+		(SELECT
+					count(*) as co
+				FROM
+					tp_record td
+				LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+				WHERE
+					td.OFFLINE_TIME IS NOT NULL
+				AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+				AND #{endDateStr}
+				AND td.ID NOT IN (
+					SELECT DISTINCT
+						tc.ID
+					FROM
+						tp_record_uloc_nc tc
+				)
+				AND td.ID NOT IN (
+					SELECT DISTINCT
+						tp.ID
+					FROM
+						tp_record_uloc_scrap tp
+				)
+				AND td.PORDER_NO = #{legend}
+				AND tc.SHIFT_NO = #{shift} ) t1,
+		(SELECT
+					count(*) as total
+				FROM
+					tp_record td
+				LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+				WHERE
+					td.OFFLINE_TIME IS NOT NULL
+				AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+				AND #{endDateStr}
+				AND td.PORDER_NO = #{legend}
+				AND tc.SHIFT_NO = #{shift})t2
+	</select>
+	
+	<!-- 根据物料和班次查询一次合格率 -->
+	<select id="getOnepassRateByPartAndShift" resultType="java.lang.Float">
+		select  ROUND(t1.co/t2.total*100,2)
+		from
+		(SELECT
+					count(*) as co
+				FROM
+					tp_record td
+				LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+				WHERE
+					td.OFFLINE_TIME IS NOT NULL
+				AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+				AND #{endDateStr}
+				AND td.ID NOT IN (
+					SELECT DISTINCT
+						tc.ID
+					FROM
+						tp_record_uloc_nc tc
+				)
+				AND td.ID NOT IN (
+					SELECT DISTINCT
+						tp.ID
+					FROM
+						tp_record_uloc_scrap tp
+				)
+				AND td.TM_PART_ID = #{legend}
+				AND tc.SHIFT_NO = #{shift} ) t1,
+		(SELECT
+					count(*) as total
+				FROM
+					tp_record td
+				LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+				WHERE
+					td.OFFLINE_TIME IS NOT NULL
+				AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+				AND #{endDateStr}
+				AND td.TM_PART_ID = #{legend}
+				AND tc.SHIFT_NO = #{shift})t2
+	</select>
+	<!-- 根据工位和班次查询一次合格率 -->
+	<select id="getOnepassRateByUlocAndShift" resultType="java.lang.Float">
+	SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+		WHERE
+			tc.TM_ULOC_ID = #{legend}
+		AND tc.SHIFT_NO = #{shift}
+		AND td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tc.ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tp.ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+		WHERE
+			tc.TM_ULOC_ID = #{legend}
+		AND tc.SHIFT_NO = #{shift}
+		AND td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+	) t2
+	</select>
+	<!-- 根据产线和班次查询一次合格率 -->
+	<select id="getOnepassRateByLineAndShift" resultType="java.lang.Float">
+	SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID LEFT JOIN tm_uloc uc on tc.TM_ULOC_ID = uc.ID 
+		WHERE
+			uc.TM_LINE_ID = #{legend}
+		AND tc.SHIFT_NO = #{shift}
+		AND td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tc.ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tp.ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID LEFT JOIN tm_uloc uc on tc.TM_ULOC_ID = uc.ID 
+		WHERE
+			uc.TM_LINE_ID = #{legend}
+		AND tc.SHIFT_NO = #{shift}
+		AND td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+	) t2
+	</select>
+	
+	<!-- 根据订单和月份查询一次合格率 -->
+	<select id="getOnepassRateByPorderAndMonth" resultType="java.lang.Float">
+	SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME LIKE '${month}%'
+		AND td.PORDER_NO = #{legend}
+		AND td.ID NOT IN (
+			SELECT
+				tc.TP_RECORD_ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT
+				tp.TP_RECORD_ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME LIKE '${month}%'
+		AND td.PORDER_NO = #{legend}
+	) t2
+	</select>
+	<!-- 根据产品和月份查询一次合格率 -->
+	<select id="getOnepassRateByPartAndMonth" resultType="java.lang.Float">
+		SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME LIKE '${month}%'
+		AND td.TM_PART_ID = #{legend}
+		AND td.ID NOT IN (
+			SELECT
+				tc.TP_RECORD_ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT
+				tp.TP_RECORD_ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME LIKE '${month}%'
+		AND td.TM_PART_ID = #{legend}
+	) t2
+	</select>
+	
+	<!-- 根据产线和月份查询一次合格率 -->
+	<select id="getOnepassRateByLineAndMonth" resultType="java.lang.Float">
+	SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+		LEFT JOIN tm_uloc uc ON tc.TM_ULOC_ID = uc.ID
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME LIKE '${month}%'
+		AND uc.TM_LINE_ID = #{legend}
+		AND td.ID NOT IN (
+			SELECT
+				tc.TP_RECORD_ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT
+				tp.TP_RECORD_ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+		LEFT JOIN tm_uloc uc ON tc.TM_ULOC_ID = uc.ID
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME LIKE '${month}%'
+		AND uc.TM_LINE_ID = #{legend}
+	) t2
+	</select>
+	
+	<!-- 根据工位和月份查询一次合格率 -->
+	<select id="getOnepassRateByUlocAndMonth" resultType="java.lang.Float">
+		SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME LIKE '${month}%'
+		AND tc.TM_ULOC_ID = #{legend}
+		AND td.ID NOT IN (
+			SELECT
+				tc.TP_RECORD_ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT
+				tp.TP_RECORD_ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME LIKE '${month}%'
+		AND tc.TM_ULOC_ID = #{legend}
+	) t2
+	</select>
+	<!-- 根据订单和周查询一次合格率 -->
+	<select id="getOnepassRateByPorderAndWeek" resultType="java.lang.Float">
+	SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND td.PORDER_NO = #{legend}
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tc.TP_RECORD_ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tp.TP_RECORD_ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND td.PORDER_NO = #{legend}
+	) t2
+	</select>
+	
+	<!-- 根据物料和周查询一次合格率 -->
+	<select id="getOnepassRateByPartAndWeek" resultType="java.lang.Float">
+	SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND td.TM_PART_ID = #{legend}
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tc.TP_RECORD_ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tp.TP_RECORD_ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND td.TM_PART_ID = #{legend}
+	) t2
+	</select>
+	
+	<!-- 根据产线和周查询一次合格率 -->
+	<select id="getOnepassRateByLineAndWeek" resultType="java.lang.Float">
+		SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+		LEFT JOIN tm_uloc uc ON tc.TM_ULOC_ID = uc.ID
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND uc.TM_LINE_ID = #{legend}
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tc.TP_RECORD_ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tp.TP_RECORD_ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td
+		LEFT JOIN tp_record_uloc tc ON td.ID = tc.TP_RECORD_ID
+		LEFT JOIN tm_uloc uc ON tc.TM_ULOC_ID = uc.ID
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND uc.TM_LINE_ID = #{legend}
+	) t2
+	</select>
+	
+	<!-- 根据工位和周查询一次合格率 -->
+	<select id="getOnepassRateByUlocAndWeek" resultType="java.lang.Float">
+	SELECT
+	ROUND(t1.co / t2.total * 100, 2)
+	FROM
+	(
+		SELECT
+			count(*) AS co
+		FROM
+			tp_record td LEFT JOIN tp_record_uloc tc on td.ID = tc.TP_RECORD_ID
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND tc.TM_ULOC_ID = #{legend}
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tc.TP_RECORD_ID
+			FROM
+				tp_record_uloc_nc tc
+		)
+		AND td.ID NOT IN (
+			SELECT DISTINCT
+				tp.TP_RECORD_ID
+			FROM
+				tp_record_uloc_scrap tp
+		)
+	) t1,
+	(
+		SELECT
+			count(*) AS total
+		FROM
+			tp_record td LEFT JOIN tp_record_uloc tc on td.ID = tc.TP_RECORD_ID
+		WHERE
+			td.OFFLINE_TIME IS NOT NULL
+		AND td.OFFLINE_TIME BETWEEN #{startDateStr}
+		AND #{endDateStr}
+		AND tc.TM_ULOC_ID = #{legend}
+	) t2
+	</select>
+</mapper>  

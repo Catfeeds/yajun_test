@@ -1,0 +1,138 @@
+ 
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+function renderPlantNoOrName(value,record) {
+	if(value && record.tmPlant.no){
+		return record.tmPlant.no+ " - " + value;
+	}
+	return record.tmPlant.no+ " - ";
+}
+
+function renderWShopNoOrName(value,record) {
+	if(value && record.tmWorkshop.no){
+		return record.tmWorkshop.no+ " - " + value;
+	}
+	return record.tmWorkshop.no+ " - ";
+}
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+function renderLineNoOrName(value,record) {
+	if(value && record.tmLine.no){
+		return record.tmLine.no+ " - " + value;
+	}
+	return record.tmLine.no+ " - ";
+}
+/* $('#dg${currentPageId}').on('click-row.bs.table', function (e,row, $element) {
+    //工位检查参数信息的取得
+    $.ajax({
+        url: "${baseUrl}/ulocSip/listInput.do?currentPageId=ulocSipGrid&params=queryCondition[tmUlocId]="+row.id,
+        cache: false,
+        global:false,
+        type: "GET",
+        dataType: "html",
+        async:true,
+        data : {"tmUlocId":row.id},
+        success: function(html){
+            $("#ulocSip").html(html);
+        }
+    });
+}); */
+
+</script>
+
+<@p.body title="ULOC_LIST_TITLE" permissionModule="ULOC">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="ULOC_PLANT" id="plantId" type="select"  onchange="plantWorkshop_listPage(this.value);" field="tmPlantId" options=plants ></@p.input>
+			<@p.input title="ULOC_LINE" type="select"  id="lineId"  field="tmLineId" options=lines ></@p.input>
+		    <@p.input title="ULOC_NO" field="no"  permissionCode="ULOC_NO"></@p.input>
+			<@p.input title="ULOC_NAME" field="name"  permissionCode="ULOC_NAME"></@p.input>
+			<@p.input title="ULOC_POSITION_TYPE" type="select" field="positionType" options=positionOptions ></@p.input>
+		    <@p.input title="ULOC_ENABLED" type="select" options=optionEnab  field="enabled"  permissionCode="ULOC_ENABLED"></@p.input>
+	   		<@p.input title="ULOC_IS_ENTRANCE" type="select" field="isEntrance"  options=entranceOptions  permissionCode="ULOC_IS_ENTRANCE"></@p.input>
+	    </@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="ULOC_ADD" permissionCode="UlocAdd" iconCls="plus" url="${baseUrl}/uloc/addInput.do" type="add"  ></@p.button>
+			<@p.button title="ULOC_UPDATE" permissionCode="UlocUpdate" iconCls="edit" url="${baseUrl}/uloc/updateInput.do" type="update"></@p.button>
+			<@p.button title="ULOC_DELETE" permissionCode="UlocDelete" iconCls="trash" url="${baseUrl}/uloc/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/uloc/list.do" >
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="ULOC_PLANT" field="tmPlant.no" permissionCode="ULOC_PLANT"> </@p.column>
+		<@p.column title="ULOC_LINE" field="tmLine.nameCn" permissionCode="ULOC_LINE" formatter="renderLineNoOrName"> </@p.column>
+		<@p.column title="ULOC_NO" field="no" permissionCode="ULOC_NO" ></@p.column>
+		<@p.column title="ULOC_NAME" field="name" permissionCode="ULOC_NAME" formatter="renderNullValue"></@p.column>
+		<@p.column title="ULOC_TM_EQUIPMENT_ID" field="equipment.name" permissionCode="ULOC_TM_EQUIPMENT_ID"></@p.column>
+		<@p.column title="ULOC_RFID_IP" field="rfidIP" permissionCode="ULOC_RFID_IP" formatter="renderNullValue"></@p.column>
+		<@p.column title="ULOC_RFID_PORT" field="rfidPort" permissionCode="ULOC_RFID_PORT" formatter="renderNullValue"></@p.column>
+		<@p.column title="ULOC_RFID_ANT" field="rfidAnt" permissionCode="ULOC_RFID_ANT" formatter="renderNullValue"></@p.column>
+		<@p.column title="ULOC_POSITION_TYPE" field="positionType" permissionCode="ULOC_POSITION_TYPE" formatter="renderPosition"></@p.column>
+		<@p.column title="ULOC_IS_ENTRANCE" field="isEntrance" permissionCode="ULOC_IS_ENTRANCE" formatter="renderEntrance"></@p.column>
+		<@p.column title="ULOC_ENABLED" field="enabled" permissionCode="ULOC_ENABLED" formatter="renderGender"></@p.column>
+		<@p.column title="ULOC_NOTE" field="note" permissionCode="ULOC_NOTE" formatter="renderNullValue"></@p.column>	
+	</@p.dataGrid>
+	<div id ="ulocSip"></div>
+</@p.body>
+<script type="text/javascript">
+function renderIsSip(value){
+	return entryRenderer('YES_OR_NO', value);
+}
+
+function renderGender(value) {
+	return entryRenderer('ENABLED', value);
+}
+
+function renderPosition(value) {
+	return entryRenderer('POSITION_TYPE', value);
+}
+function renderEntrance(value) {
+	return entryRenderer('IS_ENTRANCE', value);
+}
+
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/uloc/exportTemplate.do";
+    importFile("<@s.m code="ULOC_IMPORT" />", "${baseUrl}/uloc/importData.do", "dg${currentPageId}",obj);
+}
+//工位与质检项数据导入
+function importDataUlocAndSip(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/uloc/exportTemplateUlocAndSip.do";
+    importFile("<@s.m code="ULOC_IMPORT_ULOC_AND_SIP" />", "${baseUrl}/uloc/importDataAll.do", "dg${currentPageId}",obj);
+}
+function plantWorkshop_listPage(obj){
+	if (obj == "" || null == obj) {
+		return false;
+	}else{
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/uloc/selectLintNameOrPlantId.do", //修改为通过公司id得到所属产线
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				try {
+					$("#lineId").empty(); //清空产线列表
+					$("#lineId").append("<option value=''>-----请选择-----</option>");
+					$(result).each(function(i,item){
+						$("#lineId").append(" <option value='" + item.code + "'>"+item.name+ "</option>");
+					});
+					document.getElementById("lineId").value = '';
+					} catch (e) {
+						alert(e);
+					return;
+					} 
+					
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+}
+</script>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+$(function(){
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('#settingStart,#settingEnd').focus(function(){
+		WdatePicker({dateFmt:'HH:mm',minDate:'00:00',maxDate:'24:00'});
+	});
+	
+	var $subBox = $("#select_all_checkbox").prevAll();
+ 	$("#select_all_checkbox").click(function() {
+      	$subBox.prop("checked",this.checked); 
+    });
+    $subBox.click(function(){
+	    var count = 0;
+	    $.each($subBox,function(i,n){
+	    	if(this.checked){
+	    		count++;
+	    	}
+	    });
+        $("#select_all_checkbox").prop("checked",$subBox.length == count ? true : false);
+    });
+});
+ 
+   //开始时间 结束日期判断
+	var endDate = "";
+	var startDate = "";
+	function settingStartFunction(x){
+		var shiftno = document.getElementById("shiftno").value;
+		startDate =x.value;
+	  	if(shiftno !=""){
+			if(endDate != "" && startDate !=""){
+			     if(shiftno=="MORNINGSHIFT"){
+			　 　 　 　 	    var a = "2017-01-01 " + startDate;
+							  var b = "2017-01-01 " + endDate;
+				　 　 　 　 	    if (Date.parse(a) > Date.parse(b)) {
+			　 　 　 　 	    	    infoTip('早班开始时间必须早于结束时间');	
+						        x.focus();
+						        return false;
+					     }
+				 }
+			}
+		  }else{
+			  infoTip('请先填写班次！');	
+		  } 
+	}
+	function settingEndFunction(x)
+	{
+		var shiftno = document.getElementById("shiftno").value;
+		endDate =x.value;
+	    if(shiftno !=""){
+			if(endDate != "" && startDate !=""){
+				 if(shiftno=="MORNINGSHIFT"){
+					  var a = "2017-01-01 " + startDate;
+					  var b = "2017-01-01 " + endDate;
+			　 　 　 　 	    if (Date.parse(a) > Date.parse(b)) {
+			　 　 　 　 	    	infoTip('早班开始时间必须早于结束时间');	
+						        x.focus();
+						        return false;
+					     }
+				 }
+			}
+	    }else{
+		  infoTip('请先填写班次！');	
+	    }  
+	} 
+    function rendClassGroup(value) {
+		return entryRenderer('CLASS_GROUP', value);
+	}
+</script>
+
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/workschedule/add.do" class="form-horizontal"   permissionModule="WORKSCHEDULE">
+		<@p.formRow>
+            <div id="plant">
+				<@p.formColmd title="WORK_SCHEDULE_PLANT" permissionCode="WORK_SCHEDULE_TM_PLANT">
+					<@p.input type="select" id="plantId_addPage" onchange="plantLine_lisAdd(this.value);" field="tmPlantId" options=plant datatype="*" ></@p.input>
+				</@p.formColmd>
+			</div>
+			<@p.formColmd title="WORK_SCHEDULE_LINE" permissionCode="WORK_SCHEDULE_LINE">
+				<@p.input type="select" id="lineId_addPage" field="tmLineId" onchange="lineClassManager_listAdd(this.value);"  options=line datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_SCHEDULE_SHIFTNO_ID" permissionCode="WORK_SCHEDULE_SHIFTNO_ID">
+                <@p.input type="select" class="select2" options=shiftType id="shiftno" field="shiftnoId" datatype="*"></@p.input>			
+            </@p.formColmd>
+			<@p.formColmd title="WORK_SCHEDULE_START_TIME" permissionCode="WORK_SCHEDULE_START_TIME">
+				 <input class="inputxt"   name="startTime"  id="settingStart"  class="timepicker" onblur="settingStartFunction(this);"  datatype="*">	
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_SCHEDULE_END_TIME" permissionCode="WORK_SCHEDULE_END_TIME">
+                <input class="inputxt"  name="endTime" id="settingEnd"  class="timepicker"  onblur="settingEndFunction(this);"  datatype="*" >			
+            </@p.formColmd>
+		</@p.formRow>
+		<@p.formRow> 
+			<@p.formColmd title="WEEK_VALUE"  permissionCode="WORK_SCHEDULE_WEEK_VALUE"  class="col-md-10">
+                <input  type= "checkbox"  name="mon" value="ON"  >星期一
+                <input  type= "checkbox"  name="tue" value="ON"  >星期二
+                <input  type= "checkbox"  name="wed" value="ON"  >星期三
+                <input  type= "checkbox"  name="thu" value="ON"  >星期四
+                <input  type= "checkbox"  name="fri" value="ON"  >星期五
+                <input  type= "checkbox"  name="sat" value="ON"  >星期六
+                <input  type= "checkbox"  name="sun" value="ON"  >星期日
+                <input  type= "checkbox"  id="select_all_checkbox"  >全选
+            </@p.formColmd>         
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+
+<script type="text/javascript">
+//公司产线联动 
+function plantLine_lisAdd(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/line/selectLineNameOrId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#lineId_addPage").empty(); //清空下拉列表
+				$("#lineId_addPage").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#lineId_addPage").append(" <option value='" + item.code + "'>"+item.name+"</option>");
+					});
+					
+					var optionSize = $("#lineId_addPage option").size();
+					if(optionSize==2){
+						$('#lineId_addPage option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { // 出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function lineClassManager_listAdd(obj){
+	$.ajax({
+		data:{plantId:$("#plantId_addPage").val(),lineId:obj},
+		url:"${baseUrl}/classManager/plantTolineToClassManager.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#shiftnoGroup").empty(); //清空下拉列表
+				$("#shiftnoGroup").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#shiftnoGroup").append(" <option value='" + item.id + "'>"+rendClassGroup(item.classGroup)+"</option>");
+					});
+					
+					var optionSize = $("#shiftnoGroup option").size();
+					if(optionSize==2){
+						$('#shiftnoGroup option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+	
+</script>
+

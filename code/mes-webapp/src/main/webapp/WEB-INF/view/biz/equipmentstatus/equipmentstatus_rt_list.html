@@ -1,0 +1,56 @@
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="EQUIPMENT_RT_LIST_TITLE" permissionModule="EQUIPMENT_RT"noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EQUIPMENT_STATUS_LINE" type="select" field="tmLineId" options=lines ></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_NO_NAME"type="multiple" multipleSelect="false" id="tmEquipmentId" field="tmEquipmentId" options=equipmentOptions ></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_STATUS" field="runningState" type="select" options=eqcirculateStates></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel> 
+	<@p.dataGrid url="${baseUrl}/tbEquipmentStatus/list.do?queryCondition[IS_HISTORY]=NO" singleSelect="true">
+		<@p.column title="EQUIPMENT_STATUS_DATE" field="createTime" permissionCode="EQUIPMENT_RT_DATE"></@p.column>
+		<@p.column title="EQUIPMENT_TM_PLANT" field="tmEquipment.tmPlantId" permissionCode="EQUIPMENT_RT_CLASSES" formatter="getPlants"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_LINE" field="tmline.nameCn" permissionCode="EQUIPMENT_RT_NO"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_CLASSES" field="worktime.shiftno" permissionCode="EQUIPMENT_RT_CLASSES" formatter="rendShiftno"></@p.column>
+		<@p.column title="PRODUCT_TRACING_CLASS_MANAGER_CLASSGROUP" field="classManager.classGroup" permissionCode="EQUIPMENT_RT_CLASSES" formatter="rendClassGroup" ></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_NO" field="tmEquipment.no" permissionCode="EQUIPMENT_RT_NAME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_NAME" field="tmEquipment.name" permissionCode="EQUIPMENT_RT_NAME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_STATUS" field="runningState" permissionCode="EQUIPMENT_RT_STATUS" formatter="renderRunningState"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_STATUS_NO" field="codeRule.code" permissionCode="EQUIPMENT_RT_STATUS_NO"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_CONTENT" field="codeRule.codeDesc" permissionCode="EQUIPMENT_RT_CONTENT"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+	function renderRunningState(value) {
+		if(value =="0001"){
+			value ="1";
+		}else if(value =="0010"){
+			value ="2";
+		}else if(value =="0100"){
+			value ="3";
+		}else if(value =="1000"){
+			value ="4";
+		}else if(value=="0011"){
+			value ="2";
+		}else{
+			value ="10";
+		}
+		return entryRenderer('EQ_CIRCULATE_STATE', value);
+	}
+	function rendShiftno(value){
+		return entryRenderer('SHIFT_TYPE', value);
+	}
+	function getPlants(value){
+		var plants = eval('('+ '${plants!}' +')');
+		for(var i in plants){
+			if(plants[i].code==value){
+				return plants[i].name;
+			}
+		}
+	}
+	
+	function rendClassGroup(value){
+		return entryRenderer('CLASS_GROUP', value);
+	}
+	
+</script>

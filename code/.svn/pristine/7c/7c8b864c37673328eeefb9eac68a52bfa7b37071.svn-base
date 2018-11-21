@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/boardManage/update.do" class="form-horizontal" idValue=bean.id permissionModule="BOARD_MANAGE">
+		<input type="hidden" name="tmEquipmentNames" value="${bean.tmEquipmentNames!}"  id="tmEquipmentNames"/>
+		<@p.formRow>
+			<@p.formColmd title="BOARD_MANAGE_REGION_MARK" permissionCode="BOARD_MANAGE_REGION_MARK">
+				<@p.input field="regionMark" datatype="*" value="${bean.regionMark!}"  type="select" options=smRegionMarks></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="BOARD_MANAGE_NAME" permissionCode="BOARD_MANAGE_NAME">
+				<@p.input type="multiple" field="tmEquipmentIds" id="tmEquipmentIds" onchange="tmEquipmentSelect()" values="${bean.tmEquipmentIds!}" datatype="*" options=equipments></@p.input>
+			</@p.formColmd> 
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BOARD_MANAGE_TARGET_MOBILITY" permissionCode="BOARD_MANAGE_STEP_NUMBER">
+				<@p.input field="targetMobility" datatype="n" value="${bean.targetMobility!}" maxlength='10' ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="BOARD_MANAGE_PLC_NO" permissionCode="BOARD_MANAGE_PLC_NO">
+				<@p.input field="plcNo" datatype="*" value="${bean.plcNo!}" maxlength='30' ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BOARD_MANAGE_STEP_NUMBER" permissionCode="BOARD_MANAGE_STEP_NUMBER">
+				<@p.input field="stepNumber" value="${bean.stepNumber!}" id="stepNumber" readonly="readonly"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="BOARD_MANAGE_REMARKS" permissionCode="BOARD_MANAGE_REMARKS">
+				<@p.input field="remarks" value="${bean.remarks!}" maxlength="150"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+	
+	<script type="text/javascript">
+	function tmEquipmentSelect(){
+		var options = $("#tmEquipmentIds option:selected");
+		var tmEquipmentNames = "";
+		for(var i=0;i<options.length;i++){
+			tmEquipmentNames+=options[i].text+",";
+		}
+		if(tmEquipmentNames.length>0){
+			tmEquipmentNames=tmEquipmentNames.substring(0,tmEquipmentNames.length-1);
+		}
+		$("#stepNumber").val(($("#tmEquipmentIds").val()+" ").split(",").length);
+		$("#tmEquipmentNames").val(tmEquipmentNames);
+	}
+</script>
+</body>
+</html>
+

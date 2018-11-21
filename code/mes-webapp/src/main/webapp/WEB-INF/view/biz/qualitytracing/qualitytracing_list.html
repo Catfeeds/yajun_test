@@ -1,0 +1,209 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	$(function(){
+		$('#createTimeStart').click(function(){
+			var createTimeEnd=$dp.$('createTimeEnd');
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm:ss',
+				onpicked:function(){
+					createTimeEnd.click();
+				},
+				maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+			})
+		});
+		$('#createTimeEnd').click(function(){
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm:ss',
+				minDate:'#F{$dp.$D(\'createTimeStart\')}'
+			})
+		});
+		initQueryTime();
+	})
+	
+	function renderShiftno(value) {
+		return entryRenderer('SHIFT_TYPE', value);
+	}
+	function renderNcStatus(value) {
+		return entryRenderer('NC_STATUS', value);
+	}
+	function ngLevel(val){
+		var faultGrades = eval('('+ '${faultGrades!}' +')');
+		for(var i in faultGrades){
+			if(faultGrades[i].code==val){
+				return faultGrades[i].name;
+			}
+		}
+	}
+	
+	/* function ngExit(value,row,index){
+		var faultGrades = eval('('+ '${faultGrades!}' +')');
+		var optionNgEntrance = eval('('+ '${optionNgEntrance!}' +')');
+		for(var i in faultGrades){
+			if(faultGrades[i].code==row.tmNc.tmFaultGradeId){
+				return keysValue(optionNgEntrance,faultGrades[i].relevantParameter);
+			}
+		} 
+	} */
+	
+	function discoveryStation(val,row){
+		var no = "";
+		if(val){
+			var name ="";
+			if(row.discoveryUloc.name){
+				name = row.discoveryUloc.name;
+			}
+			no = '['+val+']'+name;
+		}
+		return no;
+	}
+	function infoSources(val,row){
+		return entryRenderer('INFO_SOURCES', row.infoSources);
+	}
+	function formatStatus(val){
+		return entryRenderer('UNQUALIFIED_STATE', val);
+	}
+	function unqualifiedClosure(){
+		var url = '${baseUrl}/tbQualityTracing/UnqualifiedClosure.do';
+		var rowsData = getSelectedRows('dg${currentPageId}');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		if (rowsData.length > 1) {
+			infoTip(commons_msg.plsSelOne);
+			return;
+		}
+		if (url.indexOf('?') != -1) {
+			url += '&id=' + rowsData[0].id;
+		} else {
+			url += '?id=' + rowsData[0].id;
+		}
+		BootstrapDialog
+		.confirm({
+			title : '故障关闭',
+			message :'你确定要关闭故障码？',
+			closable : true, // <-- Default value is false
+			draggable : true, // <-- Default value is false
+			btnCancelLabel : commons_msg.btnCancel, // <-- Default value is 'Cancel',
+			btnOKLabel : commons_msg.btnConfirm, // <-- Default value is 'OK',
+			callback : function(result) {
+					if(result){
+						ajaxRequest(url,{}, function() {
+							$('#'+'dg${currentPageId}').bootstrapTable('refresh');
+						});
+					}
+				}
+			});
+	}
+	function faultEdit(){
+		var url = '${baseUrl}/tbQualityTracing/updateInput.do';
+		var gridId = 'dg${currentPageId}';
+		var rowsData = getSelectedRows(gridId);
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		if (rowsData.length > 1) {
+			infoTip(commons_msg.plsSelOne);
+			return;
+		}
+		if(rowsData[0].status=='CREATED'){
+			if (url.indexOf('?') != -1) {
+				url += '&id=' + rowsData[0].id;
+			} else {
+				url += '?id=' + rowsData[0].id;
+			}
+			createwindow("编辑", url, gridId);
+		}else{
+			infoTip('关闭状态不可以进行编辑操作！');
+		}
+	}
+	function rendClassGroup(value){
+		return entryRenderer('CLASS_GROUP', value);
+	}
+	function downLoadAjax(){
+		downAjax("","${baseUrl}/tbQualityTracing/exportData.do",'dg${currentPageId}');
+	}
+
+	function initQueryTime(){
+		var date = new Date();
+		var year = date.getFullYear();
+		var month = date.getMonth()+1;
+		var day  = date.getDate();
+		var hour = date.getHours();
+		var minute = date.getMinutes();
+		var seconds = date.getSeconds();
+		$("#createTimeEnd").val(year+"-"+caseLessTen(month)+"-"+caseLessTen(day)+" "+caseLessTen(hour)+":"+caseLessTen(minute)+":"+caseLessTen(seconds));
+		date = new Date(date.getTime()-1000*24*60*60*7);
+		year = date.getFullYear();
+		month = date.getMonth()+1;
+		day  = date.getDate();
+		hour = date.getHours();
+		minute = date.getMinutes();
+		seconds = date.getSeconds();
+		$("#createTimeStart").val(year+"-"+caseLessTen(month)+"-"+caseLessTen(day)+" "+caseLessTen(hour)+":"+caseLessTen(minute)+":"+caseLessTen(seconds));
+	}
+	function formatterIsRemoved(value){
+		return entryRenderer('WHETHER_DELETE', value);
+	}
+	function changeColor(value,row,index){
+		var  color="white";
+		if (row.isRemoved==1){
+			 color = "red";
+		}
+		return {
+		   classes: 'text-nowrap another-class',
+		   css: {"background-color": color}
+		}
+	}
+</script>
+
+<@p.body title="QUALITY_TRACING_LIST_TITLE" permissionModule="QUALITY">
+  <@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="QUALITY_BACK_NUMBER" field="backNumber"  permissionCode="QUALITY_BACK_NUMBER"></@p.input>
+			<@p.input title="QUALITY_MACHINE_OF_NAME" field="machineOfName"  permissionCode="QUALITY_MACHINE_OF_NAME"></@p.input>
+			<@p.input title="QUALITY_MACHINE_NAME" field="machineName"  permissionCode="QUALITY_MACHINE_NAME"></@p.input>
+			<@p.input title="QUALITY_CLASSES"  type="select" field="shiftno"  options=optionShiftno   permissionCode="QUALITY_CLASSES"></@p.input>
+			<@p.input title="QUALITY_FAULT_TYPE" field="tmNcGroupId" type="select" options=ncGroup   permissionCode="QUALITY_FAULT_TYPE"></@p.input>
+			<@p.input title="QUALITY_SUBMIT_BEGIN_TIME" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="QUALITY_SUBMIT_FINISH_TIME" id="createTimeEnd"  field="createTimeEnd"  ></@p.input>
+			<!-- <@p.input title="WHETHER_DELETE"  type="select" field="isRemoved"  options=isRemoveds ></@p.input> -->
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+ 			<@p.button title="QUALITY_TRACING_ADD"  permissionCode="FmmAdd"  iconCls="plus" url="${baseUrl}/tbQualityTracing/addInput.do" type="add" ></@p.button> 
+			<@p.button title="QUALITY_TRACING_UPDATE"  permissionCode="FmmUpdate" iconCls="edit" onclick="faultEdit()" type="button"></@p.button>
+			<@p.button title="QUALITY_TRACING_DELETE" iconCls="eye-open"  permissionCode="FmmDelete" url="${baseUrl}/tbQualityTracing/delete.do" type="delete"></@p.button>
+			<@p.button title="QUALITY_TRACING_NGCLOSE" iconCls="eye-open"  permissionCode="FmmNgClose" onclick="unqualifiedClosure()" type="button"></@p.button>
+			<@p.button title="BTN_EXPORT" permissionCode="FmmNgClose"  onclick="downLoadAjax()" iconCls="upload-alt" type="button" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tbQualityTracing/list.do"  >
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="QUALITY_DATE" field="createTime" permissionCode="QUALITY_DATE" ></@p.column>
+			<@p.column title="QUALITY_CLASSES" field="shiftno" permissionCode="QUALITY_CLASSES"  formatter="renderShiftno"></@p.column>
+			<@p.column title="PRODUCT_TRACING_CLASS_MANAGER_CLASSGROUP" field="classManager.classGroup" permissionCode="QUALITY_CLASSES" formatter="rendClassGroup"></@p.column>
+			<@p.column title="BIN_SN" field="sn" permissionCode="QUALITY_BACK_NUMBER"></@p.column>
+			<@p.column title="QUALITY_BACK_NUMBER" field="backNumber" permissionCode="QUALITY_BACK_NUMBER"></@p.column>
+			<@p.column title="QUALITY_MACHINE_OF_NAME" field="machineOfName" permissionCode="QUALITY_MACHINE_OF_NAME" ></@p.column>
+			<@p.column title="QUALITY_MACHINE_NAME" field="machineName" permissionCode="QUALITY_MACHINE_NAME" ></@p.column>
+			<@p.column title="QUALITY_FAULT_CODING" field="tmNcGroup.no" permissionCode="QUALITY_FAULT_CODING" ></@p.column>
+			<@p.column title="QUALITY_FAULT_TYPE" field="tmNc.no" permissionCode="QUALITY_FAULT_TYPE" ></@p.column>
+			<@p.column title="QUALITY_FAULT_CONTENT" field="tmNc.name" permissionCode="QUALITY_FAULT_CONTENT" ></@p.column>
+			<@p.column title="QUALITY_INFO_SOURCES" field="infoSources" permissionCode="QUALITY_INFO_SOURCES" formatter ="infoSources"></@p.column>
+			<@p.column title="QUALITY_FIND_ULOC" field="discoveryUloc.no" permissionCode="QUALITY_FIND_ULOC" formatter="discoveryStation"></@p.column>
+			<@p.column title="QUALITY_FAULT_LEVEL" field="tmNc.tmFaultGradeId" permissionCode="QUALITY_FAULT_LEVEL" formatter="ngLevel"></@p.column>
+			<@p.column title="QUALITY_NG_EXIT" field="ngExit" permissionCode="QUALITY_NG_EXIT"></@p.column>
+			<@p.column title="QUALITY_NG_ENTRANCE" field="ngEntrance" permissionCode="QUALITY_NG_ENTRANCE" ></@p.column>
+			<@p.column title="QUALITY_NG_IN" field="ngin" permissionCode="QUALITY_NG_ENTRANCE" ></@p.column>
+			<@p.column title="QUALITY_UNQUALIFIED_STATE" field="status" permissionCode="QUALITY_NG_ENTRANCE" formatter="formatStatus"></@p.column>
+			<@p.column title="QUALITY_AUTHOR" field="employee.name" permissionCode="QUALITY_AUTHOR" ></@p.column>
+			<@p.column title="QUALITY_SUBMIT_DATE" field="submitTime" permissionCode="QUALITY_AUTHOR" ></@p.column>
+			<@p.column title="QUALITY_TRACING_HIGH_LINES_TIME" field="highLinesTime" permissionCode="QUALITY_AUTHOR" ></@p.column>
+			<!-- <@p.column title="WHETHER_DELETE" field="isRemoved" permissionCode="QUALITY_AUTHOR" formatter="formatterIsRemoved" style="changeColor"></@p.column> -->
+	</@p.dataGrid>  
+</@p.body>	
+

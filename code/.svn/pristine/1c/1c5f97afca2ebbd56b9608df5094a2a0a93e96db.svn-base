@@ -1,0 +1,118 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body title="METALPLATE_LIST_TITLE" permissionModule="SHEET_METAL_MATERIAL">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="METALPLATE_MODELTYPE"  field="modelType"  type="select" options=smModelType></@p.input>
+			<@p.input title="METALPLATE_PLACETYPE"  field="placeType"  type="select" options=smPlaceType></@p.input>
+			<!-- <@p.input title="METALPLATE_MATERIALDRAWINGNO"  field="materialDrawingNo"  type="select" options=smMaterialDrawingNo></@p.input> -->
+			<@p.input title="METALPLATE_REGIONMARK"  field="regionMark"  type="select" options=smRegionMark></@p.input>
+			<@p.input title="METALPLATE_MACHINETAGS"  field="machineTagNames"></@p.input>
+			<@p.input title="METALPLATE_MACHININGSURFACE"  field="machiningSurface"></@p.input>
+			<!-- <@p.input title="METALPLATE_REMARK" field="remark"></@p.input> -->
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="METALPLATE_ADD" permissionCode="MetalplateAdd" iconCls="plus" url="${baseUrl}/metalPlate/addInput.do" type="add"  ></@p.button>
+			<@p.button title="METALPLATE_UPDATE" permissionCode="MetalplateUpdate" iconCls="edit" url="${baseUrl}/metalPlate/updateInput.do" type="update"></@p.button>
+			<@p.button title="METALPLATE_DELETE" permissionCode="MetalplateDelete" iconCls="trash" url="${baseUrl}/metalPlate/delete.do" type="delete"></@p.button>
+			<@p.button title="METALPLATE_IMPORT" permissionCode="MetalplateImport" downName="METALPLATE_IMPORT_NAME" onclick="importData();" iconCls="signin" />
+			<@p.button title="METALPLATE_EXPORT" permissionCode="MetalplateExport" downName="METALPLATE_EXPORT_NAME" url="${baseUrl}/metalPlate/exportData.do" iconCls="upload-alt" type="down" />
+			<@p.button title="METALPLATE_MOULD" permissionCode="MetalplateModelMaintenance" iconCls="edit" url="${baseUrl}/metalPlate/mouldInput.do" type="update"  ></@p.button>
+			<@p.button title="PRODUCTIONSCHEDULE_SCHEDULEINVENTORY" permissionCode="MetalplateInventorySet" iconCls="edit" type="button" onclick="inventorySetting()"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/metalPlate/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="METALPLATE_MODELTYPE" field="modelType" permissionCode="MODEL_TYPE"  formatter="renderModelType"></@p.column>
+		<@p.column title="METALPLATE_PLACETYPE" field="placeType" permissionCode="PLACE_TYPE"  formatter="renderPlaceType"></@p.column>
+		<@p.column title="METALPLATE_MATERIALDRAWINGNO" field="materialDrawingNo" permissionCode="MATERIAL_DRAWING_NO" ></@p.column>
+		<@p.column title="METALPLATE_ASSEMBLYLINE" field="assemblyLine" permissionCode="ASSEMBLY_LINE"></@p.column>
+		<@p.column title="METALPLATE_MLLEVEL" field="mlLevel" permissionCode="ML_LEVEL"  formatter="renderLevel"></@p.column>
+		<@p.column title="METALPLATE_COATINGWITH" field="coatingWith" permissionCode="COATING_WITH" ></@p.column>
+		<@p.column title="METALPLATE_CWLEVEL" field="cwLevel" permissionCode="CW_LEVEL"  formatter="renderLevel"></@p.column>
+		<@p.column title="METALPLATE_MACHININGSURFACE" field="machiningSurface" permissionCode="MACHINING_SURFACE" ></@p.column>
+		<@p.column title="METALPLATE_MSLEVEL" field="msLevel" permissionCode="MS_LEVEL"  formatter="renderLevel"></@p.column>
+		<@p.column title="METALPLATE_PROGRAMNUMBER" field="programNumber" permissionCode="PROGRAM_NUMBER" ></@p.column>
+		<@p.column title="METALPLATE_PROGRESSION" field="progression" permissionCode="PROGRESSION"  formatter="renderProgression"></@p.column>
+		<@p.column title="METALPLATE_COMPONENT" field="component" permissionCode="COMPONENT"  formatter="renderComponent"></@p.column>
+		<@p.column title="METALPLATE_AFTERPROCESS" field="afterProcess" permissionCode="AFTER_PROCESS" formatter="renderProcess"></@p.column>
+		<@p.column title="METALPLATE_TEXTURE" field="texture" permissionCode="TEXTURE" ></@p.column>
+		<@p.column title="METALPLATE_PLATETHICKNESS" field="plateThickness" permissionCode="PLATE_THICKNESS" ></@p.column>
+		<@p.column title="METALPLATE_MATERIALSIZE" field="materialSize" permissionCode="MATERIAL_SIZE" ></@p.column>
+		<@p.column title="METALPLATE_BATCHNUMBER" field="batchNumber" permissionCode="BATCH_NUMBER" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATE_BATCHCAP" field="batchCap" permissionCode="BATCH_CAP" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATE_STEPNUMBER" field="stepNumber" permissionCode="STEP_NUMBER" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATE_REGIONMARK" field="regionMark" permissionCode="REGIONMARK"  formatter="renderRegionMark"></@p.column>
+		<@p.column title="METALPLATE_MACHINETAGS" field="machineTagNames" permissionCode="MACHINE_TAGS" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATE_MANUFACTURERS" field="manufacturers" permissionCode="MANUFACTURERS" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATE_IDENTIFICATIONCODE" field="identificationCode" permissionCode="IDENTIFICATION_CODE" formatter="renderBatchQty"></@p.column>
+ 		<@p.column title="METALPLATE_TOOLNUMBER" field="toolNumber" permissionCode="TOOL_NUMBER"  formatter="renderToolNumber"></@p.column>
+ 		<@p.column title="METALPLATE_APC_TOTAL_NUMBER" field="apcPlannedDemand" permissionCode="REMARK"></@p.column>
+		<@p.column title="PRODUCTIONSCHEDULE_INVENTORYNUMBER" field="inventoryNumber" permissionCode="REMARK" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATE_STANDARDCT" field="standardCt" permissionCode="REMARK" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATE_PLCNO" field="plcNo" permissionCode="REMARK" formatter="renderBatchQty"></@p.column>
+		<@p.column title="METALPLATE_REMARK" field="remark" permissionCode="REMARK"  formatter="render" formatter="renderBatchQty"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderBatchQty(value){return value == null ? "" : value;}
+function renderModelType(value){return entryRenderer('SM_MODEL_TYPE', value);}
+function renderPlaceType(value){return entryRenderer('SM_PLACE_TYPE', value);}
+function renderMaterialDrawingNo(value){return entryRenderer('SM_MATERIAL_DRAWING_NO', value);}
+function renderLevel(value){return entryRenderer('SM_DRAWING_NO_LEVEL', value);}
+function renderAssemblyLine(value){return entryRenderer('SM_ASSEMBLY_LINE', value);}
+function renderCoatingWith(value){return entryRenderer('SM_COATING_WITH', value);}
+function renderMachiningSurface(value){return entryRenderer('SM_MACHINING_SURFACE', value);}
+function renderProgression(value){return entryRenderer('SM_PROGRESSION', value);}
+function renderTexture(value){return entryRenderer('SM_TEXTURE', value);}
+function renderPlateThickness(value){return entryRenderer('SM_PLATE_THICKNESS', value);}
+function renderMaterialSize(value){return entryRenderer('SM_MATERIAL_SIZE', value);}
+function renderProgramNumber(value){return entryRendererMulti('SM_MACHINING_SURFACE', value);}
+function renderComponent(value){return entryRenderer('SM_COMPONENT', value);}
+function renderProcess(value){return entryRenderer('SM_AFTER_PROCESS', value);}
+function renderRegionMark(value){return entryRenderer('SM_REGION_MARK', value);}
+function renderMachineTags(value){return entryRendererMulti('SM_MACHINE_TAGS', value);}
+function renderToolNumber(value){
+	if(!value)return '';
+	if(value.indexOf("~") != -1){
+		var toolNumbers = value.split("~")
+		var equipmentMoulds = eval('(' + '${equipmentMoulds!}' + ')');
+		var toolVal = "";
+		for(var i in toolNumbers){
+			var toolSrc = toolNumbers[i].split(":");
+			toolVal += keysValue(equipmentMoulds,toolSrc[1])+"~";
+		}
+		if(toolVal.length>0){
+			toolVal = toolVal.substring(0, toolVal.length - 1);
+		}
+	}
+	return toolVal;
+}
+/* function renderResToolNumber(value){return entryRendererMulti('SM_RES_TOOL_NUMBER', value);} */
+function importData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/metalPlate/exportTemplate.do";
+    importFile("<@s.m code="METALPLATE_IMPORT" />", "${baseUrl}/metalPlate/importData.do", "dg${currentPageId}",obj);
+}
+
+function inventorySetting() {
+	var title="<@s.m code='PRODUCTIONSCHEDULE_SCHEDULEINVENTORY'/>";
+	var url="${baseUrl}/metalPlate/inventorySettingInput.do";
+	var gridId="dg${currentPageId}";
+	var rowsData = getSelectedRows(gridId);
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	var ids = [];
+	for(var i in rowsData){
+		ids.push(rowsData[i].id);
+	}
+	if (url.indexOf('?') != -1) {
+		url += '&ids=' + JSON.stringify(ids);
+	} else {
+		url += '?ids=' + JSON.stringify(ids);
+	}
+	createwindow(title, url, gridId,'','inventorySettingSubmit');
+}
+</script>

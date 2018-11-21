@@ -1,0 +1,35 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+
+	function renderEquipmentNoOrName(value,equipment) {
+		if(value && equipment.equipment.no){
+			return equipment.equipment.no+ " - " + value;
+		}
+		return value;
+	}
+	
+	
+</script>
+<@p.body title="EQUIPMENT_LIST_TITLE" permissionModule="EQUIPMENT_PERSON" noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EQUIPMENT_PERSON_NAME" field="user.name"  permissionCode="EQUIPMENT_PERSON_NAME"></@p.input>
+			<@p.input title="EQUIPMENT_PERSON_NOTE" field="note"  permissionCode="EQUIPMENT_PERSON_NAME"></@p.input>
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="EQUIPMENT_PERSON_ADD" permissionCode="EquipmentPersonAdd" iconCls="plus" url="${baseUrl}/equipmentResponsiblePerson/addInput.do?tmEquipmentId="+"${tmEquipmentId}" type="add"  ></@p.button>
+			<@p.button title="EQUIPMENT_PERSON_UPDATE" permissionCode="EquipmentPersonUpdate" iconCls="edit" url="${baseUrl}/equipmentResponsiblePerson/updateInput.do?tmEquipmentId="+"${tmEquipmentId}" type="update"></@p.button>
+			<@p.button title="EQUIPMENT_PERSON_DELETE" permissionCode="EquipmentPersonDelete" iconCls="trash" url="${baseUrl}/equipmentResponsiblePerson/delete.do" type="delete"></@p.button>
+			<@p.button title="EQUIPMENT_PERSON_EXPORT" permissionCode="EquipmentPersonExport" downName="EQUIPMENT_PERSON_INFO" url="${baseUrl}/equipmentResponsiblePerson/exportData.do?tmEquipmentId="+"${tmEquipmentId}" iconCls="upload-alt" type="down" ></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid  url="${baseUrl}/equipmentResponsiblePerson/list.do?tmEquipmentId="+"${tmEquipmentId}" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="EQUIPMENT_PERSON_NAME" field="user.name"   permissionCode="EQUIPMENT_PERSON_NAME"  ></@p.column>
+		<@p.column title="EQUIPMENT_PERSON_PHONE" field="user.phone"   permissionCode="EQUIPMENT_PERSON_PHONE"></@p.column>
+		<@p.column title="EQUIPMENT_PERSON_EAMIL" field="user.email"   permissionCode="EQUIPMENT_PERSON_EAMIL"></@p.column>
+		<@p.column title="EQUIPMENT_PERSON_NOTE" field="note"   permissionCode="EQUIPMENT_PERSON_EAMIL"></@p.column>
+	</@p.dataGrid>
+</@p.body>

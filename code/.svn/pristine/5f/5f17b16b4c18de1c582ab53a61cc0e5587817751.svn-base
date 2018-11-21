@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/bomDetail/add.do" class="form-horizontal"   permissionModule="BOM_DETAIL">
+		<input type ="hidden" name="tmBomId" id="bomId"/>
+		<@p.formRow>
+			<@p.formColmd title="BOM_DETAIL_ULOC" permissionCode="BOM_DETAIL_ULOC">
+				<@p.input type="select" datatype="*" field="tmUlocId"  id="add_ulocId"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="BOM_DETAIL_PART" permissionCode="BOM_DETAIL_PART">
+				 <@p.input type="select" id="detailPartId" datatype="*" field="tmPartId" ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BOM_DETAIL_QTY" permissionCode="BOM_DETAIL_QTY">
+				<input name="qty" class="inputxt" datatype="n" maxlength='16'  id="qty_add"/>
+			</@p.formColmd>
+			<@p.formColmd title="BOM_DETAIL_SEQ" permissionCode="BOM_DETAIL_SEQ">
+				<input name="seq" class="inputxt" datatype="n" maxlength='16' />
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="BOM_DETAIL_ISTRAC" permissionCode="BOM_DETAIL_ISTRAC">
+				<@p.input type="select" id="isTrac"  excludeSelectOption="true" field="isTrac" options=optionIsTrac  onchange="changeIstrac_add(this.value);"></@p.input>
+			</@p.formColmd>
+			<div id="isBatchTrac">
+				<@p.formColmd title="BOM_DETAIL_ISBATCHTRAC" permissionCode="BOM_DETAIL_ISBATCHTRAC">
+				 <@p.input type="select" id="add_isBatchTrac"  field="isBatchTrac" options=optionIsBatchrac  datatype="*" onchange="changeIsBatch_update(this.value);"></@p.input>
+			</@p.formColmd>
+			</div>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="BOM_DETAIL_NOTE" permissionCode="BOM_DETAIL_NOTE">
+				<input name="note" class="inputxt"  maxlength='150' />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	getUlocOptions($("#tmBomId").val());	
+	getPartOptions($("#tmBomId").val());
+	$("#bomId").val($("#tmBomId").val());
+	if($("#isTrac").val()=="YES"){
+		$("#isBatchTrac").show();
+	}else{
+		$("#isBatchTrac").hide();
+	}
+});
+
+function changeIstrac_add(value){
+	if(value=="YES"){
+		$("#add_isBatchTrac").attr("datatype","*");
+		$("#isBatchTrac").show();
+	}else{
+		$("#add_isBatchTrac").removeAttr("datatype");
+		$("#isBatchTrac").hide();
+	}
+}
+
+
+function getUlocOptions(obj){
+	$.ajax({
+		data:{bomId:obj},
+		url:"${baseUrl}/bomDetail/getUlocOptions.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#add_ulocId").empty(); //清空下拉列表
+				$("#add_ulocId").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#add_ulocId").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+					
+					var optionSize = $("#add_ulocId option").size();
+					if(optionSize==2){
+						$('#add_ulocId option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+function getPartOptions(obj){
+	$.ajax({
+		data:{bomId:obj},
+		url:"${baseUrl}/bomDetail/getPartOptions.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#detailPartId").empty(); //清空下拉列表
+				$("#detailPartId").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#detailPartId").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+					
+					var optionSize = $("#detailPartId option").size();
+					if(optionSize==2){
+						$('#detailPartId option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+</script>
+

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>	
+<#include "../include/editorCommons.html"> 
+<script type="text/javascript">
+$(function(){
+ 	$('#ncData').val('${ncDictString!}');
+ 	ngLevelOrExit('${bean.tmNcId!}');
+ });
+function nc_listAdd(obj){
+	$('#ncData').val('');
+	$.ajax({
+		data:{tmNcGroupId:obj},
+		url:"${baseUrl}/tbQualityTracing/getNcItem.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			$('#ncData').val(JSON.stringify(result.data));
+			if(result.data){
+				$('#ngLevel').val('');
+				$('#ngEntrance').val('');
+			}
+			try {
+				$("#ncId_addPage").empty(); //清空下拉列表
+				$("#ncId_addPage").append(" <option value=''>-----请选择-----</option>");
+				$(result.data).each(
+					function(i, item) {
+						$("#ncId_addPage").append(" <option value='" + item.code + "'>"+item.name+ "</option>");
+					});
+					/* var optionSize = $("#ncId_addPage option").size();
+					if(optionSize==2){
+						$('#ncId_addPage option:eq(1)').prop("selected",true);
+					} */
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+function ngLevelOrExit(val){
+	var ncData = eval('('+ $('#ncData').val() +')');
+	var levelId = "";
+	for(var nc in ncData){
+		if(ncData[nc].code == val){
+			levelId =ncData[nc].ngLevel; 
+		}
+	}
+	if(levelId){
+		var faultGrades = eval('('+ '${faultGrades!}' +')');
+		var optionNgEntrance = eval('('+ '${optionNgEntrance!}' +')');
+		for(var i in faultGrades){
+			if(faultGrades[i].code==levelId){
+				$('#ngLevel').val(faultGrades[i].name);
+				$('#ngEntrance').val(keysValue(optionNgEntrance,faultGrades[i].relevantParameter));
+			}
+		}
+	}else{
+		$('#ngLevel').val('');
+		$('#ngEntrance').val('');
+	}
+}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+
+<@p.editForm url="${baseUrl}/tbQualityTracing/update.do" idValue=bean.id class="form-horizontal" permissionModule="QUALITY">
+		<input type="hidden" id="ncData"/>
+		<@p.formRow>
+		    <@p.formColmd title="QUALITY_BACK_NUMBER" permissionCode="QUALITY_BACK_NUMBER">
+				<input name="backNumber" class="inputxt" value="${bean.backNumber!}" disabled="disabled" maxlength='100' datatype="*" />
+			</@p.formColmd>
+			  <@p.formColmd title="QUALITY_MACHINE_NAME"  permissionCode="QUALITY_MACHINE_NAME">
+				<input name="machineName" class="inputxt"  value="${bean.machineName!}" disabled="disabled"  datatype="*" maxlength='100'>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="QUALITY_CLASSES" permissionCode="QUALITY_CLASSES">
+			    <@p.input type="select"  value="${bean.shiftno!}"  disabled="disabled" field="shiftno" options=optionShiftno ></@p.input>
+				<input type="hidden" value="${bean.shiftno!}" name="shiftno" /> 
+			</@p.formColmd>
+			
+			<@p.formColmd title="PRODUCT_TRACING_CLASS_MANAGER_CLASSGROUP" permissionCode="QUALITY_CLASSES">
+			    <@p.input type="select"  value="${bean.tmClassManagerId!}" disabled="disabled" options=classmanagerOption ></@p.input>
+			    <input type="hidden" value="${bean.tmClassManagerId!}" name="tmClassManagerId" /> 
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="QUALITY_FAULT_TYPE"  permissionCode="QUALITY_FAULT_TYPE">
+				<@p.input type="select" field="tmNcGroupId" value="${bean.tmNcGroupId!}" onchange="nc_listAdd(this.value);" options=ncGroup datatype="*"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="QUALITY_FAULT_CONTENT" permissionCode="QUALITY_FAULT_CONTENT">
+				<@p.input type="select" field="tmNcId" value="${bean.tmNcId!}" id="ncId_addPage" onchange="ngLevelOrExit(this.value);" options=ncDict datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="QUALITY_FAULT_LEVEL" permissionCode="QUALITY_FAULT_LEVEL">
+				<input class="inputxt" id="ngLevel" readonly="readonly">
+			</@p.formColmd>
+			<@p.formColmd title="QUALITY_NG_ENTRANCE"  permissionCode="QUALITY_NG_ENTRANCE">
+				<input name="ngEntrance" id="ngEntrance" class="inputxt" value="${bean.ngEntrance!}" readonly="readonly">
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<!-- <@p.formColmd title="QUALITY_PROCESS_MODE"  permissionCode="QUALITY_PROCESS_MODE">
+				<@p.input type="select" excludeSelectOption="true" value="${bean.ncProcessMode!}" field="ncProcessMode" options=optionNcStatus ></@p.input>
+			</@p.formColmd> -->
+			<@p.formColmd title="QUALITY_FIND_ULOC"  permissionCode="QUALITY_FIND_ULOC">
+				<@p.input type="select" field="discoveryStation" value="${bean.discoveryStation!}" options=optionUloc datatype="*"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

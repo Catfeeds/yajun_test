@@ -1,0 +1,17 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body   permissionModule="FORM_PERMISSION_SET" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="permissionSetListGrid" style="height:36px;">
+		<@p.searchColumns >
+			<@p.input title="PERMISSION_SET_CODE" field="code"  permissionCode="PERMISSION_SET_CODE"></@p.input>
+			<@p.input title="PERMISSION_SET_NAME" field="name"  permissionCode="PERMISSION_SET_NAME"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/formPermissionSet/list.do"    id="permissionSetListGrid">
+		<@p.column title="Id" checkbox="true" field="Id" ></@p.column>
+		<@p.column title="PERMISSION_SET_CODE" field="code"  permissionCode="PERMISSION_SET_CODE" ></@p.column>
+		<@p.column title="PERMISSION_SET_NAME" field="name"  permissionCode="PERMISSION_SET_NAME" ></@p.column>
+		<@p.column title="PERMISSION_SET_DESCRIPTION" field="description"  permissionCode="PERMISSION_SET_DESCRIPTION" ></@p.column>
+	</@p.dataGrid>
+</@p.body>	
+

@@ -1,0 +1,28 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body title="AUDIT_LIST_TITLE"    permissionModule="AUDIT">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="OPERATOR_NAME" field="operatorName"  permissionCode="OPERATOR_NAME" />
+			<@p.input title="AUDIT_TYPE_NAME" field="config.auditTypeName"   permissionCode="AUDIT_TYPE_NAME"/>
+			<@p.input title="OPERATE_START_TIME" id="beginTime" field="operateDateStart"   permissionCode="OPERATE_START_TIME"/>
+			<@p.input title="OPERATE_END_TIME" id="endTime" field="operateDateEnd"  permissionCode="OPERATE_END_TIME"/> 	
+        	<@p.input title="OPERATION_NAME" field="config.operationName"   permissionCode="OPERATION_NAME"/>
+        	<@p.input title="BEFORE_OPERATE_OBJ" field="beforeOperateObj"   permissionCode="BEFORE_OPERATE_OBJ"/>
+        	<@p.input title="AFTER_OPERATE_OBJ" field="afterOperateObj"   permissionCode="BEFORE_OPERATE_OBJ"/>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/audit/list.do">
+		<@p.column title="OPERATOR_NAME" field="operatorName" width="100" permissionCode="OPERATOR_NAME"></@p.column>
+		<@p.column title="OPERATE_DATE" field="operateDate" width="130"   permissionCode="OPERATE_DATE"></@p.column>
+		<@p.column title="AUDIT_TYPE_NAME" field="config.auditTypeName" width="120"   permissionCode="AUDIT_TYPE_NAME" ></@p.column>
+		<@p.column title="OPERATION_NAME" field="config.operationName"  width="120" permissionCode="OPERATION_NAME"></@p.column>
+        <@p.column title="BEFORE_OPERATE_OBJ" field="beforeOperateObj"  width="500" permissionCode="BEFORE_OPERATE_OBJ" ></@p.column>
+        <@p.column title="AFTER_OPERATE_OBJ" field="afterOperateObj"  width="500" permissionCode="BEFORE_OPERATE_OBJ" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script>
+$("#beginTime,#endTime").focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd'});
+});
+</script>

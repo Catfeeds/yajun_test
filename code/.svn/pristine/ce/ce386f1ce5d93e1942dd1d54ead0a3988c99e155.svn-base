@@ -1,0 +1,98 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+function operator(action){
+	var rows = getSelectedRows('dg${currentPageId}');
+    if(rows.length<1){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    var ids = [];
+    var url='';
+    
+    if('convert-to-model' == action){
+    	for (var i = 0; i < rows.length; i++) {
+    		if (rows[i].defId != null) {
+    			ids.push(rows[i].defId);
+    		}
+    	}
+    	url = '${baseUrl}/bpm/definition/manage/convert-to-model.do';
+    }else{
+    	for (var i = 0; i < rows.length; i++) {
+    		if (rows[i].id != null) {
+    			ids.push(rows[i].id);
+    		}
+    	}
+    	url = '${baseUrl}/bpm/definition/manage/update/' + action + '.do';
+    	
+    }
+    ajaxRequest(url, {'ids' :  JSON.stringify(ids)},function(){
+    	reloadTable('dg${currentPageId}');
+	});
+}
+function renderPic(value , row, index){
+	return '<a href="#" onclick="viewPic('+"'"+row.defId+"'"+','+"'"+value+"'"+')" >'+value+'</a>';
+}
+function viewPic(processDefinitionId ,value){
+	var url = '${baseUrl}/bpm/definition/resource/viewPic.do?processDefinitionId='+processDefinitionId+'&resourceType=image';
+	createwindow('<@s.m code="PROCESS_COLUMN_IMG" />'+value,url,'dg${currentPageId}');
+	
+}
+function renderXml(value , row, index){
+	return '<a target="_blank" href="${baseUrl}/bpm/definition/resource/read.do?processDefinitionId='+row.defId+'&resourceType=xml" >'+value+'</a>';
+}
+function processConfiguration(){
+	var rows=getSelectedRows('dg${currentPageId}');
+    if(rows.length<1){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    if(rows.length!=1){
+    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+	var definitionId= rows[0].defId;
+	var	url = '${baseUrl}/bpm/definition/manage/configInput.do?processDefinitionId='+definitionId;
+	createdetailwindow('<@s.m code="PROCESS_BUT_CONFIGURATION" />',url,'dg${currentPageId}');
+}
+function testFormatter(index, row, element) {
+	return row.historyUrl;
+}
+</script>
+<@p.body title="PROCESS_LIST_TITLE"  permissionModule="PROCESS_MANAGER_LIST" >
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="PROCESS_COLUMN_TITLE" permissionCode="PROCESS_COLUMN_TITLE"  field="name" ></@p.input>
+			<@p.input title="PROCESS_COLUMN_STATUS" permissionCode="PROCESS_COLUMN_STATUS" type="select" field="suspensionState" options=statusOptions></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar>
+			<@p.button title="PROCESS_BUTTON_HANGUP"  permissionCode="ProcessHangup" onclick="operator('suspend')" iconCls="pause"></@p.button>
+			<@p.button title="PROCESS_BUTTON_ACTIVE"  permissionCode="ProcessActive" onclick="operator('active')" iconCls="play" ></@p.button>
+			<@p.button title="PROCESS_BUTTON_DEL" permissionCode="ProcessDelete" url="${baseUrl}/bpm/definition/delete.do" type="delete" iconCls="trash"></@p.button>
+			<@p.button title="PROCESS_BUTTON_CHANGE_MODEL" permissionCode="ProcessConvert" onclick="operator('convert-to-model')" iconCls="gear"></@p.button>
+			<@p.button title="PROCESS_BUT_CONFIGURATION" permissionCode="ProcessConfig" onclick="processConfiguration()" iconCls="cogs"></@p.button>
+			<@p.button title="PROCESS_BUTTON_DEPLOY" permissionCode="ProcessDeploy" url="${baseUrl}/bpm/definition/manage/deployByFileInput.do"  type="add" iconCls="plus" ></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/definition/manage/list.do" detailView="true" detailFormatter="testFormatter">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="PROCESS_COLUMN_TITLE" sortable="false" permissionCode="PROCESS_COLUMN_TITLE" field="name" width="200"></@p.column>
+		<@p.column hidden="hidden" title="RPOCESS_COLUMN_TYPE" sortable="false"  field="category" width="100" formatter="renderProcessType"></@p.column>
+		<@p.column title="PROCESS_COLUMN_STATUS" sortable="false" permissionCode="PROCESS_COLUMN_STATUS" width="40" field="suspensionState" formatter="renderProcessStatus"></@p.column>
+		<@p.column title="PROCESS_COLUMN_IMG" sortable="false" permissionCode="PROCESS_COLUMN_IMG" width="200" field="diagramResourceName" formatter="renderPic" ></@p.column>
+		<@p.column title="PROCESS_COLUMN_XML" sortable="false" permissionCode="PROCESS_COLUMN_XML" width="200" field="resourceName" formatter="renderXml" ></@p.column>
+		<@p.column title="PROCESS_COLUMN_SERVISION" sortable="false" permissionCode="PROCESS_COLUMN_SERVISION" width="50" field="version" ></@p.column>
+		<@p.column title="RPOCESS_COLUMN_CREATTIME" sortable="false" permissionCode="RPOCESS_COLUMN_CREATTIME" field="createTime" width="100"></@p.column>
+		<@p.column title="PROCESS_COLUMN_CREATUSER" sortable="false" permissionCode="PROCESS_COLUMN_CREATUSER" field="employee.name" width="100"></@p.column>
+		<@p.column title="PROCESS_COLUMN_HISTORY_URL" sortable="false" permissionCode="PROCESS_COLUMN_HISTORY_URL" field="historyUrl" width="100"></@p.column>
+		<@p.column title="PROCESS_COLUMN_DESC" sortable="false" permissionCode="PROCESS_COLUMN_DESC" width="200" field="description" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderProcessStatus(value) {
+	return entryRenderer('PROCESS_DEF_STATUS', value);
+}
+function renderProcessType(value) {
+	return entryRenderer('PROCESS_TYPE', value);
+}
+</script>

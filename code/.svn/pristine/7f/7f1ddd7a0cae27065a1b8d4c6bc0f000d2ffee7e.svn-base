@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/path/add.do" class="form-horizontal"   permissionModule="PATH">
+		<@p.formRow>
+			<@p.formColmd title="PATH_PLANT" permissionCode="PATH_PLANT">
+				<@p.input type="select" id="add_plant" datatype="*" onchange="path_add_plantChange(this.value);" field="tmPlantId" options=plantOptions></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_LINE" permissionCode="PATH_LINE">
+				<@p.input type="select" id="add_line" field="tmLineId" options=lineOptions datatype="*"></@p.input>
+			</@p.formColmd>
+			
+		</@p.formRow>
+		<#--
+			<@p.formColmd title="PATH_WORKSHOP" permissionCode="PATH_WORKSHOP">
+			 	<@p.input type="select" id="add_workShop" datatype="*"  field="tmWorkshopId" options=workShopOptions onchange ="add_workShopChange(this.value);"></@p.input>
+			</@p.formColmd>
+		<@p.formColmd title="PATH_STATUS" permissionCode="PATH_STATUS">
+				 <@p.input type="select" excludeSelectOption="true" field="status" options=statusOptions ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_PART" permissionCode="PATH_PART">
+				 <@p.input type="select" id="add_part"  field="tmPartId" options=partOptions ></@p.input>
+			</@p.formColmd>
+		-->
+		<@p.formRow>
+			<@p.formColmd title="PATH_NO" permissionCode="PATH_NO">
+				<input name="no" class="inputxt" maxlength="100" datatype="no"/>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_NAME" permissionCode="PATH_NAME">
+				<input name="name" class="inputxt" maxlength="150" datatype="*" />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_BACK_NUMBER" permissionCode="PATH_BACK_NUMBER">
+				<input name="backNumber" class="inputxt" datatype="no" maxlength='22' />
+			</@p.formColmd>
+			<@p.formColmd title="PATH_MACHINE_OF_NAME" permissionCode="PATH_MACHINE_OF_NAME">
+				<input name="machineOfName" class="inputxt" datatype="*" maxlength='50' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ENABLED" permissionCode="PATH_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" options=enabledOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PATH_REMARK" permissionCode="PATH_REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250"></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	 var optionSize = $("#add_plant option").size();
+	if(optionSize==2){
+		$('#add_plant option:eq(1)').prop("selected",true);
+		path_add_plantChange($("#add_plant").val());
+	} 
+});
+function path_add_plantChange(obj){
+	getPart(obj);
+	//getWorkShop(obj);
+	doGetLine(obj);
+	//getLine($("#add_plant").val(),$("#add_workShop").val());
+}
+function add_workShopChange(workShopId){
+	getLine($("#add_plant").val(),workShopId);
+}
+
+function getPart(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/path/getPartByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			console.log(result);
+			try {
+				$("#add_part").empty(); //清空下拉列表
+				$("#add_part").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#add_part").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+					var optionSize = $("#add_part option").size();
+					if(optionSize==2){
+						$('#add_part option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+
+/* function getWorkShop(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/path/getWorkShopByPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#add_workShop").empty(); //清空下拉列表
+				$("#add_workShop").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(function(i, item) {
+						$("#add_workShop").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+					 var optionSize = $("#add_workShop option").size();
+					if(optionSize==2){
+						$('#add_workShop option:eq(1)').prop("selected",true);
+						getLine($("#add_plant").val(),$("#add_workShop").val());
+					} 
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+} */
+function doGetLine(obj){
+	if (obj == "" || null == obj) {
+		return false;
+	}else{
+		$.ajax({
+			data:{plantId:obj},
+			url:"${baseUrl}/uloc/selectLintNameOrPlantId.do", //修改为通过公司id得到所属产线
+			dataType : 'json', //返回的类型为json
+			success : function(result) { //成功时执行的方法
+				$("#add_line").empty(); //清空下拉列表
+				$("#add_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#add_line").append(" <option  value='" + item.id + "'>"+item.nameCn + "</option>");
+					});
+				},
+			error : function(result, status) { //出错时会执行这里的回调函数 
+				if (status == 'error') {
+					alert(status);
+				}
+			}
+		});
+	}
+}
+/* 
+function getLine(plantId,workShopId){
+	$.ajax({
+		data:{
+			plantId:plantId,
+			workShopId:workShopId
+		},
+		url:"${baseUrl}/path/getLineByWorkShopIdAndPlantId.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#add_line").empty(); //清空下拉列表
+				$("#add_line").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#add_line").append(" <option  value='" + item.code + "'>"+item.name + "</option>");
+					});
+					 var optionSize = $("#add_line option").size();
+					if(optionSize==2){
+						$('#add_line option:eq(1)').prop("selected",true);
+					} 
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+} */
+</script>
+

@@ -1,0 +1,27 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body title="BOARD_MANAGE_TITLE" permissionModule="BOARD_MANAGE">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="BOARD_MANAGE_NAME" field="name" id="name"/>
+			<@p.input title="BOARD_MANAGE_REGION_MARK" field="regionMark" type="select" options=smRegionMarks/>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="BTN_ADD" permissionCode="BoardManageAdd" iconCls="plus" url="${baseUrl}/boardManage/addInput.do" type="add"  ></@p.button>
+			<@p.button title="BTN_UPDATE" permissionCode="BoardManageUpdate" iconCls="edit" url="${baseUrl}/boardManage/updateInput.do" type="update"></@p.button>
+			<@p.button title="BTN_DELETE" permissionCode="BoardManageDelete" iconCls="trash" url="${baseUrl}/boardManage/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/boardManage/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="BOARD_MANAGE_REGION_MARK" field="regionMark" permissionCode="BOARD_MANAGE_REGION_MARK" formatter="readRegionMark"/>
+		<@p.column title="BOARD_MANAGE_NAME" field="tmEquipmentNames" permissionCode="BOARD_MANAGE_NAME"/>
+		<@p.column title="BOARD_MANAGE_STEP_NUMBER" field="stepNumber" permissionCode="BOARD_MANAGE_STEP_NUMBER"/>
+		<@p.column title="BOARD_MANAGE_PLC_NO" field="plcNo" permissionCode="BOARD_MANAGE_PLC_NO"/>
+		<@p.column title="BOARD_MANAGE_REMARKS" field="remarks" permissionCode="BOARD_MANAGE_REMARKS"/>
+	</@p.dataGrid>
+	<script type="text/javascript">
+		function readRegionMark(value){
+			return entryRenderer('SM_REGION_MARK', value);
+		}
+	</script>
+</@p.body>

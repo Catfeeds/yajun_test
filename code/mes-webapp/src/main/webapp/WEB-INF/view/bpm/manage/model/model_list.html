@@ -1,0 +1,84 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+function updateModel(){
+	var rowsData = getSelectedRows('model_list_grid');
+	if (!rowsData || rowsData.length==0) {
+		infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+	if (rowsData.length>1) {
+		infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+		return;
+	}
+	window.open('${baseUrl}/process-editor/modeler.html?modelId='+rowsData[0].modelId,'scrollbars,resizable=yes, alwaysRaised=yes,z-look=yes')
+
+}
+
+function deployModel(){
+	var rowsData = getSelectedRows('model_list_grid');
+	if (!rowsData || rowsData.length==0) {
+		infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+	if (rowsData.length>1) {
+		infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+		return;
+	}
+	var modelId = rowsData[0].modelId;
+	
+	createwindow('<@s.m code="MODEL_BUT_DEPLOY" />：'+rowsData[0].actReModel.name,'${baseUrl}/bpm/model/manage/deployInput.do?modelId='+modelId,'dg${currentPageId}'); 
+	
+  	/* ajaxRequest('${baseUrl}/bpm/model/manage/deploy.do',{'modelId' : modelId},function(){
+  		refreshGrid();
+	}); */
+}
+function refreshGrid() {
+	reloadTable('dg${currentPageId}');
+}
+
+function exportModel(){
+	var modelId = validateModelId();
+	if(modelId){
+		window.open('${baseUrl}/bpm/model/manage/export.do?modelId='+modelId);
+	}
+}
+function validateModelId(){
+	var rowsData = getSelectedRows('model_list_grid');
+	if (!rowsData || rowsData.length==0) {
+		tip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+	if (rowsData.length>1) {
+		tip('<@s.m code="SELECT_ONE_ONLY" />');
+		return;
+	}
+	var modelId = rowsData[0].modelId;
+	return modelId;
+}
+</script>
+<@p.body title="MODEL_LIST_TITLE"  permissionModule="MODEL_DEFINITION_LIST" >
+	<@p.searchPanel gridId="model_list_grid">
+		<@p.searchColumns>
+			<@p.input title="MODEL_COL_NAME" permissionCode="MODEL_COL_NAME" field="actReModel.name" ></@p.input>
+			<@p.input title="MODEL_COL_KEY" permissionCode="MODEL_COL_KEY" field="actReModel.key" ></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+			<@p.button title="MODEL_BUT_ADD" height="250" iconCls="plus" permissionCode="ModelAdd" url="${baseUrl}/bpm/model/manage/addInput.do" type="add"></@p.button>
+			<@p.button title="MODEL_BUT_EDIT" iconCls="edit"  permissionCode="ModelUpdate" onclick="updateModel()"></@p.button>
+			<@p.button title="MODEL_BUT_DEPLOY"  permissionCode="ModelDeploy" onclick="deployModel()" iconCls="gear"></@p.button>
+			<@p.button title="MODEL_BUT_DEL" iconCls="trash" permissionCode="ModelDelete" url="${baseUrl}/bpm/model/manage/delete.do" type="delete"></@p.button>
+			<@p.button title="MODEL_BUT_EXPORT" permissionCode="ModelExport" onclick="exportModel()" iconCls="download"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/model/manage/list.do" id="model_list_grid">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="MODEL_COL_NAME" sortable="false" permissionCode="MODEL_COL_NAME" field="actReModel.name" width="220"></@p.column>
+		<@p.column title="MODEL_COL_KEY" sortable="false" permissionCode="MODEL_COL_KEY" field="actReModel.key" width="180" ></@p.column>
+		<@p.column title="PROCESS_COLUMN_SERVISION" sortable="false" permissionCode="PROCESS_COLUMN_SERVISION" width="90" field="actReModel.version" ></@p.column>
+		<@p.column title="MODEL_COL_CREATETIME" sortable="false" permissionCode="MODEL_COL_CREATETIME" field="actReModel.createTime" width="150"></@p.column>
+		<@p.column title="MODEL_COL_UPDATETIME" sortable="false" permissionCode="MODEL_COL_UPDATETIME" field="actReModel.lastUpdateTime" width="150"></@p.column>
+		<@p.column title="MODEL_COL_DESCRIPTION" sortable="false" permissionCode="MODEL_COL_DESCRIPTION" field="actReModel.description" width="300"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+

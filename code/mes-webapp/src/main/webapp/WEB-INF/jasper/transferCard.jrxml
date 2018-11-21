@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="toOrderTrace3" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="db0f4a3c-03e8-4fc4-82ba-116d5ac272d0">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="18"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="TYPE" class="java.lang.String"/>
+	<parameter name="TM_PART_ID" class="java.lang.String"/>
+	<parameter name="NAME_CN" class="java.lang.String"/>
+	<parameter name="NO" class="java.lang.String"/>
+	<parameter name="ORDER_NO" class="java.lang.String"/>
+	<parameter name="QTY" class="java.lang.String"/>
+	<parameter name="SN" class="java.lang.String"/>
+	<parameter name="PPATH_NO" class="java.lang.String"/>
+	<parameter name="LINE_NO_NAME" class="java.lang.String"/>
+	<parameter name="PORDER_NO" class="java.lang.String"/>
+	<field name="SEQ" class="java.lang.String"/>
+	<field name="TM_ULOC_ID" class="java.lang.String"/>
+	<field name="PROCESS_NAME" class="java.lang.String"/>
+	<field name="TM_WORKCENTER_ID" class="java.lang.String"/>
+	<field name="IS_OUTSIDE" class="java.lang.String"/>
+	<field name="ACC_EQUIPMENT_ID" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="142" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="18fde550-911c-4832-a778-9452be5b2a17" x="224" y="23" width="77" height="26"/>
+				<textElement>
+					<font fontName="微软雅黑" size="16" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[流转卡]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement uuid="7d32a6c8-900b-4078-aafa-4cf0da966302" x="358" y="23" width="197" height="119"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="true" checksumRequired="true" barHeight="200">
+					<jr:codeExpression><![CDATA[$P{SN}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="33" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="e2c54163-451a-4ad3-9f26-39cffe18a2f7" x="121" y="11" width="30" height="22"/>
+				<textElement textAlignment="Right">
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[产线：]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="eeb401f9-61b5-4b81-b4c1-cea0f7880c35" x="420" y="11" width="30" height="22"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[产品：]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c953a00a-9d4c-4f12-8061-3da7125bfae8" x="445" y="11" width="118" height="22"/>
+				<textElement>
+					<font fontName="微软雅黑" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{TM_PART_ID}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="6e265c48-103c-4e44-bb4f-2a82b1d5719a" x="145" y="11" width="142" height="22"/>
+				<textElement>
+					<font fontName="微软雅黑" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{LINE_NO_NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="470cef65-294a-404f-ac46-b64a098d4b1c" x="45" y="11" width="85" height="22"/>
+				<textElement>
+					<font fontName="微软雅黑" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{PORDER_NO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="60ccbfe1-dd23-412c-9ef8-1f52e70782e5" x="286" y="11" width="70" height="22"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[工艺路径编号：]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="e330f8bc-c4a3-4304-8988-94dd2819a67e" x="351" y="11" width="73" height="22"/>
+				<textElement>
+					<font fontName="微软雅黑" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{PPATH_NO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="7480a289-e9a1-4a4a-8db9-3fb0c019d680" x="1" y="11" width="50" height="22"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[工单编号：]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="027bb6c3-f1ff-4b20-a764-cff2666ec2e7" x="0" y="5" width="64" height="19"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="dd2c29ce-fd1e-4f2e-92b9-4768669927b8" x="0" y="5" width="64" height="19"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[工序顺序]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="cf683bea-ac71-4e66-9051-e9d860115676" x="64" y="5" width="93" height="19"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="4e8b5a7c-e65d-44b5-949e-b90ac0a580fe" x="79" y="5" width="63" height="19"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[工序编号]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="fde42a81-e5dd-4032-8120-2f7b34ade852" x="157" y="5" width="85" height="19"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="058f31fa-8da8-4200-bdb2-bfe377a65b18" x="157" y="5" width="85" height="19"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[工序名称]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="9296e264-bb93-4d7c-8f54-6dafe497eaca" x="242" y="5" width="47" height="19"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="7e9c8efc-cdfa-4543-a89e-2c027d50c196" x="242" y="5" width="47" height="19"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[操作人员]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="051dd304-d8d8-43d2-bc95-9c15c8ed6a12" x="289" y="5" width="69" height="19"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="0e94f968-8c99-4325-89e3-45316b772c80" x="302" y="5" width="56" height="19"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[不合格数量]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="75551e99-dfa7-4226-bfa6-53a94007b812" x="358" y="5" width="58" height="19"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="9982be2c-c56a-43f0-894d-2076cfa22013" x="366" y="5" width="50" height="19"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[检验员]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="fd2abfcc-afe8-4ca3-ad37-48c4c4ddaabf" x="416" y="5" width="68" height="19"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="2b684753-fae1-4df4-b382-594f2c0a0679" x="432" y="5" width="38" height="19"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[日期]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="3dcceee8-9b44-49dc-8fdb-fb49148e100c" x="484" y="5" width="71" height="19"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="39216aaf-ab8c-4802-a3ff-d20098094468" x="506" y="5" width="28" height="19"/>
+				<textElement>
+					<font fontName="微软雅黑" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[备注]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="17" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="87cce727-b909-4d6f-b16b-560c210a63ce" x="0" y="0" width="64" height="17"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="3ca1998d-e88f-4e0f-a01c-6608f0b261ac" x="3" y="0" width="58" height="17"/>
+				<textElement>
+					<font fontName="微软雅黑" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SEQ}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="504f180c-2966-4649-82d7-1cccb68406bb" x="64" y="0" width="93" height="17"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="18bb6f5a-dfbb-4668-b30d-e1ef3f50e85f" x="69" y="0" width="88" height="17"/>
+				<textElement>
+					<font fontName="微软雅黑" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TM_ULOC_ID}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="cd126d91-6d3d-4081-903f-543508d2ebf1" x="157" y="0" width="85" height="17"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="1e54cb5b-e04e-4c7d-a516-28db4255db5e" x="242" y="0" width="47" height="17"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="daf975af-b6f4-4659-9626-3fc77910563f" x="289" y="0" width="69" height="17"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="2298f675-2be6-4bfc-b590-879e9b009fb9" x="160" y="0" width="83" height="17"/>
+				<textElement>
+					<font fontName="微软雅黑" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PROCESS_NAME}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="224dc9b3-571f-41d3-9fae-3edf4cf4678a" x="358" y="0" width="58" height="17"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="80370ce9-a09f-4928-9fad-857495e9e0b9" x="416" y="0" width="68" height="17"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="d8b708aa-7760-4c32-a964-26244368b5bb" x="484" y="0" width="71" height="17"/>
+			</rectangle>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="48" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="24" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="24" splitType="Stretch"/>
+	</summary>
+</jasperReport>

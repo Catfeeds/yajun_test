@@ -1,0 +1,130 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+	function reset(obj){
+	    var ids = getSelectedIds('dg${currentPageId}');
+	    if(ids.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    ajaxRequest('${baseUrl}/user/resetPwdToDefault.do',{'ids' : JSON.stringify(ids)},function(){
+	    	reloadTable('dg${currentPageId}');
+		});
+	}
+	function lock(){
+	    var ids=getSelectedIds('dg${currentPageId}');
+	    if(ids.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    ajaxRequest('${baseUrl}/user/lock.do',{'ids' : JSON.stringify(ids)},function(){
+	    	reloadTable('dg${currentPageId}');
+		});
+	}
+	function unlock(){
+	    var ids=getSelectedIds('dg${currentPageId}');
+	    if(ids.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    ajaxRequest('${baseUrl}/user/unlock.do',{'ids' : JSON.stringify(ids)},function(){
+	    	reloadTable('dg${currentPageId}');
+		});
+	}
+	
+	function setSelectRole() {
+	    var rows=getSelectedRows('dg${currentPageId}');
+	    if(rows.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    if(rows.length!=1){
+		    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+	    	return;
+	    }
+	    var url = '${baseUrl}/user/setSelectRole.do?id='+rows[0].id;
+	    createChildwindow('<@s.m code='USER_SELECT_ROLE'/>', url,'','','userSelectRoleSetGrid');
+	}
+	
+	function setPermissionSet() {
+	    var rows=getSelectedRows('dg${currentPageId}');
+	    if (!rows || rows.length==0) {
+	        infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	        return;
+	    }
+	    var url='${baseUrl}/user/permissionSetListSelect.do?id='+rows[0].id;
+	    createChildwindow('<@s.m code='ALLOT_FROM_PERMISSION'/>', url,'','','permissionSelectGrid');
+	}
+	
+	function setDatePermissionSet() {
+	    var rows=getSelectedRows('dg${currentPageId}');
+	    if (!rows || rows.length==0) {
+	        infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	        return;
+	    }
+	    var url='${baseUrl}/user/allotDataPermissionSet.do?id='+rows[0].id;
+	    createChildwindow('<@s.m code='ALLOT_DATA_PERMISSION'/>', url,'','','dataPermissionSetGrid');
+	}
+	
+	function showPosition(){
+	    var rows=getSelectedRows('dg${currentPageId}');
+	    if(rows.length<1){
+	    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+	    	return;
+	    }
+	    if(rows.length!=1){
+	    	infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+	    	return;
+	    }
+	    var url='${baseUrl}/position/listView.do?currentPageId=SelectGrid&params=queryCondition[userId]='+rows[0].id;
+	    createChildwindow('<@s.m code='POSITION_ORGNAME'/>',url,'','','userPositionView');
+	}
+</script>
+<@p.body title="USER_LIST_TITLE" permissionModule="USER">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="USER_NAME" field="name" permissionCode="USER_NAME"></@p.input>
+			<@p.input title="USER_ACCOUNT_NUMBER" field="account" permissionCode="USER_ACCOUNT_NUMBER"></@p.input>
+			<@p.input title="USER_STATUS" type="select" field="status" options=options permissionCode="USER_STATUS"></@p.input>
+		</@p.searchColumns>
+	
+		<@p.toolbar> 
+			<@p.button title="USER_ADD" permissionCode="UserEdit" iconCls="plus" url="${baseUrl}/user/addInput.do" type="add"></@p.button>
+			<@p.button title="USER_EDIT" permissionCode="UserEdit" iconCls="edit" url="${baseUrl}/user/updateInput.do" type="update"></@p.button>
+			<@p.button title="RESET_PASSWORD" permissionCode="UserEdit" iconCls="retweet" onclick="reset(this)" type="button"></@p.button>
+			<@p.button title="USER_LOCK" permissionCode="UserEdit" iconCls="lock" onclick="lock()"></@p.button>
+			<@p.button title="USER_UNLOCK" permissionCode="UserEdit" iconCls="unlock-alt" onclick="unlock()"></@p.button>
+			<@p.button title="USER_VIEW" permissionCode="UserEdit" iconCls="eye-open" url="${baseUrl}/user/viewInput.do" type="view"></@p.button>
+			<@p.button title="USER_DELETE" permissionCode="UserEdit" iconCls="trash" url="${baseUrl}/user/delete.do" type="delete"></@p.button>
+			<@p.button title="USER_ROLE_SET" permissionCode="UserEdit" iconCls="cogs" onclick="setSelectRole()"></@p.button>
+			<!-- <@p.button title="POSITION_ORGNAME" permissionCode="UserEdit" iconCls="sitemap" onclick="showPosition()"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid  url="${baseUrl}/user/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="USER_NAME" field="name"   permissionCode="USER_NAME"></@p.column>
+		<@p.column title="USER_ACCOUNT_NUMBER" field="account"   permissionCode="USER_ACCOUNT_NUMBER"></@p.column>
+		<@p.column title="USER_STATUS" width="80"field="status"  permissionCode="USER_STATUS"  formatter="renderStatus"  ></@p.column>
+		<@p.column title="USER_SEX" width="80" field="gender"    permissionCode="USER_SEX"  formatter="renderGender"  ></@p.column>
+		<@p.column title="USER_MAIL" field="email"  permissionCode="USER_MAIL"></@p.column>
+		<@p.column title="USER_PHONE" field="phone"  permissionCode="USER_PHONE"></@p.column>
+		<@p.column title="USER_FAX" field="fax"  permissionCode="USER_FAX"></@p.column>
+		<@p.column title="PMC_LINE" field="tmLineIds"   permissionCode="USER_NAME" formatter="renderLineIds"></@p.column>
+		<@p.column title="LAST_LOGIN_DATE" field="lastLoginDate"   permissionCode="LAST_LOGIN_DATE"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<!-- /.page-content -->
+<!-- inline scripts related to this page -->
+<script type="text/javascript">
+	function renderGender(value) {
+		return entryRenderer('GENDER', value);
+	}
+	function renderStatus(value) {
+		return entryRenderer('LOGINSTATUS', value);
+	}
+	function renderLineIds(value){
+		
+		return keysValue(eval("("+'${lineOptions!}'+")"),value);
+	}
+</script>

@@ -1,0 +1,203 @@
+<#include "../phone_main/head.html"/>
+<style>
+	.custom-search{ 
+		background:url(../res/mui/images/sweep_code.png) no-repeat left center;
+		background-color: #F2F2F2F2 !important;
+		border-radius: 5px !important;
+		text-indent: 20px;
+	}
+	
+	.mui-content-padded .mui-input-group .mui-input-row label{
+	    font-size: 14px;
+   		font-family: 微软雅黑;
+	}
+    
+</style>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">新增故障机</h1>
+	</header>
+<div class="mui-content">
+	<div class="mui-content-padded" style="margin: 5px;">
+		<div class="mui-input-row">
+			<input type="text" onkeydown='if(event.keyCode==13)readSn(this.value);'  class="mui-input-clear custom-search" placeholder="">
+		</div>
+		<form id="formId" class="mui-input-group">
+			<input name="sn" id="this_sn" type="hidden"/>
+			<div class="mui-input-row">
+				<label>背番号：</label>
+				<input name="backNumber" id="backNumber" type="text" readonly="readonly" >
+			</div>
+			<div class="mui-input-row">
+				<label>机&nbsp;&nbsp;号：</label>
+				<input name="machineName"  id="machineName" type="text" readonly="readonly" >
+			</div>
+			<div class="mui-input-row">
+				<label>机种名：</label>
+				<input name="machineOfName"  id="machineOfName" type="text" readonly="readonly" >
+			</div>
+			<div class="mui-input-row">
+				<label>班次<span style='color:red;'>*</span>：</label>
+				<select name="shiftno" title="班次" id="shiftno"></select>
+			</div>
+			<div class="mui-input-row">
+				<label>故障类型<span style='color:red;'>*</span>：</label>
+				<select name="tmNcGroupId" title="故障类型" onchange="nc_listAdd(this.value);" id="tmNcGroupId"></select>
+			</div>
+			<div class="mui-input-row">
+				<label>故障内容<span style='color:red;'>*</span>：</label>
+				<select name="tmNcId" title="故障内荣" onchange="ngLevelOrExit(this.value)" id="tmNcId"></select>
+			</div>
+			<div class="mui-input-row">
+				<label>故障等级：</label>
+				<input type="text" id="ngLevel" readonly="readonly" >
+			</div>
+			<div class="mui-input-row">
+				<label>适应NG入口：</label>
+				<input type="text" name="ngEntrance" id="ngEntrance" readonly="readonly" >
+			</div>
+			<div class="mui-input-row">
+				<label>处理方式<span style='color:red;'>*</span>：</label>
+				<select  name="ncProcessMode"  title="处理方式" id="ncProcessMode"></select>
+			</div>
+			<div class="mui-input-row">
+				<label>发现工位<span style='color:red;'>*</span>：</label>
+				<select name="discoveryStation"  title="发现工位" id="discoveryStation"></select>
+			</div>
+			<div class="mui-input-row">
+				<label>出口<span style='color:red;'>*</span>：</label>
+				<select name="ngExit"  title="出口" id="ngExitId"></select>
+			</div>
+			<div class="mui-button-row">
+<!-- 				<button type="button" class="mui-btn mui-btn-primary" onclick="return false;">返回</button>&nbsp;&nbsp; -->
+				<button type="button" class="mui-btn mui-btn-primary" onclick="submitFrom();">提交</button>&nbsp;&nbsp;
+			</div>
+		</form>
+	</div>
+</div>
+<#include "../phone_main/footer.html"/>
+<script>
+var data;
+(function($, doc) {
+	$.init();
+	$.ready(function() {
+		data={
+				'optionShiftno':eval('('+ '${optionShiftno!}' +')'),	
+				'ncGroup':eval('('+ '${ncGroup!}' +')'),	
+				'optionNcStatus':eval('('+ '${optionNcStatus!}' +')'),	
+				'optionUloc':eval('('+ '${optionUloc!}' +')'),
+				'optionNgEntrance':eval('('+ '${optionNgEntrance!}' +')'),
+				'faultGrades':eval('('+ '${faultGrades!}' +')'),
+				'optionUlocExits':eval('('+ '${optionUlocExits!}' +')'),
+				'ncDictString':false
+			} 
+		
+		initSelect('shiftno','',data.optionShiftno);
+		initSelect('tmNcGroupId','',data.ncGroup);
+		initSelect('tmNcId','',null);
+		initSelect('ncProcessMode','',data.optionNcStatus);
+		initSelect('discoveryStation','',data.optionUloc);
+		initSelect('ngExitId','',data.optionUlocExits);
+	});
+})(mui, document);
+  function submitFrom(){
+	var this_sn = $('#this_sn').val();
+	var formData = document.getElementById("formId");
+    for(var i=0;i<formData.length;i++){
+          if(formData.elements[i].value=="" && formData.elements[i].name != ""){
+        	  if(formData.elements[i].name=="sn"){
+        		  mui.toast("请扫描条码。",{ duration:'short', type:'div' });
+        	  }else{
+	        	  mui.toast(formData.elements[i].title+"不能为空！",{ duration:'short', type:'div' });
+        	  }
+              formData.elements[i].focus(); 
+              return ;
+          }
+    }
+    
+   var discoveryStation =  $('#discoveryStation option:selected').text();
+   var ngExitId =  $('#ngExitId option:selected').text();
+   if(parseInt(ngExitId)<parseInt(discoveryStation)){
+	   mui.toast("出口必须大于发现工位。");
+	   return;
+   }
+    
+	if(this_sn && this_sn.length == 22){
+		$("#formId").submit( 
+	        mui.ajax({
+		   	    type: "post",
+		        dataType: "json",
+		        contentType:'application/x-www-form-urlencoded',//ajax submit 编码
+		    	url:'${baseUrl}/faultMachine/faultMachineAdd.do',
+				data:$('#formId').serialize(),
+				success:function(r){
+					console.log(r);
+					if(r.success){
+						mui.back();
+					}else{
+						mui.toast(r.message,{ duration:'short', type:'div' });
+					}
+				}
+			})
+	        
+        ); 
+	}else{
+		mui.toast("请扫描SN码！(SN码必须是22位字符编码)",{ duration:'short', type:'div' });
+	}	
+  }
+  function readSn(sn){
+	  if(sn && sn.length == 22){
+		  mui.ajax({
+		   	    type: "post",
+		        dataType: "json",
+		        contentType:'application/x-www-form-urlencoded',//ajax submit 编码
+		    	    url:'${baseUrl}/faultMachine/analyzeSn.do',
+					data:{'sn':sn},
+					success:function(r){
+ 						$('#this_sn').val(r.data.newSn);
+ 						$('#backNumber').val(r.data.backNumber);
+ 						$('#machineName').val(r.data.machineName);
+ 						$('#machineOfName').val(r.data.machineOfName);
+					}
+				})
+	  }else{
+		  mui.toast("SN码必须是22位字符编码",{ duration:'short', type:'div' });
+	  }
+  }
+  function nc_listAdd(obj){
+	data.ncDictString =false;
+	mui.ajax({
+   	    type: "post",
+        dataType: "json",
+        contentType:'application/x-www-form-urlencoded',//ajax submit 编码
+    	    url:'${baseUrl}/faultMachine/getNcItem.do',
+			data:{'tmNcGroupId':obj},
+			success:function(r){
+				initSelect('tmNcId','',r.data);
+				data.ncDictString = r.data;
+			}
+		})
+	}
+  function ngLevelOrExit(val){
+	 	var ncData = data.ncDictString;
+		var levelId = "";
+		for(var nc in ncData){
+			if(ncData[nc].code == val){
+				levelId =ncData[nc].ngLevel; 
+			}
+		}
+		if(levelId){
+			var faultGrades = data.faultGrades;
+			var optionNgEntrance = data.optionNgEntrance;
+			for(var i in faultGrades){
+				if(faultGrades[i].code==levelId){
+					$('#ngLevel').val(faultGrades[i].name);
+					$('#ngEntrance').val(keysValue(optionNgEntrance,faultGrades[i].relevantParameter));
+				}
+			}
+		}else{
+			$('#ngLevel').val('');
+			$('#ngEntrance').val('');
+		}
+	}
+</script>

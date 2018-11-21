@@ -1,0 +1,453 @@
+<#include "../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PMC总能耗报表 </title>
+<style>
+	.report-panel{
+		width:100%;
+		height:85rem;
+	}
+
+	.panel-div{
+		width: 300px;
+	    max-height: 120px;
+	    z-index: 100;
+	    position: fixed;
+	    right: 40px;
+	}
+	
+	.report-title{
+		width: 100%;
+	    height: 5%;
+	    align-items: center;
+	    text-align: center;
+	    display: grid;
+	    font-size: 19px;
+	    font-family: 微软雅黑;
+	    font-weight: 600;
+	}
+</style>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<script src="${baseUrl}/res/js/custom-echarts.js"></script>
+<script type="text/javascript">
+var pillarTyearECMyChart={};
+var pillarMonthECMyChart={};
+function pillarTyearECmarkLine(value){
+     var yearMarkLine = {
+          symbol : 'none',
+          itemStyle : {
+              normal : {
+                  color:'red',
+                  label : {
+                      show:true,
+                      formatter:value
+                  }
+              }
+          },
+          data : [
+              {yAxis: value}
+          ]
+      }
+     pillarTyearECMyChart.setOption({
+          series: [
+              {
+                  markLine: yearMarkLine
+              }
+          ]
+      });
+}
+function pillarMonthECmarkLine(value){
+     var monthMarkLine = {
+         symbol : 'none',
+         itemStyle : {
+             normal : {
+                 color:'red',
+                 label : {
+                     show:true,
+                     formatter:value
+                 }
+             }
+         },
+         data : [
+             {yAxis: value}
+         ]
+     }
+    pillarMonthECMyChart.setOption({
+        series: [
+            {
+                markLine: monthMarkLine
+            }
+        ]
+    });
+}
+$(function(){
+	initTime();
+	setEcGeneralNewspaper("pillarTyearEC",'yyyy-MM');
+	setEcGeneralNewspaper("pillarMonthEC",'yyyy-MM-dd');
+	setEcGeneralNewspaper("pieDayEC",'yyyy-MM-dd');
+	setEcGeneralNewspaper("pieMonthEC",'yyyy-MM');
+})
+	function initTime(){
+		var date = new Date();
+		var month = date.getMonth()+1;
+		var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		$("#createTimeEnd").val(endTime);
+		date = new Date(date.getTime()-1000*60*60*24*30);
+		month = date.getMonth()+1;
+		var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		$("#createTimeStart").val(startTime);
+	}
+	function caseLessTen(num){
+		if(num<10){
+			return '0'+num;
+		}else {
+			return num;
+		}
+	}
+function getMaxEnergy(totalEnergy){
+	var max = 0;
+	$(totalEnergy).each(function(i,obj){
+		if(obj>max){
+			max = obj;
+		}
+	});
+	return max;
+}
+function getPillarTyearEC(time,acEnergy,deviceEnergy,lightEnergy,totalEnergy,titleText){
+	var targetMax = getMaxEnergy(totalEnergy);
+	var XData = time?time:['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+ 	totalEcData=totalEnergy;//总能耗
+ 	equipmentEcData=deviceEnergy;//设备能耗
+ 	airConditionerEcData=acEnergy;//空调能耗
+ 	lightingEcData=lightEnergy;//照明能耗
+ 	targetEcData=[20];//目标能耗
+	var option = {
+		title:{
+			text: titleText,
+			x:'center',
+		    y:'top'
+		},
+	    tooltip : {
+	        trigger: 'axis',
+	        axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+	            type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+	        }
+	    },
+	    legend: {
+	        data:['总能耗N','设备能耗N','空调能耗N','照明能耗N','目标能耗'],
+	        top:30
+	    },
+	    dataZoom: [
+            { show: true, realtime: true, start: 1,end: 100},
+            {type: 'inside',realtime: true, start: 1,end: 100}
+       	],
+	    grid: {
+	    	y:80,
+	        right: '10%',
+	        bottom: '10%',
+	        containLabel: true
+	    },
+	    toolbox: {
+	    	orient: 'vertical',
+	    	left: 'right',
+	        feature: {
+	            dataView: {show: true, readOnly: false}, 
+	            magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+	            restore: {show: true},
+	            saveAsImage: {show: true}
+	        }
+	    },
+	    xAxis : [
+	        {
+	            type : 'category',
+	            data : XData
+	        }
+	    ],
+	    yAxis : [
+	        {
+	            type : 'value',
+	            name:'kw/h',
+	            /* splitLine:{
+	            	show:false
+	            } */
+	        }
+	        /* ,
+	        {
+	            type : 'value',
+	            name:'目标能耗',
+	            max:targetMax
+	        } */
+	    ],
+	    series : [
+	        {
+	            name:'总能耗N',
+	            type:'bar',
+	            data:totalEcData
+	        },
+	        {
+	            name:'设备能耗N',
+	            type:'bar',
+	            stack: '广告',
+	            data:equipmentEcData
+	        },
+	        {
+	            name:'空调能耗N',
+	            type:'bar',
+	            stack: '广告',
+	            data:airConditionerEcData
+	        },
+	        {
+	            name:'照明能耗N',
+	            type:'bar',
+	            stack: '广告',
+	            data:lightingEcData
+	        }
+	        /* ,
+	        {
+	            name:'目标能耗',
+	            type:'line',
+	            yAxisIndex:1,
+	            data:targetEcData
+	        } */
+	    ]
+	};
+	return option;
+}
+
+function getPieSeriesUpdate(scatterData, chart) {
+    return echarts.util.map(scatterData, function (item, index) {
+        var center = chart.convertToPixel('calendar', item);
+        return {
+            id: index + 'pie',
+            center: center
+        };
+    });
+}
+
+function getPieDayEC(month,myChart,time,timeEnergy,label){
+	var cellSize = [70, 70];
+	var scatterData =[];
+	if(time){
+		for(var i in time){
+			scatterData.push([time[i],i]);
+		}
+	}
+	var app = {};
+	var	option = {
+		    tooltip : {
+		    	  trigger: 'item',
+		          formatter: "{b}: {c} ({d}%)"
+		    },
+		    legend: {
+		    	 orient: 'vertical',
+		    	 right: 10,
+		         top:'50px',
+		         data: ['设备能耗N', '空调能耗N','照明能耗N']
+		    },
+		    toolbox: {
+		        feature: {
+		        	 myTool : {
+		                 show : true,
+		                 title : '是否显示百分比',
+		                 icon : 'image://${baseUrl}/res/images/percent.png',
+		                 onclick : function (event){
+		                	 var label = {
+				                		normal: {
+		            	                    fontSize:'8px',
+		            	                    formatter: '{d}%',
+		            	                    position: 'inside'
+		            	                }
+				                	};
+		                	 if(app.isPercent){
+		                		 app.isPercent = false;
+		                		 myChart.setOption(getPieDayEC(month,myChart,time,timeEnergy,false),true);
+		                	 }else{
+		                		 app.isPercent = true;
+		                		 myChart.setOption(getPieDayEC(month,myChart,time,timeEnergy,label),true);
+		                	 }
+		                 }
+		             },
+		            saveAsImage: {show: true}
+		        }
+		    },
+		    calendar: {
+		        top: 'middle',
+		        left: 'center',
+		        orient: 'vertical',
+		        cellSize: cellSize,
+		        yearLabel: {
+		            show: false,
+		            textStyle: {
+		                fontSize: 30
+		            }
+		        },
+		        dayLabel: {
+		            margin: 20,
+		            firstDay: 1,
+		            nameMap: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+		        },
+		        monthLabel: {
+		            show: false
+		        },
+		        range: month
+		    },
+		    series: [{
+		        id: 'label',
+		        type: 'scatter',
+		        coordinateSystem: 'calendar',
+		        symbolSize: 1,
+		        label: {
+		            normal: {
+		                show: true,
+		                formatter: function (params) {
+		                    return echarts.format.formatTime('dd', params.value[0]);
+		                },
+		                offset: [-cellSize[0] / 2 + 10, -cellSize[1] / 2 + 10],
+		                textStyle: {
+		                    color: '#000',
+		                    fontSize: 12
+		                }
+		            }
+		        },
+		        data: scatterData
+		    }]
+		};
+	    setTimeout(function () {
+	        myChart.setOption({
+	            series: getPieSeries(scatterData,timeEnergy,myChart,label)
+	        });
+	    }, 10);
+		return option;
+}
+function getPieSeries(scatterData,timeEnergy, chart,label) {
+	var pieRadius = 25;
+    return echarts.util.map(scatterData, function (item, index) {
+        var center = chart.convertToPixel('calendar', item);
+        return {
+            id: index + 'pie',
+            type: 'pie',
+            center: center,
+            label:label,
+            radius: pieRadius,
+            data: timeEnergy[index]
+        };
+    });
+}
+
+function setEcGeneralNewspaper(modelId,timeFormat){
+	var myChart = echarts.init(document.getElementById(modelId));
+	ajaxRequest("${baseUrl}/report/pmcEcpReportData.do", {
+		"type":modelId,
+		"timeFormate":timeFormat,
+		"createTimeStart":$("#createTimeStart").val(),
+		"createTimeEnd":$("#createTimeEnd").val()
+	}, function(result){
+		var data = result.data;
+		if(modelId=="pillarTyearEC"){
+			pillarTyearECMyChart = echarts.init(document.getElementById(modelId));
+			pillarTyearECMyChart.showLoading();
+			var option = getPillarTyearEC(JSON.parse(data.time),JSON.parse(data.acEnergy),JSON.parse(data.deviceEnergy),JSON.parse(data.lightEnergy),JSON.parse(data.totalEnergy),'能耗月报');
+			pillarTyearECMyChart.hideLoading();
+			pillarTyearECMyChart.setOption(option,true);
+		}else if(modelId=="pillarMonthEC"){
+			pillarMonthECMyChart = echarts.init(document.getElementById(modelId));
+			pillarMonthECMyChart.showLoading();
+			var option = getPillarTyearEC(JSON.parse(data.time),JSON.parse(data.acEnergy),JSON.parse(data.deviceEnergy),JSON.parse(data.lightEnergy),JSON.parse(data.totalEnergy),'能耗日报');
+			pillarMonthECMyChart.hideLoading();
+			pillarMonthECMyChart.setOption(option,true);
+		}else if(modelId=="pieDayEC"){
+			myChart.showLoading();
+			var time = $("#createTimeEnd").val();
+			if(!time){
+				var date = new Date();
+				var month = date.getMonth()+1;
+				time =date.getFullYear()+"-"+(month<10?'0'+month:month);
+			}
+			var option = getPieDayEC(time.substring(0,7),myChart,JSON.parse(data.time),JSON.parse(data.timeEnergy) );
+			myChart.hideLoading();
+			myChart.setOption(option,true);
+		}else if(modelId == 'pieMonthEC'){
+			var time = $("#createTimeStart").val();
+			if(!time){
+				var date = new Date();
+				time =date.getFullYear();
+			}else{
+				time = time.substring(0,4);
+			}
+			myChart.showLoading();
+			var option = getPieMonthEC(time,JSON.parse(data.acEnergy),JSON.parse(data.deviceEnergy),JSON.parse(data.lightEnergy),false,myChart);
+			myChart.hideLoading();
+			myChart.setOption(option,true);
+		}
+	},false);
+}
+</script>
+</head>
+<body>
+<div class="page-content" >
+	<div class="panel panel-default panel-div">
+		<a data-toggle="collapse" data-parent="#accordion" 
+				   href="#collapseThree">
+			<div class="panel-heading" style="background-color: #f5f5f5;">目标值</div>
+		</a>
+		<div id="collapseThree" class="panel-collapse collapse">
+			<div class="panel-body">
+				<div><label>年目标值：</label><input onChange="pillarTyearECmarkLine(this.value)"/></div>
+				<div><label>月目标值：</label><input onChange="pillarMonthECmarkLine(this.value)" /></div>
+			</div>
+		</div>
+	</div>
+  <@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div class="report-panel">
+		<div style="width: 50%;height: 35rem;float: left;"  id="pillarTyearEC"></div>
+		<div style="width: 50%;height: 35rem;float: left;" id="pillarMonthEC"></div>
+		<div style="width: 50%;height: 50rem;float: left;padding-left: 5%;">
+			<div class="report-title">能耗月报占比</div>
+			<div style="width: 100%;height: 95%;float: left;" id="pieMonthEC"></div>
+		</div>
+		<div style="width: 48%;height: 50rem;float: left;">
+			<div class="report-title">能耗日报占比</div>
+			<div style="width: 100%;height:95%;" id="pieDayEC"></div>
+		</div>
+	</div>
+				
+</div>
+</body>
+<script type="text/javascript">
+  function conditionalQuery(searchBtnObj){
+		setEcGeneralNewspaper("pillarTyearEC",'yyyy-MM');
+		setEcGeneralNewspaper("pillarMonthEC",'yyyy-MM-dd');
+		setEcGeneralNewspaper("pieDayEC",'yyyy-MM-dd');
+		setEcGeneralNewspaper("pieMonthEC",'yyyy-MM');
+ }
+  $('#createTimeStart').click(function(){
+		var createTimeEnd=$dp.$('createTimeEnd');
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd',
+			onpicked:function(){
+				createTimeEnd.click();
+			},
+			maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+		})
+	});
+	$('#createTimeEnd').click(function(){
+		WdatePicker({
+			autoPickDate:true,
+			dateFmt:'yyyy-MM-dd',
+			minDate:'#F{$dp.$D(\'createTimeStart\')}'
+		})
+	});
+</script>
+</html>

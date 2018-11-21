@@ -1,0 +1,24 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<@p.body title="DELEGATE_TASK_LIST_TITLE" permissionModule="DELEGATE_MANAGEMENT">
+	<@p.searchPanel>
+		<@p.searchColumns >
+			<@p.input title="DELEGATE_TASK_PROCESS_NAME" field="processName" permissionCode="PROCESS_NAME"></@p.input>
+			<@p.input title="DELEGATE_TASK_PROCESS_DESCRIPTION" field="processDescription" permissionCode="PROCESS_DESCRIPTION"></@p.input>
+			<@p.input title="DELEGATE_TASK_NAME" field="name" permissionCode="NODE_NAME"></@p.input><br/>
+			<@p.input title="DELEGATE_TASK_DESCRIPTION" field="description" permissionCode="DESCRIPTION"></@p.input>
+			<@p.input title="DELEGATE_TASK_CURRENT_NAME" field="currentUser.name" permissionCode="CURRENT_NAME"></@p.input>
+			<@p.input title="DELEGATE_TASK_TARGET_NAME"  field="targetUser.name" permissionCode="TARGET_NAME"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/bpm/manage/delegateTask/list.do">
+		<@p.column title="Id" checkbox="true" field="id" ></@p.column>
+		<@p.column title="DELEGATE_TASK_PROCESS_NAME" width="100" field="processName" permissionCode="PROCESS_NAME"></@p.column>
+		<@p.column title="DELEGATE_TASK_PROCESS_DESCRIPTION" width="160" field="processDescription" permissionCode="PROCESS_DESCRIPTION"></@p.column>
+		<@p.column title="DELEGATE_TASK_NAME" field="name" width="100" permissionCode="NODE_NAME"></@p.column>
+		<@p.column title="DELEGATE_TASK_DESCRIPTION" field="description" width="100" permissionCode="NODE_NAME"></@p.column>
+		<@p.column title="DELEGATE_TASK_CURRENT_NAME" width="100" field="currentUserName" permissionCode="CURRENT_NAME"></@p.column>
+		<@p.column title="DELEGATE_TASK_TARGET_NAME"  width="100" field="targetUserName" permissionCode="TARGET_NAME"></@p.column>
+		<@p.column title="DELEGATE_TASK_CREATE_TIME" width="120" field="wisDelegateTaskCreateTime" permissionCode="CREATE_TIME"></@p.column>
+	</@p.dataGrid>
+</@p.body>	
+

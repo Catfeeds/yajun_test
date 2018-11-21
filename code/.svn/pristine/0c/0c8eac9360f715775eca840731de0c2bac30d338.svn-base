@@ -1,0 +1,396 @@
+package com.wis.mes.production.metalplate.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jinterop.dcom.core.JIVariant;
+import org.openscada.opc.lib.da.Item;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.wis.basis.common.utils.ConstantUtils;
+import com.wis.basis.common.web.model.BootstrapTableQueryCriteria;
+import com.wis.core.dao.PageResult;
+import com.wis.core.framework.service.exception.BusinessException;
+import com.wis.core.service.impl.BaseServiceImpl;
+import com.wis.mes.master.boardmanage.entity.TmBoardManage;
+import com.wis.mes.master.boardmanage.service.TmBoardManageService;
+import com.wis.mes.master.metalPlate.entity.TmSheetMetalMaterial;
+import com.wis.mes.master.metalPlate.service.TmSheetMetalMaterialService;
+import com.wis.mes.opc.util.OpcPropertiesConfig;
+import com.wis.mes.opc.util.metalplate.OpcInitMetalPlateUtil;
+import com.wis.mes.opc.util.metalplate.OpcMetalPlateHelper;
+import com.wis.mes.production.metalplate.dao.TbMetalPlateSchedulDao;
+import com.wis.mes.production.metalplate.entity.TbMetalPlateSchedul;
+import com.wis.mes.production.metalplate.service.TbMetalPlateSchedulService;
+
+@Service
+public class TbMetalPlateSchedulServiceImpl extends BaseServiceImpl<TbMetalPlateSchedul>
+		implements TbMetalPlateSchedulService {
+
+	@Autowired
+	public void setDao(TbMetalPlateSchedulDao dao) {
+		this.dao = dao;
+	}
+
+	@Autowired
+	private TmSheetMetalMaterialService sheetMetalMaterialService;
+
+	@Autowired
+	private TmBoardManageService boardManageService;
+
+	public TbMetalPlateSchedul findRelevanceById(Map<String, Object> params) {
+		return ((TbMetalPlateSchedulDao) dao).findRelevanceById(params);
+	}
+
+	@Override
+	public Map<String, Object> findSchedulEgByPress(String press) {
+		return ((TbMetalPlateSchedulDao) dao).findSchedulEgByPress(press);
+	}
+
+	@Override
+	public PageResult<Map<String, Object>> pmcReport(BootstrapTableQueryCriteria criteria) {
+		return ((TbMetalPlateSchedulDao) dao).pmcReport(criteria);
+	}
+
+	private static String PACKAGE_NAME = "Banjin2.1756-L72_3.HISORDER";
+	private static String[] PMC_ROWS = new String[] { 
+			"HISODRMES[{0}]STATUS", //状态
+			"HISODRMES[{0}]PLNTIME",//计划时间
+			"HISODRMES[{0}]NAME", //部品名称
+			"HISODRMES[{0}]CRTTIME",//当前时间
+			"HISODRMES[{0}]CRTQTY", //实际生产量
+			"HISODRMES[{0}]CLASSIFY",//机种
+			"HISODRMES[{0}]CHGTIME", //换模时间
+			"HISODRMES[{0}]BATCH", //批次
+			"HISODRMES[{0}]AREA" //区域
+		};
+	//组装items
+	private void assemblyTagsItems(Map<Integer,Map<String,Object>> itemmapsAll,Map<Integer,String[]> itemsAll) {
+		for(int i=1;i<=9;i++) {
+			String[] items = new String[9];
+			Map<String,Object> map = new HashMap<String,Object>();
+			items[0]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[0].replace("{0}", i+"");
+			items[1]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[1].replace("{0}", i+"");
+			items[2]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[2].replace("{0}", i+"");
+			items[3]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[3].replace("{0}", i+"");
+			items[4]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[4].replace("{0}", i+"");
+			items[5]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[5].replace("{0}", i+"");
+			items[6]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[6].replace("{0}", i+"");
+			items[7]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[7].replace("{0}", i+"");
+			items[8]= PACKAGE_NAME+ConstantUtils.STRING_POINT+PMC_ROWS[8].replace("{0}", i+"");
+			itemsAll.put(i, items);
+			map.put(PMC_ROWS[0].replace("{0}", i+""), -1);
+			map.put(PMC_ROWS[1].replace("{0}", i+""), (Integer)0);
+			map.put(PMC_ROWS[2].replace("{0}", i+""), (Integer)0);
+			map.put(PMC_ROWS[3].replace("{0}", i+""), (Integer)0);
+			map.put(PMC_ROWS[4].replace("{0}", i+""), (Integer)0);
+			map.put(PMC_ROWS[5].replace("{0}", i+""), (Integer)0);
+			map.put(PMC_ROWS[6].replace("{0}", i+""), (Integer)0);
+			map.put(PMC_ROWS[7].replace("{0}", i+""), "");
+			map.put(PMC_ROWS[8].replace("{0}", i+""), "");
+			itemmapsAll.put(i, map);
+		}
+	}
+	
+	private void tagsItemsValue(Map<String,Object> itemmaps,int index,Map<String, Object> scheduls) {
+		Integer status =  Integer.valueOf(scheduls.get("STATUS").toString());
+		Object plannedTime = null != scheduls.get("PLANNEDTIME")?scheduls.get("PLANNEDTIME"):0;
+		Object component = null != scheduls.get("COMPONENT")?scheduls.get("COMPONENT"):0;
+		Object practicalTime =  null != scheduls.get("PRACTICALTIME")?scheduls.get("PRACTICALTIME"):0;
+		Object practicalNumber = null != scheduls.get("PRACTICALNUMBER")?scheduls.get("PRACTICALNUMBER"):0;
+		Object modelType = null != scheduls.get("MODELTYPE")?scheduls.get("MODELTYPE"):0;
+		Object verifyDuration = null != scheduls.get("VERIFYDURATION")?scheduls.get("VERIFYDURATION"):0;
+		if(itemmaps.containsKey(PMC_ROWS[0].replace("{0}", index+""))) {
+			itemmaps.put(PMC_ROWS[0].replace("{0}", index+""), status);
+			itemmaps.put(PMC_ROWS[1].replace("{0}", index+""), plannedTime);
+			itemmaps.put(PMC_ROWS[2].replace("{0}", index+""), component);
+			itemmaps.put(PMC_ROWS[3].replace("{0}", index+""),practicalTime);
+			itemmaps.put(PMC_ROWS[4].replace("{0}", index+""), practicalNumber);
+			itemmaps.put(PMC_ROWS[5].replace("{0}", index+""), modelType);
+			itemmaps.put(PMC_ROWS[6].replace("{0}", index+""), verifyDuration);
+			itemmaps.put(PMC_ROWS[7].replace("{0}", index+""), scheduls.get("BATCHNUMBER"));
+			itemmaps.put(PMC_ROWS[8].replace("{0}", index+""), scheduls.get("REGIONMARK"));
+		}
+	}
+	
+	@Override
+	public void pmcBoardProductionInfo() {
+		Map<Integer,Map<String,Object>> itemmapsAll = new HashMap<Integer,Map<String,Object>>();
+		Map<Integer,String[]> itemsAll = new HashMap<Integer,String[]>();
+		List<Map<String, Object>> scheduls = ((TbMetalPlateSchedulDao) dao).queryPMCBoardProductionInfo();
+		assemblyTagsItems(itemmapsAll,itemsAll);
+		int index = 0,index1 = 3,index2 = 6;
+		for(Map<String, Object> map:scheduls) {
+			if(map.get("TYPE_NO").toString().equals("TYPE_0")) {
+				index++;
+				tagsItemsValue(itemmapsAll.get(index),index,map);
+			}else if(map.get("TYPE_NO").toString().equals("TYPE_1")) {
+				index1++;
+				tagsItemsValue(itemmapsAll.get(index1),index1,map);
+			}else if(map.get("TYPE_NO").toString().equals("TYPE_2")) {
+				index2++;
+				tagsItemsValue(itemmapsAll.get(index2),index2,map);
+			}
+		}
+		for(Integer key:itemmapsAll.keySet()) {
+			OpcMetalPlateHelper.sendDataToOpc(itemsAll.get(key), itemmapsAll.get(key));
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	//------------------------------------------------------------------------------//
+	
+	private static String ORDERCOMM_NAME = "Banjin1.1756-L72_2.ORDERCOMM.MFG AREA {0}.";
+	private static String[] ORDERCOMM_ROWS = new String[] { "BJ_PLC_01_{0}_ODRINFO_BATCH",
+			"BJ_PLC_01_{0}_ODRINFO_STATUS", "BJ_PLC_01_{0}_ODRINFO_PGCODE" };
+
+	private static String[] REGION_MARKS = new String[] { "A", "B", "C" };
+
+	// 区域生产状态标签名称
+	private static String[] regionalStateTagNames = OpcPropertiesConfig
+			.getPropertyByKey("opc.bj.regional.production.state").split(",");
+	// 区域生产状态Items
+	private static List<Item> regionalStateItems = new ArrayList<Item>();
+
+	// 区域区分标签名称(1：3+2+1,2：4+4)新增2种模式[DC(4+3),AE(3+4)]
+	private static String[] regionalDivisionTagNames = new String[] { "Banjin1.1756-L72_2.ORDERCOMM.Zone_Type" };
+	// 区域区分Items
+	private static List<Item> regionalDivisionItems = new ArrayList<Item>();
+
+	private static String REGION_MARK_ZONE_TYPE = "Zone_Type";
+
+	@Override
+	public synchronized void mpregionMarkMonitor() {
+		// 把区域生产状态 Item 定义为全局的,每次执行JOB的时候先检查Item是否需要重新创建
+		if (regionalStateItems.size() < 1) {
+			OpcInitMetalPlateUtil.getOpcItemListMap(regionalStateTagNames, regionalStateItems);
+		}
+		// 把区域区分 Item 定义为全局的,每次执行JOB的时候先检查Item是否需要重新创建
+		if (regionalDivisionItems.size() < 1) {
+			OpcInitMetalPlateUtil.getOpcItemListMap(regionalDivisionTagNames, regionalDivisionItems);
+		}
+		//区域管理
+		List<TmBoardManage> boardManageList = boardManageService.findAll();
+		try {
+			for(TmBoardManage boardManage:boardManageList) {
+				String regionMark = boardManage.getRegionMark();
+				final Map<String, String> orderCommMap = getOrdercommItemsByIndex(regionMark);
+				//检查对应区域是否有任务需要派工  TODU
+				TbMetalPlateSchedul schedul = ((TbMetalPlateSchedulDao) dao).queryNextSchedulByRegionMark(regionMark);
+				if(null == schedul)continue;
+				// 先从数据库读取该区域是否有已下发并没有完成的数据(1在产 3已下发 4已校验 )
+				int validateWorkOrder  = ((TbMetalPlateSchedulDao) dao).queryBeProductionNumberByRegionMark(regionMark);
+				if(validateWorkOrder != 0)continue;
+				Map<String, Object> sendPlcMap = null;
+				
+				//检查当前区域是否可以派单
+				boolean isSend = checkRegionalState(schedul.getStatus(),regionMark);
+				System.out.println(isSend);
+				// PLC准备就绪下发该区域订单，且当前订单为需要下发的
+				if(isSend && ConstantUtils.BJ_MP_SCHEDUL_STATUS_0.equals(schedul.getStatus())) {
+					TmSheetMetalMaterial material = sheetMetalMaterialService.findById(schedul.getMaterialId());
+					if(null == material) {
+						continue;
+					}
+					Integer zoneType = getPlcZoneType();
+					if(zoneType != 0) {
+						Integer updateZoneTypeValue = 0;
+						//根据区域名称判断即可
+						if (regionMark == "D" ||regionMark == "E"&& zoneType == 1) {
+							updateZoneTypeValue = 2;
+						} else if (regionMark == "A" ||regionMark == "B" ||regionMark == "C" && zoneType == 2) {
+							updateZoneTypeValue = 1;
+						}else if (regionMark == "D" ||regionMark == "C" && zoneType == 3) {
+							updateZoneTypeValue = 3;
+						}else if (regionMark == "A" ||regionMark == "E" && zoneType == 4) {
+							updateZoneTypeValue = 4;
+						}
+						if (updateZoneTypeValue != 0) {
+							//查看区域是否全部空闲，全部空闲才能更换区域生产模式，然后派单
+							boolean checkAllRegion = checkAllRegion();
+							System.out.println(checkAllRegion);
+							if (checkAllRegion) {
+								sendPlcMap = new HashMap<String, Object>();
+								sendPlcMap.put(REGION_MARK_ZONE_TYPE, updateZoneTypeValue);
+								OpcMetalPlateHelper.sendDataToOpc(regionalDivisionTagNames, sendPlcMap);
+							}else {
+								continue;
+							}
+						}
+					}
+					sendPlcMap = new HashMap<String, Object>();
+					sendPlcMap.put("BJ_PLC_01_"+ regionMark + "_ODRINFO_BATCH", schedul.getBatchNumber());
+					sendPlcMap.put("BJ_PLC_01_" + regionMark + "_ODRINFO_STATUS", ConstantUtils.BJ_MP_SCHEDUL_STATUS_1);		
+					sendPlcMap.put("BJ_PLC_01_" + regionMark + "_ODRINFO_PGCODE", material.getPlcNo());		
+					OpcMetalPlateHelper.sendDataToOpc(new String[] {orderCommMap.get("odrInfoBatch"),orderCommMap.get("odrInfoStatus"),orderCommMap.get("odrInfoPgcode")}, sendPlcMap);
+
+				}
+			}
+		} catch (BusinessException e) {
+			regionalStateItems.clear();
+			regionalDivisionItems.clear();
+			OpcInitMetalPlateUtil.getOpcItemListMap(regionalStateTagNames, regionalStateItems);
+			OpcInitMetalPlateUtil.getOpcItemListMap(regionalDivisionTagNames, regionalDivisionItems);
+		}
+	}
+		
+		/***
+		 * @author yajun_ren
+		 * @date 2018/9/13
+		 * @desc 获取当前生产模式
+		 * @return isFree
+		 * **/
+		private Integer getPlcZoneType() {
+			int zoneType = 0;
+			JIVariant value = null;
+			try {
+				value = regionalDivisionItems.get(0).read(false).getValue();
+				zoneType = (int) value.getObjectAsShort();
+			} catch (Exception e) {
+				throw new BusinessException(e.getMessage());
+			}
+			return zoneType;
+		}
+		
+		/***
+		 * @author yajun_ren
+		 * @date 2018/9/13
+		 * @desc 检查对应区域是否空闲
+		 * @return isFree
+		 * @param schedulState 工单当前状态,regionMark 区域标识
+		 * **/
+		private boolean checkRegionalState(Integer schedulState,String regionMark) {
+			Map<String, String> orderCommMap = getOrdercommItemsByIndex(regionMark);
+			Map<String, Object> sendPlcMap = null;
+			boolean isSend = true;
+			for(Item item:regionalStateItems) {
+				String itemId = item.getId();
+				if(orderCommMap.get("odrInfoStatus").equals(itemId)) {
+					int status = 0;
+					try {
+						JIVariant value = item.read(false).getValue();//false读缓存，true读取真实数据。false快
+						status = (int) value.getObjectAsChar();
+					} catch (Exception e) {
+						throw new BusinessException(e.getMessage());
+					}
+					//状态不是待产,也不是已完成
+					if (!ConstantUtils.BJ_MP_SCHEDUL_STATUS_0.equals(status) && !ConstantUtils.BJ_MP_SCHEDUL_STATUS_5.equals(status)) {
+						isSend = false;
+					}
+					//状态等于已完成刷新batch 批号
+					if (ConstantUtils.BJ_MP_SCHEDUL_STATUS_5.equals(status)) {
+						sendPlcMap = new HashMap<String, Object>();
+						sendPlcMap.put("BJ_PLC_01_"+ regionMark + "_ODRINFO_BATCH", "0");
+						sendPlcMap.put("BJ_PLC_01_" + regionMark + "_ODRINFO_STATUS", 0);
+						OpcMetalPlateHelper.sendDataToOpc(new String[] {orderCommMap.get("odrInfoBatch"),orderCommMap.get("odrInfoStatus")}, sendPlcMap);
+					}
+					if (ConstantUtils.BJ_MP_SCHEDUL_STATUS_2.equals(status)) {
+						// 查看模具是否全部校验完成，完成后给PLC写入3
+						if (ConstantUtils.BJ_MP_SCHEDUL_STATUS_4.equals(schedulState)) {
+							String[] ORDERCOMM_ROWS = new String[] {
+									"Banjin1.1756-L72_2.ORDERCOMM.MFG AREA " + regionMark
+											+ ".BJ_PLC_01_" + regionMark + "_ODRINFO_STATUS" };
+							sendPlcMap = new HashMap<String, Object>();
+							sendPlcMap.put("BJ_PLC_01_" + regionMark + "_ODRINFO_STATUS", 3);
+							OpcMetalPlateHelper.sendDataToOpc(ORDERCOMM_ROWS, sendPlcMap);
+						}
+					}
+					break;
+				}
+			}
+			return isSend;
+		}
+		
+		/***
+		 * @author yajun_ren
+		 * @date 2018/9/13
+		 * @desc 检查所有区域是否空闲
+		 * @return isFree
+		 * 
+		 * **/
+		private boolean checkAllRegion() {
+			//区域管理
+			List<TmBoardManage> boardManageList = boardManageService.findAll();
+			boolean isFree = true;//是否空闲
+			for (TmBoardManage boardManageMark:boardManageList) {
+				//获取allRegionalStateTagNames
+				Map<String, String> markMap = getOrdercommItemsByIndex(boardManageMark.getRegionMark());
+				for (Item item : regionalStateItems) {
+					String markItemId = item.getId();
+					if (markMap.get("odrInfoStatus").equals(markItemId)) {
+						int status = 0;
+						try {
+							JIVariant value = item.read(false).getValue();
+							status = (int) value.getObjectAsChar();
+						} catch (Exception e) {
+							throw new BusinessException(e.getMessage());
+						}
+						if (!ConstantUtils.BJ_MP_SCHEDUL_STATUS_0.equals(status) && !ConstantUtils.BJ_MP_SCHEDUL_STATUS_5.equals(status) ) {
+							isFree = false;
+							break;
+						}
+					}
+				}
+			}
+			return isFree;
+		}
+		
+		/***
+		 * @author yajun_ren
+		 * @date 2018/9/12
+		 * @desc 通过区域标识拼接 程序号/批号/生产状态 tagName
+		 * @param regionMark
+		 * @return orderCommMap
+		 * 
+		 * **/
+		private static Map<String,String> getOrdercommItemsByIndex(String regionMark) {
+			Map<String,String> orderCommMap = new HashMap<String,String>();
+			String ordercommName = "Banjin1.1756-L72_2.ORDERCOMM.MFG AREA {0}.";
+			//批号
+			orderCommMap.put("odrInfoBatch", ordercommName.replace("{0}", regionMark)+"BJ_PLC_01_{0}_ODRINFO_BATCH".replace("{0}", regionMark));
+			//生产状态
+			orderCommMap.put("odrInfoStatus", ordercommName.replace("{0}", regionMark)+"BJ_PLC_01_{0}_ODRINFO_STATUS".replace("{0}", regionMark));
+			//程序号
+			orderCommMap.put("odrInfoPgcode", ordercommName.replace("{0}", regionMark)+"BJ_PLC_01_{0}_ODRINFO_PGCODE".replace("{0}", regionMark));
+			return orderCommMap;
+		}
+
+		@Override
+		public void doUnLock(TbMetalPlateSchedul mps) {
+			try {
+//				((TbMetalPlateSchedulDao) dao).doLock(mps);
+				dao.update(mps);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void doLock(TbMetalPlateSchedul mps) {
+			try {
+//				((TbMetalPlateSchedulDao) dao).doLock(mps);
+				dao.update(mps);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void doMandatoryEnd(TbMetalPlateSchedul mps) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void doWorkOrderStick(Map<String, Object> params) {
+			((TbMetalPlateSchedulDao) dao).doWorkOrderStick(params);
+		}
+
+}

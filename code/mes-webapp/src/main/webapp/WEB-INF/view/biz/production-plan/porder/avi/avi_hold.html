@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/avi/doHold.do" class="form-horizontal" idValue=id  permissionModule="PORDER">
+		<@p.formRow>
+		<@p.formColmd title="PORDER_NOTE" permissionCode="PORDER_NO">
+				<input class="inputxt"name="note" maxlength="150" datatype="*" >
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

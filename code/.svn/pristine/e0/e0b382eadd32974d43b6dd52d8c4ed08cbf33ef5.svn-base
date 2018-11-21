@@ -1,0 +1,145 @@
+package com.wis.mes.dakin.report.service.impl;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.wis.mes.dakin.report.dao.MetalPlateFaultedDetailReportDao;
+import com.wis.mes.dakin.report.service.MetalPlateFaultedDetailReportService;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+/**
+ * @author caixia
+ *
+ */
+@Service
+public class MetalPlateFaultedDetailReportServiceImpl implements MetalPlateFaultedDetailReportService {
+	@Autowired
+	MetalPlateFaultedDetailReportDao faultedDetailReportDao;
+
+	@Override
+	public Map<String, String> getMetalPlateFaultedDetailReport(String whitOrNight, String shiftNo, String beginTime,
+			String endTime) {
+
+		Map<String, String> returnMap = new HashMap<String, String>();
+		JSONArray data = new JSONArray();
+		JSONArray dataCount = new JSONArray();
+		JSONArray name = new JSONArray();
+		List<Map<String, Object>> dataList = faultedDetailReportDao.getMetalPlateFaultedDetailReport(whitOrNight,
+				shiftNo, beginTime, endTime);
+		for (Map<String, Object> map : dataList) {
+			if (null != map.get("DURATION")) {
+				BigDecimal duration = (BigDecimal) map.get("DURATION");
+				BigDecimal lastDuration = duration.divide(new BigDecimal("60"), 2, BigDecimal.ROUND_HALF_UP);
+				data.add(lastDuration);
+			} else {
+				data.add(0);
+			}
+			dataCount.add(map.get("NUMBERS"));
+			name.add(map.get("CODE_DESC"));
+		}
+		dataCount.add(0);
+		data.add(0);
+		name.add("其他");
+		returnMap.put("dataCount", dataCount.toString());
+		returnMap.put("data", data.toString());
+		returnMap.put("name", name.toString());
+		return returnMap;
+	}
+
+	@Override
+	public Map<String, String> getMetalPlateFaultedDetailPieReportInfo(String whitOrNight, String shiftNo,
+			String beginTime, String endTime) {
+		Map<String, String> returnMap = new HashMap<String, String>();
+		JSONArray data = new JSONArray();
+		JSONArray name = new JSONArray();
+		List<Map<String, Object>> dataList = faultedDetailReportDao.getMetalPlateFaultedDetailReport(whitOrNight,
+				shiftNo, beginTime, endTime);
+		for (Map<String, Object> map : dataList) {
+			BigDecimal bigDecimal = new BigDecimal("0");
+			if (null != map.get("DURATION")) {
+				BigDecimal duration = (BigDecimal) map.get("DURATION");
+				bigDecimal = duration.divide(new BigDecimal("60"), 2, BigDecimal.ROUND_HALF_UP);
+			}
+			JSONObject dataObj = new JSONObject();
+			dataObj.put("name", map.get("CODE_DESC"));
+			dataObj.put("value", bigDecimal);
+			dataObj.put("dataCount", map.get("NUMBERS"));
+			data.add(dataObj);
+			name.add(map.get("CODE_DESC"));
+		}
+
+		JSONObject otherObj = new JSONObject();
+		otherObj.put("name", "其他");
+		otherObj.put("value", new BigDecimal("0"));
+		otherObj.put("dataCount", 0);
+		data.add(otherObj);
+		name.add("其他");
+		returnMap.put("data", data.toString());
+		returnMap.put("name", name.toString());
+		return returnMap;
+	}
+
+	@Override
+	public Map<String, String> getfaultedDetailsInfo(String beginTime,String endTime) {
+		String year = "";
+		if (StringUtils.isNotEmpty(beginTime)) {
+			year = beginTime.split("-")[0];
+		} else {
+			Calendar cal = Calendar.getInstance();
+			year = String.valueOf(cal.get(Calendar.YEAR));
+			beginTime = year + "-01-01 00:00";
+			endTime = year + "-12-31 23:59";
+		}
+		
+		List<Map<String, Object>> faultedDetailsInfo = faultedDetailReportDao.getfaultedDetailsInfo(beginTime, endTime);
+		JSONArray countList = new JSONArray();
+		JSONArray minuteList = new JSONArray();
+		List<Integer> countMaxList = new ArrayList<Integer>();
+		List<Integer> minuteMaxList = new ArrayList<Integer>();
+		for (Map<String, Object> map : faultedDetailsInfo) {
+			String createTime = "",minute = "";
+			int count = 0;
+			if(null != map.get("CREATETIME")){
+				createTime = map.get("CREATETIME").toString();
+			}
+			if(null != map.get("MINUTE")){
+				minute = map.get("MINUTE").toString();
+			}
+			if(null != map.get("COUNT")){
+				count = Integer.valueOf(map.get("COUNT").toString());
+			}
+			JSONArray countArray = new JSONArray();
+			JSONArray minuteArray = new JSONArray();
+			countArray.add(createTime);
+			countArray.add(count);
+			minuteArray.add(createTime);
+			minuteArray.add(minute);
+			countList.add(countArray);
+			minuteList.add(minuteArray);
+			countMaxList.add(count);
+			int minute1=0;
+			if(StringUtils.isNotBlank(minute)){	
+				minute1=Integer.parseInt(minute);
+			}
+			minuteMaxList.add(Double.valueOf(minute1).intValue());
+		}
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("minute", minuteList.toString());
+		map.put("count", countList.toString());
+		map.put("year", year);
+		map.put("countMax", String.valueOf(Collections.max(countMaxList)));
+		map.put("minuteMax", String.valueOf(Collections.max(minuteMaxList)));
+		return map;
+	}
+}

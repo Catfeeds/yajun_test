@@ -1,0 +1,70 @@
+<#include "../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	$(function(){
+		getData();
+	});
+	function getData(){
+		$.ajax({
+	        url: "${baseUrl}/productQuery/getData.do",
+	        cache: false,
+	        global: false,
+	        type: "POST",
+	        data : {
+	        	"sn" : $("#sn").val(),
+	        	"partNo" : $("#partNo").val(),
+	        	"partName" : $("#partName").val(),
+	        	"porder" : $("#porder").val()
+	        },
+	        success: function(result){
+	        	var str = "";
+	        	if(result == "ERROR"){
+					infoTip("请检查网络或硬件");
+	        	}else{
+	        		var arr = eval(result);
+	        		for(var i = 0;i < arr.length;i++){
+	        			str = str + "<tr><td>" + arr[i].SN + "</td><td>" + arr[i].PART_NO + "</td>"
+	        				+"<td>" + arr[i].PART_NAME + "</td><td>" + arr[i].ONLINE_TIME + "</td>"
+	        				+"<td>" + arr[i].OFFLINE_TIME + "</td><td>" + arr[i].AVI_NO + "</td><td>" + arr[i].PORDER_NO + "</td></tr>";
+	        		}
+	        	}
+	        	document.getElementById("tb").innerHTML = str;
+	        }
+	    });
+	}
+	document.onkeydown = function(event){
+        var e = event || window.event || arguments.callee.caller.arguments[0];           
+         if(e && e.keyCode==13){
+        	 getData();
+        }
+    }; 
+</script>
+<@p.body title="PRODUCT_QUERY_TITLE" permissionModule="PRODUCT_QUERY">	
+<div style="width: 100%">
+	<table width="100%">
+		<tbody>
+			<tr height="35px">
+				<td width="20%"><input id="sn" placeholder="请输入SN" style="height: 100%;width: 90%;" /></td>
+				<td width="20%"><input id="partNo" placeholder="产品编码" style="height: 100%;width: 90%;" /></td>
+				<td width="20%"><input id="partName" placeholder="产品名称" style="height: 100%;width: 90%;" /></td>
+				<td width="20%"><input id="porder" placeholder="工单号" style="height: 100%;width: 90%;" /></td><td></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div style="width:100%;overflow-x:auto;">
+	<table class="table table-bordered  table-hover table-condensed">
+		<thead>
+			<tr height="35px">
+				<th>SN</th>
+				<th>产品编码</th>
+				<th>产品描述</th>
+				<th>上线时间</th>
+				<th>下线时间</th>
+				<th>生产序列号</th>
+				<th>工单号</th>
+			<tr>
+		</thead>
+		<tbody id="tb"></tbody>
+	</table>
+</div>
+</@p.body>

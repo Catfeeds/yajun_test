@@ -1,0 +1,40 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body title="NOTIFICATION_LIST_TITLE" noPermissionModule="true">
+	<@p.searchPanel gridId="table_management_notification_list">
+		<@p.searchColumns>
+			<@p.input title="NOTIFICATION_TITLE" field="title"></@p.input>
+			<@p.input title="NOTIFICATION_TYPE" type="select" field="status" options=options></@p.input>
+			<@p.input title="START_TIME" field="startedAfter" id="startAfter"  ></@p.input> 
+			<@p.input title="END_TIME" field="startedBefore"  id="startBefore"></@p.input>
+		</@p.searchColumns>
+	
+		<@p.toolbar id="toolbar"> 
+			<@p.button title="NOTIFICATION_ADD" iconCls="plus" url="${baseUrl}/notification/addInput.do" type="add"></@p.button>
+			<@p.button title="NOTIFICATION_VIEW" iconCls="eye-open" url="${baseUrl}/notification/viewInput.do" type="view"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid id="table_management_notification_list" url="${baseUrl}/notification/managementList.do">
+	 	<@p.column checkbox="true"></@p.column>
+		<@p.column title="NOTIFICATION_TITLE" field="title" ></@p.column>
+		<@p.column title="NOTIFICATION_TYPE" field="account" ></@p.column>
+		<@p.column title="NOTIFICATION_CREATE_TIME" field="createTime"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<!-- /.page-content -->
+<!-- inline scripts related to this page -->
+<script type="text/javascript">
+	$("#startBefore,#startAfter").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd'});
+	});
+	function renderStatus(value) {
+		return entryRenderer('LOGINSTATUS', value);
+	}
+	function renderSysdata(value) {
+		return entryRenderer('YESORNO', value);
+	}
+	function renderUsertype(value) {
+		return entryRenderer('USER_TYPE', value);
+	}
+</script>

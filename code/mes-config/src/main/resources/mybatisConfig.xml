@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+	<settings>
+		<setting name="cacheEnabled" value="true" />
+		<setting name="lazyLoadingEnabled" value="false" />
+		<setting name="multipleResultSetsEnabled" value="true" />
+		<setting name="useColumnLabel" value="true" />
+		<setting name="useGeneratedKeys" value="false" />
+		<setting name="autoMappingBehavior" value="PARTIAL" />
+		<setting name="defaultExecutorType" value="SIMPLE" />
+		<setting name="defaultStatementTimeout" value="25" />
+		<setting name="safeRowBoundsEnabled" value="false" />
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+		<setting name="localCacheScope" value="SESSION" />
+		<setting name="jdbcTypeForNull" value="OTHER" />
+		<setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString" />
+		<!-- <setting name="logImpl" value="STDOUT_LOGGING" />   -->
+	</settings>
+
+	<typeAliases>
+		<package name="com.wis.core.framework.entity" />
+		<package name="com.wis.basis.systemadmin.entity" />
+		<package name="com.wis.mes.master.parametermanage.entity" />
+	</typeAliases>
+	<mappers>
+		<!-- 对应vo类的DAO接口 所对应的xml配置文件的路径信息 -->
+		<mapper resource="com/wis/core/mapper/BaseMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/AttachmentMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/AuditConfigMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/CommonMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/DictEntryMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/DictTypeMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/PermissionMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/DataPermissionNewMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/FormPermissionNewMapper.xml" />
+		<mapper
+			resource="com/wis/core/mapper/framework/RoleDataPermissionNewMapper.xml" />
+		<mapper resource="com/wis/core/mapper/framework/SysJobMapper.xml" />
+
+		<mapper resource="com/wis/basis/systemadmin/mapper/DataPermissionMapper.xml" />
+		<mapper resource="com/wis/basis/systemadmin/mapper/FormPermissionMapper.xml" />
+		<mapper resource="com/wis/basis/systemadmin/mapper/MenuMapper.xml" />
+		<mapper resource="com/wis/basis/systemadmin/mapper/OrgnizationMapper.xml" />
+		<mapper resource="com/wis/basis/systemadmin/mapper/PositionMapper.xml" />
+		<mapper resource="com/wis/basis/systemadmin/mapper/RoleMapper.xml" />
+		<mapper resource="com/wis/basis/systemadmin/mapper/UserMapper.xml" />
+
+		<!-- remove below if don not contain bpm module -->
+		<mapper resource="com/wis/bpm/workflow/mapper/ApplicationFormMapper.xml" />
+		<mapper resource="com/wis/bpm/workflow/mapper/BomFormMapper.xml" />
+		<mapper resource="com/wis/bpm/workflow/mapper/MaterialFormMapper.xml" />
+		<mapper resource="com/wis/bpm/workflow/mapper/NodePropertityMapper.xml" />
+		<mapper resource="com/wis/bpm/workflow/mapper/DelegateConfigMapper.xml" />
+		<mapper resource="com/wis/bpm/workflow/mapper/StorageFormMapper.xml" />
+		<mapper resource="com/wis/bpm/workflow/mapper/WisExecutionMapper.xml" />
+
+		<mapper resource="com/wis/biz/plant/PlantMapper.xml" />
+		<mapper resource="com/wis/biz/workshop/WorkShopMapper.xml" />
+		<mapper resource="com/wis/biz/line/LineMapper.xml" />
+		<mapper resource="com/wis/biz/nc/NcMapper.xml" />
+		<mapper resource="com/wis/biz/nc/NcGroupMapper.xml" />
+		<!--物料Mapper -->
+		<mapper resource="com/wis/biz/part/PartMapper.xml" />
+		<!--工艺路径Mapper -->
+		<mapper resource="com/wis/biz/path/PathMapper.xml" />
+		<!--工作日历Mapper -->
+		<mapper resource="com/wis/biz/workcalendar/WorkTimeMapper.xml" />
+		<!--工作日历休息时间Mapper -->
+		<mapper resource="com/wis/biz/workcalendar/WorkTimeRestMapper.xml" />
+		<mapper resource="com/wis/biz/workcalendar/WorkScheduleRestMapper.xml" />
+		<!--工单Mapper -->
+		<mapper resource="com/wis/biz/porder/PorderMapper.xml" />
+		<!--生产序列下的工艺路径Mapper -->
+		<mapper resource="com/wis/biz/porder/AviPathMapper.xml" />
+
+		<mapper resource="com/wis/biz/rolemasterset/RoleMasterSetMapper.xml" />
+		<mapper resource="com/wis/biz/equipment/EquipmentMapper.xml" />
+		<mapper resource="com/wis/biz/base/MasterBaseMapper.xml" />
+		<mapper resource="com/wis/biz/record/TpRecordMapper.xml" />
+		<mapper resource="com/wis/biz/recordUloc/TpRecordUlocMapper.xml" />
+
+		<!-- 上线Mapper -->
+		<mapper resource="com/wis/biz/online/OnlineMapper.xml" />
+		<!--过点 -->
+		<mapper resource="com/wis/biz/online/CrossPointMapper.xml" />
+		<mapper resource="com/wis/biz/supplier/SupplierPartMapper.xml" />
+		<!-- 产品档案表Mapper -->
+		<mapper resource="com/wis/biz/record/TpRecordMapper.xml" />
+		<mapper resource="com/wis/biz/record/TpRecordUlocNcMapper.xml" />
+		<!-- 未处理缺陷 Mapper -->
+		<mapper resource="com/wis/biz/uloc/UlocMapper.xml" />
+		<!-- 参数管理 -->
+		<mapper resource="com/wis/biz/parametermanage/ParameterManageMapper.xml" />
+		<!-- 生产进度查询 -->
+		<mapper resource="com/wis/biz/pmc/PmcMapper.xml" />
+		<!--工位实时状态 -->
+		<mapper resource="com/wis/biz/productionTracing/UlocStatusMapper.xml" />
+		<!--设备实时状态 -->
+		<mapper resource="com/wis/biz/productionTracing/EquipmentStatusMapper.xml" />
+		<!-- 产品追溯 -->
+		<mapper resource="com/wis/biz/producttracing/ProductTracingMapper.xml" />
+		<mapper resource="com/wis/biz/productionTracing/ProductParametersMapper.xml" />
+		<mapper resource="com/wis/biz/productionTracing/ProductPartMapper.xml" />
+		<!--报表  -->
+		<mapper resource="com/wis/biz/report/ReportMapper.xml" />
+		
+		<!-- 翅片报表 -->
+		<mapper resource="com/wis/biz/report/FinAnnualReportMapper.xml" />
+		<!-- 翅片非故障明细 -->
+		<mapper resource="com/wis/biz/report/FinNoFaultDetailsMapper.xml" />
+		<!-- 翅片报表导出 -->
+		<mapper resource="com/wis/biz/report/FinExportMapper.xml" />
+		<mapper resource="com/wis/biz/report/FinMovableRateMapper.xml" />
+		<mapper resource="com/wis/biz/report/FinMovableRateDetailsMapper.xml" />
+		<mapper resource="com/wis/biz/report/FinFaultedDetailsMapper.xml" />
+		<!--OPC -->
+		<mapper resource="com/wis/biz/opc/mapper/KsGroupMapper.xml" />
+		<!--PLC 报表  -->
+		<mapper resource="com/wis/biz/report/PLCReportMapper.xml" />
+		<!--钣金原材料主数据-->
+		<mapper resource="com/wis/biz/sheetMetalMaterial/SheetMetalMaterialMapper.xml" />
+		<mapper resource="com/wis/biz/equipment/TmpEquipmentStatusMapper.xml" />
+		<!-- app菜单 -->
+		<mapper resource="com/wis/biz/phone/PhoneMenuMapper.xml" />
+		<!-- 钣金设备异常分析报表-->
+		<mapper resource="com/wis/biz/report/MetalPlateReportMapper.xml" />
+
+	</mappers>
+</configuration>  

@@ -1,0 +1,57 @@
+
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+function renderNcGroup(value) {
+	return value == null ? "" : value;
+}
+function renderNcType(value){
+	return entryRenderer('NC_TYPE', value);
+}
+function renderNgLevel(value){
+	var faultGrades = eval('(' + '${faultGrades!}' + ')');
+	for(var i in faultGrades){
+		if(faultGrades[i].code == value){
+			return faultGrades[i].name;
+		}
+	}
+}
+function renderEntrance(value){
+	var faultGrades = eval('(' + '${faultGrades!}' + ')');
+	var optionNgEntrance = eval('(' + '${optionNgEntrance!}' + ')');
+	for(var i in faultGrades){
+		if(faultGrades[i].code == value){
+			return keysValue(optionNgEntrance,faultGrades[i].relevantParameter);
+		}
+	}
+}
+function ncImportData(){ 
+	var obj = new Object();
+	obj.templateUrl="${baseUrl}/nc/exportTemplate.do";
+	   importFile("<@s.m code="NC_IMPORT" />", "${baseUrl}/nc/importData.do?tmNcGroupId=${tmNcGroupId}", "dg${currentPageId}",obj);
+}
+</script>
+<@p.body title="NC_LIST_TITLE" permissionModule="NC" noBreadcrumbs="true">
+<div style="color: #428bca;text-align:center; margin:10px" >故障代码</div>
+<input id="ncGroupId" type="text" value="${tmNcGroupId!}" hidden="true"/>
+	<@p.searchPanel>
+		<@p.toolbar> 
+			<@p.button title="NC_ADD" permissionCode="NcAdd" iconCls="plus" url="${baseUrl}/nc/addInput.do?tmNcGroupId=${tmNcGroupId}" type="add"  ></@p.button>
+			<@p.button title="NC_UPDATE" permissionCode="NcUpdate" iconCls="edit" url="${baseUrl}/nc/updateInput.do?tmNcGroupId=${tmNcGroupId}" type="update"></@p.button>
+			<@p.button title="NC_DELETE" permissionCode="NcDelete" iconCls="trash" url="${baseUrl}/nc/delete.do?tmNcGroupId=${tmNcGroupId}" type="delete"></@p.button>
+			<@p.button title="NC_IMPORT" permissionCode="NcImport" onclick="ncImportData();" iconCls="signin" />
+			<@p.button title="NC_EXPORT" permissionCode="NcExport" downName="NC_EXPORT_NAME" url="${baseUrl}/nc/exportData.do?tmNcGroupId=${tmNcGroupId}" iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/nc/list.do?${params!}"+"&no="+"${no!}"+"&name="+"${name!}"+"&extCode="+"${extCode!}" >
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="TM_NC_NO" field="no" permissionCode="TM_NC_NO"/>
+		<@p.column title="TM_NC_NAME" field="name" permissionCode="TM_NC_NAME" formatter="renderNcGroup"/>
+		<@p.column title="FAULT_GRADE_LEVEL" field="tmFaultGradeId" permissionCode="TM_NC_REMARKS" formatter="renderNgLevel"/>
+		<@p.column title="FAULT_GRADE_ENTRANCE" field="faultGrade.id"  permissionCode="TM_NC_REMARKS" formatter="renderEntrance"/>
+		<@p.column title="TM_NC_REMARKS" field="remarks" permissionCode="TM_NC_REMARKS" formatter="renderNcGroup"/>
+	</@p.dataGrid>
+</@p.body>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<http pattern="/res/**" security="none" />
+	<http pattern="/opcReadWrite/**" security="none" />
+	<http pattern="/login.jsp" security="none" />
+	<http pattern="/phone/login.jsp" security="none" />
+	<http pattern="/locale/change.do" security="none" />
+	<http pattern="/bpm/model/manage/deployByFile.do" security="none" />
+	<http pattern="/webservice/**" security="none" />
+	<http pattern="/websocket/**" security="none" />
+	<http pattern="/rfid/**" security="none" />
+	<http pattern="/phoneMain/**" security="none" />
+	<http pattern="/faultMachineApp/**" security="none" />
+	<http pattern="/plcReport/**" security="none" />
+	<http pattern="/energy_report.html" security="none" />
+	<http pattern="/mpSchedul/mouldVerify.do" security="none" />
+	
+	<http auto-config="true">
+		<form-login login-page="/login.jsp"
+			authentication-failure-handler-ref="accessAuthenticationFailureHandler"
+			authentication-success-handler-ref="accessAuthenticationSuccessHandler"
+			always-use-default-target="true" authentication-failure-url="/login.jsp?code=1"
+			login-processing-url="/j_spring_security_check.action" />
+		<logout invalidate-session="true" logout-success-url="/login.jsp?code=3" />
+		<port-mappings>
+			<port-mapping http="8080" https="8443" />
+		</port-mappings>
+		<!-- 自定义安全过滤器 -->
+		<custom-filter position="CONCURRENT_SESSION_FILTER" ref="concurrentSessionFilter" />
+		<custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="myFilter" />
+		
+		<session-management invalid-session-url="/login.jsp?code=2" session-authentication-strategy-ref="sas"/>
+	</http>
+	
+	<!-- 自定义数据库验证账号密码权限提供器，主要实现UserDetailsService接口 -->
+	<beans:bean id="appUserDetailsService" class="com.wis.core.authentication.UserDetailServiceImpl"/>
+	<!-- 认证管理器，实现用户认证的入口 -->
+	<authentication-manager alias="authenticationManager" >
+		<authentication-provider user-service-ref="appUserDetailsService">
+			<password-encoder hash="md5">
+				<salt-source user-property="passwordSalt" />
+			</password-encoder>
+		</authentication-provider>
+	</authentication-manager>
+	
+	<!-- spring security session注册服务 -->
+	<beans:bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl" />
+		
+	<!-- action url 资源获取 -->
+	<beans:bean id="securityMetadataSource" class="com.wis.core.authentication.MyInvocationSecurityMetadataSourceService"/>
+	
+	<!-- action url 授权管理 -->
+	<beans:bean id="accessDecisionManager" class="com.wis.core.authentication.MyAccessDecisionManager" />
+	
+	<!-- 授权管理 -->
+	<beans:bean id="myFilter" class="com.wis.core.authentication.MySecurityFilter">
+		<beans:property name="authenticationManager" ref="authenticationManager" />
+		<beans:property name="accessDecisionManager" ref="accessDecisionManager" />
+		<beans:property name="securityMetadataSource" ref="securityMetadataSource" />
+	</beans:bean>
+	
+	<!-- 并发用户过滤器 -->
+	<beans:bean id="concurrentSessionFilter" class="com.wis.core.authentication.ConcurrentSessionFilter">
+		<beans:property name="expiredUrl" value="/login.jsp?code=4" />
+		<beans:property name="sessionRegistry" ref="sessionRegistry" />
+	</beans:bean>
+	
+	<!-- 并发用户策略管理器 -->
+      <beans:bean id="sas" class="com.wis.core.authentication.MyConcurrentSessionAuthenticationStrategy">
+        <beans:constructor-arg ref="sessionRegistry"/>
+		<beans:property name="exceptionIfMaximumExceeded" value="false" />
+		<beans:property name="maximumSessions" value="10" />
+		<beans:property name="exceedMaximumUrl" value="/login.jsp?code=5" />
+      </beans:bean>
+	
+	<!-- 用户密码尝试次数控制 -->
+	<beans:bean id="accessAuthenticationFailureHandler" class="com.wis.core.authentication.AccessAuthenticationFailureHandler">
+		<beans:property name="tryMaxCount" value="100000" />
+		<beans:property name="authenticationFailureUrl" value="/login.jsp?code=1" />
+		<beans:property name="defaultFailureUrl" value="/login.jsp?code=7" />
+		<beans:property name="lockedUrl" value="/login.jsp?code=10" />
+		<beans:property name="tryMaxCountExceededUrl" value="/login.jsp?code=6" />
+	</beans:bean>
+	
+	<!-- 登录成功后续控制 -->
+	<beans:bean id="accessAuthenticationSuccessHandler"
+		class="com.wis.core.authentication.AccessAuthenticationSuccessHandler">
+		<beans:property name="defaultTargetUrl" value="/main.do" />
+	</beans:bean>
+</beans:beans>

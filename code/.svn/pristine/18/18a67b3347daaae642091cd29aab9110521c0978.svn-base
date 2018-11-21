@@ -1,0 +1,83 @@
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="ULOC_RT_LIST_TITLE" permissionModule="ULOC_RT"noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="ULOC_PLANT" type="select" field="tmPlantId" options=plantOptions></@p.input>
+			<@p.input title="ULOC_LINE" type="select" field="tmLineId" options=lineOptions></@p.input>
+			<@p.input title="ULOC_STATUS_NO" type="select" field="tmUlocId" options=ulocOptions></@p.input>
+			<@p.input title="ULOC_STATUS_STATUS" field="stationState" type="select" options=ulocStatus></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tbUlocStatus/list.do?queryCondition[IS_HISTORY]=NO" singleSelect="true">
+		<@p.column title="ULOC_STATUS_DATE" field="createTime" permissionCode="ULOC_RT_DATE"></@p.column>
+		<@p.column title="ULOC_PLANT" field="uloc.tmPlantId" permissionCode="ULOC_RT_CLASSES" formatter="getPlants"></@p.column>
+		<@p.column title="ULOC_LINE" field="uloc.tmLineId" permissionCode="ULOC_RT_CLASSES" formatter="getLineNo"></@p.column>
+		<@p.column title="ULOC_STATUS_CLASSES" field="worktime.shiftno" permissionCode="ULOC_RT_CLASSES" formatter="rendShiftno"></@p.column>
+		<@p.column title="PRODUCT_TRACING_CLASS_MANAGER_CLASSGROUP" field="classManager.classGroup" permissionCode="ULOC_RT_CLASSES" formatter="rendClassGroup"></@p.column>
+		<@p.column title="ULOC_STATUS_NAME" field="uloc.name" permissionCode="ULOC_RT_NAME"></@p.column>
+		<@p.column title="ULOC_STATUS_NO" field="uloc.no" permissionCode="ULOC_RT_NO"></@p.column>
+		<@p.column title="ULOC_STATUS_OPERATOR" field="employeeNo.no" permissionCode="ULOC_RT_OPERATOR" formatter="employeeNoToName"></@p.column>
+		<@p.column title="ULOC_STATUS_STATUS" field="stationState" permissionCode="ULOC_RT_STATUS" ></@p.column>
+		<@p.column title="ULOC_STATUS_CONTENT" field="statusContent" permissionCode="ULOC_RT_CONTENT"></@p.column>
+		<@p.column title="ULOC_STATUS_CONTENT_NO" field="codeRule.code" permissionCode="ULOC_RT_CONTENT_NO"></@p.column>
+		<@p.column title="ULOC_STATUS_DESCRIBE" field="codeRule.codeDesc" permissionCode="ULOC_RT_DESCRIBE"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderStationState(value){
+	console.log(value);
+	if(value){
+		return value;
+		if(value.substr(4,1)=='1'||value.substr(5,1)=='1'||value.substr(7,1)=='1'){
+			return "异常";
+		}else if(value.substr(1,1)=='1'){
+			return "通过";
+		}else if(value.substr(2,1)=='1'){
+			return "手动";
+		}else if(value.substr(3,1)=='1'){
+			return "正常";
+		}
+	}
+	return "";
+}
+
+function readUlocStatus(value,row){
+	var station = row.stationState;
+	if(station){
+		if(station.substr(4,1)=='1'||station.substr(5,1)=='1' ||station.substr(7,1)=='1' ){
+			return "异常";
+		}else if(station.substr(0,1)=='1' || station.substr(6,1)=='1'){
+			return "警告";
+		}
+	}
+	return "";
+}
+	function rendShiftno(value){
+		return entryRenderer('SHIFT_TYPE', value);
+	}
+	function employeeNoToName(value,row,index){
+		if(value){
+			return value+(row.employeeNo?"-"+row.employeeNo.name:"");
+		}
+		return '';
+	}
+	function rendClassGroup(value){
+		return entryRenderer('CLASS_GROUP', value);
+	}
+	function getPlants(value){
+		var plants = eval('('+ '${plants!}' +')');
+		for(var i in plants){
+			if(plants[i].code==value){
+				return plants[i].name;
+			}
+		}
+	}
+	function getLineNo(value){
+		var lines = eval('('+ '${lines!}' +')');
+		for(var i in lines){
+			if(lines[i].code==value){
+				return lines[i].name;
+			}
+		}
+	}
+</script>

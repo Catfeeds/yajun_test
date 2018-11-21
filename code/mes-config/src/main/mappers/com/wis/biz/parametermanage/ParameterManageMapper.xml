@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ParameterManageMapper">
+	<select id="parameterColumn"
+		resultType="com.wis.mes.master.parametermanage.vo.ParameterManageVo"
+		parameterType="java.util.HashMap">
+		  select 
+		    t1.name as equipmentName,
+		    LISTAGG(t.parameter_name||':'||t.parameter_explain||':'||t.parameter_uloc||':'||t.id,',')WITHIN GROUP (ORDER BY t.id)  as parameterSet 
+	    from tm_equipment_param t, tm_equipment t1
+	    where t.tm_equipment_id = t1.id and t.if_cnf_scope = 'YES'
+	    group by t1.name
+	    order by t1.name 
+
+	</select>
+	<select id="saveOrUpdateColumn"
+		resultType="com.wis.mes.master.equipment.entity.TmEquipmentParam"
+		parameterType="java.util.HashMap">
+		select t.id as id,t.parameter_name as parameterName,
+	    t.parameter_explain as parameterExplain, t.parameter_uloc as
+	    parameterUloc, t.tm_equipment_id as tmEquipmentId,t1.NAME as equipmentName  from
+	    tm_equipment_param t left join tm_equipment t1 on t.tm_equipment_id = t1.id
+	    where t.if_cnf_scope = 'YES' and t1.NAME is not null
+	    order by t1.NAME , t.id 
+	</select>
+	
+	<select id="queryParameterManage" parameterType="java.util.Map" resultType="com.wis.mes.master.parametermanage.entity.TmParameterManage">
+		SELECT
+		*
+		FROM
+		(
+		SELECT
+		ROW_.*,
+		ROWNUM ROWNUM_
+		FROM
+		(
+		    SELECT pm.back_number as backNumber,
+		       pm.machine_of_name as machineOfName,
+		       max(pm.id) as id,
+		       <!-- wm_concat(tep.parameter_name || ':' || pmd.PARAMETER_RANGE) as details -->
+		        LISTAGG(tep.id||'-'||tep.parameter_name || ':' || pmd.min_val||'~'||pmd.max_val,',')WITHIN GROUP (ORDER BY tep.ID) as details
+		  FROM tm_parameter_manage pm
+		  left join tm_parameter_manage_detail pmd
+		    on pm.id = pmd.tm_parameter_manage_id
+		  left join tm_equipment_param tep
+		    on tep.id = pmd.parameter_id
+		 where 1 = 1
+		<if test="backNumber !=null and backNumber!='' ">
+			AND pm.back_number LIKE '%'|| #{backNumber} || '%'
+		</if>
+		<if test="machineOfName !=null and machineOfName!='' ">
+			AND pm.machine_of_name LIKE '%'|| #{machineOfName} || '%'
+		</if>
+		 group by pm.back_number,pm.machine_of_name
+		order by max(pm.ID) desc
+		) ROW_
+		)
+		WHERE
+		ROWNUM_ > #{firstRow}
+		AND #{pageSize} >= ROWNUM_
+	</select>
+	
+	 <select id="queryParameterManageCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+	 	 SELECT
+		      count(*)
+		    FROM
+		    tm_parameter_manage pm 
+		    where 1=1
+			<if test="productModel !=null and productModel!='' ">
+				AND pm.product_model LIKE '%'|| #{productModel} || '%'
+			</if>
+	 </select>
+	 
+	 <resultMap id="queryParameterManageMap" type="tmParameterManage">
+		<id property="id" column="pmId" javaType="int" jdbcType="INTEGER" />
+		<result property="backNumber" column="backNumber" javaType="string"	jdbcType="VARCHAR" />
+		<result property="machineOfName" column="machineOfName" javaType="string"	jdbcType="VARCHAR" />
+		<collection property="parameterManageDetail" column="parent_id"
+			ofType="tmParameterManageDetail">
+			<id property="id" column="pmdId" javaType="int" jdbcType="INTEGER" />
+			<result property="parameterRange" column="parameterRange" javaType="string" jdbcType="VARCHAR" />
+			<result property="parameterId" column="parameterId" javaType="int" jdbcType="INTEGER" />
+			<result property="parameterName" column="parameterName" javaType="string" jdbcType="VARCHAR" />
+			<result property="parameterExplain" column="parameterExplain" javaType="string" jdbcType="VARCHAR" />
+			<result property="maxVal" column="maxVal" javaType="string" jdbcType="VARCHAR" />
+			<result property="minVal" column="minVal" javaType="string" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+	
+	 <select id="findByParameterManageId" parameterType="java.util.Map" resultMap="queryParameterManageMap">
+		SELECT
+		      pm.ID AS pmId,
+		      pm.product_model AS productModel,
+		      pm.back_number as backNumber,
+		      pm.machine_of_name as machineOfName,
+		      pmd.id as pmdId,
+		      pmd.PARAMETER_RANGE as parameterRange,
+		      pmd.PARAMETER_ID as parameterId,
+		      pmd.MAX_VAL as maxVal,
+		      pmd.MIN_VAL as minVal,
+		      tep.PARAMETER_NAME as parameterName,
+          	  tep.parameter_explain as parameterExplain
+		    FROM
+		    tm_parameter_manage pm 
+		    left join tm_parameter_manage_detail pmd on pm.id = pmd.tm_parameter_manage_id
+		    left join tm_equipment_param tep on tep.id = pmd.parameter_id
+		    where 1=1
+		<if test="parameterManageId !=null and parameterManageId!='' ">
+		 	and pm.id = #{parameterManageId}
+		</if>
+	</select>
+	
+	<delete id="doDeleteParameterDetail" parameterType="java.util.HashMap">
+	<if test="ids!=null and ids!=''">
+		DELETE FROM tm_parameter_manage_detail WHERE tm_parameter_manage_id IN(${ids})
+	</if>
+	</delete>
+	
+	 <select id="getParameterRange" parameterType="java.util.Map" resultType="com.wis.mes.master.parametermanage.vo.ParameterManageVo">
+		  select 
+		       pmd.MAX_VAL as maxVal,
+		       pmd.MIN_VAL as minVal,
+		       pmd.parameter_range as parameterRange,
+		       tep.parameter_name as parameterName,
+		       tep.parameter_explain as parameterExplain,
+		       tep.parameter_uloc as parameterUloc,
+		       tep.tm_equipment_id as tmEquipmentId
+		  from tm_parameter_manage_detail pmd,
+		  tm_parameter_manage pm,
+		  tm_equipment_param tep
+		  where 1=1 
+		  and pm.id = pmd.tm_parameter_manage_id 
+		  and tep.id = pmd.parameter_id 
+		  and tep.if_cnf_scope = 'YES'
+		<if test="backNumber !=null and backNumber!='' ">
+			and pm.back_number = #{backNumber}
+		</if>
+	</select>
+	
+</mapper>

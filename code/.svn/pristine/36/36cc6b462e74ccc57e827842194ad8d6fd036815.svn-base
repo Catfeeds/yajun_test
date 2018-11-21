@@ -1,0 +1,24 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body noBreadcrumbs="true"  noPermissionModule="true">
+	<@p.searchPanel gridId="jobLogListView">
+		<@p.searchColumns>
+			<@p.input title="OPERATE_START_TIME" type="text" field="exeTimeStart" id="exeTimeStart"></@p.input>
+			<@p.input title="OPERATE_END_TIME" type="text" field="exeTimeEnd" id="exeTimeEnd"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid url="${baseUrl}/job/logList.do?queryCondition[jobId]=${jobId}" id="jobLogListView">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="JOB_LOG_DETAIL_EXECUTION_TIME"  field="exeTime"></@p.column>
+		<@p.column title="JOB_LOG_DETAIL_EXECUTION_RESULT"   field="exeResult"></@p.column>
+		<@p.column title="JOB_LOG_DETAIL_ERROR_MESSAGE"  field="errorMsg"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$("#exeTimeStart").focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'exeTimeEnd\')}'});
+});
+$("#exeTimeEnd").focus(function(){
+	WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'exeTimeStart\')}'});
+});
+</script>

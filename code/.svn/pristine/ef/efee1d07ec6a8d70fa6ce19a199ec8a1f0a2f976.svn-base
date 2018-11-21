@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+$(function(){
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	var date = new Date();
+	var currentdate = date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
+	$('#settingStart').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',minDate:currentdate});
+	});
+	
+	$('#startTime,#endTime').focus(function(){
+		WdatePicker({dateFmt:'H:mm',minDate:'00:00',maxDate:'24:00'});
+	});
+});
+function settingEndFunction(obj){
+	startDate=$("#startTime").val();
+	endDate=$("#endTime").val();
+	/* var shiftno = document.getElementById("shiftno").value;
+	endDate =obj.value;
+	if(shiftno !=""){ */
+		if(endDate != "" && startDate !=""){
+			 //if(shiftno=="MORNINGSHIFT" || shiftno=="NOONSHIFT"){
+				var a = "2016-12-12 " + startDate;
+				var b = "2016-12-12 " + endDate;
+　 　 　 　 	    if (Date.parse(a) > Date.parse(b)) {
+　 　 　 　 	    	errorTip('开始时间不能晚于结束时间');
+　 　 　 　 	    	obj.value='';
+			        obj.focus();
+			        return false;
+		     	}else{
+		     		 return true;
+		     	}
+			//}
+		}
+	}
+</script>
+	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/workspecialdate/add.do" class="form-horizontal"   permissionModule="WORK_SPECIAL_DATE">
+		<@p.formRow>
+			<@p.formColmd title="WORK_SPECIAL_DATE_LINE" permissionCode="WORK_SPECIAL_DATE_LINE">
+				<@p.input type="select" id="lineId_addPage" datatype="*" field="tmLineId"  options=line></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="WORK_SPECIAL_DATE_CLASS_NAME" permissionCode="WORK_SPECIAL_DATE_CLASS_NAME">
+				  <@p.input type="select" id="shiftno" field="shiftno" field="classOrder" options=classOrderOptions datatype="*" onchange="checkResultTips();"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_SPECIAL_DATE_CLASS_GROUP" permissionCode="WORK_SPECIAL_DATE_CLASS_GROUP">
+				<@p.input type="select" id="workshopId_addPage" field="classGroup"  datatype="*"  options=classGroupOptions ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="WORK_SPECIAL_DATE_SPECIAL_DATE" permissionCode="WORK_SPECIAL_DATE_SPECIAL_DATE">
+				 <input class="inputxt"  name="specialDate"  id="settingStart"  class="timepicker" datatype="*">	
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="WORK_SPECIAL_DATE_ENABLED" permissionCode="WORK_SPECIAL_DATE_ENABLED">
+				 <@p.input type="select"  excludeSelectOption="true" field="enabled" options=enabled ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="WORK_SPECIAL_DATE_STARTTIME" permissionCode="WORK_SPECIAL_DATE_STARTTIME">
+				  <input name="startTime" id="startTime" class="timepicker" datatype="*" onblur="settingEndFunction(this);"  >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_SPECIAL_DATE_ENDTIME" permissionCode="WORK_SPECIAL_DATE_ENDTIME">
+				  <input name="endTime" id="endTime" class="timepicker" datatype="*" onblur="settingEndFunction(this);"  >
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORK_SPECIAL_DATE_NOTE" permissionCode="WORK_SPECIAL_DATE_NOTE">
+				 <textarea rows="2" cols="40" name="note" style="width: 570px;" maxlength="250"></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+

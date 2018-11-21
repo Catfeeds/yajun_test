@@ -1,0 +1,59 @@
+<#include "../../../../include/bootstrapTableCommons.html">
+<script type="text/javascript" src="${baseUrl}/res/js/production/crossPoint.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/dateFormat.js"></script>
+<style>
+ .onlineSelect{
+	width: 140px;
+}
+</style>
+<@p.body title="PRODUCTION_CROSS_POINT_TITLE" permissionModule="CROSS_POINT">	
+<div style="width: 100%">
+	<table>
+		<tbody>
+			<tr>
+				<td colspan="3" style="width: 55%"><input id="snInput" type="text" placeholder="请输入SN" onkeyup="crossPointScanSN(this.value);" style="height: 50px;width: 100%;"/></td>
+				<td>&nbsp;&nbsp;产线：<select id="crossPointLineSelect" onchange="crossPointChangeLine(this.value)" class="onlineSelect"></select></td>
+				<td>&nbsp;&nbsp;工位：<select id="ulocSelect" onchange="crossPointChangeUloc(this.value)" class="onlineSelect"></select></td>
+				<td>&nbsp;&nbsp;<span id="shiftNo"></span></td>
+			</tr>
+			<tr style="height: 50px;">
+				<td>工单：<span id="porder" style="width: 200px;"></span></td>
+				<td>产品编号：<span id="partNo"></span></td>
+				<td>产品描述：<span id="partName"></span></td>
+				<td colspan="3" style="text-align: center">当班合格数：<span id="qualityQty"></span>&nbsp;&nbsp;&nbsp;当班不合格数：<span id="unqualityQty"></span></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+	<div id="waitSNPanel" style="border:0.5px solid #000;width: 100%;height: 60px;display: none"></div>
+	<hr>
+	<@p.searchPanel >
+	<@p.toolbar> 
+			<!-- 自动生成 AutoGenerateSN ONLINE_AUTO_GENERATE_SN -->
+			<@p.button title="ONLINE_IS_HOLD"      permissionCode="IsHold"       onclick="holdOrNotHold()" iconCls=""></@p.button>
+			<@p.button title="ONLINE_BIND_PART" 			permissionCode="BindPart" 				onclick="bindPart();" iconCls="" />
+			<@p.button title="ONLINE_BIND_PARAMETER" permissionCode="BindParameter" onclick="bindParameter();" iconCls="" />
+			<@p.button title="ONLINE_QUALITY_CHECK" permissionCode="QualityCheck" 	onclick="qualityCheck();" iconCls="" />
+			<@p.button title="ONLINE_RECORD_NC" 			permissionCode="RecordNC" 			onclick="recordNC();" iconCls="" />
+			<@p.button title="ONLINE_CONFIRM_CROSS" permissionCode="ConfirmCross"onclick="confirmCrossPoint();" iconCls="" />
+	</@p.toolbar>
+	</@p.searchPanel>
+	<div style="width: 55%;float: left;overflow-x:auto;">
+		<table class="table table-bordered  table-hover table-condensed">
+			<thead>
+				<tr  style="height: 35px;">
+					<th>SN</th><th>生产序列</th><th>工单</th><th>物料</th><th>过点时间</th><th>是否Hold</th><tr>
+			</thead>
+			<tbody id="crossPointReachTable"></tbody>
+		</table>
+	</div>
+	<div style="width: 44%;float: right;overflow-x:auto" >
+		<table class="table table-bordered  table-hover table-condensed" style="width: 100%">
+			<thead>
+				<tr style="height: 35px;"><th>SN</th><th>生产序列</th><th>工单</th><th>物料</th><th>下一工位</th><th>过点时间</th><tr>
+			</thead>
+			<tbody id="crossPointCrossTable"></tbody>
+		</table>
+	</div>
+	<input type="hidden"  id="isAutoOnline" value="${isAutoOnline!}"/> 
+</@p.body>

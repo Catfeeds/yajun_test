@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/line/add.do" class="form-horizontal"   permissionModule="LINE">
+		<@p.formRow>
+			<@p.formColmd title="LINE_PLANT" permissionCode="TM_PLANT_ID">
+				<@p.input type="select" datatype="*" id="plantSelect" onchange="plantWorkshop_addPage(this.value);" field="tmPlantId" options=plant ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="LINE_NO" permissionCode="LINE_NO">
+				<input name="no" class="inputxt" datatype="no" maxlength='100' />
+			</@p.formColmd>
+		<#--	<@p.formColmd title="LINE_WORKSHOP" permissionCode="TM_WORKSHOP_ID">
+				 <@p.input type="select" id="workshopId_addPage" datatype="*" field="tmWorkshopId" options=workshop></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="LINE_NAME_EN" permissionCode="LINE_NAME_EN">
+				<input name="nameEn" class="inputxt" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='100' />
+			</@p.formColmd>
+		-->
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="LINE_NAME_CN" permissionCode="LINE_NAME_CN">
+				<input name="nameCn" class="inputxt"  datatype="*" errormsg="<@s.m code='ERROR_CHINESE'/>" ignore="ignore" maxlength='50' />
+			</@p.formColmd>
+			<@p.formColmd title="LINE_ENABLED" permissionCode="LINE_ENABLED">
+				 <@p.input type="select" excludeSelectOption="true" field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="LINE_REMARK" permissionCode="LINE_REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 570px;" maxlength="250"></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	var optionSize = $("#plantSelect option").size();
+	if(optionSize==2){
+		$('#plantSelect option:eq(1)').prop("selected",true);
+		plantWorkshop_addPage($("#plantSelect").val());
+	}
+});
+
+function plantWorkshop_addPage(obj){
+	$.ajax({
+		data:{plantId:obj},
+		url:"${baseUrl}/line/selectWShopNameOrID.do",
+		dataType : 'json', //返回的类型为json
+		success : function(result) { //成功时执行的方法
+			try {
+				$("#workshopId_addPage").empty(); //清空下拉列表
+				$("#workshopId_addPage").append(" <option value=''>-----请选择-----</option>");
+				$(result).each(
+					function(i, item) {
+						$("#workshopId_addPage").append(" <option  value='" + item.id + "'>"+item.no+" - "+ item.nameCn + "</option>");
+					});
+					var optionSize = $("#workshopId_addPage option").size();
+					if(optionSize==2){
+						$('#workshopId_addPage option:eq(1)').prop("selected",true);
+					}
+				} catch (e) {
+					alert(e);
+				return;
+				}
+			},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+</script>
+

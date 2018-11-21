@@ -1,0 +1,539 @@
+<#include "../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>工位数据分析 – 异常明细</title>
+<style>
+	.report-panel{
+		width:100%;
+		height:90rem;
+		overflow: auto;
+		padding-top: 10px;
+	}
+</style>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<script type="text/javascript">
+	var ulocStatusCountDetailChart = null;
+	var app = {};
+	$(function(){
+		initTime();
+		getUlocStatusData("ULOC_STATUS_TIME_COUNT","ULOC_STATUS_TIME_COUNT");
+		getUlocStatusData("ULOC_STATUS_COUNT_DETAIL","ULOC_STATUS_COUNT_DETAIL");
+		getUlocStatusData("ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_E","ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_E");
+		getUlocStatusData("ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_L","ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_L");
+		getUlocStatusData("ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_W","ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_W");
+		/* getUlocStatusData("ULOC_STATUS_YEAR_DENSITY","ULOC_STATUS_YEAR_DENSITY"); */
+	});
+	function initTime(){
+		var date = new Date();
+		var month = date.getMonth()+1;
+		var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		$("#createTimeEnd").val(endTime+" 23:59");
+		date = new Date(date.getTime()-1000*60*60*24*30);
+		month = date.getMonth()+1;
+		var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+		$("#createTimeStart").val(startTime+" 00:00");
+	}
+	function caseLessTen(num){
+		if(num<10){
+			return '0'+num;
+		}else {
+			return num;
+		}
+	}
+	
+	var compareInt = function (x, y) {//比较函数
+	    if (parseInt(x) < parseInt(y)) {
+	        return -1;
+	    } else if (parseInt(x) > parseInt(y)) {
+	        return 1;
+	    } else {
+	        return 0;
+	    }
+	}
+	function getMaxData(countData){
+		var sortArray = [];
+		for(var i =0;i<countData.length;i++){
+			sortArray[i]= countData[i];
+		}
+		sortArray = sortArray.sort(compareInt);
+		return parseInt(parseInt(sortArray[sortArray.length - 1])*1.1)+1;
+	}
+function getUlocStatusTimeCountOption(source,time,count,title,color){
+	var option = {
+		    title: {
+		        text: title,
+		        x:'center',
+		        y:'top'
+		    },
+		    tooltip: {
+		        trigger: 'axis',
+		        axisPointer: {
+		            type: 'cross',
+		            crossStyle: {
+		                color: '#999'
+		            }
+		        }
+		    },
+		    toolbox: {
+		        feature: {
+		            dataView: {show: true, readOnly: false},
+		            magicType: {show: true, type: ['line', 'bar']},
+		            restore: {show: true},
+		            saveAsImage: {show: true}
+		        },
+		        top:30
+		    },
+		    legend: {
+		        data:['异常时间','异常次数'],
+		        left:'15%',
+		        top:30
+		    },
+		    dataZoom: [
+		    	 { show: true},
+		         {type: 'inside'},
+		    ],
+		    xAxis: [
+		        {
+					/* axisLabel:{
+						rotate: 70,
+						interval:0
+					},	      */   	
+		            type: 'category',
+		            data: source,
+		            axisPointer: {
+		                type: 'shadow'
+		            }
+		        }
+		    ],
+		    yAxis: [
+		        {
+		            type: 'value',
+		            name: '时间/min',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        },
+		        {
+		            type: 'value',
+		            name: '次数',
+		            min: 0,
+		            max:function(value) {
+		                return parseInt(value.max*1.1)+1;
+		            },
+		            axisLabel: {
+		                formatter: '{value}'
+		            },
+		            splitLine:{  
+		                show:false
+		            }
+		        }
+		    ],
+		    grid:{
+		    	y:110
+		    },
+		    series: [
+		        {
+		            name:'异常时间',
+		            type:'bar',
+		            data:time,
+		            barWidth:'40%',
+		            itemStyle: {   
+		                normal:{  
+		                	color:color
+		                    /* color: function (params){
+		                        var colorList = ["#61a0a8", "#d48265", "#91c7ae"];
+		                        return colorList[params.dataIndex];
+		                    }  */
+		                }
+		            },
+		            //icon:'image://./images/icon1.png',
+		        },
+		        {
+		            name:'异常次数',
+		            type:'line',
+		            yAxisIndex: 1,
+		            data:count,
+		            itemStyle: {   
+		                //通常情况下：
+		                normal:{  
+		　　　　　　　　　　　　//每个柱子的颜色即为colorList数组里的每一项，如果柱子数目多于colorList的长度，则柱子颜色循环使用该数组
+		                    color: function (params){
+		                        var colorList = ["#c23531","#2f4554", "#61a0a8", "#d48265", "#91c7ae","#749f83","#ca8622"];
+		                        return "#d48265";
+		                    }
+		                }
+		            },
+		        }
+		    ]
+		};
+	return option;
+  }
+	
+function getUlocStatusCountDetailOpt(abnormal,abnormalSourceData,abnormalContentData,namesSelectedData){
+	var option = {
+			title: {
+		        text: '异常占比明细',
+		        x:'center',
+		        y:'top'
+		    },
+		    tooltip: {
+		        trigger: 'item',
+		        formatter: "{a} <br/>{b}: {c} ({d}%)"
+		    },
+		    legend: {
+		    	type: 'scroll',
+	            orient: 'vertical',
+	            right: 10,
+	            top: 20,
+	            bottom: 20,
+		        data:abnormal,
+		        selected: namesSelectedData
+		    },
+		    toolbox: {
+		    	feature: {
+		        	  myTool : {
+		                 show : true,
+		                 title : '是否显示注释',
+		                 icon : 'image://${baseUrl}/res/images/annotate.png',
+		                 onclick : function (event){
+		    	            var labelLine = false;
+		    	            var label = false;
+		                	if(app.isPercent){
+		                		 app.isPercent = false;
+		                		 label = {show:true,normal:{show:true}}
+	                		  	 labelLine = {
+	                		         normal: {
+	                		        	  show:true,
+                                          smooth: 0.2,
+                                          length: 10,
+                                          length2: 20
+                                      }
+                                  };
+		                	 }else{
+		                		 app.isPercent = true;
+		                		 label ={show:false,normal: {show:false}};
+		                		 labelLine = {
+		                				 normal: {
+		                					  show:false,
+	                                          smooth: 0.2,
+	                                          length: 10,
+	                                          length2: 20
+	                                      }
+		                		 };
+		                	 }
+		                	ulocStatusCountDetailChart.setOption({
+		                	     series:[
+		                	    	{},
+		                	        {
+		                	            label:label,
+		                	        	labelLine:labelLine
+		                	        }
+		                	    ]
+		                	 });
+		                 }
+		             },
+		            saveAsImage: {show: true}
+		        },
+		        top:30
+		    },
+		    series: [
+		        {
+		            name:'访问来源',
+		            type:'pie',
+		            selectedMode: 'single',
+		            radius: [0, '30%'],
+		            label: {
+		                normal: {
+		                    position: 'inner'
+		                }
+		            },
+		            itemStyle: {   
+		                normal:{  
+		                    color: function (params){
+		                        var colorList = ["#61a0a8","#d48265","#91c7ae"];
+		                        return colorList[params.dataIndex];
+		                    }  
+		                }
+		            },
+		            labelLine: {
+		                normal: {
+		                    show: false
+		                }
+		            },
+		            center:['38%','55%'],
+		            data:abnormalSourceData
+		        },
+		        {
+		            name:'信息来源',
+		            type:'pie',
+		            radius: ['40%', '55%'],
+		            center: ['38%', '55%'],
+		            label: {
+		                normal: {show:true}
+		            },
+		            labelLine: {
+		                normal: {
+		                    smooth: 0.2,
+		                    length: 10,
+		                    length2: 20
+		                }
+		            },
+		            data:abnormalContentData
+		        }
+		    ]
+		};
+	return option;
+}
+
+function ulocStatusYearDensityMinute(year,max,minute,count){
+	var option = {
+			title:{
+				text:"时间/min"
+			},
+		    tooltip: {
+		        position: 'top',
+		        formatter: function (p) {
+		            var format = echarts.format.formatTime('yyyy-MM-dd', p.data[0]);
+		            return format + ': ' + p.data[1];
+		        }
+		    },
+		    visualMap: {
+		        min: 0,
+		        max:parseInt(max),
+		        calculable: true,
+		        orient: 'vertical',
+		        top: "30%"
+		    },
+		    calendar: [
+		    {
+		        orient: 'vertical',
+		        cellSize: [15,15, 'auto'],
+		        range: year
+		    }],
+
+		    series: [{
+		        type: 'heatmap',
+		        coordinateSystem: 'calendar',
+		        calendarIndex: 0,
+		        data: minute
+		    }]
+		};
+	return option;
+}
+function ulocStatusYearDensityCount(year,max,minute,count){
+	var option = {
+			title:{
+				text:"次数/次"
+			},
+		    tooltip: {
+		        position: 'top',
+		        formatter: function (p) {
+		            var format = echarts.format.formatTime('yyyy-MM-dd', p.data[0]);
+		            return format + ': ' + p.data[1];
+		        }
+		    },
+		    visualMap: {
+		        min: 0,
+		        max:parseInt(max),
+		        calculable: true,
+		        orient: 'vertical',
+		        top: '30%'
+		    },
+		    calendar: [
+		    {
+		        orient: 'vertical',
+		        cellSize: [15,15, 'auto'],
+		        range: year
+		    }],
+		    series: [
+		    	{
+			        type: 'heatmap',
+			        coordinateSystem: 'calendar',
+			        calendarIndex: 0,
+			        data: count
+		   		}]
+		};
+	return option;
+}
+function getUlocStatusData(type,id){
+	var myChart = echarts.init(document.getElementById(id));
+	ajaxRequest("${baseUrl}/report/stationAnomalyData.do", {
+		"type":type,
+		"createTimeStart":$("#createTimeStart").val(),
+		"createTimeEnd":$("#createTimeEnd").val(),
+	}, function(result){
+		var data = result.data;
+		if(data){
+			if(type=="ULOC_STATUS_TIME_COUNT"){
+				myChart.showLoading();
+				var color = function (params){
+                    var colorList = ["#61a0a8", "#d48265", "#91c7ae"];
+                    return colorList[params.dataIndex];
+                } 
+				var option = getUlocStatusTimeCountOption(JSON.parse(data.source),JSON.parse(data.time),JSON.parse(data.count),"异常源分布明细",color);
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(type=="ULOC_STATUS_COUNT_DETAIL"){
+				ulocStatusCountDetailChart = echarts.init(document.getElementById(id));
+				var  abnormal = JSON.parse(data.abnormal);
+				var  abnormalSourceData = JSON.parse(data.abnormalSourceData);
+				var  abnormalContentData = JSON.parse(data.abnormalContentData);
+				var namesSelectedData = {};
+				var otherval = 0;
+				for(var i in abnormal){
+					if(i>5){
+				 		namesSelectedData[abnormal[i]]=false;
+				 		for(var j in abnormalContentData){
+							if(abnormalContentData[j].name==abnormal[i]){
+								otherval+=abnormalContentData[j].value;
+								break;
+							}
+						}
+					}
+				} 
+				abnormal.push('其他');
+				abnormalContentData.push({'name':'其他','value':otherval});
+				ulocStatusCountDetailChart.showLoading();
+				var option = getUlocStatusCountDetailOpt(abnormal,abnormalSourceData,abnormalContentData,namesSelectedData);
+				ulocStatusCountDetailChart.on('legendselectchanged', function (param){
+					 var selected = param.selected;
+					 var legend = param.name;
+					 var otherval = 0;
+					 if(legend == "其他"){//如果是其他就把所有项都显示,其他置为0
+						 for(var name in selected){
+							 selected[name] = true; 
+							 if(name == "其他"){
+								 for(var i in abnormalContentData){
+									if(abnormalContentData[i].name == '其他'){
+										abnormalContentData[i].value = 0;
+										break;
+									}
+								}
+							 }
+						 }
+					 }else if(selected[legend]){
+						 //选中项为true其他--
+						for(var j in abnormalContentData){
+							if(abnormalContentData[j].name==legend){
+								for(var i in abnormalContentData){
+									if(abnormalContentData[i].name == '其他'){
+										abnormalContentData[i].value = abnormalContentData[i].value-abnormalContentData[j].value;
+										break;
+									}
+								}
+								break;
+							}
+						}
+					}else{
+						 //选中项为false其他++
+						for(var j in abnormalContentData){
+							if(abnormalContentData[j].name==legend){
+								for(var i in abnormalContentData){
+									if(abnormalContentData[i].name == '其他'){
+										abnormalContentData[i].value = abnormalContentData[i].value+abnormalContentData[j].value;
+										break;
+									}
+								}
+								break;
+							}
+						}
+					}
+					var options = getUlocStatusCountDetailOpt(abnormal,abnormalSourceData,abnormalContentData,selected);
+					ulocStatusCountDetailChart.setOption(options);
+			     });  
+				ulocStatusCountDetailChart.hideLoading();
+				ulocStatusCountDetailChart.setOption(option,true);
+			}else if(type=="ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_L"){
+				myChart.showLoading();
+				var option = getUlocStatusTimeCountOption(JSON.parse(data.source),JSON.parse(data.time),JSON.parse(data.count),"线体异常明细","#61a0a8");
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(type=="ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_W"){
+				myChart.showLoading();
+				var option = getUlocStatusTimeCountOption(JSON.parse(data.source),JSON.parse(data.time),JSON.parse(data.count),"作业异常明细","#d48265");
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(type=="ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_E"){
+				myChart.showLoading();
+				var option = getUlocStatusTimeCountOption(JSON.parse(data.source),JSON.parse(data.time),JSON.parse(data.count),"设备异常明细","#91c7ae");
+				myChart.hideLoading();
+				myChart.setOption(option,true);
+			}else if(type=="ULOC_STATUS_YEAR_DENSITY"){
+				myChart.showLoading();
+				var option = ulocStatusYearDensityMinute(data.year,data.max,JSON.parse(data.minute),JSON.parse(data.count));
+				myChart.hideLoading();
+				myChart.setOption(option,true); 
+				var coutMyChart = echarts.init(document.getElementById("ULOC_STATUS_YEAR_DENSITY_COUNT"));
+				var optionCount = ulocStatusYearDensityCount(data.year,data.max,JSON.parse(data.minute),JSON.parse(data.count));
+				coutMyChart.setOption(optionCount,true);
+			}
+		}
+	}, false);
+}
+</script>
+</head>
+<body>
+  <@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>	
+		<div class="report-panel">
+			<div style="width:130rem;height:100%;">
+				<div style="width:100%;float: left;height:100%;">
+					<div id="ULOC_STATUS_TIME_COUNT"  style="width: 45%;height: 45%;float: left;"></div>
+					<div id="ULOC_STATUS_COUNT_DETAIL" style="width: 55%;height: 45%;float: left;"></div>
+					<div id="ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_L" style="width: 33%;height: 45%;float: left;"></div><!--线体-->
+					<div id="ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_W" style="width: 33%;height: 45%;float: left;"></div><!--作业-->
+					<div id="ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_E" style="width: 33%;height: 45%;float: left;"></div><!--设备-->
+				</div>
+				<!-- <div style="width: 25%;height: 100%;float: left;">
+					<div id="ULOC_STATUS_YEAR_DENSITY" style="width: 50%;height: 100%;float: left;"></div>
+					<div id="ULOC_STATUS_YEAR_DENSITY_COUNT" style="width: 50%;height: 100%;float: left;"></div>
+				</div> -->
+			</div>
+		</div> 
+<script type="text/javascript">
+	function conditionalQuery(searchBtnObj){
+			getUlocStatusData("ULOC_STATUS_TIME_COUNT","ULOC_STATUS_TIME_COUNT");
+			getUlocStatusData("ULOC_STATUS_COUNT_DETAIL","ULOC_STATUS_COUNT_DETAIL");
+			getUlocStatusData("ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_E","ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_E");
+			getUlocStatusData("ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_L","ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_L");
+			getUlocStatusData("ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_W","ULOC_STATUS_ABNORMAL_SOURCE_COUNT_MINTUE_W");
+			/* getUlocStatusData("ULOC_STATUS_YEAR_DENSITY","ULOC_STATUS_YEAR_DENSITY"); */
+	}
+	  $('#createTimeStart').click(function(){
+			var createTimeEnd=$dp.$('createTimeEnd');
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm',
+				onpicked:function(){
+					createTimeEnd.click();
+				},
+				maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+			})
+		});
+		$('#createTimeEnd').click(function(){
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm',
+				minDate:'#F{$dp.$D(\'createTimeStart\')}'
+			})
+		});
+	</script>
+</body>
+</html>

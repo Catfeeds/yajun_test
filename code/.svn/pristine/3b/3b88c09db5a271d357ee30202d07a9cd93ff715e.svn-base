@@ -1,0 +1,99 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body  permissionModule="PRODUCT_PARAMER"  noBreadcrumbs="true">	
+	<@p.searchPanel gridId="product_paramer_sett_gridId">
+		<@p.searchColumns>
+			<@p.input title="PRODUCT_PARAMER_EQUIPMENT_NAME" field="params" ></@p.input>
+			<@p.input title="PRODUCT_PARAMER_EQUIPMENT_EXPPLAIN" field="paramExplain"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/vbProductParameters/list.do?${params!}&isDk=${isDk!}" id="product_paramer_sett_gridId">
+		<@p.column title="PRODUCT_PARAMER_EQUIPMENT_NAME" field="params" permissionCode="PRODUCT_PARAMER_EQUIPMENT_NAME" ></@p.column>
+		<@p.column title="PRODUCT_PARAMER_EQUIPMENT_EXPPLAIN" field="paramExplain" permissionCode="PRODUCT_PARAMER_EQUIPMENT_EXPPLAIN" formatter="renderParamerExplain"></@p.column>
+		<@p.column title="PRODUCT_PARAMER_PARAMETER_VALUE" field="paramsValue" permissionCode="PRODUCT_PARAMER_PARAMETER_VALUE" style="changeColor"></@p.column>
+		<@p.column title="PRODUCT_PARAMER_EQUIPMENT_ULOC" field="unit" permissionCode="PRODUCT_PARAMER_EQUIPMENT_ULOC"  ></@p.column>
+		<@p.column title="PRODUCT_PARAMER_REMARK" field="note" permissionCode="PRODUCT_PARAMER_REMARK"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+
+var parameterRanges = {};
+$(function(){
+	if('${parameterRange!}'){
+		parameterRanges = eval('('+ '${parameterRange!}' +')');
+	}
+})
+
+function changeColor(value, row, index, field){
+	var color="white";
+	if(row.isConfig == 'YES'){
+		for(var i=0;i<parameterRanges.length;i++){
+			var tmEquipmentId = parameterRanges[i].tmEquipmentId;
+			var parameterName = parameterRanges[i].parameterName;
+			var parameterRange = parameterRanges[i].parameterRange;
+			var maxVal = parameterRanges[i].maxVal;
+			var minVal = parameterRanges[i].minVal;
+			if(row.equipmentId == tmEquipmentId && row.params == parameterName){
+				if(maxVal && minVal && row.paramsValue && parseInt(row.paramsValue) >= parseInt(minVal) && parseInt(row.paramsValue) <= parseInt(maxVal)){
+					color ="green"
+				}else{
+					color ="red"
+				}
+				break;
+			}
+		}
+	}
+	return {
+	    classes: 'text-nowrap another-class',
+	    css: {"background-color": color}
+	 }
+}
+function renderParamerExplain(value,record,index){
+	if(value&& record){
+		var equipmentType= record.equipmentType;
+		var equipmentNo = record.equipmentNo;
+		if(equipmentType=="PMSHISTORY"){
+			if(equipmentNo=="1"){
+				value = "["+28+"]"+value;
+			}else if(equipmentNo=="2"){
+				value = "["+29+"]"+value;
+			}else if(equipmentNo=="3"){
+				value = "["+35+"]"+value;
+			}else if(equipmentNo=="4"){
+				value = "["+36+"]"+value;
+			}else {
+				return value;
+			}
+		}else if(equipmentType=="VTS_RST"){
+			if(equipmentNo=="1"){
+				value = "["+65+"]"+value;
+			}else if(equipmentNo=="2"){
+				value = "["+66+"]"+value;
+			}else if(equipmentNo=="3"){
+				value = "["+67+"]"+value;
+			}else if(equipmentNo=="4"){
+				value = "["+68+"]"+value;
+			}else if(equipmentNo=="5"){
+				value = "["+69+"]"+value;
+			}else if(equipmentNo=="6"){
+				value = "["+70+"]"+value;
+			}else if(equipmentNo=="7"){
+				value = "["+72+"]"+value;
+			}else {
+				return value;
+			}
+		}else if(equipmentType=="COOLRST_TBL"){
+			if(equipmentNo=="1"){
+				value = "["+75+"]"+value;
+			}else if(equipmentNo=="2"){
+				value = "["+104+"]"+value;
+			}else {
+				return value;
+			}
+		}
+		return value;
+	}else{
+		return "";
+	}
+}
+</script>

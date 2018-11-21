@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<style>
+	#inventorySettingForm .col-md-3{
+		width: 15%;
+	}
+</style>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm formId="inventorySettingForm" url="${baseUrl}/metalPlate/inventorySetting.do" class="form-horizontal" permissionModule="SHEET_METAL_MATERIAL">
+	<#list beans?sort_by("id")?reverse as bean>
+		<@p.formRow>
+			<input type="hidden" value="${bean.id}" name="ids">
+			<@p.formColmd title="METALPLATE_MACHININGSURFACE" permissionCode="REMARK">
+				<@p.input value="${bean.machiningSurface!}"  readonly="readonly"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_COMPONENT" permissionCode="REMARK">
+				<@p.input value="${bean.component!}" readonly="readonly"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_INVENTORYNUMBER" permissionCode="REMARK">
+				<@p.input value="${bean.inventoryNumber!}"  field="inventoryNumbers" datatype="pm"></@p.input>
+			</@p.formColmd> 
+		</@p.formRow>
+	</#list>
+</@p.editForm>
+<script type="text/javascript">
+	function inventorySettingSubmit(){
+		var formDataAll = document.getElementById("inventorySettingForm");
+		var parameters = [];
+	    for(var i=0;i<formDataAll.length;i++){
+		  if(formDataAll.elements[i].name!="" && formDataAll.elements[i].value=="" && formDataAll.elements[i].name=="inventoryNumbers"){
+			  formDataAll.elements[i].focus();
+			  errorTip("剩余库存数不能为空。");
+			  return ;
+		  }
+	    }
+	    $("input[id='btn_sub']").click();
+		dialogRef.close();
+	}
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+
+<#include "../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	function importData(){ 
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/scrap/exportTemplate.do";
+	    importFile("<@s.m code="NC_IMPORT" />", "${baseUrl}/scrap/importData.do", "dg${currentPageId}",obj);
+	}
+	function renderNcGroup(value) {
+		return value == null ? "" : value;
+	}
+</script>
+<@p.body title="SCRAP_LIST_TITLE" permissionModule="SCRAP">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="NC_NO" field="no" />
+			<@p.input title="NC_NAME" field="note" />
+			<@p.input title="NC_EXTCODE" field="extCode" />
+		</@p.searchColumns>
+		
+		<@p.toolbar> 
+			<@p.button title="NC_ADD" permissionCode="ScrapAdd" iconCls="plus" url="${baseUrl}/scrap/addInput.do" type="add"  ></@p.button>
+			<@p.button title="NC_UPDATE" permissionCode="ScrapUpdate" iconCls="edit" url="${baseUrl}/scrap/updateInput.do" type="update"></@p.button>
+			<@p.button title="NC_DELETE" permissionCode="ScrapDelete" iconCls="trash" url="${baseUrl}/scrap/delete.do" type="delete"></@p.button>
+			<@p.button title="NC_IMPORT" permissionCode="ScrapImport" onclick="importData();" iconCls="signin" />
+			<@p.button title="NC_EXPORT" permissionCode="ScrapExport" downName="SCRAP_EXPORT_NAME" url="${baseUrl}/scrap/exportData.do" iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/scrap/list.do">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="NC_NO" field="no" permissionCode="TM_SCRAP_NO" formatter="renderNcGroup"/>
+		<@p.column title="NC_NAME" field="note" permissionCode="TM_SCRAP_NOTE" formatter="renderNcGroup"/>
+		<@p.column title="NC_EXTCODE" field="extCode" permissionCode="TM_SCRAP_EXT_CODE" formatter="renderNcGroup"/>
+	</@p.dataGrid>
+</@p.body>

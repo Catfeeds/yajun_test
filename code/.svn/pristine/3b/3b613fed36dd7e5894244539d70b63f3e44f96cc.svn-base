@@ -1,0 +1,210 @@
+package com.wis.mes.production.metalplate.service.impl;
+
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.wis.basis.common.utils.ConstantUtils;
+import com.wis.basis.common.utils.DateUtils;
+import com.wis.core.framework.entity.DictEntry;
+import com.wis.core.framework.service.DictEntryService;
+import com.wis.core.framework.service.GlobalConfigurationService;
+import com.wis.core.service.impl.BaseServiceImpl;
+import com.wis.mes.master.equipment.entity.TmpEquipmentStatus;
+import com.wis.mes.master.equipment.service.TmEquipmentStatusService;
+import com.wis.mes.master.line.entity.TmLine;
+import com.wis.mes.master.line.service.TmLineService;
+import com.wis.mes.master.workcalendar.entity.TmWorktime;
+import com.wis.mes.master.workcalendar.service.TmWorktimeService;
+import com.wis.mes.production.metalplate.dao.TbMetalPlateProductionRecordDao;
+import com.wis.mes.production.metalplate.entity.TbMetalPlateProductionRecord;
+import com.wis.mes.production.metalplate.service.TbMetalPlateProductionRecordService;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+@Service
+public class TbMetalPlateProductionRecordServiceImpl extends
+		BaseServiceImpl<TbMetalPlateProductionRecord> implements
+		TbMetalPlateProductionRecordService {
+
+	@Autowired
+	public void setDao(TbMetalPlateProductionRecordDao dao) {
+		this.dao = dao;
+	}
+
+	@Autowired
+	private TmWorktimeService worktimeService;
+	@Autowired
+	private GlobalConfigurationService configurationService;
+	@Autowired
+	private TmLineService lineService;
+	@Autowired
+	private TmEquipmentStatusService equipmentStatusService;
+	@Autowired
+	private DictEntryService entryService;
+	
+	
+	@Override
+	public Map getEveryDayPrd(String time, String model, String prdLine) {
+		Map<String, Object> params=new HashMap<String, Object>();
+		params.put("time", time);
+		params.put("model", model);
+		params.put("prdLine", prdLine);
+		List<Map<String,Object>> everyDayPrd = ((TbMetalPlateProductionRecordDao)dao).getEveryDayPrd(params);
+		
+		List<Map<String,Object>> prd = new ArrayList<Map<String,Object>>();
+		for (int i = 0; i < 10; i++) {
+			Map<String,Object> prdMap = new HashMap<>();
+			prdMap.put("HOURS", i+8);
+			prdMap.put("PLANNEDCOUNT", 0);
+			prdMap.put("PRACTICALCOUNT", 0);
+			prd.add(prdMap);
+		}
+		Integer plannedTotal=0;
+		Integer practicalTotal=0;
+		for (Map<String, Object> dayPrd : everyDayPrd) {
+			Integer plannedCount = Integer.parseInt(dayPrd.get("PLANNEDCOUNT").toString());
+			Integer practicalCount = Integer.parseInt(dayPrd.get("PRACTICALCOUNT").toString());
+			Integer hours =null;
+			if(null != dayPrd.get("HOURS")){
+				hours = Integer.parseInt(dayPrd.get("HOURS").toString());
+			}
+			
+			plannedTotal+=plannedCount;
+			practicalTotal+=practicalCount;
+			Map<String, Object> newDayPrd = new HashMap<>();
+			newDayPrd.put("PRACTICALCOUNT", practicalCount/60);
+			newDayPrd.put("PLANNEDCOUNT", plannedCount);
+			newDayPrd.put("HOURS", hours);
+			if(null != dayPrd.get("HOURS"))
+				prd.set(hours-8, newDayPrd);
+		}
+		
+		List plannedList = new ArrayList<>();
+		List practicalList = new ArrayList<>();
+		Map result = new HashMap<>();
+		
+		for (Map product : prd) {
+			Integer planned = Integer.parseInt(product.get("PLANNEDCOUNT").toString());
+			Integer practical = Integer.parseInt(product.get("PRACTICALCOUNT").toString());
+			plannedList.add(planned);
+			practicalList.add(practical);
+		}
+		NumberFormat numberFormat = NumberFormat.getInstance();
+		numberFormat.setMaximumFractionDigits(2);
+		String per = (float) practicalTotal / (float) plannedTotal * 100+"%";
+		if("NaN%".equals(per)){
+			per="0%";
+		}
+		result.put("plannedList", plannedList);
+		result.put("practicalList", practicalList);
+		result.put("practicalTotal", practicalTotal);
+		result.put("per", per);
+		return result;
+	}
+
+	@Override
+	public Map<String, Object> productionStatusData(String dataTime, Integer equipmentId,String shiftno) {
+		Map<String,Object> resultMap = new HashMap<String,Object>();
+		JSONArray seriesData = new JSONArray();
+		JSONArray circulateStateArray = new JSONArray(); 
+		JSONObject jsonObject = new JSONObject();
+		String lineNo = configurationService.getValueByKey(ConstantUtils.MP_LINE_NO);
+		TmLine lineBean = lineService.findByNo(lineNo);
+		TmWorktime worktime = null;
+		if(StringUtils.isEmpty(dataTime)) {
+			worktime = worktimeService.thisWorkTime(lineBean.getId());
+		}else {
+			TmWorktime eg = new TmWorktime();
+			eg.setTmLineId(lineBean.getId());
+			eg.setWorkDate(DateUtils.parseDate(dataTime));
+			eg.setShiftno(shiftno);
+			List<TmWorktime> worktimeList = worktimeService.findByEg(eg);
+			if(null != worktimeList && worktimeList.size() > 0) {
+				worktime = worktimeList.get(0);
+			}
+		}
+		if(null != worktime) {
+			Date startTime =DateUtils.parse(DateUtils.formatDate(worktime.getWorkDate())+" "+ worktime.getStartTime()+":00", DateUtils.FORMAT_DATETIME_YYYY_MM_DD_HH_MM_SS);
+			Date endTime =DateUtils.parse(DateUtils.formatDate(worktime.getWorkDate())+" "+ worktime.getEndTime()+":59", DateUtils.FORMAT_DATETIME_YYYY_MM_DD_HH_MM_SS);
+			int worktimeSum = 0;
+			if(startTime.getTime() > endTime.getTime()) {
+				Calendar rightNow = Calendar.getInstance();
+				rightNow.setTime(endTime);
+				rightNow.add(Calendar.DATE, 1);
+				worktimeSum = ((int) rightNow.getTimeInMillis() - (int) startTime.getTime());
+			}else {
+				worktimeSum = ((int) endTime.getTime()- (int)startTime.getTime());
+			}
+			TmpEquipmentStatus equipmentStatusEg = new TmpEquipmentStatus();
+			equipmentStatusEg.setTmEquipmentId(Long.valueOf(equipmentId));
+			equipmentStatusEg.setTmWorkTimeId(Long.valueOf(worktime.getId()));
+			List<TmpEquipmentStatus> equipmentStatusList = equipmentStatusService.findByEg(equipmentStatusEg);
+			
+			//钣金设备运行类型数据字典
+			Map<String, DictEntry> smCirculateState = entryService.getMapTypeCode(ConstantUtils.SM_CIRCULATE_STATE);
+			Map<String,Object> yMap = new HashMap<String,Object>();
+			int index = 0;
+			for(String key:smCirculateState.keySet()) {
+				circulateStateArray.add(smCirculateState.get(key).getName());
+				if(!yMap.containsKey(key)) {
+					yMap.put(key, index);
+					index++;
+				}
+			}
+			
+			if(null != equipmentStatusList && equipmentStatusList.size() > 0) {
+				for(TmpEquipmentStatus equipmentStatusBean:equipmentStatusList ) {
+					if(StringUtils.isNotBlank(equipmentStatusBean.getFinishTime())) {
+						if(yMap.containsKey(equipmentStatusBean.getRunningState())) {
+							int timeResults = 0;
+							String beginTime = DateUtils.formatDate(equipmentStatusBean.getCreateTime())+" "+equipmentStatusBean.getBeginTime(); 
+							String finishTime = DateUtils.formatDate(equipmentStatusBean.getCreateTime())+" "+equipmentStatusBean.getFinishTime(); 
+							Date beginDate = DateUtils.parse(beginTime, DateUtils.FORMAT_DATETIME_YYYY_MM_DD_HH_MM_SS);
+							Date finishDate = DateUtils.parse(finishTime, DateUtils.FORMAT_DATETIME_YYYY_MM_DD_HH_MM_SS);
+							timeResults = ((int)finishDate.getTime()-(int)beginDate.getTime());
+							String partialFill = getPartialFill(timeResults,worktimeSum);
+							jsonObject.put("x", beginDate.getTime());
+							jsonObject.put("x2",finishDate.getTime());
+							jsonObject.put("y", yMap.get(equipmentStatusBean.getRunningState()));
+							jsonObject.put("partialFill", Double.valueOf(partialFill));
+							seriesData.add(jsonObject);
+						}
+					}
+				}
+			}
+		}
+		resultMap.put("seriesData", seriesData.toString());
+		resultMap.put("yCategories", circulateStateArray.toString());
+		return resultMap;
+	}
+	
+	private String getDateParameter(Date dateTime) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(dateTime);
+		int year = calendar.get(Calendar.YEAR);
+		int monday = calendar.get(Calendar.MONDAY);
+		int date = calendar.get(Calendar.DATE);
+		int hour = calendar.get(Calendar.HOUR);
+		int minute = calendar.get(Calendar.MINUTE);
+		int second = calendar.get(Calendar.SECOND);
+		return year+","+monday+","+date+","+hour+","+minute+","+second;
+	}
+	
+	private String getPartialFill(int num1,int num2) {
+		 // 创建一个数值格式化对象  
+        NumberFormat numberFormat = NumberFormat.getInstance();  
+        // 设置精确到小数点后2位  
+        numberFormat.setMaximumFractionDigits(4);  
+        return numberFormat.format((float) num1 / (float) num2);  
+	}
+}

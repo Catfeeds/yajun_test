@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<div style="text-align: center">
+	<input type="text" value="${SN!}" readonly="readonly"  style="width: 500px;height: 50px;margin-bottom: 10px;"/>
+</div>
+<@p.editForm url="${baseUrl}/onLine/bindParameter.do" class="form-horizontal"   permissionModule="ONLINE">
+<input type="hidden" name="recordId" value="${recordId}">
+<input type="hidden" name="shiftNo" value="${shiftNo!}">
+<input type="hidden" name="tmUlocId" value="${tmUlocId}">
+<input type="hidden" name="currentUlocSeq" value="${currentUlocSeq}">
+<input type="hidden" id="beforeSubmit" value="checkParameterValue"/>
+<input type="hidden" value="bindParameterCallback" id="callback">
+<table class="table table-bordered  table-hover table-condensed">
+	<thead><tr><th>参数编号</th><th>参数名称</th><th>备注</th><th>是否必填</th><th>请输入</th><th>备注</th></tr></thead>
+	<tbody >
+		<#if parameter??>
+			<#list parameter as bean>
+			<tr >
+				<td style="vertical-align: middle">${bean.parameter.code}</td><td style="vertical-align: middle">${bean.parameter.name}</td><td style="vertical-align: middle">${bean.parameter.note}</td>
+				<td style="vertical-align: middle"><#if '${bean.isRequired}'=="YES">是<#else>否</#if></td>
+				<td style="width: 230px;"><input type="hidden" name="parameterCode" value='${bean.parameter.code}'/>
+				<input name="parameterValue" data-required ='${bean.isRequired}' data-value='${bean.parameter.regularExpression}' class="inputxt" <#if '${bean.isRequired}'=="YES">datatype="*"</#if> maxlength='100' /></td>
+			<td style="width: 230px;"><input class="inputxt" name="note" maxlength="75"></td>
+			</tr>
+		</#list>
+		</#if>
+	</tbody>
+</table>
+	</@p.editForm>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$(".close").hide();
+	$(".btn-default").hide();
+	$(".form_required_flag").attr("style","position:relative;");
+	$(".inputxt").attr("style","width:200px;");
+	$(".bootstrap-dialog-footer-buttons").append("<button class='btn btn-primary' onclick='reLoadParameter()'>重新读取</button>"
+			+"<button class='btn btn-primary' onclick='goGackParameter()'>返回</button>");
+})
+function checkParameterValue(){
+	var isTrue =true;
+	$("input[name='parameterValue']").each(function(){
+		var isRequired=$(this).attr("data-required");
+		var regular = $(this).attr("data-value");
+		var value=this.value;
+		var expression = new RegExp(regular.replace(/\//g,''));
+		if(value){
+			if(!expression.test(value)){
+				$(this).css("background-color","red");
+				isTrue=false;
+			}else{
+				$(this).css("background-color","white");
+			}
+		}else{
+			$(this).css("background-color","white");
+		}
+	});
+	if(!isTrue){
+		if(confirm("有不合格项确认保存吗？")){
+			isTrue = true;
+		}
+	}
+	return isTrue;
+}
+function reLoadParameter(){
+	$("input[name='parameterValue']").each(function(){
+		$(this).val("");
+		$(this).css("background-color","white");
+	});
+}
+
+function bindParameterCallback(){
+	clickSN("${SN}");
+}
+
+function goGackParameter(){
+	ajaxRequest(baseUrl+"/onLine/bindParameterGoBack.do", {
+		recordId:"${recordId}",
+		shiftNo:"${shiftNo}",
+		tmUlocId:"${tmUlocId}",
+		currentUlocSeq:"${currentUlocSeq}"
+	}, function(result){
+		$(".close").click();
+	}, true);
+}
+</script>

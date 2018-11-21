@@ -1,0 +1,97 @@
+
+#Root logger
+log4j.rootLogger=INFO, CONSOLE
+log4j.additivity.org.apache=false
+
+#System logger
+log4j.logger.systemLogger=INFO, SYSTEM_FILE,CONSOLE
+log4j.additivity.systemLogger=false
+#Business logger
+#log4j.logger.businessLogger=INFO, BUSINESS_FILE, BUSINESS_DB
+log4j.logger.businessLogger=INFO, BUSINESS_FILE
+log4j.additivity.businessLogger=false
+#JOB logger
+log4j.logger.jobLogger=INFO,JOB_FILE,CONSOLE
+log4j.additivity.jobLogger=false
+#Interface logger
+log4j.logger.interfaceLogger=INFO, CONSOLE,INTERFACE_FILE
+log4j.additivity.interfaceLogger=false
+#opc logger
+log4j.logger.opcLogger=INFO, CONSOLE,OPC_FILE
+log4j.additivity.opcLogger=false
+#rfid Logger
+log4j.logger.rfidLogger=INFO, CONSOLE,RFID_FILE
+log4j.additivity.rfidLogger=false
+
+#all to console		   
+log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
+log4j.appender.CONSOLE.Threshold=INFO
+log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
+log4j.appender.CONSOLE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %p %X{className}:%X{methodName} - %m%n
+
+
+
+#sf to file
+log4j.appender.SYSTEM_FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.SYSTEM_FILE.Threshold=INFO
+log4j.appender.SYSTEM_FILE.File=D:/MyWork/projects/logs/mes/mes-system.log
+log4j.appender.SYSTEM_FILE.MaxFileSize=4096KB
+log4j.appender.SYSTEM_FILE.MaxBackupIndex=30
+log4j.appender.SYSTEM_FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.SYSTEM_FILE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %p %X{className}:%X{methodName} - %m%n
+
+
+#JOB to file
+log4j.appender.JOB_FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.JOB_FILE.Threshold=INFO
+log4j.appender.JOB_FILE.File=D:/MyWork/projects/logs/mes/mes-job.log
+log4j.appender.JOB_FILE.MaxFileSize=4096KB
+log4j.appender.JOB_FILE.MaxBackupIndex=30
+log4j.appender.JOB_FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.JOB_FILE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %p %X{className}:%X{methodName} - %m%n
+
+#interface file
+log4j.appender.INTERFACE_FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.INTERFACE_FILE.Threshold=INFO
+log4j.appender.INTERFACE_FILE.File=D:/MyWork/projects/logs/mes/mes-interface.log
+log4j.appender.INTERFACE_FILE.MaxFileSize=4096KB
+log4j.appender.INTERFACE_FILE.MaxBackupIndex=30
+log4j.appender.INTERFACE_FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.INTERFACE_FILE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %p %X{className}:%X{methodName} - %m%n
+
+#bf to file
+log4j.appender.BUSINESS_FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.BUSINESS_FILE.Threshold=INFO
+log4j.appender.BUSINESS_FILE.File=D:/MyWork/projects/logs/mes/mes-business.log
+log4j.appender.BUSINESS_FILE.MaxFileSize=4096KB
+log4j.appender.BUSINESS_FILE.MaxBackupIndex=5
+log4j.appender.BUSINESS_FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.BUSINESS_FILE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %p %X{className}:%X{methodName} - %m%n
+
+#opc to file
+log4j.appender.OPC_FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.OPC_FILE.Threshold=INFO
+log4j.appender.OPC_FILE.File=D:/MyWork/projects/logs/mes/mes-opc.log
+log4j.appender.OPC_FILE.MaxFileSize=102400KB
+log4j.appender.OPC_FILE.MaxBackupIndex=100
+log4j.appender.OPC_FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.OPC_FILE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %p %X{className}:%X{methodName} - %m%n
+
+#RFID to file
+log4j.appender.RFID_FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.RFID_FILE.Threshold=INFO
+log4j.appender.RFID_FILE.File=D:/MyWork/projects/logs/mes/mes-rfid.log
+log4j.appender.RFID_FILE.MaxFileSize=4096KB
+log4j.appender.RFID_FILE.MaxBackupIndex=5
+log4j.appender.RFID_FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.RFID_FILE.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %p %X{className}:%X{methodName} - %m%n
+
+
+#comments below to disable mybatis trace
+log4j.logger.com.mybatis=INFO  
+log4j.logger.com.mybatis.common.jdbc.SimpleDataSource=INFO  
+log4j.logger.com.mybatis.common.jdbc.ScriptRunner=INFO  
+log4j.logger.com.mybatis.sqlmap.engine.impl.SqlMapClientDelegate=INFO  
+log4j.logger.java.sql.Connection=INFO  
+log4j.logger.java.sql.Statement=INFO  
+log4j.logger.java.sql.PreparedStatement=INFO

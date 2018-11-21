@@ -1,0 +1,197 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<style>
+.width{
+	width: 256px;
+	text-align: left;
+}
+.right{
+	text-align: right;
+}
+</style>
+
+<script type="text/javascript">
+
+$.fn.serializeObject = function()
+{
+	var o = {};
+	var a = this.serializeArray();
+	$.each(a, function() {
+		if (o[this.name] !== undefined) {
+			if (!o[this.name].push) {
+				o[this.name] = [o[this.name]];
+			}
+			o[this.name].push(this.value || '');
+		} else {
+			o[this.name] = this.value || '';
+		}
+	});
+	return o;
+};
+
+	function doUpdateTimeAndCount(){
+			var nextMaintenanceTime = $("#nextMaintenanceTime").val();
+			var timeWarningValue = $("#timeWarningValue").val();
+			var typeValue = $("#typeValue").val();
+			var count = $("#count").val();
+			var countWarningValue = $("#countWarningValue").val();
+			
+			 if(!($("#byTime").prop("checked"))&&(!$("#byCount").prop("checked"))) {
+				infoTip("请先勾选时间/次数!");	
+				return;
+			}	
+			
+			if($("#byTime").prop("checked")){
+				if(nextMaintenanceTime=="" || timeWarningValue=="" || typeValue==""){
+					infoTip("请填写按时间保养的所需值!");
+					return;
+				}
+				var re = /^[0-9]+.?[0-9]*$/; 
+				 if (!re.test(typeValue)){
+					 infoTip("周期值只能为整数!");
+						return; 
+				 }
+				 if (!re.test(timeWarningValue)){
+					 infoTip("保养时间预警值只能为整数!");
+						return; 
+				 }
+			} 
+			
+			if($("#byCount").prop("checked")){
+				if(count=="" || countWarningValue==""){
+					infoTip("请填写按次数保养的所需值!");
+					return;
+				}
+				var re = /^[0-9]+.?[0-9]*$/; 
+				 if (!re.test(count)){
+					 infoTip("目标保养次数只能为整数!");
+						return; 
+				 }
+				 if (!re.test(countWarningValue)){
+					 infoTip("保养次数预警值只能为整数!");
+						return; 
+				 }
+			}
+			submitTimeAndCount()
+			
+		}
+	
+	function submitTimeAndCount(){
+		$.ajax({
+	        url: "${baseUrl}/equipmentMaintenance/saveOrUpdateTimeAndCount.do",
+	        cache: false,
+	        global: false,
+	        type: "POST",
+	        data : {"beans":JSON.stringify($("form").serializeObject())},
+	        success: function(result){
+	        	if(result.success == true){
+	        		infoTip("设置成功!");
+	        		showMaintenance(1);
+	        	}else{
+	        		errorTip(result.message);
+	        	}
+	        }
+	    });
+	}
+	
+	function reset(){
+		infoTip("还原成功!");
+		showMaintenance(1);
+	}
+	
+	function resetTime(){
+		var id = $("#id").val();
+		var tmEquipmentId = $("#tmEquipmentId").val();
+		var timeWarningValue = $("#timeWarningValue").val();
+		if(id=="" || timeWarningValue==""){
+			infoTip("请先保存按时间保养数据!");
+			return;
+		}
+		$.ajax({
+			data:{"id":id},
+			dataType:'json',
+			url:"${baseUrl}/equipmentMaintenance/updateLastMaintenanceTime.do",
+			success : function(result) { 
+				infoTip("重置时间成功");
+				showMaintenance(1);
+			}
+			
+		});
+	}
+	
+	$(function(){
+		var lastMaintenanceTime = $("#lastMaintenanceTime").val();
+		if(lastMaintenanceTime!=""){
+			$("#nextMaintenanceTime").attr("readonly",true);
+			$("#nextMaintenanceTime").removeAttr("onclick");
+		}
+		
+	})
+</script>
+<div id="maintenance">
+<@p.body  permissionModule="EQUIPMENT_MAINTENANCE" noBreadcrumbs="true">
+<center>
+<form id="maintenanceForm">
+<input type="hidden" name="id" id="id" value="${maintenance.id!}"/>
+<input type="hidden"name="tmEquipmentId" id="tmEquipmentId" value="${maintenance.tmEquipmentId!}">
+<input type="hidden" name="lastMaintenanceTime" id="lastMaintenanceTime" value="${maintenance.lastMaintenanceTime!}">	
+ 		<table>
+ 			<tr><td><input  name="c" id="byTime" type="checkbox" value="1" />按时间</td></tr>
+ 			<tr>
+ 				<td class ="right">选择保养周期:</td>
+ 				<td>	
+ 					<select class="width" id="maintenanceOption" name="type" datatype="*" >
+ 					<#if typeList??>
+						 <#list typeList as entry>
+					 	   <option  value="${entry.code}"  <#if type?? && type =='${entry.code}'>selected="selected"</#if>>${entry.name}</option>
+						 </#list>
+					</#if>
+ 					</select>
+ 				</td>
+ 			</tr>
+ 			<tr>
+ 			<td class="right">请填写周期值:</td>
+ 			<td><input type="text"  class="width" id="typeValue" maxlength="10" name="typeValue" value="${maintenance.typeValue!}" ></td>
+ 			</tr>
+ 			<tr>	
+ 				<td class ="right">下一次保养时间:</td>
+ 				<td><input type="text" id="nextMaintenanceTime" name="nextMaintenanceTime" value="${nextMaintenanceTime!}"  class="width"  onClick="WdatePicker({minDate:'%y-%M-{%d}',dateFmt: 'yyyy-MM-dd HH:mm:ss'})"/></td>
+ 			</tr>
+ 			<tr>
+ 				<td class ="right">剩余保养时间:</td>
+ 				<td><input type="text" id="remainderTime" name="remainderTime"  value="${remainderTime!}" class="width" readonly="readonly"/></td>
+ 				<td>小时</td>
+ 			</tr>
+ 			<tr>	
+ 				<td class ="right">保养时间预警值:</td>
+ 				<td><input type="text" id="timeWarningValue" name="timeWarningValue" maxlength="10" value="${maintenance.timeWarningValue!}" class="width"/></td>
+ 				<td>小时</td>
+ 			</tr>
+ 			</table>
+ 			
+ 			<div style="height: 28px"></div>
+ 			<table>
+ 			<tr><td><input name="c" id="byCount" type="checkbox" value="2" />按次数<td></tr>
+ 			<tr>
+ 				<td class ="right">目标保养次数:</td>
+ 				<td><input type="text" id="count" name="count" value="${maintenance.count!}" maxlength="10" class="width"/></td>
+ 				<td>&nbsp;&nbsp;</td>
+ 			</tr>
+ 			<tr>
+ 				<td class ="right">剩余保养次数:</td>
+ 				<td><input type="text" id="remainderCount" name="remainderCount" value="${maintenance.remainderCount!}" class="width" readonly="readonly" /> </td>
+ 			</tr>	
+ 				<td class ="right">保养次数预警值:</td>
+ 				<td> <input type="text" id="countWarningValue" name="countWarningValue" maxlength="10" value="${maintenance.countWarningValue!}" class="width"/></td>
+ 			</tr>
+ 		</table>
+</form> 	
+</center>	
+<div class="hr dotted"></div>
+<center>
+		<@p.button title="FRAME_SAVE" permissionCode="EquipmentMaintenanceUpdate" iconCls="plus" type="button" onclick="doUpdateTimeAndCount()" class="btn btn-sm btn-info"></@p.button>
+		<@p.button title="FRAME_RESTORE" permissionCode="EquipmentMaintenanceUpdate" iconCls="retweet" type="button" onclick="reset()" class="btn btn-sm btn-info"></@p.button>
+		<@p.button title="EQUIPMENT_MAINTENANCE_RESETTIME" permissionCode="EquipmentMaintenanceUpdate" iconCls="retweet" type="button" onclick="resetTime()" class="btn btn-sm btn-info"></@p.button>
+</center>
+	
+</@p.body>
+</div>

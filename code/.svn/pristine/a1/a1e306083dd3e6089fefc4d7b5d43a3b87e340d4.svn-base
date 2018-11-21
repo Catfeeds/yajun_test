@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm idValue=user.id class="inputxtDisabled"    permissionModule="USER">
+	<@p.formRow>
+		<@p.formColmd title="USER_ACCOUNT_NUMBER"    permissionCode="USER_ACCOUNT_NUMBER">
+			${user.account!}
+		</@p.formColmd>
+		<@p.formColmd title="REAL_NAME"   permissionCode="REAL_NAME">
+			  ${user.name!}
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_STATUS"   permissionCode="USER_STATUS">
+				<@p.input type="selectView" value=user.status options=options></@p.input>
+		</@p.formColmd>
+		<@p.formColmd title="USER_SEX"  permissionCode="USER_SEX">
+			<@p.input type="selectView"  options=sexOptions value=user.gender></@p.input>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_PHONE"  permissionCode="USER_PHONE">
+			 ${user.phone!}
+		</@p.formColmd>
+		<@p.formColmd title="USER_FAX"   permissionCode="USER_FAX">
+			${user.fax!}
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_MAIL"   permissionCode="USER_MAIL">
+			${user.email!}
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_ADDRESS" class="col-md-8"  permissionCode="USER_ADDRESS">
+			${user.address!}
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+ <script>
+$(function(){
+	$(" inputxtDisabled input,textarea").attr("readonly","true");
+});
+</script>  
+</body>
+</html>

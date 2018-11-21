@@ -1,0 +1,112 @@
+<script type="text/javascript">
+	$(".page-content").toggleClass("page-content");
+	var operateParam=new Object();
+	operateParam.id=0;
+	var operateParamRight=new Object();
+	operateParamRight.id=0;
+	var selectedOrg = 0;
+	var selectedNode = 0;
+	jQuery(function($) {
+		loadAviPathPartDiv();
+		$("#widget-collapse").click(function() {
+			if ($("#org_tab_left_body").is(":hidden")) {
+				$("#aviPathDetailTable").removeClass("widget-box-max");
+			} else {
+				$("#aviPathDetailTable").addClass("widget-box-max");
+			}
+		});
+ 		$("#myTab4 li").click(function() {
+ 			reLoadAviPathTree(operateParam.id, $(this).index());
+ 		});
+	});
+	
+	function loadAviPathPartDiv(){
+		$.ajax({
+	        url: '${baseUrl}/avi/path/part/listInput.do?',
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:false,
+	        data : {
+	        	currentPageId:"AviPathPartGridId",
+	        	toPorderAviPathId:"${toPorderAviPathId}"
+	        },
+	        success: function(html){
+        		$("#tabAviPathPart").html(html);
+	        }
+	    });
+	}
+	function reLoadAviPathTree(orgId, lindex) {
+		if (lindex == undefined) {
+			lindex = $("#myTab4 li.active").index();
+		}
+		operateParam.id = orgId;
+		switch (lindex) {
+		case 0: {
+			loadAviPathPartDiv();
+			$("#tabAviPathPart").show();
+			$("#tabAviPathParameter").empty();
+			$("#tabAviPathSip").empty();
+		}
+			break;
+		case 1: {
+			$("#tabAviPathPart").empty();
+			$("#tabAviPathParameter").show();
+			$("#tabAviPathSip").empty();
+			$.ajax({
+		        url: '${baseUrl}/avi/path/parameter/listInput.do?',
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:false,
+		        data : {
+		        	currentPageId:"AviPathParameterGridId",
+		        	toPorderAviPathId:"${toPorderAviPathId}"
+		        },
+		        success: function(html){
+	        		$("#tabAviPathParameter").html(html);
+		        }
+		    });
+		}
+			break;
+		case 2: {
+			$("#tabAviPathPart").empty();
+			$("#tabAviPathParameter").empty();
+			$("#tabAviPathSip").show();
+			$.ajax({
+		        url: '${baseUrl}/avi/path/sip/listInput.do?',
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:false,
+		        data : {
+		        	currentPageId:"AviPathSipGridId",
+		        	toPorderAviPathId:"${toPorderAviPathId}"
+		        },
+		        success: function(html){
+	        		$("#tabAviPathSip").html(html);
+		        }
+		    });
+		}
+			break;
+		default:
+			break;
+		}
+	}
+	
+</script>
+<div id="aviPathDetailTable" style="width: 100%;margin-left: 0px;margin-top: 15px;"  class="tabbable org_tab_right" >
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue"	id="myTab4" >
+		<li class="active"><a data-toggle="tab" href="#tabUser">关键件信息</a></li>
+		<li><a data-toggle="tab" href="#tabAvi" id="viewAviPathParameter">参数信息</a></li>
+		<li><a data-toggle="tab" href="#tabBom"id="viewAviPathSip">质检项信息</a></li>
+	</ul>
+	<div class="tab-content" >
+		<div id="tabAviPathPart" class="tab-pane in active"></div>
+		<div id="tabAviPathParameter" class="tab-pane"></div>
+		<div id="tabAviPathSip" class="tab-pane"></div>
+	</div>
+</div>

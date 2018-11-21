@@ -1,0 +1,36 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<@p.body title="EMPLOYEE_NO_LIST_TITLE" permissionModule="EMPLOYEE_NO" noBreadcrumbs="true">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EMPLOYEE_NO_NO" field="no"></@p.input>
+			<@p.input title="EMPLOYEE_NO_NAME" field="name" ></@p.input>
+			<@p.input title="EMPLOYEE_NO_SEX" field="sex" type="select" options=sexOptions></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+			<@p.button title="BTN_ADD" permissionCode="EmployeeNoAdd" iconCls="plus" url="${baseUrl}/tmEmployeeNo/addInput.do" type="add"  ></@p.button>
+			<@p.button title="BTN_UPDATE" permissionCode="EmployeeNoUpdate" iconCls="edit" url="${baseUrl}/tmEmployeeNo/updateInput.do" type="update"></@p.button>
+			<@p.button title="BTN_DIALOG_DELETE" permissionCode="EmployeeNoDelete" iconCls="trash" url="${baseUrl}/tmEmployeeNo/delete.do" type="delete" ></@p.button>
+			<@p.button title="BTN_IMPORT" permissionCode="EmployeeNoImport" onclick="importData();" iconCls="signin" />
+			<@p.button title="BTN_EXPORT" permissionCode="EmployeeNoExport" url="${baseUrl}/tmEmployeeNo/exportData.do" iconCls="upload-alt" type="down" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tmEmployeeNo/list.do" >
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="EMPLOYEE_NO_NO" field="no" permissionCode="EMPLOYEE_NO_NO"></@p.column>
+		<@p.column title="EMPLOYEE_NO_NAME" field="name" permissionCode="EMPLOYEE_NO_NAME" ></@p.column>
+		<@p.column title="EMPLOYEE_NO_SENIORITY" field="seniority" permissionCode="EMPLOYEE_NO_SENIORITY" ></@p.column>
+		<@p.column title="EMPLOYEE_NO_SEX" field="sex" permissionCode="EMPLOYEE_NO_SEX"  formatter="sexRead"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+	function sexRead(value){
+		return entryRenderer('GENDER', value);
+	}
+	function importData (){ 
+		var obj = new Object();
+		obj.templateUrl="${baseUrl}/tmEmployeeNo/exportTemplate.do";
+	    importFile("<@s.m code='BTN_IMPORT' />", "${baseUrl}/tmEmployeeNo/importData.do", "pageEmployeeNoId",obj);
+	}
+</script>
+

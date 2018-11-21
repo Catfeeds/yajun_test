@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="format-detection" content="telephone=no" />
+	<link rel="stylesheet" href="../../mui/css/mui.min.css" />
+	<script src="../../mui/js/mui.min.js"></script>
+	<script type="text/javascript"  src="../../mui/js/app.js"></script>
+	<script src="../../js/jquery-1.8.0.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+<body>
+	<div class="page-content">
+		<header class="mui-bar mui-bar-nav ">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">修改密码</h1>
+		</header>
+		<div class="page-content" style="margin:50px 5px 0px 5px;height: 100%;">
+			<form id="formId">
+				<input id="valid" name="id" type="hidden"/>
+				<input id="updateUser" name="updateUser" type="hidden"/>
+				<div class="title-form-group">
+					<input type="hidden" id="userId" name="userId" />
+					<div class="mui-input-row my-input-row">
+						<label class="edit-label-color" >原密码:</label>
+						<input type="text" title="原密码" placeholder="请输入旧的密码" name="oldPassword"/>
+					</div>
+					<div class="mui-input-row my-input-row">
+						<label class="edit-label-color" >新密码:</label>
+						<input type="text" title="新密码" id="newPassword" onchange="datatype(this.value,'newPassword','新密码')" placeholder="请输入新的密码" name="newPassword"/>
+					</div>
+					<div class="mui-input-row my-input-row">
+						<label class="edit-label-color" >确认密码:</label>
+						<input type="text" title="确认密码" id="affirmPassword" onchange="datatype(this.value,'newPassword','确认密码')"  placeholder="请再次输入新的密码" name="affirmPassword"/>
+					</div>
+				</div>
+			</form>
+
+			<ul class="mui-table-view" style="margin-top: 10px;">
+				<li class="mui-table-view-cell" style="text-align: center;" onclick="resetPwd()">
+					<a>提交更新</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+<script>
+$(function(){
+	var user = JSON.parse(app.localStorage("user"));
+	$("#userId").val(user.id);
+})
+ function resetPwd(){
+ 		var oldPassword;
+		var newPassword;
+		var affirmPassword;
+		var formDataAll = document.getElementById("formId");
+		for(var i=0;i<formDataAll.length;i++){
+		  if(formDataAll.elements[i].name!="" && formDataAll.elements[i].value=="" && formDataAll.elements[i].title){
+			  mui.toast(formDataAll.elements[i].title+"不能为空！",{ duration:'short', type:'div' });
+			  formDataAll.elements[i].focus();
+			  return ;
+		  }else{
+		  	 if(formDataAll.elements[i].name == "oldPassword"){
+				oldPassword = formDataAll.elements[i].value;
+			  }else if(formDataAll.elements[i].name == "newPassword"){
+				newPassword = formDataAll.elements[i].value;
+			  }else if(formDataAll.elements[i].name == "affirmPassword"){
+			  	affirmPassword=formDataAll.elements[i].value;
+			  }
+		  }
+		}
+		if (oldPassword == newPassword) {
+			mui.toast("新密码不能与原密码相同。",{ duration:'short', type:'div' })
+			$("#newPassword").focus();
+			return;
+		}else if(affirmPassword != newPassword){
+			mui.toast("新密码与确认密码不一致。",{ duration:'short', type:'div' })
+			$("#affirmPassword").focus();
+			return;
+		}
+		mui.confirm("确定需要更新密码吗?", "提示", ["取消", "确定"], function(result){
+			if(result.index === 1){
+				app.ajaxRequest({
+					url:'phoneMain/resetPwd.do',
+					data:$('#formId').serialize(),
+					callback:function(res){
+						mui.toast("执行成功。",{ duration:'short', type:'div' })
+						mui.back();
+					}
+				});
+			}
+		});
+ }
+function datatype(val,t_id,name){
+	var reg = /^\d{6,16}$/;
+	var r = val.match(reg);
+	if(r == null){
+		$('#'+t_id).focus();
+		mui.toast(name+":必须是6-16位的任意字符的",{ duration:'short', type:'div' })
+	}
+}
+</script>
+<style>
+	.page-content {
+		background: #FFFFFF;
+	}
+	.title-form-group {
+		border-radius: 5px;
+		margin: 0em 0em 3.5em 0em;
+		border: 0.5px solid #ccc;
+	}
+	.title-form-group label {
+		background: #F0F0F0;
+		border-radius: 5px;
+	}
+	.title-form-group div {
+		border-bottom: 1px solid #F2F2F2;
+	}
+	.edit-label-color {
+	 color: #0062cc;;
+	}
+	.nav-bth{
+		background: #FFFFFF;
+		height: 3.5em;
+		position: fixed;
+		bottom: 0;
+		width: 100%;
+		text-align: -webkit-center;
+		border-bottom: 1px solid #F0F0F0;
+		border-top: 1px solid #F0F0F0;
+	}
+	.nav-bth button{
+		height: 2.5em;
+		background: #007AFF;
+		color: #FFFFFF;
+		font-size: 14px;
+		border-radius: 10px;
+		padding: 5px;
+		margin-top: 9px;
+	}
+</style>
+</body>
+</html>

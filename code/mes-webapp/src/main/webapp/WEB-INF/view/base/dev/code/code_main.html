@@ -1,0 +1,158 @@
+<script type="text/javascript">
+	var operateParam=new Object();
+	operateParam.id=0;
+	var operateParamRight=new Object();
+	operateParamRight.id=0;
+
+	jQuery(function($) {
+		$("#widget-collapse").click(function() {
+			if ($("#table_list_body").is(":hidden")) {
+				$("#table_list_panel").removeClass("widget-box-min");
+				$("#code_gen_panel").removeClass("widget-box-max");
+				$("#table_list_body").show();
+			} else {
+				$("#table_list_panel").addClass("widget-box-min");
+				$("#code_gen_panel").addClass("widget-box-max");
+				$("#table_list_body").hide();
+			}
+		});
+ 		initTable();
+	});
+	
+	function initTable() {
+		loadTree();
+		$('#org_tree').treeview({
+			collapseIcon:"icon-caret-down",
+			expandIcon:"icon-caret-right",
+			data: getOrgTreeData(),
+			onNodeSelected: function(event, data) {
+				reLoadTree(data.id)
+			},
+			onNodeUnselected: function() {
+				initTable();
+			}
+		});
+	}
+	
+	function reLoadTree(orgId, lindex) {
+		if (lindex == undefined) {
+			lindex = $("#myTab4 li.active").index();
+		}
+		operateParam.id = orgId;
+		switch (lindex) {
+		case 0: {
+			$.ajax({
+		        url: '${baseUrl}/user/listOrgInput.do?orgnizationId='+orgId,
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:true,
+		        data : {},
+		        success: function(html){
+	        		$("#tabUser").html(html);
+		        }
+		    });
+		}
+			break;
+
+		case 1: {
+			$.ajax({
+		        url: '${baseUrl}/position/listInput.do?orgnizationId='+orgId,
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:true,
+		        data : {},
+		        success: function(html){
+	        		$("#tabPosition").html(html);
+		        }
+		    });
+		}
+			break;
+
+		case 2: {
+			$.ajax({
+		        url: '${baseUrl}/orgnization/listInput.do?parentId='+orgId+"&dimension="+operateParam.dimension,
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:true,
+		        data : {},
+		        success: function(html){
+	        		$("#tabOrgView").html(html);
+		        }
+		    });
+		}
+			break;
+
+		default:
+			alert(lindex);
+			break;
+		}
+	}
+	function loadTree() {
+		var dimensionId = $("#dimensionId").val();
+		operateParam.dimension = dimensionId;
+		reLoadTree(0);
+	}
+	
+	//=====bootstrap-treeview
+	function getOrgTreeData() {
+		var tree_data = {};
+		$.ajax({
+		    url: $("#baseUrl").val()+"/orgnization/listTree.do",
+		    cache: false,
+		    global: false,
+		    type: "GET",
+		    data: {
+				"dimension":$("#dimensionId").val()
+			},
+		    dataType: "json",
+		    async:false,
+		    success: function(data){
+		    	if(data!=null){
+		    		tree_data = data;
+		    	}else{
+		      	}
+		    }
+		});
+		return tree_data;
+	}
+</script>
+<@p.body title="CODEGEN_TITLE" noPermissionModule="true">
+<div id="table_list_panel" class="widget-box table_list_panel">
+	<div class="sidebar-collapse" id="widget-collapse">
+		<i class="icon-double-angle-left"></i><i class="icon-double-angle-right"></i>
+	</div>
+	<div class="widget-header header-color-blue2">
+		<h4 class="lighter smaller"><@s.m code='CODEGEN_TABLE_LIST' /></h4>
+	</div>
+
+	<div id="table_list_body" class="widget-body">
+		<div class="widget-main padding-8" style="position: relative;">
+			<div id="org_tree"></div>
+		</div>
+	</div>
+</div>
+<div id="code_gen_panel" class="tabbable code_gen_panel">
+	<ul class="nav nav-tabs padding-12 tab-color-blue background-blue"
+		id="myTab4">
+		<li class="active"><a data-toggle="tab" href="#tabCode"><@s.m
+				code='CODEGEN_GEN'/></a></li>
+
+		<li><a data-toggle="tab" href="#tabForm"><@s.m
+				code='CODEGEN_FORM_DESIGN'/></a></li>
+	</ul>
+
+	<div class="tab-content">
+		<div id="tabCode" class="tab-pane in active">
+		</div>
+
+		<div id="tabForm" class="tab-pane">
+		</div>
+	</div>
+</div>
+</@p.body>

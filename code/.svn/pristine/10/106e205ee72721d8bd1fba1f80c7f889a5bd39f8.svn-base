@@ -1,0 +1,89 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+
+function renderEnableStatus(value) {
+	return entryRenderer('ENABLE_STATUS', value);
+}
+
+function pause() {
+	var rows=getSelectedRows('dg${currentPageId}');
+    if(rows.length<1){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    if(rows.length!=1){
+	    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    if(rows[0].jobStatus != "PAUSE"){
+		ajaxRequest("${baseUrl}/job/pause.do", {
+			id:rows[0].id
+		}, function(result){
+			reloadTable('dg${currentPageId}');
+		});
+    }
+}
+function resume() {
+	var rows=getSelectedRows('dg${currentPageId}');
+    if(rows.length<1){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    if(rows.length!=1){
+	    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    if(rows[0].jobStatus=="PAUSE"){
+		ajaxRequest("${baseUrl}/job/resume.do", {
+			id:rows[0].id
+		}, function(result){
+			reloadTable('dg${currentPageId}');
+		});
+    }
+}
+
+function runImmediately() {
+	var rows=getSelectedRows('dg${currentPageId}');
+    if(rows.length<1){
+    	infoTip('<@s.m code="FRAME_NOT_CHOOSE_DATA" />');
+    	return;
+    }
+    if(rows.length!=1){
+	    infoTip('<@s.m code="SELECT_ONE_ONLY" />');
+    	return;
+    }
+    if(rows[0].jobStatus!="RUNNING") {
+		ajaxRequest("${baseUrl}/job/runImmediately.do",{
+			id:rows[0].id
+		})
+    }
+}
+</script>
+<@p.body title="JOB_LIST_TITLE"  noPermissionModule="true">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="ENABLE_STATUS" type="select" field="enableStatus" options=options ></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="BTN_UPDATE" permissionCode="JobEdit" iconCls="edit" url="${baseUrl}/job/updateInput.do" type="update"></@p.button>
+			<@p.button title="JOB_PAUSE" permissionCode="JobPause" iconCls="pause" onclick="pause();"></@p.button>
+			<@p.button title="JOB_RESUME" permissionCode="JobResume" iconCls="play" onclick="resume();"></@p.button>
+			<@p.button title="JOB_RUN_IMMEDIATELY" permissionCode="JobRunImmediately" iconCls="play" onclick="runImmediately();"></@p.button>
+			<@p.button title="JOB_LOG_VIEW" permissionCode="JobLogView" iconCls="eye-open" url="${baseUrl}/job/viewInput.do" type="view"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/job/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="JOB_NAME"  field="jobName"  ></@p.column>
+		<@p.column title="JOB_TYPE"  field="jobType"  ></@p.column>
+		<@p.column title="JOB_CRON_EXPRESSION"  field="cronExpression" ></@p.column>
+		<@p.column title="JOB_INSTANCE_LAST_EXECUTE_TIME"  field="runtimeLast" ></@p.column>
+		<@p.column title="JOB_INSTANCE_NEXT_EXECUTE_TIME"  field="runtimeNext" ></@p.column>
+		<@p.column title="JOB_STATUS"   field="jobStatus" ></@p.column>
+		<@p.column title="ENABLE_STATUS"   field="enableStatus" formatter="renderEnableStatus"></@p.column>
+		<@p.column title="JOB_RUN_TIMES"   field="runtimes"></@p.column>
+		<@p.column title="JOB_RUN_DURATION"   field="runDuration"></@p.column>
+		<@p.column title="JOB_NOTES"   field="jobMemo"></@p.column>
+	</@p.dataGrid>
+</@p.body>

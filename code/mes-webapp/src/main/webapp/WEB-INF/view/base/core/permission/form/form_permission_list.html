@@ -1,0 +1,30 @@
+<#include "../../../include/bootstrapTableCommons.html">
+
+<@p.body title="FORM_PERMISSION_LIST_TITILE" permissionModule="FORM_PERMISSION">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PERMISSION_MODULE" type="select" field="module"  options=moduleOptions  permissionCode="PERMISSION_MODULE"></@p.input>
+			<@p.input title="PERMISSION_CODE" field="code"  permissionCode="PERMISSION_CODE"></@p.input>
+			<@p.input title="PERMISSION_NAME" field="name"  permissionCode="PERMISSION_NAME"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar"> 
+			<@p.button title="BTN_ADD"  iconCls="plus"    url="${baseUrl}/formPermission/addInput.do" type="add"  ></@p.button>
+			<@p.button title="BTN_UPDATE"  iconCls="edit"   url="${baseUrl}/formPermission/updateInput.do" type="update"></@p.button>
+			<@p.button title="BTN_DELETE"   iconCls="trash" url="${baseUrl}/formPermission/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/formPermission/list.do" >
+		<@p.column title="Id" checkbox="true" field="Id" ></@p.column>
+		<@p.column title="PERMISSION_MODULE" field="module"  permissionCode="PERMISSION_MODULE"  formatter="renderFormPermission" ></@p.column>
+		<@p.column title="PERMISSION_NAME" field="name"  permissionCode="PERMISSION_NAME" ></@p.column>
+		<@p.column title="PERMISSION_CODE" field="code"  permissionCode="PERMISSION_CODE" ></@p.column>
+		<@p.column title="PERMISSION_DESCRIPTION" field="description"  permissionCode="PERMISSION_DESCRIPTION"  width="150"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<!-- inline scripts related to this page -->
+<script type="text/javascript">
+	function renderFormPermission(value) {
+		return entryRenderer('FORM_PERMISSION_MODULE', value);
+	}
+</script>

@@ -1,0 +1,88 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+
+<#include "../../../include/bootstrapTableCommons.html">
+
+<@p.body title='USER_SELECT_ROLE' permissionModule="PATH_ULOC_PARAMETER" noBreadcrumbs="true" >
+<input type="hidden" name ="tmPathUlocId" value="${tmPathUlocId!}"/>
+	<@p.searchPanel gridId="param_sett_gridId">
+		<@p.toolbar   id="tbparam_sett_gridId">
+			<@p.button title="BTN_DIALOG_ADD"     iconCls="plus" onclick="doAdd()"></@p.button>
+			<@p.button title="BTN_MOVE" permissionCode="PathUlocDelete" iconCls="trash" onclick="deleateParam();" type="button"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid  id="param_sett_gridId"  url="${baseUrl}/path/uloc/parameter/getPathUlocParamListData.do?${params!}" singleSelect=singleSelect>
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_EQUIPMENTNO" field="EQUIPMENTNO" permissionCode="PATH_ULOC_PARAMETER_EQUIPMENTNO"></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_EQUIPMENTNAME" field="EQUIPMENTNAME" permissionCode="PATH_ULOC_PARAMETER_EQUIPMENTNAME"></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_PARAMETERNAME" field="PARAMETERNAME" permissionCode="PATH_ULOC_PARAMETER_PARAMETERNAME"></@p.column>
+		<@p.column title="PATH_ULOC_PARAMETER_PARAMETEREXPLAIN" field="PARAMETEREXPLAIN" permissionCode="PATH_ULOC_PARAMETER_PARAMETEREXPLAIN"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+
+<script type="text/javascript">
+function deleateParam(){
+	var rowsData = getSelectedRows('param_sett_gridId');
+	debugger
+	if (!rowsData || rowsData.length == 0) {
+		infoTip(commons_msg.plsSelData);
+		return;
+	}
+	var ids = [];
+	$(rowsData).each(function(i,item){
+		ids.push(item.ID);
+	});
+	var url="${baseUrl}/path/uloc/parameter/delete.do?ids="+JSON.stringify(ids);
+	createConfirmWindow("删除","确定删除吗?",url, 'param_sett_gridId');
+}
+	function  doAdd() {
+		BootstrapDialog.show({
+			size : BootstrapDialog.SIZE_WIDE,
+			title : '<@s.m code="FRAME_NOT_CHOOSE_DATA" />',
+			message : function(dialog) {
+				var $message = $('<div></div>');
+				var pageToLoad = dialog.getData('pageToLoad');
+				$message.load(pageToLoad);
+
+				return $message;
+			},
+			buttons : [ {
+				label : commons_msg.btnConfirm,
+				cssClass : 'btn-primary',
+				action : function(dialogRef) {
+				    var rows=getSelectedRows('add_param_sett_gridId');
+					if (rows.length > 0) {
+						debugger
+					    var ids=[];
+						for(var i=0,c=rows.length;i<c;i++){
+							if(rows[i].ID!= null){
+								ids.push(rows[i].ID);
+							}
+						}
+						ajaxRequest('${baseUrl}/path/uloc/parameter/addPathUlocParam.do', {
+							'tmPathUlocIds' : JSON.stringify(ids),'tmPathUlocId':'${tmPathUlocId!}'
+						}, function() {
+							reloadTable('param_sett_gridId');
+							dialogRef.close();
+						});
+					
+					}else{
+						infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+					}
+
+				}
+			}, {
+				label : commons_msg.btnClose,
+				cssClass : 'btn-default',
+				action : function(dialogRef) {
+					dialogRef.close();
+				}
+			} ],
+			data : {
+				'pageToLoad' : '${baseUrl}/path/uloc/parameter/addParamsInput.do?tmPathUlocId=${tmPathUlocId!}&params=queryCondition[tmPathUlocId]=${tmPathUlocId!}'
+			}
+		});
+
+	}
+
+</script>

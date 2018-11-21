@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+<script type="text/javascript">
+$(function(){
+	var lang='${lang!}';
+	var params={};
+	if(lang=='en_US'){
+		params.lang='en';
+	}
+	$('.dateField').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd'});
+	});
+});
+function openChooseValueWin(target,url,code,name){
+	code=code?code:'code';
+	name=name?name:'name';
+	 showWindow({title:'<@s.m code='NO_CHOOSE_DATA'/>',url:'${baseUrl}/'+url+'/listSelect.do?currentPageId=ProcessSelect',callback:function(dialog){
+		 var iframe =  dialog.iframe.contentWindow;
+	     var selectedRows=iframe.getSelected('dgProcessSelect');	
+		 if(!selectedRows){return false;}
+		 $(target).val(selectedRows[0][code]+'-'+selectedRows[0][name]);
+	 }});
+}
+</script>
+</head>	
+<body> 
+	<@p.editFormMulti url="${baseUrl}/bpm/task/todo/completeTask.do" class="inputxt" noPermissionModule="true">
+	<input name="taskId" value="${taskId}" type="hidden" />
+	<#if (list?size > 8 && list?size < 16) >
+		<#assign coCC=2>
+	<#elseif (list ? size>16)>
+		<#assign coCC=3>
+	<#else>
+		<#assign coCC=1>
+	</#if>
+	
+	<@p.editTableMulti colCount=coCC>
+	<#list list as l>
+	<#if l.type.name=="textarea">
+		<#assign oneR="true">
+	<#else>
+		<#assign oneR="">
+	</#if>
+	<@p.editorNoLang title="${l.name!}"  oneRow=oneR>
+		<#if l.type.name=='string'>
+    	   <input id="${l.id!}" name="fp_${l.id}" class="inputxt" value="${l.value!}"  ${l.writable?string('',"disabled='disabled'")}   ${l.required?string("required='required'","")} />
+   	    <#elseif l.type.name=='date'>
+    	    <input type="text" name="fp_${l.id}" id="${l.id!}" class="dateField" value="${l.value!}" ${l.writable?string('',"disabled='disabled'")} ${l.required?string("required='required'","")} />
+   	    <#elseif l.type.name=='long'>
+    	    <input type="number" name="fp_${l.id}" id="${l.id!}" value="${l.value!}" ${l.required?string("required='required'","")} ${l.writable?string('',"disabled='disabled'")}/>
+   	    <#elseif l.type.name=='boolean'>
+			<select name="fp_${l.id}" id="${l.id!}"  ${l.required?string("required='required'","")} ${l.writable?string("","disabled='disabled'")}/>
+			 	   <option value="true" <#if l.value?? && l.value=='true'> selected='selected'</#if>>是 </option>
+			       <option value="false" <#if l.value?? && l.value=='false'> selected='selected'</#if>>否</option> 
+    	    </select>
+   	    <#elseif l.type.name=='enum'>
+    	    <select name="fp_${l.id}" id="${l.id!}"  ${l.required?string("required='required'","")} ${l.writable?string("","disabled='disabled'")}/>
+			<#list  enumOptions["enumOptions_"+l.id]?keys  as enumKey> 
+			      
+			       <option value="${enumKey}" <#if l.value?? && l.value==enumKey> selected='selected'</#if> >
+			              ${enumOptions["enumOptions_"+l.id][enumKey]} 
+			       </option>
+			       
+			</#list>
+    	    </select>
+   	    <#elseif l.type.name=='textarea'>
+    	    <textarea id="${l.id!}" name="fp_${l.id}" style="width: 68%" class="inputxt" ignore="ignore"  ${l.writable?string("","disabled='disabled'")} ${l.required?string("required='required'","")} >${l.value!}</textarea>
+   	    <#elseif l.type.name=='user'>
+	  	    <#if l.writable>
+  	    		<input  class="inputxt" readonly="readonly" id="${l.id!}" name="fp_${l.id}" ${l.required?string("required='required'","")} value="${l.value!}">
+    	    	<a href="#" class="linkbutton" plain="true" icon="magnifier" onClick="openChooseValueWin('#${l.id!}','user','account')" ><@s.m code="FRAME_CHOOSE" /></a>
+		    	<a href="#" class="linkbutton" plain="true" icon="icon-redo" onClick="frame_cleanSelect(this);"><@s.m code="FRAME_CLEAN" /></a>
+  	   		<#else>
+  	   			<input  class="inputxt" readonly="readonly" id="${l.id!}" name="fp_${l.id}" disabled="disabled" value="${l.value!}">
+  	   		</#if>
+   	    <#elseif l.type.name=='role'>
+	  	   	 <#if l.writable>
+	  	   	 	<input  class="inputxt" readonly="readonly" id="${l.id!}" name="fp_${l.id}" ${l.required?string("required='required'","")} value="${l.value!}">
+	    	    <a href="#" class="linkbutton" plain="true" icon="magnifier" onClick="openChooseValueWin('#${l.id!}','role')" ><@s.m code="FRAME_CHOOSE" /></a>
+			    <a href="#" class="linkbutton" plain="true" icon="icon-redo" onClick="frame_cleanSelect(this);"><@s.m code="FRAME_CLEAN" /></a>
+	  	     <#else> 
+	  	   		<input  class="inputxt" readonly="readonly" id="${l.id!}" name="fp_${l.id}" disabled="disabled" value="${l.value!}">    
+	   	    </#if>
+   	    </#if>
+	</@p.editorNoLang>
+				</#list>
+	</@p.editTableMulti>
+	</@p.editFormMulti>
+</body>
+</html>

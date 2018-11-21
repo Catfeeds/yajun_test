@@ -1,0 +1,38 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body  permissionModule="PART"  noBreadcrumbs="true">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PART_NO" field="no"></@p.input>
+			<@p.input title="PART_ENABLED"  field="enabled"  type="select" options=enabledOptions></@p.input>
+			<@p.input title="PART_NAME_CN" field="nameCn"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/equipmentMaterials/getPartList.do?tmEquipmentId="+"${tmEquipmentId}" singleSelect=singleSelect>
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PART_NO" field="no" permissionCode="PART_NO"></@p.column>
+		<@p.column title="PART_NAME_CN" field="nameCn" permissionCode="PART_NAME_CN"></@p.column>
+		<@p.column title="PART_NAME_CN_S" field="nameCnS" permissionCode="PART_NAME_CN_S"></@p.column>
+		<@p.column title="PART_NAME_EN" field="nameEn" permissionCode="PART_NAME_EN" ></@p.column>
+		<@p.column title="PART_NAME_EN_S" field="nameEnS" permissionCode="PART_NAME_EN_S"></@p.column>
+		<@p.column title="PART_TYPE" field="type" permissionCode="PART_TYPE"  formatter="renderType"></@p.column>
+		<@p.column title="PART_BATCH_QTY" field="batchQty" permissionCode="PART_BATCH_QTY"></@p.column>
+		<@p.column title="PART_BASE_UNIT" field="baseUnit" permissionCode="PART_BASE_UNIT" formatter="renderBaseUnit"></@p.column>
+		<@p.column title="PART_ENABLED" field="enabled" permissionCode="PART_ENABLED" formatter="renderGenderEnabled"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+
+function renderGenderEnabled(value) {
+	return entryRenderer('ENABLED', value);
+}
+
+function renderType(value){
+	return entryRenderer('PART_TYPE', value);
+}
+
+function renderBaseUnit(value){
+	return entryRenderer('BASE_UNIT', value);
+}
+
+</script>

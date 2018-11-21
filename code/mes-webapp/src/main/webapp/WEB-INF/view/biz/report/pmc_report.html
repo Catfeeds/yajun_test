@@ -1,0 +1,61 @@
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="PMC_LIST_TITLE"  noPermissionModule="true">
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="PMC_CLASSES" field="tmWorktime.shiftno" type="select" options=shiftnoOptions></@p.input>
+			<@p.input title="PMC_TIME_CLASS_GROUP" type="select" field="tmWorktime.tmClassManagerId"  options=classGroupOptions></@p.input>
+			<@p.input title="PMC_BEGIN_TIME" field="createTimeStart" id="createTimeStart"></@p.input>
+			<@p.input title="PMC_FINISH_TIME" field="createTimeEnd" id="createTimeEnd"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/maintenance_report/pmc_report_list.do" singleSelect="true">
+		<@p.column title="PMC_DATE" field="SCHEDUL_DATE" width="13%"  ></@p.column>
+		<!--<@p.column title="PMC_LINE" field="tmWorktime.tmLineId"  width="13%"  formatter="renderLine"></@p.column>-->
+		<@p.column title="PMC_CLASSES" field="WORK_SCHEDULE" width="13%"  formatter="renderShiftType"></@p.column>
+		<@p.column title="PMC_TIME_CLASS_GROUP" field="TM_CLASS_MANAGER_ID" width="13%"  formatter="renderClassManagers"></@p.column>
+		<@p.column title="PMC_DAYPLAN" field="DISPATCH_NUMBER" width="13%"></@p.column>
+		<@p.column title="PMC_REALITYPLAN" field="realityPlan" width="13%" ></@p.column>
+		<@p.column title="PMC_REALITYCOMPLETION" field="FINISH_NUMBER" width="13%" ></@p.column>
+		<@p.column title="PMC_DELAYTIME" field="delayTime" width="13%"></@p.column>
+		<@p.column stitle="实际可动率(%)" field="delayTime" width="13%"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderShiftType(value) {
+	return entryRenderer('SHIFT_TYPE', value);
+}
+function renderLine(value) {
+	var lines = eval('(' + '${lines!}' + ')');
+	for(var i in lines){
+		if(lines[i].code == value){
+			return lines[i].name;
+		}
+	}
+}
+function renderClassManagers(value) {
+	var classManagers = eval('(' + '${classManagers!}' + ')');
+	for(var i in classManagers){
+		if(classManagers[i].code == value){
+			return classManagers[i].name;
+		}
+	}
+}
+$('#createTimeStart').click(function(){
+	var createTimeEnd=$dp.$('createTimeEnd');
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		onpicked:function(){
+			createTimeEnd.click();
+		},
+		maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+	})
+});
+$('#createTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		minDate:'#F{$dp.$D(\'createTimeStart\')}'
+	})
+});
+</script>

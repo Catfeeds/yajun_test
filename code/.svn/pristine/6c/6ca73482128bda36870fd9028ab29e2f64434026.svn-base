@@ -1,0 +1,43 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+	function clickcallback(dialog){
+		var rowsData = getSelectedRows('dgPositionSelectGrid');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		$('#parentName').val(rowsData[0].name);
+		$('#parentId').val(rowsData[0].id);
+		dialog.close();
+	}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/position/update.do" idValue=position.id class="form-horizontal" permissionModule="POSITION">
+		<@p.formRow>
+			<@p.formColmd class="col-md-4" title="ORG_NAME"   permissionCode="ORG_NAME">
+				<input type="hidden" name="systemData" value="${position.systemData!}">
+				<input type="hidden" name="orgnizationId" value="${position.orgnizationId!}">
+				<input  value="${orgnization.name?if_exists}" readonly="readonly" class="txtreadonly">
+			</@p.formColmd>
+			<@p.formColmd class="col-md-4" title="POSITION_PARENT" permissionCode="POSITION_PARENT">
+		 	  <input name="parentId"  type="hidden" id="parentId" value="<#if parent??>${parent.id!}</#if>">
+			  <input  class="inputxt" readonly="readonly" id="parentName" value="<#if parent??>${parent.name!}</#if>" class="txtreadonly">
+			  <@p.select  title="POSITION_PARENT"   url="${baseUrl}/position/listSelect.do?orgnizationId=${orgnization.id}&currentPageId=PositionSelectGrid&singleSelect=true" callback="clickcallback"/>
+			</@p.formColmd>
+			<@p.formColmd class="col-md-4" title="POSITION_CODE"  permissionCode="POSITION_CODE">
+				  <input name="code" value="${position.code!}" readonly="readonly" class="txtreadonly">
+			</@p.formColmd>
+			<@p.formColmd class="col-md-4" title="POSITION_NAME" checktip="POSITION_NAME_CHECK_TIP" permissionCode="POSITION_NAME">
+				  <input name="name"  datatype="s2-50" value="${position.name!}" nullmsg='<@s.m code="POSITION_NAME_NULL" />'/>
+			</@p.formColmd>
+			<@p.formColmd class="col-md-4" title="POSITION_DESCRIPTION"   permissionCode="POSITION_DESCRIPTION">
+				<textarea name="description" ignore="ignore">${position.description!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

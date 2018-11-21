@@ -1,0 +1,110 @@
+<div class="sidebar" id="sidebar">
+	<script type="text/javascript">
+		try {
+			ace.settings.check('sidebar', 'fixed')
+		} catch (e) {
+		}
+		function openChildMenu(menuId) {
+			//
+			$.ajax({
+		        url: "${baseUrl}/menu.do",
+		        cache: false,
+		        global: false,
+		        type: "GET",
+		        dataType: "html",
+		        async:true,
+		        data : {"id":menuId},
+		        success: function(html){
+		        	var conLen = html.length;
+	        		$(".main-content").html(html);
+		        }
+		    });
+			if ($("#menu-toggler").hasClass("display")) {
+				$("#menu-toggler").removeClass("display")
+				$("#sidebar").removeClass("display");
+			}
+		}
+		function windowOpenChildMenu(menuId) {
+			window.open('${baseUrl}/menu.do?id='+menuId,'target','toolbar=no,menubar=no,scrollbars=yes, resizable=yes,location=no, status=no');
+		}
+	</script>
+
+	<div class="sidebar-shortcuts" id="sidebar-shortcuts">
+		<div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+			<button class="btn btn-success">
+				<i class="icon-signal"></i>
+			</button>
+
+			<button class="btn btn-info">
+				<i class="icon-pencil"></i>
+			</button>
+
+			<button class="btn btn-warning">
+				<i class="icon-group"></i>
+			</button>
+
+			<button class="btn btn-danger">
+				<i class="icon-cogs"></i>
+			</button>
+		</div>
+
+		<div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+			<span class="btn btn-success"></span> <span class="btn btn-info"></span>
+
+			<span class="btn btn-warning"></span> <span class="btn btn-danger"></span>
+		</div>
+	</div>
+	<!-- #sidebar-shortcuts -->
+
+	<ul class="nav nav-list">
+		<li><a href="${baseUrl}/main.do"> <i
+				class="icon-dashboard"></i> <span class="menu-text"> <@s.m code="INDEX_PAGE" /> </span>
+		</a></li>
+<#list menus as menu>
+	<#if menu.id != 200>
+		<li><a href="javascript:void(0);" class="dropdown-toggle"> <i
+				class="icon-${menu.iconCls}"></i> <span class="menu-text"> ${menu.name} </span> <b
+				class="arrow icon-angle-down"></b>
+		</a>
+			<ul class="submenu">
+				<#if (menu.children?size > 0)>
+			<#list menu.children as childMenu>
+				<#if childMenu.id != 8601>
+					<li >
+						<a href="javascript:void(0);" onclick="javascript:openChildMenu(${childMenu.id});"> <i
+							class="icon-double-angle-right"></i> <i	class="icon-${childMenu.iconCls}"></i> ${childMenu.name}
+						</a>
+					</li>
+					<#else>
+					<li >
+						<a href="javascript:void(0);" onclick="javascript:windowOpenChildMenu(${childMenu.id});"> <i
+							class="icon-double-angle-right"></i> <i	class="icon-${childMenu.iconCls}"></i> ${childMenu.name}
+						</a>
+					</li>
+				</#if>
+			</#list>
+				</#if>
+			</ul></li>
+		</#if>
+</#list>
+	</ul>
+	<!-- /.nav-list -->
+
+	<div class="sidebar-collapse" id="sidebar-collapse">
+		<i class="icon-double-angle-left" data-icon1="icon-double-angle-left"
+			data-icon2="icon-double-angle-right"></i>
+	</div>
+
+	<script type="text/javascript">
+		try {
+			ace.settings.check('sidebar', 'collapsed')
+		} catch (e) {
+		}
+		$(function() {
+			$(".submenu li").click(function() {
+				$(".submenu li.active").removeClass("active");
+				$(this).addClass("active");
+			});
+		});
+	</script>
+</div>

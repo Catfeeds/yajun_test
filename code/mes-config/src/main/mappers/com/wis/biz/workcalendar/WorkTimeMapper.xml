@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="WorkTimeMapper">
+
+	<select id="queryWorkTimeByParams" resultType="java.lang.String"  parameterType="java.util.HashMap" >
+		SELECT 
+		 	LISTAGG(tw.id,',')WITHIN GROUP (ORDER BY tw.ID) as id
+		  from tm_worktime tw 
+		 where 
+		 		tw.TM_PLANT_ID=#{tmPlantId} 
+		  and tw.TM_LINE_ID=#{tmLineId} 
+		  and SHIFTNO = #{shiftno}
+		 <if test="tmWorkshopId != null  and  tmWorkshopId!=''">
+		 	 and tw.TM_WORKSHOP_ID=#{tmWorkshopId}
+		 </if>
+		   and tw.WORK_DATE in 
+		   <foreach item="item" index="index" collection="workDates" open="(" separator="," close=")">
+		   		to_date( '${item}','yyyy-MM-dd')
+          </foreach> 
+	</select>
+	
+	<select  id="findByCondition" resultType="java.util.Map"  parameterType="java.util.HashMap">
+		SELECT
+			CONCAT(
+				DATE_FORMAT(a.WORK_DATE, '%Y-%m-%d'),
+				' ',
+				DATE_FORMAT(a.START_TIME, '%H:%m:%s')
+			) AS START_TIME,
+			CONCAT(
+				DATE_FORMAT(
+					CASE
+					WHEN a.START_TIME > a.END_TIME THEN
+						DATE_SUB(a.WORK_DATE, INTERVAL - 1 DAY)
+					ELSE
+						a.WORK_DATE
+					END,
+					'%Y-%m-%d'
+				),
+				' ',
+				DATE_FORMAT(a.END_TIME, '%H:%m:%s')
+			) AS END_TIME,
+			CONCAT(
+				DATE_FORMAT(a.WORK_DATE, '%Y-%m-%d'),
+				' ',
+				b.ENTRY_NAME
+			) AS COL
+		FROM
+			TM_WORKTIME a
+		LEFT JOIN TS_DICT_ENTRY b ON a.SHIFTNO = b.ENTRY_CODE
+		LEFT JOIN TS_DICT_TYPE c ON b.TYPE_ID = c.ID
+		WHERE
+			c.TYPE_CODE = 'SHIFT_TYPE'
+		AND (
+			CONCAT(
+				DATE_FORMAT(a.WORK_DATE, '%Y-%m-%d'),
+				' ',
+				DATE_FORMAT(a.START_TIME, '%H:%m:%s')
+			) BETWEEN #{startTime}
+			AND #{endTime}
+		)
+		OR (
+			CONCAT(
+				DATE_FORMAT(
+					CASE
+					WHEN a.START_TIME > a.END_TIME THEN
+						DATE_SUB(a.WORK_DATE, INTERVAL - 1 DAY)
+					ELSE
+						a.WORK_DATE
+					END,
+					'%Y-%m-%d'
+				),
+				' ',
+				DATE_FORMAT(a.END_TIME, '%H:%m:%s')
+			) BETWEEN #{startTime}
+			AND #{endTime}
+		)
+		<if test="isAll == '0'">
+			AND (
+				a.TM_LINE_ID IN (
+						SELECT
+							TM_LINE_ID
+						FROM
+							TS_ROLE_MASTER_SET
+						WHERE
+							TM_LINE_ID IS NOT NULL
+						AND TM_ULOC_ID IS NULL
+						AND ROLE_ID IN (
+							SELECT
+								ROLE_ID
+							FROM
+								TR_ROLE_USER
+							WHERE
+								USER_ID = #{currUser}
+						)
+				)
+				OR a.TM_LINE_ID IN (
+					SELECT
+						TM_LINE_ID
+					FROM
+						TM_LINE
+					WHERE
+						TM_WORKSHOP_ID IN (
+							SELECT
+								TM_WORKSHOP_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_WORKSHOP_ID IS NOT NULL
+							AND TM_LINE_ID IS NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+				OR a.TM_LINE_ID IN (
+					SELECT
+						TM_LINE_ID
+					FROM
+						TM_LINE
+					WHERE
+						TM_PLANT_ID IN (
+							SELECT
+								TM_PLANT_ID
+							FROM
+								TS_ROLE_MASTER_SET
+							WHERE
+								TM_PLANT_ID IS NOT NULL
+							AND TM_WORKSHOP_ID IS NULL
+							AND TM_LINE_ID IS NULL
+							AND TM_ULOC_ID IS NULL
+							AND ROLE_ID IN (
+								SELECT
+									ROLE_ID
+								FROM
+									TR_ROLE_USER
+								WHERE
+									USER_ID = #{currUser}
+							)
+						)
+				)
+			) 
+	    </if>
+	    ORDER BY CONCAT(
+				DATE_FORMAT(a.WORK_DATE, '%Y-%m-%d'),
+				' ',
+				DATE_FORMAT(a.START_TIME, '%H:%m:%s')
+			)
+		;
+	</select>
+	
+	<select id="findByWorkTime" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+	     select count(0) from tm_worktime t where to_char(t.START_TIME ,'yyyy-MM-dd') =#{startTime} and
+	     to_char(t.END_TIME ,'yyyy-MM-dd') =#{endTime}
+	     and t.TM_CLASS_MANAGER_ID=#{tmClassManagerId}
+	</select>
+	
+	<select id="thisWorkTime" resultType="com.wis.mes.master.workcalendar.entity.TmWorktime" parameterType="java.util.HashMap">
+	     select *
+		  from (select t.id as id,
+		               t.shiftno as shiftNo,
+		               ASSEMBLE_WORKTIME(t.work_date,t.start_time,t.end_time,'startTime',t.shiftno) startTime,
+                   	   ASSEMBLE_WORKTIME(t.work_date,t.start_time,t.end_time,'endTime',t.shiftno) endTime,
+		               t.enabled as enabled,
+		               t.plan_online_qty planOnlineQty, 
+		               t.tm_line_id as tmLineId,
+		               t.tm_plant_id as tmPlantId,
+		               t.tm_class_manager_id as tmClassManagerId,
+		               t.work_date as workDate
+		          from tm_worktime t) tab
+		 where rownum = 1
+		   and sysdate between to_date(tab.startTime, 'yyyy-MM-dd HH24:mi:ss') and
+		       to_date(tab.endTime, 'yyyy-MM-dd HH24:mi:ss')
+		   and enabled = 'ON'
+		   <if test="tmLineId != null and tmLineId != ''">
+			   and tmLineId = #{tmLineId}
+		   </if>
+	</select>
+	<select id="todayWorkTime" resultType="com.wis.mes.master.workcalendar.entity.TmWorktime" parameterType="java.util.HashMap">
+		select *
+		from tm_worktime 
+		where to_char(work_date,'yyyy-MM-dd') = to_char(sysdate, 'yyyy-MM-dd') 
+		and enabled = 'ON' 
+		<if test="tmLineId != null and tmLineId != ''">
+		 	and tm_line_id = #{tmLineId}
+	   </if>
+	   <if test="shiftNo != null and shiftNo != ''">
+		 	and shiftno = #{shiftNo}
+	   </if>
+	</select>
+	
+	<select id="getPageTmWorkSpecialDate">
+	
+	</select>
+	
+	<select id="getTmWorkSpecialDateCount">
+	
+	</select>
+	
+	<select id="breathingSpace" resultType="java.lang.String"  parameterType="java.util.HashMap" >
+		select LISTAGG(replace(t.start_time, ':', '') ||
+               replace(t.end_time, ':', '')) WITHIN GROUP(ORDER BY t.ID) as recessTime
+		 from tm_worktime_rest t
+		 where rownum &lt;= #{rownum}
+		   and tm_worktime_id = #{tmWorktimeId}
+		 group by tm_worktime_id
+	</select>
+	<select id="getNextFlight" resultType="com.wis.mes.master.workcalendar.entity.TmWorktime"  parameterType="java.util.HashMap" >
+			select *
+		  		from tm_worktime t
+			 where 
+			   rownum = 1
+			   and t.work_date = to_date(to_char(sysdate, 'yyyy-MM-dd'),'yyyy-MM-dd')
+			   and t.enabled = 'ON'
+			   <if test="shiftno != null and shiftno != ''">
+			   		and t.shiftno = #{shiftno}
+			   </if>
+			   <if test="tmLineId != null and tmLineId != ''">
+			  	 	and t.tm_line_id = #{tmLineId}
+			   </if>
+	</select>
+	<select id="getWorkTimeByDayAndShiftno" resultType="com.wis.mes.master.workcalendar.entity.TmWorktime"  parameterType="java.util.HashMap" >
+		 select *
+		  from (select t.id as id,
+		               t.shiftno as shiftNo,
+		               ASSEMBLE_WORKTIME(t.work_date,t.start_time,t.end_time,'startTime',t.shiftno) startTime,
+                       ASSEMBLE_WORKTIME(t.work_date,t.start_time,t.end_time,'endTime',t.shiftno) endTime,
+		               t.enabled as enabled,
+		               t.plan_online_qty planOnlineQty, 
+		               t.tm_line_id as tmLineId,
+		               t.tm_plant_id as tmPlantId,
+		               t.tm_class_manager_id as tmClassManagerId,
+		               t.work_date as workDate
+		          from tm_worktime t 
+		          left join tm_line line on line.id = t.tm_line_id
+		          where line.no = #{lineNo} and to_char(t.work_date, 'yyyy-MM-dd') = #{queryDay}
+		          ) tab
+		 where rownum = 1
+		   and shiftNo = #{shiftNo}
+		   and enabled = 'ON'
+	</select>
+	<select id="getDateWorkTime" resultType="com.wis.mes.master.workcalendar.entity.TmWorktime"  parameterType="java.util.HashMap" >
+	  select *
+		  from (select t.id as id,
+		               t.shiftno as shiftNo,
+		               ASSEMBLE_WORKTIME(t.work_date,t.start_time,t.end_time,'startTime',t.shiftno) startTime,
+                       ASSEMBLE_WORKTIME(t.work_date,t.start_time,t.end_time,'endTime',t.shiftno) endTime,
+		               t.enabled as enabled,
+		               t.plan_online_qty planOnlineQty, 
+		               t.tm_line_id as tmLineId,
+		               t.tm_plant_id as tmPlantId,
+		               t.tm_class_manager_id as tmClassManagerId,
+		               t.work_date as workDate
+		          from tm_worktime t 
+		          left join tm_line line on line.id = t.tm_line_id
+		          where line.no = #{lineNo}
+		          ) tab
+		 where rownum = 1
+		   and #{queryDate} between to_date(tab.startTime, 'yyyy-MM-dd HH24:mi:ss') and
+		       to_date(tab.endTime, 'yyyy-MM-dd HH24:mi:ss')
+		   and enabled = 'ON'
+	
+	</select>
+	
+	<select id="lastDayWordkTime" resultType="com.wis.mes.master.workcalendar.entity.TmWorktime"  parameterType="java.util.HashMap" >
+		select 　*   
+			from tm_worktime 
+			where 
+			rownum = 1
+			and work_date = to_date(to_char(sysdate-1, 'yyyy-MM-dd'),'yyyy-MM-dd') 
+			and enabled = 'ON' 
+			<if test="shiftno != null and shiftno != ''">
+		   		and shiftno = #{shiftno}
+		    </if>
+		    <if test="tmLineId != null and tmLineId != ''">
+		  	 	and tm_line_id = #{tmLineId}
+		    </if>
+	</select>
+</mapper>

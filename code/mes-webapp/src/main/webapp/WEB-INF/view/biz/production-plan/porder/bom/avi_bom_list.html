@@ -1,0 +1,57 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+function bomRenderPart(value,record) {
+	if(record.part&& record.part.no){
+		return record.part.no+ " - " + record.part.nameCn;
+	}
+	return value;
+}
+
+function bomRenderUloc(value,record) {
+	if(record.uloc && record.uloc.no){
+		return record.uloc.no+ " - " + record.uloc.name;
+	}
+	return value;
+}
+</script>
+<@p.body title="BOM_LIST_TITLE" permissionModule="AVI_BOM" noBreadcrumbs="true">
+<input type="text" value="${aviId!}" hidden="true"/>
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="AVI_BOM_ULOC" field="tmUlocId"  type="select" options=ulocOptions></@p.input>
+			<@p.input title="AVI_BOM_PART" field="tmPartId"  type="select" options=partOptions></@p.input>
+			<@p.input title="AVI_BOM_IS_TRACE" field="isTrac"  type="select" options=yesOrNoOptions></@p.input>
+			<@p.input title="AVI_BOM_ISBATCH_TRACE" field="isBatchTrac"  type="select" options=yesOrNoOptions></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="BOM_ADD" permissionCode="AviBomAdd" iconCls="plus" url="${baseUrl}/aviBom/addInput.do?aviId="+"${aviId}" type="add"  ></@p.button>
+			<@p.button title="BOM_UPDATE" permissionCode="AviBomUpdate" iconCls="edit" url="${baseUrl}/aviBom/updateInput.do?aviId="+"${aviId}" type="update"></@p.button>
+			<@p.button title="BOM_DELETE" permissionCode="AviBomDelete" iconCls="trash" url="${baseUrl}/aviBom/delete.do" type="delete"></@p.button>
+<!-- 			<@p.button title="BOM_IMPORT" permissionCode="AviBomImport" downName="BOM_IMPORT_NAME" onclick="importData();" iconCls="signin" /> -->
+			<@p.button title="BOM_EXPORT" permissionCode="AviBomExport" downName="PORDER_AVI_BOM_EXPORT_NAME" url="${baseUrl}/aviBom/exportData.do?aviId="+"${aviId!}"  iconCls="upload-alt" type="down" />
+<!-- 			<@p.button title="BOM_EXPORT_TEMPLTE" permissionCode="AviBomImport" iconCls="upload-alt"downName="PORDER_AVI_BOM_EXPORT_TEMPLATE_NAME"  url="${baseUrl}/aviBom/exportTemplate.do" type="down"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/aviBom/list.do?${params!}" >
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="BOM_DETAIL_ULOC" field="uloc.name" permissionCode="AVI_BOM_ULOC" formatter="bomRenderUloc"></@p.column>
+		<@p.column title="BOM_DETAIL_PART" field="part.nameCn" permissionCode="AVI_BOM_PART" formatter="bomRenderPart"></@p.column>
+		<@p.column title="BOM_DETAIL_QTY" field="qty" permissionCode="AVI_BOM_QTY" ></@p.column>
+		<@p.column title="BOM_DETAIL_SEQ" field="seq" permissionCode="AVI_BOM_SEQ" ></@p.column>
+		<@p.column title="BOM_DETAIL_ISTRAC" field="isTrac" permissionCode="AVI_BOM_ISTRAC" formatter="renderGender"></@p.column>
+		<@p.column title="BOM_DETAIL_ISBATCHTRAC" field="isBatchTrac" permissionCode="AVI_BOM_ISBATCHTRAC" formatter="renderGender"></@p.column>
+		<@p.column title="BOM_DETAIL_NOTE" field="note" permissionCode="AVI_BOM_NOTE" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+});
+function renderGender(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+
+function importData11(){ 
+    importFile("<@s.m code="BOM_IMPORT" />", "${baseUrl}/BOM_DETAIL/importData.do", "dg${currentPageId}","${baseUrl}/BOM_DETAIL/exportTemplate.do");
+}
+</script>

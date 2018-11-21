@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="DelegateConfigMapper" >
+
+  <select id="verify" resultType="int"  parameterType="java.util.HashMap" >
+  	SELECT COUNT(*) FROM WACT_DELEGATE_CONFIG WHERE MARK_FOR_DELETE=0 AND OWNER_ID=#{ownerId,jdbcType=INTEGER} 
+  	AND PROCESS_DEFINITION_ID=#{processDefinitionId,jdbcType=VARCHAR}
+  	AND ((START_TIME BETWEEN #{startTime,jdbcType=DATE} AND #{endTime,jdbcType=DATE})
+    OR (END_TIME BETWEEN #{startTime,jdbcType=DATE} AND #{endTime,jdbcType=DATE})  
+    OR (#{startTime,jdbcType=DATE} BETWEEN START_TIME AND END_TIME) 
+    OR (#{endTime,jdbcType=DATE} BETWEEN START_TIME AND END_TIME))
+  	<if test="id != null">
+		AND ID != #{id,jdbcType=INTEGER}
+	</if>
+  </select>
+</mapper>

@@ -1,0 +1,30 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<script type="text/javascript">
+
+function renderSysdata(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+</script>
+<@p.body title="TYPE_LIST_TITLE" permissionModule="DICT_TYPE">
+	<@p.searchPanel>
+		<@p.searchColumns>
+			<@p.input title="TYPE_CODE" field="code" permissionCode="TYPE_CODE"></@p.input>
+			<@p.input title="TYPE_NAME_CN" field="name" permissionCode="TYPE_NAME"></@p.input>
+			<@p.input title="TYPE_NAME_EN" field="enName" permissionCode="TYPE_NAME"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="TYPE_ADD" iconCls="plus" url="${baseUrl}/type/addInput.do" type="add"></@p.button>
+			<@p.button title="TYPE_UPDATE" iconCls="edit" url="${baseUrl}/type/updateInput.do" type="update"></@p.button>
+			<@p.button title="TYPE_DELETE" iconCls="trash" url="${baseUrl}/type/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	<@p.dataGrid url="${baseUrl}/type/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="TYPE_CODE" width="150"  field="code"    permissionCode="TYPE_CODE"></@p.column>
+		<@p.column title="TYPE_NAME_CN" width="200" field="name"    permissionCode="TYPE_NAME"></@p.column>
+		<@p.column title="TYPE_NAME_EN" width="200" field="enName"    permissionCode="TYPE_NAME"></@p.column>
+		<@p.column title="FRAME_SYSTEM_DATA" width="100"  field="systemData" formatter="renderSysdata"></@p.column>
+	</@p.dataGrid>
+</@p.body>

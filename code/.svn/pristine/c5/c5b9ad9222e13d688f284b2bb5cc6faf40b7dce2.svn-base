@@ -1,0 +1,36 @@
+<#include "../../include/bootstrapTableCommons.html">
+<@p.body title="PLANT_LIST_TITLE" permissionModule="CODE_RULE">
+	<@p.searchPanel >
+		<@p.searchColumns>
+		    <@p.input title="TM_CODE_RULE_LINE" field="tmLineId" type="select"  options=lineOption ></@p.input>
+		    <@p.input title="TM_CODE_RULE_DISTINGUISH" field="distinguish" type="select"  options=abnormalDistinguishOption ></@p.input>
+		    <@p.input title="TM_CODE_RULE_ABNORMAL_SOURCE" field="dataSource" type="select"  options=abnormalSourceOption ></@p.input>
+		    <@p.input title="TM_CODE_RULE_CODE_DESC" field="codeDesc"></@p.input>
+		    <@p.input title="TM_CODE_RULE_NEW_CODE" field="plcCode"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar> 
+			<@p.button title="TM_CODE_RULE_ADD" permissionCode="EquipmentStatusEdit" iconCls="plus" url="${baseUrl}/tmCodeRule/addInput.do" type="add" ></@p.button>
+			<@p.button title="TM_CODE_RULE_UPDATE" permissionCode="EquipmentStatusEdit" iconCls="edit" url="${baseUrl}/tmCodeRule/updateInput.do" type="update" ></@p.button>
+			<@p.button title="TM_CODE_RULE_DELEATE" permissionCode="EquipmentStatusEdit" iconCls="trash" url="${baseUrl}/tmCodeRule/delete.do" type="delete" ></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+	 <@p.dataGrid  url="${baseUrl}/tmCodeRule/list.do">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="TM_CODE_RULE_LINE" field="line.nameCn" permissionCode="NEW_CODE" ></@p.column>
+		<@p.column title="TM_CODE_RULE_DISTINGUISH" field="distinguish" permissionCode="NEW_CODE" formatter="renderDistinguish" ></@p.column>
+		<@p.column title="TM_CODE_RULE_ABNORMAL_SOURCE" field="dataSource" permissionCode="OLD_CODE" formatter="renderSource"  ></@p.column>
+		<@p.column title="TM_CODE_RULE_CODE" field="code" permissionCode="NOTE" ></@p.column>
+		<@p.column title="TM_CODE_RULE_CODE_DESC" field="codeDesc" permissionCode="CODE_DESC" ></@p.column>
+		<@p.column title="TM_CODE_RULE_NEW_CODE" field="plcCode" permissionCode="NOTE" ></@p.column>
+		<@p.column title="TM_CODE_RULE_NOTE" field="note" permissionCode="NOTE" ></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script>
+function renderDistinguish(value) {
+	return entryRenderer('ABNORMAL_DISTINGUISH', value);
+}
+function renderSource(value) {
+	return entryRenderer('ABNORMAL_SOURCE', value);
+}
+</script>

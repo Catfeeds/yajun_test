@@ -1,0 +1,2 @@
+var biz_msg = {
+}

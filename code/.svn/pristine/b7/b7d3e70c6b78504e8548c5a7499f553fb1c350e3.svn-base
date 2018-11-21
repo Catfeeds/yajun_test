@@ -1,0 +1,10 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../../include/bootstrapTableCommons.html">
+	<@p.body permissionModule="ROLE" noBreadcrumbs="true">
+		<@p.dataGrid url="${baseUrl}/role/list.do" >
+			<@p.column title="Id" checkbox="true" field="id" ></@p.column>
+			<@p.column title="ROLE_CODE" width="100"  field="code"   permissionCode="ROLE_CODE"></@p.column><#t/>
+			<@p.column title="ROLE_NAME" width="150" field="name"    permissionCode="ROLE_NAME"></@p.column><#t/>
+			<@p.column title="ROLE_DESC" width="200"  field="desc"    permissionCode="ROLE_DESC"></@p.column><#t/>
+		</@p.dataGrid>
+	</@p.body>

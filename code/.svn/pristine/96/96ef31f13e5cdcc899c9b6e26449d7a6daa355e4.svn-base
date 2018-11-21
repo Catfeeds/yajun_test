@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<div style="text-align: center">
+	<input type="text" value="${SN!}" readonly="readonly"  style="width: 500px;height: 50px;margin-bottom: 10px;"/>
+</div>
+<form action="${baseUrl}/onLine/doSaveNcGroupAndUntreated.do" class="form-horizontal" id="unqualityRecordNcForm">
+	<input type="hidden" name="recordId" value="${recordId}">
+	<input type="hidden" name="shiftNo" value="${shiftNo!}">
+	<input type="hidden" name="tmUlocId" value="${tmUlocId}">
+	<input type="hidden" name="currentUlocSeq" value="${currentUlocSeq}">
+	<input type="hidden" name="SN" value="${SN}" readonly="readonly" />
+<table  class="table table-bordered  table-hover table-condensed">
+	<thead><tr><td>检查项</td><td>不合格组</td><td>不合格代码</td><td>不合格类型</td></tr></thead>
+	<tbody>
+		<#if quality??>
+			<#list quality as bean>
+				<tr <#if '${bean.checkResult}' == "YES"> style="display: none"</#if>>
+					<td style="display: none">
+						<input type="text" name="checkResult" value="${bean.checkResult}" />
+						<input type="text" name="qualityCode" value="${bean.qualityCode}" />
+						<input type="text" name="qualityNote" value="${bean.qualityNote}" />
+						<input type="text" id="${bean_index}_qualityId" value="${bean.qualityId}">
+					</td>
+					<td>${bean.qualityCode}-${bean.qualityName}</td>
+					<td style="width: 200px;">
+						
+								<select onchange="chageNcGroup(this.value,${bean_index})" style="width: 200px;" name="ncGroup" id="ncGroup">
+								<option  value=''>-----请选择不合格组------</option>
+								<#if bean.ncGroup ??>
+									<#list bean.ncGroup as ncGroup>
+										<option value="${ncGroup.ncGroupId}" <#if bean.tmUlocSipnc ?? && bean.tmUlocSipnc.ncGroupId == ncGroup.ncGroupId >selected='selected'</#if>  >${ncGroup.ncGoup}</option>
+									</#list>
+								</#if>
+								</select>
+							
+					</td>
+					<td style="width: 200px;"><select id="${bean_index}_recordNc" name="ncCode" style="width: 200px;" onchange="recordNcChange(this,${bean_index})">
+						<option  value=''>-----请选择不合格代码------</option>
+						<#if bean.tmNcs ??>
+							<#list bean.tmNcs as tmNc>
+								<option value="${tmNc.id}" <#if bean.tmUlocSipnc ?? && bean.tmUlocSipnc.ncId == tmNc.id?string >selected='selected'</#if>  >${tmNc.no}-${tmNc.name}</option>
+							</#list>
+						</#if>
+						</select></td>
+					<td style="width: 200px;">
+						<input type="hidden" name="ncTypeInput"   style="width: 200px;"  id="${bean_index}_ncTypeInput" value="CONCESSION"/>
+						<select style="width: 200px;" id="${bean_index}_recordNcType"onchange="unQualitChangeNcType(this.value,${bean_index})">
+							<#if ncType??>
+								 <#list ncType as type>
+								 	   <option  value="${type.code}" <#if bean.tmUlocSipnc ?? && bean.tmUlocSipnc.type ?? && bean.tmUlocSipnc.type == type.code >selected='selected'</#if> >${type.name}</option>
+								 </#list>
+							</#if>
+					</select>
+					</td>
+				</tr>
+			</#list>
+		</#if>	
+	</tbody>
+</table>
+</form>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$(".close").hide();
+	$(".btn-default").hide();
+	$(".btn-primary").hide();
+	$(".form_required_flag").attr("style","position:relative;");
+	$(".inputxt").attr("style","width:200px;");
+	$(".bootstrap-dialog-footer-buttons").append("<button class='btn btn-primary' onclick='confirmRecordNc()'>确定</button>");
+})
+
+function confirmRecordNc(){
+	$("#unqualityRecordNcForm").submit();
+}
+function chageNcGroup(groupId,index){
+	var options="<option value=''>-------请选择-----------</option>";
+	if(groupId != ''){
+		$.ajax({
+			url:"${baseUrl}/onLine/getNcData.do",
+			type:"GET",
+			dataType:"json",
+			data:{
+				"tmNcGroupId":groupId
+			},
+			success:function(result){
+				$(result).each(function(i,item){
+					options+="<option value="+item.id+" data-type="+item.type+">"+item.no+"-"+item.name+"</option>";
+				});
+				$("#"+index+"_recordNc").html(options);
+			}
+		});
+	}else{
+		$("#"+index+"_recordNc").html(options);
+	}
+}
+function unQualitChangeNcType(obj,index){
+	$("#"+index+"_ncTypeInput").val(obj);
+}
+function chageNcGroupSipNc(groupId,index){
+	$.ajax({
+		url:"${baseUrl}/onLine/getNcDataFromUlocNc.do",
+		type:"GET",
+		dataType:"json",
+		data:{
+			"tmNcGroupId":groupId,
+			"qualityId":$("#"+index+"_qualityId").val(),
+			"ulocId":"${tmUlocId}"
+		},
+		success:function(result){
+			var options="<option value=''>-------请选择-----------</option>";
+			$(result).each(function(i,result){
+				var item = result.nc;
+				options+="<option value="+item.id+" data-type="+item.type+">"+item.no+"-"+item.name+"</option>";
+			});
+			$("#"+index+"_recordNc").html(options);
+		}
+	});
+}
+
+function recordNcChange(obj,index){
+	var type = $(obj).find("option:selected").attr("data-type");
+	if(type&&type!="null"){
+		$("#"+index+"_ncTypeInput").val(type);
+		$("#"+index+"_recordNcType").val(type);
+		$("#"+index+"_recordNcType").attr("disabled","disabled");
+	}else{
+		$("#"+index+"_recordNcType").show();
+		$("#"+index+"_recordNcType").removeAttr("disabled");
+	}
+}
+</script>

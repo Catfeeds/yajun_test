@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/path/uloc/part/graph_add.do" formId="partAddForm"  class="form-horizontal"   permissionModule="PATH_ULOC_PART">
+		<input type ="hidden" name="tmPathUlocId" id="add_tmPathUlocId"value="${tmPathUlocId!}"/>
+		<input type ="hidden" name="rectSeq" id="add_rectSeq" value="${rectSeq!}"/>
+		<input type="hidden" value="pathUlocPartSaveCallBack" id="callback">
+		<input type="hidden" value="checkUniqueData" id="beforeSubmit">
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_PART" permissionCode="PATH_ULOC_PART_ULOC_PART">
+				 <@p.input type="select" id="ulocPartId" datatype="*" field="tmPartId" options=partOptions ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_QTY" permissionCode="PATH_ULOC_PART_ULOC_QTY">
+				<input name="qty" class="inputxt" datatype="n" maxlength='16' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_PART_ULOC_SEQ" permissionCode="PATH_ULOC_PART_ULOC_SEQ">
+				<input name="seq" class="inputxt" datatype="n" maxlength='16' datatype="*"/>
+			</@p.formColmd>
+				<@p.formColmd title="PATH_ULOC_PART_ULOC_ISBATCHTRAC" permissionCode="PATH_ULOC_PART_ULOC_ISBATCHTRAC">
+				 <@p.input type="select" id="add_isBatchTrac"  field="isBatchTrac" datatype="*" options=yesOrNoOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+
+function checkUniqueData(){
+	if($("#add_tmPathUlocId").val()!=""){
+		return true;
+	}
+	var isHavePart = true;
+	$(partArray).each(function(i,partObject){
+		if(partObject.key == $("#add_rectSeq").val()){
+			$(partObject.value).each(function(i,item){
+				if(item.tmPartId == $("#ulocPartId").val()){
+					isHavePart= false;
+					return false;
+				}
+			});
+			return false;
+		}
+	});
+	if(!isHavePart){
+		errorTip("该站点该关键件已经存在，请检查!");
+	}
+	return isHavePart;
+}
+
+function pathUlocPartSaveCallBack(result){
+	if($("#add_tmPathUlocId").val()!=""){
+		return;
+	}
+	var partObject = {
+			key:"",
+			value:new Array()
+	};
+	var bean = result.data;
+	var isHaveKey = false;
+	$(partArray).each(function(i,partObject){
+		if(partObject.key == bean.rectSeq){
+			isHaveKey= true;
+			partObject.value.push(bean);
+			return false;
+		}
+	});
+	if(!isHaveKey){
+		partObject.key = bean.rectSeq;
+		partObject.value.push(bean);
+		partArray.push(partObject);
+	}	
+	$("#pathUlocPartTable").append("<tr id="+bean.id+"><td><input type='checkbox' id="+bean.id+" name='partCheckbox' onclick='clickPartCheckBox(this.id)'></td><td>"+bean.part.no+"-"+bean.part.nameCn+"</td><td>"+bean.qty+"</td><td>"+bean.seq+"</td><td>"+renderYesOrNo(bean.isBatchTrac)+"</td></tr>");		
+	$("#pathUlocPartTable").find("tr td").not("tr td:first-child").bind('click',function(){
+		clickTr($(this).parent("tr").attr("id"));
+	});
+}
+</script>
+

@@ -1,0 +1,14 @@
+<script>
+$(function(){
+	var callback =$("input[id='callback']").val();
+	var beforeSubmit=$("input[id='beforeSubmit']").val();
+	var beforeCheck=$("input[id='beforeCheck']").val();
+	//if(typeof beforeSubmit == "undefined"){
+		//initValidForm(null,callback);
+	//}else{
+		initValidForm(beforeCheck,beforeSubmit,callback);
+	//}
+	$(".modal-dialog .modal-content .modal-body").addClass("edit-dialog-modal-body");
+});
+</script>
+<script src="${baseUrl}/res/js/editor.js"></script>

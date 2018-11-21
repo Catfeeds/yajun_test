@@ -1,0 +1,40 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html">
+</head>	
+<#if lang="zh_CN">
+<#assign title="TYPE_NAME_CN">
+<#assign typename="${entry.type.name!}">
+<#else>
+<#assign title="TYPE_NAME_EN">
+<#assign typename="${entry.type.enName!}">
+</#if>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/entry/update.do" idValue=entry.id class="form-horizontal"  permissionModule="DICT_ENTRY">
+		<@p.formRow>
+			<@p.formColmd title="${title}"  checktip="TYPE_SELECT"    permissionCode="TYPE_NAME">
+				  <input type="hidden" name="systemData" value="${entry.systemData!}">
+			 	  <input name="type.id"  type="hidden" id="typeId" value="${entry.type.id}">
+				  <input name="type.name" class="inputxt" readonly="readonly" value="${typename}" id="typeName" nullmsg='<@s.m code="TYPE_SELECT" />'>
+			</@p.formColmd>
+			<@p.formColmd title="ENTRY_CODE"  checktip="ENTRY_CODE_CHECK_TIP"  permissionCode="ENTRY_CODE" >
+				<input name="code" ajaxurl="" class="inputxt" value="${entry.code}"  nullmsg='<@s.m code="ENTRY_CODE_NULL_TIP" />' readonly="readonly">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ENTRY_NAME_CN"  permissionCode="ENTRY_NAME" >
+				  <input name="name" class="inputxt" value="${entry.name}" datatype="*1-128">
+			</@p.formColmd>
+			<@p.formColmd title="ENTRY_NAME_EN"  permissionCode="ENTRY_NAME" >
+				  <input name="enName" class="inputxt" value="${entry.enName}" datatype="*1-128">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="ENTRY_SORT"    permissionCode="ENTRY_SORT">
+				  <input name="sortNo" class="inputxt" value="${entry.sortNo!}"   datatype="n0-3" ignore="ignore">
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

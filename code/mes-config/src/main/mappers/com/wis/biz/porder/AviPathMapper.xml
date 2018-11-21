@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="AviPathMapper">
+	<select id="selectNotOfflineDataByAviId" resultType="java.util.HashMap" parameterType ="java.lang.Integer" >
+		SELECT 
+			a.seq as seq,
+			a.ID as id,
+			a.TM_ULOC_ID as tmUlocId,
+			IFNULL(a.IS_ONLINE,"") as isOnline,
+			IFNULL(b.`NO`,"") as ulocNo,
+			IFNULL(b.NAME,"") as ulocName,	
+			a.PARENT_ID as parentId,
+			IFNULL(a.IS_OFFLINE,"") as isOffline
+		FROM 
+			to_porder_avi_path a 
+		LEFT JOIN 
+			tm_uloc b ON a.TM_ULOC_ID = b.ID
+       WHERE 1=1
+	      	   and a.TO_PORDER_AVI_ID = #{aviId}
+			    and a.IS_ONLINE !='OFFLINE'
+      	order by id asc;
+	</select>
+	
+	<!--查询参数列表  -->
+	<select id="getParameterPageResult" resultType="com.wis.basis.configuration.entity.TsParameter" parameterType="java.util.HashMap">
+		SELECT
+			a.id as id,
+			a.`CODE` as code,
+			a.DEFAULT_VALUE as defaultValue,
+			a.`NAME` as name,
+			a.NOTE as note,
+			a.REGULAR_EXPRESSION as regularExpression,
+			a.VARIUABLE_NAME as variuableName
+		FROM
+			ts_parameter a
+		LEFT JOIN tm_equipment_param b ON a.ID = b.TS_PARAMETER_ID
+		LEFT JOIN tm_equipment c ON b.TM_EQUIPMENT_ID = c.ID
+		LEFT JOIN to_porder_avi_path d ON d.TM_ULOC_ID = c.TM_ULOC_ID
+		WHERE
+			d.ID=#{toPorderAviPathId} AND c.ENABLED='ON'
+			<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			AND a.ID NOT IN(SELECT q.TS_PARAMETER_ID from to_porder_avi_path_parameter q  WHERE q.TO_PORDER_AVI_PATH_ID =#{toPorderAviPathId})
+			LIMIT #{firstRow}, #{pageSize}
+	</select>
+	<!--查询参数列表Count  -->
+	<select id="getParameterCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			ts_parameter a
+		LEFT JOIN tm_equipment_param b ON a.ID = b.TS_PARAMETER_ID
+		LEFT JOIN tm_equipment c ON b.TM_EQUIPMENT_ID = c.ID
+		LEFT JOIN to_porder_avi_path d ON d.TM_ULOC_ID = c.TM_ULOC_ID
+		WHERE
+				d.ID=#{toPorderAviPathId} AND c.ENABLED='ON'
+			<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			AND a.ID NOT IN(SELECT q.TS_PARAMETER_ID from to_porder_avi_path_parameter q  WHERE q.TO_PORDER_AVI_PATH_ID =#{toPorderAviPathId})
+	</select>
+		<!-- 查询质检项 Count-->
+	<select id="getEquipmentAndUlocParameterCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT  
+			count(*)
+		FROM(
+			SELECT
+				a.*
+			FROM
+				ts_parameter a
+			LEFT JOIN tm_equipment_param b ON b.TS_PARAMETER_ID = a.ID
+			LEFT JOIN tm_equipment c ON b.TM_EQUIPMENT_ID = c.ID
+			LEFT JOIN to_porder_avi_path d ON d.TM_ULOC_ID = c.TM_ULOC_ID
+			WHERE d.ID = #{toPorderAviPathId} AND b.TYPE='QUALITY' AND c.ENABLED='ON'
+			<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  to_porder_avi_path_sip h  WHERE h.to_porder_avi_path_id =#{toPorderAviPathId})
+		UNION	
+			SELECT a.*
+		FROM ts_parameter a
+		LEFT JOIN tm_uloc_sip b ON b.TS_PARAMETER_ID = a.ID
+		LEFT JOIN to_porder_avi_path d ON b.TM_ULOC_ID = d.TM_ULOC_ID
+		WHERE	d.ID = #{toPorderAviPathId} AND b.IS_EXAMINE !='YES'
+		<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  to_porder_avi_path_sip h  WHERE h.to_porder_avi_path_id =#{toPorderAviPathId})
+		)tab
+	</select>
+	
+	<!-- 查询质检项 -->
+	<select id="getEquipmentAndUlocParameter" resultType="com.wis.basis.configuration.entity.TsParameter" parameterType="java.util.HashMap">
+		SELECT  
+			tab.id as id,
+			tab.code as code,
+			tab.defaultValue as defaultValue,
+			tab.name as name,
+			tab.note as note,
+			tab.regularExpression as regularExpression,
+			tab.variuableName as variuableName
+		FROM(
+			SELECT
+				a.id as id,
+				a.`CODE` as code,
+				a.DEFAULT_VALUE as defaultValue,
+				a.`NAME` as name,
+				a.NOTE as note,
+				a.REGULAR_EXPRESSION as regularExpression,
+				a.VARIUABLE_NAME as variuableName
+			FROM
+				ts_parameter a
+			LEFT JOIN tm_equipment_param b ON b.TS_PARAMETER_ID = a.ID
+			LEFT JOIN tm_equipment c ON b.TM_EQUIPMENT_ID = c.ID
+			LEFT JOIN to_porder_avi_path d ON d.TM_ULOC_ID = c.TM_ULOC_ID
+			WHERE d.ID = #{toPorderAviPathId} AND b.TYPE='QUALITY' AND c.ENABLED='ON'
+			<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  to_porder_avi_path_sip h  WHERE h.to_porder_avi_path_id =#{toPorderAviPathId})
+		UNION 	
+			SELECT 
+				a.id as id,
+				a.`CODE` as code,
+				a.DEFAULT_VALUE as defaultValue,
+				a.`NAME` as name,
+				a.NOTE as note,
+				a.REGULAR_EXPRESSION as regularExpression,
+				a.VARIUABLE_NAME as variuableName
+		FROM ts_parameter a
+		LEFT JOIN tm_uloc_sip b ON b.TS_PARAMETER_ID = a.ID
+		LEFT JOIN to_porder_avi_path d ON b.TM_ULOC_ID = d.TM_ULOC_ID
+		WHERE	d.ID = #{toPorderAviPathId} AND b.IS_EXAMINE !='YES'
+		<if test="code !=null and code !='' ">
+				AND a.`CODE` LIKE CONCAT('%',#{code},'%')
+			</if>
+			<if test="name !=null and name!='' ">
+				AND a.`NAME` LIKE CONCAT('%',#{name},'%')
+			</if>
+			AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  to_porder_avi_path_sip h  WHERE h.to_porder_avi_path_id =#{toPorderAviPathId})
+		)tab
+		LIMIT #{firstRow}, #{pageSize}
+	</select>
+	<!-- 查询必检项-->
+	<select id="getSipParameterExamine" resultType="com.wis.basis.configuration.entity.TsParameter" parameterType="java.util.HashMap">
+		SELECT 
+			a.* 
+		FROM 
+			ts_parameter a
+			LEFT JOIN tm_uloc_sip b ON a.ID = b.TS_PARAMETER_ID
+			LEFT JOIN to_porder_avi_path c ON b.TM_ULOC_ID = c.TM_ULOC_ID
+		WHERE 
+			c.ID =#{toPorderAviPathId} 
+			AND b.IS_EXAMINE ='YES'
+			<if test="notIN !=null and notIN =='YES'">
+			AND a.ID NOT IN(SELECT h.TS_PARAMETER_ID FROM  to_porder_avi_path_sip h  WHERE h.to_porder_avi_path_id =#{toPorderAviPathId})
+			</if>
+	</select>
+	<!--删除生产序列工艺路径下的信息  -->
+	<delete id="deletePathUlocChilds" parameterType="java.util.HashMap">
+		DELETE FROM tm_path_uloc_part WHERE tm_path_uloc_id IN ${tmPathUlocIds};
+		DELETE FROM tm_path_uloc_parameter WHERE tm_path_uloc_id IN ${tmPathUlocIds};
+		DELETE FROM tm_path_uloc_sip WHERE tm_path_uloc_id IN ${tmPathUlocIds};
+	</delete>
+	
+	<select id="getLineId" resultType="java.lang.Integer" parameterType="java.util.HashMap">	
+		SELECT 	
+			b.TM_LINE_ID tmLineId
+		FROM 
+			tm_path_uloc a 
+		LEFT JOIN tm_uloc b ON a.TM_ULOC_ID = b.ID
+		WHERE a.TM_PATH_ID =#{tmPathId} 
+		<if test="isOnline !=null and isOnline !='' ">
+		AND a.IS_ONLINE= #{isOnline}
+		</if>
+		ORDER BY a.SEQ ASC LIMIT 0,1;
+	</select>
+</mapper>

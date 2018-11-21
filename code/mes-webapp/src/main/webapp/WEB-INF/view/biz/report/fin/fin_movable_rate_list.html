@@ -1,0 +1,232 @@
+<#include "../../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>翅片-可动率</title>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<style type="text/css">
+	.divC{
+		background-color: #f3f3f3;
+	}
+	.erengyTbodyDiv::-webkit-scrollbar-thumb { background-color: #f3f3f3;}
+	table,table tr th, table tr td { border:1px solid #ccc; }
+	.tdC{
+		text-align: -webkit-center;
+	}
+	.trc{
+	    text-align: -webkit-center;
+	    height: 30px;
+	   }
+</style>
+<script type="text/javascript">
+ $(function(){
+	 initTime();
+	 showReport("1");
+	 document.getElementById('nameShow').innerHTML='白班';
+}); 
+function initTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month);
+	$("#createTimeEnd").val(endTime);
+	date = new Date();
+	var startTime = date.getFullYear()+"-"+caseLessTen(month);
+	$("#createTimeStart").val(startTime);
+}
+function caseLessTen(num){
+	if(num<10){
+		return '0'+num;
+	}else {
+		return num;
+	}
+}
+function showReport(shiftNo) {
+	var startTime = $("#createTimeStart").val();
+	var date = new Date();
+	if (startTime == null || startTime == "") {
+		startTime = date.getFullYear() + "-" +date.getMonth() + "-" + date.getDate();
+	}
+	var endTime = $("#createTimeEnd").val();
+	if (endTime == null || endTime == "") {
+		endTime = date.getFullYear() + "-" + (parseInt(date.getMonth()) + parseInt(1)) + "-" + date.getDate();
+	}
+	$.ajax({
+		url:"${baseUrl}/finMovableRate/getFinMovableRateInfo.do",
+		type:"GET",
+		data:{
+			"shiftNo":shiftNo,
+			"createTimeStart":startTime,
+			"createTimeEnd":endTime
+		},
+		dataType:"json",
+		success:function(result){
+			dateShiftShow(result, shiftNo);
+		 }
+	});
+}
+	function dateShiftShow(result, shiftNo){
+		if(null != result && result.length > 0) {
+			var tableShow = "<tr class='trc'><td id='0'>星期日</td><td id='1'>星期一</td><td id='2'>星期二</td><td id='3'>星期三</td><td id='4'>星期四</td><td id='5'>星期五</td><td id='6'>星期六</td></tr>";
+			var dateTr="";
+			var spiltTd=0;
+			
+			var dateShow = eval(result[0].dateShow);
+			if (result.length > 0) {
+				var weekShow = eval(result[0].weekShow)[0];
+				//计算出前面隔几个td
+				if(weekShow == "星期日") {
+					spiltTd = 0;
+				} else if (weekShow == "星期一") {
+					spiltTd = 1;
+				} else if (weekShow == "星期二") {
+					spiltTd = 2;
+				} else if (weekShow == "星期三") {
+					spiltTd = 3;
+				} else if (weekShow == "星期四") {
+					spiltTd = 4;
+				} else if (weekShow == "星期五") {
+					spiltTd = 5;
+				} else if (weekShow == "星期六") {
+					spiltTd = 6;
+				}
+				//根据日期显示所有tr
+				for(var i=0; i<dateShow.length; i++) {
+					if(parseInt(spiltTd) < 7 && spiltTd != 0 && i==0) {
+						for(var j=0; j<spiltTd; j++) {
+							dateTr+="<td></td>";
+						}
+					} 
+					var showDay = parseInt(i) + parseInt(1);
+					dateTr+="<td class='tdC'><span style='line-height: 30px;'>"+ dateShow[i] +" </span><div id='shiftReport"+i+"' style='width:17rem;height: 8rem;'></div></td>";
+					if ((parseInt(spiltTd) + parseInt(1) + parseInt(i))%7 == 0) {
+						tableShow+= "<tr>" + dateTr +"</tr>";
+							dateTr="";
+						    spiltTd = parseInt(spiltTd) + parseInt(7);
+					}
+					if(((i == (parseInt(dateShow.length) - parseInt(1))) && ((parseInt(spiltTd) + parseInt(1) + parseInt(i))%7 != 0))  || ((i == (parseInt(dateShow.length) - parseInt(1))) && dateShow.length < 7)) {
+						tableShow+= "<tr>" + dateTr +"</tr>";
+						dateTr="";
+					}
+		 		}
+			}
+			$("#dateShiftShowDetails").html(tableShow);
+			lineShow(result, shiftNo);
+		}
+	}
+	function lineShow(result,shiftNo) {
+		for(var j=0; j<result.length; j++) {
+			var myChart = echarts.init(document.getElementById("shiftReport" + j));
+			myChart.showLoading();
+			var runRateShow = "";
+			if (shiftNo == "1") {
+				runRateShow = "[" + eval(result[0].whiteRealRunRateShow)[j] + "]";
+			} else {
+				runRateShow = "[" +  eval(result[0].nightRealRunRateShow)[j] + "]";
+			}
+			var xTime = "[" +  eval(result[0].allTimeShow)[j] + "]";
+			option = {
+					grid: {
+				        left: '0%',
+				        right: '0%',
+				        top:"5%",
+				        bottom: '10%',
+				        containLabel: true
+				    },
+					xAxis: {
+				        type: 'category',
+				        show:true
+				    },
+				    yAxis: {
+				        type: 'value',
+				        show:true,
+				        max:120,
+				        min:0,
+				        /* max:function(value) {
+				        	var valMax = 0;
+				        	if(value.max==0){
+				        		valMax=120;
+				        	}
+			                return valMax;
+			            }, */ 
+			            axisTick:{
+			                show:false,                         
+			            },
+			            axisLabel: {
+			                show: true,
+			                textStyle: {
+			                    fontSize:'8px'
+			                }
+			            },
+			            /* axisLine:{
+			                show:true,
+			                lineStyle:{color:'#ccc'}
+			            }, */
+			            splitNumber:6
+				    },
+				     grids:{
+				        show: true,
+				        borderWidth: 0,
+				        backgroundColor: '#fff',
+				        shadowColor: 'rgba(0, 0, 0, 0.3)',
+				        shadowBlur: 2
+				    },
+				    series: [{
+				        data: eval(runRateShow),
+				        type: 'line',
+				         showSymbol: false,
+				         smooth:true
+				    }
+				    ]
+				};
+			myChart.hideLoading();
+			myChart.setOption(option);
+		}
+	}
+	function whiteSearch() {
+		showReport("1");
+		document.getElementById('nameShow').innerHTML='白班';
+	}
+	function nightSearch() {
+		showReport("2");
+		document.getElementById('nameShow').innerHTML='晚班';
+	}
+</script>
+</head>
+
+<body>
+ 	<div class="page-content" style="width: 98%; overflow:auto; ">
+ 	<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="REPORT_MONTH" id="createTimeStart" field="createTimeStart"></@p.input>
+			<input name="createTimeEnd" type="hidden" id="createTimeEnd" />
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				 <a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="whiteSearch();"><span class="icon-search">白班</a>
+				 &nbsp;&nbsp;<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="nightSearch();"><span class="icon-search">晚班</a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div id="nameShow" style="font-weight:bold;font-size:20px;"></div>
+	<div class="report-panel">
+		<table id="dateShiftShowDetails" border="1px" style="width: 100rem;height: 40rem;"></table>
+	</div>
+</div>
+
+<script type="text/javascript">
+$('#createTimeStart').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM'
+	})
+});
+/* $('#createTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM',
+		minDate:'#F{$dp.$D(\'createTimeStart\')}'
+	})
+}); */
+</script>
+</body>
+</html>

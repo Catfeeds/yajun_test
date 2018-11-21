@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<script type="text/javascript">
+function regionMarkChange(val){
+	ajaxRequest("${baseUrl}/metalPlate/findBoardManageInfo.do", {regionMark:val}, function(res){
+		$("#machineTags").val(res.data.tmEquipmentIds);
+		$("#stepNumber").val(res.data.stepNumber);
+		$("#machineTagNames").val(res.data.tmEquipmentNames);
+		}, false)
+}
+function batchCapBlur(){
+	var batchNumber = $("#batchNumber").val();
+	if(batchNumber!=""){
+		var batchCap = $("#batchCap").val();
+		var value = parseInt(batchCap)/parseInt(batchNumber);
+		if(!isInteger(value)){
+			infoTip("<@s.m code='METALPLATE_BATCHCAP_CHECK'/>");
+		}
+	}
+}
+function checkValue(){
+	var isSubmit = true;
+	var batchNumber = $("#batchNumber").val();
+	if(batchNumber!=""){
+		var batchCap = $("#batchCap").val();
+		var value = parseInt(batchCap)/parseInt(batchNumber);
+		if(!isInteger(value)){
+			infoTip("<@s.m code='METALPLATE_BATCHCAP_CHECK'/>");
+			isSubmit=false;
+			return false;
+		}
+	}
+	var machiningSurface=$("#machiningSurface").val();
+	if(machiningSurface){
+		$.ajax({
+			data:{param:machiningSurface},
+			url:"${baseUrl}/metalPlate/checkMachiningSurface.do",
+			dataType : 'json', 
+			async:false,
+			success : function(result) { 
+				if(result.status == "n") {
+					if(result.info){
+						errorTip(result.info);
+						isSubmit=false;
+						return false;
+					}
+				}
+			},
+			error : function(result, status) {}
+		});
+	}
+	return isSubmit;
+}
+function isInteger(obj) { return Math.floor(obj) === obj}
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/metalPlate/add.do" class="form-horizontal"   permissionModule="SHEET_METAL_MATERIAL">
+		<input type="hidden" id="beforeSubmit" value="checkValue">
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_MODELTYPE" permissionCode="MODEL_TYPE">
+				<@p.input type="select" field="modelType" options=smModelType datatype="*" ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_PLACETYPE" permissionCode="PLACE_TYPE">
+				<@p.input type="select" field="placeType" options=smPlaceType></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_MATERIALDRAWINGNO" permissionCode="MATERIAL_DRAWING_NO">
+				<input id="materialDrawingNo" name="materialDrawingNo" class="inputxt" datatype="*"  maxlength='15' />
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_PROGRESSION" permissionCode="PROGRESSION">
+				<@p.input type="select" datatype="*" field="progression" options=smProgression></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_ASSEMBLYLINE" permissionCode="ASSEMBLY_LINE">
+				<input id="assemblyLine" name="assemblyLine" class="inputxt" datatype="*"  maxlength='10' />
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_MLLEVEL" permissionCode="ML_LEVEL">
+				<@p.input type="select" field="mlLevel" options=smDrawingNoLevel></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_COATINGWITH" permissionCode="COATING_WITH">
+				<input id="coatingWith" name="coatingWith" class="inputxt" />
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_CWLEVEL" permissionCode="CW_LEVEL">
+				<@p.input type="select" field="cwLevel" options=smDrawingNoLevel></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_MACHININGSURFACE" permissionCode="MACHINING_SURFACE">
+				<input name="machiningSurface" id="machiningSurface" class="inputxt" datatype="*"  maxlength='30' />
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_MSLEVEL" permissionCode="MS_LEVEL">
+				<@p.input type="select" field="msLevel" options=smDrawingNoLevel></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_PROGRAMNUMBER" permissionCode="PROGRAM_NUMBER">
+				<input name="programNumber" class="inputxt"  maxlength='64' />
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_COMPONENT" permissionCode="COMPONENT">
+				<@p.input type="select" field="component" datatype="*" options=smComponent></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_AFTERPROCESS" permissionCode="AFTER_PROCESS">
+				<@p.input type="select" field="afterProcess" options=smAfterProcess></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_TEXTURE" permissionCode="TEXTURE">
+				<input name="texture" id="texture" class="inputxt" maxlength='32' /> 
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_PLATETHICKNESS" permissionCode="PLATE_THICKNESS">
+				<input name="plateThickness" id="plateThickness" class="inputxt"  />
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_MATERIALSIZE" permissionCode="MATERIAL_SIZE">
+				<input name="materialSize" id="materialSize" class="inputxt"  />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_BATCHNUMBER" permissionCode="BATCH_NUMBER">
+				<input id="batchNumber" name="batchNumber" class="inputxt" datatype="*" errormsg="<@s.m code='ERROR_NUMBER'/>" maxlength='4' onkeyup="value=value.replace(/[^\d]/g,'')"/>
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_BATCHCAP" permissionCode="BATCH_CAP">
+				<input id="batchCap" name="batchCap" class="inputxt" datatype="*" errormsg="<@s.m code='ERROR_NUMBER'/>" maxlength='5' onkeyup="value=value.replace(/[^\d]/g,'')" onblur="batchCapBlur()"/>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_MANUFACTURERS" permissionCode="MANUFACTURERS">
+				<input name="manufacturers" class="inputxt" maxlength='128' />
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_IDENTIFICATIONCODE" permissionCode="IDENTIFICATION_CODE">
+				<input name="identificationCode" class="inputxt" errormsg="<@s.m code='ERROR_CHINESE'/>" maxlength='128' />
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_REGIONMARK" permissionCode="REGIONMARK">
+				<@p.input type="select" datatype="*" field="regionMark" options=smRegionMark onchange="regionMarkChange(this.value)"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_MACHINETAGS" permissionCode="MACHINE_TAGS">
+				<input name="machineTagNames" id="machineTagNames"  class="inputxt" readonly="readonly" />
+			<input name="machineTags" id="machineTags" type="hidden"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_STEPNUMBER" permissionCode="STEP_NUMBER">
+				<input name="stepNumber" id="stepNumber" class="inputxt" readonly="readonly" errormsg="<@s.m code='ERROR_CHINESE'/>" maxlength='3' />
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_PLCNO" permissionCode="REMARK">
+				<input name="plcNo" class="inputxt" datatype="*" maxlength='16'/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PRODUCTIONSCHEDULE_INVENTORYNUMBER" permissionCode="REMARK">
+				<input id="inventoryNumber" name="inventoryNumber" class="inputxt" datatype="n"  maxlength='9'/>
+			</@p.formColmd>
+			<@p.formColmd title="METALPLATE_STANDARDCT" permissionCode="REMARK">
+				<input id="standardCt" name="standardCt" class="inputxt" datatype="n" maxlength='8'/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="METALPLATE_REMARK" permissionCode="REMARK">
+				 <textarea rows="2" cols="40" name="remark" style="width: 200px;" maxlength="512"></textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

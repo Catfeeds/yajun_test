@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="FinFaultedDetailsMapper" >
+	<select id="getFaultedBarInfo" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select (select count(a.id) from fin_faulted a) as totalNum,
+		       sum(f.duration) as faultedDuration,
+		       count(f.faulted_code) faultedCount,
+		       f.faulted_code as faultedCode,
+		       decode(b.entry_name, null, '未知错误名称', b.entry_name) as entryName
+		  from fin_faulted f
+		  left join (select tde.entry_name, tde.entry_code
+		               from ts_dict_entry tde, ts_dict_type tdt
+		              where tde.type_id = tdt.id
+		                and tdt.type_code = 'FAULTED_DETAILS_CODE') b
+		    on f.faulted_code = b.entry_code
+		 where f.shift_no = #{shiftNo}
+		  and f.faulted_code!='999' 
+		  and f.faulted_code is not null
+		  and f.work_calendar_begin is not null
+		  and f.is_rest = 'N'
+		 <if test="beginTime!=null and beginTime!='' ">
+			 and f.work_calendar_begin &gt;= to_date(#{beginTime},'yyyy-MM-dd HH24:mi')
+		 </if>
+		 <if test="endTime!=null and endTime!='' ">
+		 	and f.work_calendar_begin &lt;= to_date(#{endTime},'yyyy-MM-dd HH24:mi') + 1
+		 </if>
+		 group by b.entry_name, f.faulted_code
+		 order by sum(f.duration) asc
+	</select>
+	
+	<select id="faultedDetailsYearShow" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+			   select TRUNC(SUM(f.duration) / 60, 2) as minute,
+            to_char(f.work_calendar_begin, 'yyyy-MM-dd') createTime,
+            count(f.id) as count
+       from fin_faulted f
+      where f.shift_no != '0'  
+       and f.faulted_code!='999'  
+       and f.faulted_code is not null 
+       and f.work_calendar_begin is not null
+       and f.is_rest = 'N'
+       <if test="createTimeStart!=null and createTimeStart!='' ">
+	   and f.work_calendar_begin &gt;= to_date(#{createTimeStart},'yyyy-MM-dd HH24:mi')
+	  </if>
+	  <if test="createTimeEnd!=null and createTimeEnd!='' ">
+	    and f.work_calendar_begin &lt;= to_date(#{createTimeEnd},'yyyy-MM-dd HH24:mi')
+  		</if>
+      group by to_char(f.work_calendar_begin, 'yyyy-MM-dd')
+	</select>
+</mapper>  

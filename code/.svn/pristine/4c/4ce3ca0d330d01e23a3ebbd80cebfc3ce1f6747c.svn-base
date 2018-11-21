@@ -1,0 +1,246 @@
+package com.wis.mes.production.qualitytracing.service.impl;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.wis.basis.common.utils.ConstantUtils;
+import com.wis.basis.common.utils.DateUtils;
+import com.wis.basis.common.utils.LoadUtils;
+import com.wis.core.framework.entity.DictEntry;
+import com.wis.core.framework.service.AuditLogService;
+import com.wis.core.framework.service.DictEntryService;
+import com.wis.core.service.impl.BaseServiceImpl;
+import com.wis.mes.master.nc.service.TmFaultGradeService;
+import com.wis.mes.master.nc.vo.NGVo;
+import com.wis.mes.master.workcalendar.entity.TmWorktime;
+import com.wis.mes.master.workcalendar.service.TmWorktimeService;
+import com.wis.mes.production.producttracing.service.TbProductTracingService;
+import com.wis.mes.production.qualitytracing.dao.TbQualityTracingDao;
+import com.wis.mes.production.qualitytracing.entity.TbQualityTracing;
+import com.wis.mes.production.qualitytracing.service.TbQualityTracingService;
+import com.wis.mes.rfid.util.MathUtils;
+import com.wis.mes.rfid.util.MathUtils.IntPair;
+import com.wis.mes.rfid.vo.SnInfoObjVo;
+import com.wis.mes.util.StringUtil;
+
+@Service
+public class TbQualityTracingServiceImpl extends BaseServiceImpl<TbQualityTracing> implements TbQualityTracingService {
+
+	@Autowired
+	public void setDao(TbQualityTracingDao dao) {
+		this.dao = dao;
+	}
+
+	@Autowired
+	private TbProductTracingService productTracingService;
+	@Autowired
+	private TmWorktimeService tmWorktimeService;
+	@Autowired
+	private AuditLogService logService;
+	@Autowired
+	private DictEntryService entryService;
+	@Autowired
+	private TmFaultGradeService faultGradeService;
+
+	public Map<String, Object> verifyFailureState(String sn) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Map<Integer, Boolean> ngEntryMap = new HashMap<Integer, Boolean>();
+		Integer[] ngEntrys = null;
+		boolean FLAG = true;
+		TbQualityTracing eg = new TbQualityTracing();
+		eg.setSn(sn);
+		List<TbQualityTracing> beans = this.findByEg(eg);
+		if (null != beans && beans.size() > 0) {
+			StringBuffer buffer = new StringBuffer();
+			List<Integer> ngExitList = new ArrayList<Integer>();
+			for (TbQualityTracing bean : beans) {
+				if(StringUtils.isNotBlank(bean.getNgin()))continue;//NG入口不等于空的表示已经修复,只检查NG入口为空的
+				if (bean.getStatus().equals(ConstantUtils.CREATED)) {
+					FLAG = false;// 有不良没有修复，不可以从NG流入口流入
+					break;
+				}
+				if (StringUtils.isNotBlank(bean.getNgEntrance())) {
+					buffer.append(bean.getNgEntrance() + ",");
+					if(StringUtils.isNotBlank(bean.getNgExit())) {
+						ngExitList.add(Integer.valueOf(bean.getNgExit()));
+					}
+				}
+			}
+			if (null != buffer && buffer.length() > 0) {
+				IntPair minmax = MathUtils.minmax(ngExitList.toArray(new Integer[ngExitList.size()]));
+				buffer = buffer.deleteCharAt(buffer.length() - 1);
+				ngEntrys = StringUtil.getInts(buffer.toString());
+				/*if (beans.size() == 1) {*/
+					for (Integer val : ngEntrys) {
+						if(val <= minmax.getMin()) {
+							ngEntryMap.put(val, true);
+						}
+					}
+				/*} else {
+					MathUtils.IntPair intPair = MathUtils.minmax(ngEntrys);
+					ngEntryMap.put(intPair.getMin(), true);
+				}*/
+			}
+		} else {
+			FLAG = false; // 没有查询到产品有不良信息
+		}
+		map.put("flag", FLAG);
+		map.put("ngEntry", ngEntryMap);
+		return map;
+	}
+
+	public void doOnSnUpdateQualityTracing(String sn,String ulocNo) {
+		TbQualityTracing eg = new TbQualityTracing();
+		eg.setSn(sn);
+		List<TbQualityTracing> beans = this.findByEg(eg);
+		if(null != beans && beans.size() > 0) {
+			for(TbQualityTracing bean:beans) {
+				if(StringUtils.isEmpty(bean.getNgin())) {
+					bean.setNgin(ulocNo);
+					bean.setHighLinesTime(new Date());
+					doUpdate(bean);
+				}
+			}
+		}
+	}
+	
+	public void doSaveQualityTracing(String sn, String ulocNo) {
+		TbQualityTracing bean = new TbQualityTracing();
+		Date date = new Date();
+		TmWorktime tmWorktime = tmWorktimeService.thisWorkTime(169);
+		SnInfoObjVo snInfoObjVo = SnInfoObjVo.splitSn(sn);
+		bean.setSn(snInfoObjVo.getNewSn());
+		bean.setMachineName(snInfoObjVo.getMachineName());
+		bean.setBackNumber(snInfoObjVo.getBackNumber());
+		bean.setMachineOfName(productTracingService.getEgModelName(snInfoObjVo.getBackNumber()));
+		bean.setNgExit(ulocNo);
+		if(null != tmWorktime) {
+			bean.setTmWorkTimeId(tmWorktime.getId());
+			bean.setShiftno(tmWorktime.getShiftno());
+		}
+		bean.setCreateTime(date);
+		bean.setStatus(ConstantUtils.CREATED);
+		bean.setInfoSources(ConstantUtils.EQUIPMENT_JUDGE);// 具体状态还需从PLC获取。
+		super.doSave(bean);
+		logService.doAddLog("TbQualityTracing", bean);
+	}
+
+	@Override
+	public void doSaveTbQualityTracing(String SN, String ngExitUloc, String discoveryStation, String shiftNo,
+			Integer classManagerId, Integer infoSource, String abnormalCode,Integer worktimeId) {
+		TbQualityTracing bean = new TbQualityTracing();
+		Date date = new Date();
+		bean.setSn(SN);
+		SnInfoObjVo snInfoObjVo = SnInfoObjVo.splitSn(SN);
+		bean.setSn(snInfoObjVo.getNewSn());
+		bean.setMachineName(snInfoObjVo.getMachineName());
+		bean.setBackNumber(snInfoObjVo.getBackNumber());
+		if (StringUtils.isNotBlank(snInfoObjVo.getBackNumber())) {
+			bean.setMachineOfName(productTracingService.getEgModelName(snInfoObjVo.getBackNumber()));
+		}
+		bean.setTmWorkTimeId(worktimeId);
+		bean.setNgExit(ngExitUloc);
+		bean.setDiscoveryStation(discoveryStation);
+		bean.setShiftno(shiftNo);
+		bean.setTmClassManagerId(classManagerId);
+		bean.setCreateTime(date);
+		bean.setStatus("CREATED");
+		// 具体状态还需从PLC获取。
+		if (infoSource.intValue() == 128) {
+			bean.setInfoSources(ConstantUtils.PRODUCT_OK_NG_ORTHER_JUDGE);
+		} else if (infoSource.intValue() == 32) {
+			bean.setInfoSources(ConstantUtils.PRODUCT_OK_NG_PC_JUDGE);
+		} else if (infoSource.intValue() == 8) {
+			bean.setInfoSources(ConstantUtils.EQUIPMENT_JUDGE);
+		} else if (infoSource.intValue() == 2) {
+			bean.setInfoSources(ConstantUtils.EMPLOYEE_JUDGE);
+		}
+		super.doSave(bean);
+	}
+
+	@Override
+	public void exportData(List<TbQualityTracing> content, SXSSFWorkbook workbook, Sheet sheet, int rownum) {
+		// 班次数据字典
+		Map<String, DictEntry> shiftnoMap = entryService.getMapTypeCode(ConstantUtils.TYPE_CODE_CLASS_ORDER);
+		//班组数据字典
+		Map<String, DictEntry> groupMap = entryService.getMapTypeCode(ConstantUtils.TYPE_CODE_CLASS_GROUP);
+		//信息来源数据字典
+		Map<String, DictEntry> infoSourcesMap = entryService.getMapTypeCode(ConstantUtils.INFO_SOURCES);
+		//故障机状态数据字典
+		Map<String, DictEntry> statusMap = entryService.getMapTypeCode(ConstantUtils.UNQUALIFIED_STATE);
+		//故障等级map
+		Map<String,Object> ngVoMap = new HashMap<String,Object>();
+		for(NGVo ngVo:faultGradeService.getDictItem(null)) {
+			ngVoMap.put(ngVo.getCode(), ngVo.getName());
+		}
+		for (TbQualityTracing qualityTracing : content) {
+			int cellnum = 0;
+			String shiftno="",classGroup="",ncGroupNo="",ncNo="",ncName="",infoSources="",
+					discoveryUlocNo="",ngLevel="",status="",userName="",updateTime="";
+			if(StringUtils.isNotBlank(qualityTracing.getShiftno()) && shiftnoMap.containsKey(qualityTracing.getShiftno())) {
+				shiftno = shiftnoMap.get(qualityTracing.getShiftno()).getName();
+			}
+			if(null != qualityTracing.getClassManager() && 
+					StringUtils.isNotBlank(qualityTracing.getClassManager().getClassGroup())
+					&& groupMap.containsKey(qualityTracing.getClassManager().getClassGroup())) {
+				classGroup = groupMap.get(qualityTracing.getClassManager().getClassGroup()).getName();
+			}
+			if(null != qualityTracing.getTmNcGroup() && StringUtils.isNotBlank(qualityTracing.getTmNcGroup().getNo())) {
+				ncGroupNo = qualityTracing.getTmNcGroup().getNo();
+			}
+			if(null != qualityTracing.getTmNc() && StringUtils.isNotBlank(qualityTracing.getTmNc().getNo())) {
+				ncNo = qualityTracing.getTmNc().getNo();
+			}
+			if(null != qualityTracing.getTmNc() && StringUtils.isNotBlank(qualityTracing.getTmNc().getName())) {
+				ncName = qualityTracing.getTmNc().getName();
+			}
+			if(StringUtils.isNoneBlank(qualityTracing.getInfoSources()) && infoSourcesMap.containsKey(qualityTracing.getInfoSources())) {
+				infoSources = infoSourcesMap.get(qualityTracing.getInfoSources()).getName();
+			}
+			if(null != qualityTracing.getDiscoveryUloc() && StringUtils.isNotBlank(qualityTracing.getDiscoveryUloc().getNo())) {
+				discoveryUlocNo = qualityTracing.getDiscoveryUloc().getNo();
+			}
+			if(null != qualityTracing.getTmNc() && null != qualityTracing.getTmNc().getTmFaultGradeId()&& ngVoMap.containsKey(qualityTracing.getTmNc().getTmFaultGradeId())) {
+				ngLevel = ngVoMap.get(String.valueOf(qualityTracing.getTmNc().getTmFaultGradeId())).toString();
+			}
+			if(StringUtils.isNotBlank(qualityTracing.getStatus())&& statusMap.containsKey(qualityTracing.getStatus())) {
+				status=statusMap.get(qualityTracing.getStatus()).getName();
+			}
+			if(null != qualityTracing.getEmployee() && StringUtils.isNotBlank(qualityTracing.getEmployee().getName())) {
+				userName = qualityTracing.getEmployee().getName();
+			}
+			if(null != qualityTracing.getUpdateTime()) {
+				 updateTime = DateUtils.formatDateTime(qualityTracing.getUpdateTime());
+			}
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(DateUtils.formatDateTime(qualityTracing.getCreateTime()));// 日期
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(shiftno);// 班次
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(classGroup);// 班组
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(qualityTracing.getSn());// SN
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(qualityTracing.getBackNumber());// 背番号
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(qualityTracing.getMachineOfName());// 机种名
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(qualityTracing.getMachineName());// 机号
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(ncGroupNo);// 故障组编码
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(ncNo);// 故障编码
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(ncName);// 故障内容
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(infoSources);// 信息来源
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(discoveryUlocNo);// 发现工位
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(ngLevel);// 故障等级
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(qualityTracing.getNgExit());// NG出口
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(qualityTracing.getNgEntrance());// 适应NG入口
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(qualityTracing.getNgin());// NG入口
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(status);// 状态
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(userName);// 录入人
+			LoadUtils.getCell(sheet, rownum, cellnum++).setCellValue(updateTime);// 提交时间
+			rownum++;
+		}
+	}
+}

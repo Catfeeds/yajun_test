@@ -1,0 +1,23 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>	
+<#include "../../../include/editorCommons.html">
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/formPermissionSet/update.do"  idValue=formPermissionSet.id class="form-horizontal"  permissionModule="FORM_PERMISSION_SET">
+		<@p.formRow class="row rowDivTop">
+			<@p.formColmd class="col-md-4" title="PERMISSION_SET_CODE"   checktip="PERMISSION_SET_CODE_CHECK_TIP"  permissionCode="PERMISSION_SET_CODE">
+			 <input name="code" class="col-xs-10 col-sm-5 form-control" datatype="s2-50" ajaxurl="${baseUrl}/formPermissionSet/checkCode.do?code=${formPermissionSet.code}" value="${formPermissionSet.code!}"   nullmsg='<@s.m code="POSITION_NAME_NULL" />'/>
+			</@p.formColmd>
+		<@p.formColmd class="col-md-4" title="PERMISSION_SET_NAME"  checktip="PERMISSION_SET_NAME_CHECK_TIP"   permissionCode="PERMISSION_SET_NAME">
+		 <input name="name"  class="col-xs-10 col-sm-5 form-control" datatype="s2-50" value="${formPermissionSet.name!}"   nullmsg='<@s.m code="POSITION_NAME_NULL" />'/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow class="row rowDivTop">
+			<@p.formColmd class="col-md-4" title="PERMISSION_SET_DESCRIPTION"  checktip="PERMISSION_SET_DESCRIPTION_NULL"  permissionCode="PERMISSION_SET_DESCRIPTION">
+		    	<textarea name="description" class="col-xs-10 col-sm-5 form-control" ignore="ignore">${formPermissionSet.description!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>

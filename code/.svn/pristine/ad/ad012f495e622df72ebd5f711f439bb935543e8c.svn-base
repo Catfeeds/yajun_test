@@ -1,0 +1,202 @@
+<div id="id-message-item-navbar"
+	class="hide message-navbar align-center clearfix">
+	<div class="message-bar">
+		<div class="message-toolbar">
+			<div class="inline position-relative align-left">
+				<a href="#" class="btn-message btn btn-xs dropdown-toggle"
+					data-toggle="dropdown"> <span class="bigger-110">Action</span>
+
+					<i class="icon-caret-down icon-on-right"></i>
+				</a>
+
+				<ul
+					class="dropdown-menu dropdown-lighter dropdown-caret dropdown-125">
+					<li><a href="#"> <i class="icon-mail-reply blue"></i>
+							&nbsp; Reply
+					</a></li>
+
+					<li><a href="#"> <i class="icon-mail-forward green"></i>
+							&nbsp; Forward
+					</a></li>
+
+					<li><a href="#"> <i class="icon-folder-open orange"></i>
+							&nbsp; Archive
+					</a></li>
+
+					<li class="divider"></li>
+
+					<li><a href="#"> <i class="icon-eye-open blue"></i> &nbsp;
+							Mark as read
+					</a></li>
+
+					<li><a href="#"> <i class="icon-eye-close green"></i>
+							&nbsp; Mark unread
+					</a></li>
+
+					<li><a href="#"> <i class="icon-flag-alt red"></i> &nbsp;
+							Flag
+					</a></li>
+
+					<li class="divider"></li>
+
+					<li><a href="#"> <i class="icon-trash red bigger-110"></i>
+							&nbsp; Delete
+					</a></li>
+				</ul>
+			</div>
+
+			<div class="inline position-relative align-left">
+				<a href="#" class="btn-message btn btn-xs dropdown-toggle"
+					data-toggle="dropdown"> <i
+					class="icon-folder-close-alt bigger-110"></i> <span
+					class="bigger-110">Move to</span> <i
+					class="icon-caret-down icon-on-right"></i>
+				</a>
+
+				<ul
+					class="dropdown-menu dropdown-lighter dropdown-caret dropdown-125">
+					<li><a href="#"> <i class="icon-stop pink2"></i> &nbsp;
+							Tag#1
+					</a></li>
+
+					<li><a href="#"> <i class="icon-stop blue"></i> &nbsp;
+							Family
+					</a></li>
+
+					<li><a href="#"> <i class="icon-stop green"></i> &nbsp;
+							Friends
+					</a></li>
+
+					<li><a href="#"> <i class="icon-stop grey"></i> &nbsp;
+							Work
+					</a></li>
+				</ul>
+			</div>
+
+			<a href="#" class="btn btn-xs btn-message"> <i
+				class="icon-trash bigger-125"></i> <span class="bigger-110">Delete</span>
+			</a>
+		</div>
+	</div>
+
+	<div>
+		<div class="messagebar-item-left">
+			<a href="#" class="btn-back-message-list"> <i
+				class="icon-arrow-left blue bigger-110 middle"></i> <b
+				class="bigger-110 middle">Back</b>
+			</a>
+		</div>
+
+		<div class="messagebar-item-right">
+			<i class="icon-time bigger-110 orange middle"></i> <span
+				class="time grey">Today, 7:15 pm</span>
+		</div>
+	</div>
+</div>
+<div class="hide message-content" id="id-message-content">
+	<div class="message-header clearfix">
+		<div class="pull-left">
+			<span class="blue bigger-125"> Clik to open this message </span>
+
+			<div class="space-4"></div>
+
+			<i class="icon-star orange2 mark-star"></i> &nbsp; <img
+				class="middle" alt="John's Avatar"
+				src="${baseUrl}/res/bootstrap/avatars/avatar.png" width="32" />
+			&nbsp; <a href="#" class="sender">John Doe</a> &nbsp; <i
+				class="icon-time bigger-110 orange middle"></i> <span class="time">Today,
+				7:15 pm</span>
+		</div>
+
+		<div class="action-buttons pull-right">
+			<a href="#"> <i class="icon-reply green icon-only bigger-130"></i>
+			</a> <a href="#"> <i
+				class="icon-mail-forward blue icon-only bigger-130"></i>
+			</a> <a href="#"> <i class="icon-trash red icon-only bigger-130"></i>
+			</a>
+		</div>
+	</div>
+
+	<div class="hr hr-double"></div>
+
+	<div class="message-body">
+		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed
+			do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+
+		<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco
+			laboris nisi ut aliquip ex ea commodo consequat.</p>
+
+		<p>Duis aute irure dolor in reprehenderit in voluptate velit esse
+			cillum dolore eu fugiat nulla pariatur.</p>
+
+		<p>Excepteur sint occaecat cupidatat non proident, sunt in culpa
+			qui officia deserunt mollit anim id est laborum.</p>
+
+		<p>Duis aute irure dolor in reprehenderit in voluptate velit esse
+			cillum dolore eu fugiat nulla pariatur.</p>
+
+		<p>Ut enim ad minim veniam, quis nostrud exercitation ullamco
+			laboris nisi ut aliquip ex ea commodo consequat.</p>
+	</div>
+
+	<div class="hr hr-double"></div>
+
+	<div class="message-attachment clearfix">
+		<div class="attachment-title">
+			<span class="blue bolder bigger-110">Attachments</span> &nbsp; <span
+				class="grey">(2 files, 4.5 MB)</span>
+
+			<div class="inline position-relative">
+				<a href="#" data-toggle="dropdown" class="dropdown-toggle">
+					&nbsp; <i class="icon-caret-down bigger-125 middle"></i>
+				</a>
+
+				<ul class="dropdown-menu dropdown-lighter">
+					<li><a href="#">Download all as zip</a></li>
+
+					<li><a href="#">Display in slideshow</a></li>
+				</ul>
+			</div>
+		</div>
+
+		&nbsp;
+		<ul class="attachment-list pull-left list-unstyled">
+			<li><a href="#" class="attached-file inline"> <i
+					class="icon-file-alt bigger-110 middle"></i> <span
+					class="attached-name middle">Document1.pdf</span>
+			</a>
+
+				<div class="action-buttons inline">
+					<a href="#"> <i class="icon-download-alt bigger-125 blue"></i>
+					</a> <a href="#"> <i class="icon-trash bigger-125 red"></i>
+					</a>
+				</div></li>
+
+			<li><a href="#" class="attached-file inline"> <i
+					class="icon-film bigger-110 middle"></i> <span
+					class="attached-name middle">Sample.mp4</span>
+			</a>
+
+				<div class="action-buttons inline">
+					<a href="#"> <i class="icon-download-alt bigger-125 blue"></i>
+					</a> <a href="#"> <i class="icon-trash bigger-125 red"></i>
+					</a>
+				</div></li>
+		</ul>
+
+		<div class="attachment-images pull-right">
+			<div class="vspace-sm-4"></div>
+
+			<div>
+				<img width="36" alt="image 4"
+					src="${baseUrl}/res/bootstrap/images/gallery/thumb-4.jpg" /> <img
+					width="36" alt="image 3"
+					src="${baseUrl}/res/bootstrap/images/gallery/thumb-3.jpg" /> <img
+					width="36" alt="image 2"
+					src="${baseUrl}/res/bootstrap/images/gallery/thumb-2.jpg" /> <img
+					width="36" alt="image 1"
+					src="${baseUrl}/res/bootstrap/images/gallery/thumb-1.jpg" />
+			</div>
+		</div>
+	</div>
+</div>

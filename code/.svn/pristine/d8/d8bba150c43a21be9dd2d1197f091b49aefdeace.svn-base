@@ -1,0 +1,77 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+<script type="text/javascript">
+	$(function(){
+		var lang='${lang!}';
+		var params={};  
+		if(lang=='en_US'){
+			params.lang='en';
+		}
+		
+		var optionSize = $("#Uloc option").size();
+		if(optionSize==2){
+			$('#Uloc option:eq(1)').prop("selected",true);
+		}
+	});
+</script>
+</head>	
+
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/equipment/update.do?AUDIT.TYPE=0001&AUDIT.OPERATION=001" class="form-horizontal" idValue=equipment.id   permissionModule="EQUIPMENT">
+	
+	<@p.formRow>
+		<@p.formColmd title="EQUIPMENT_TM_PLANT_ID"      permissionCode="EQUIPMENT_PLANT">
+		<@p.input type="select"   value="${equipment.tmPlantId}" disabled="disabled" options=plant  ></@p.input>
+			<input name="tmPlantId" type="hidden"  readonly="readonly"  value="${equipment.tmPlantId}"  />
+		</@p.formColmd>
+		<@p.formColmd title="EQUIPMENT_NAME"  permissionCode="EQUIPMENT_NAME">
+			<input class="inputxt"  name="name" datatype="s1-16"  value="${equipment.name}" maxlength='16'/>
+		</@p.formColmd>
+	</@p.formRow>
+		<@p.formRow>
+		<@p.formColmd title="EQUIPMENT_NO"  permissionCode="EQUIPMENT_NO">
+				<input class="inputxt"  name="no"  disabled="disabled"  value="${equipment.no}"/ >
+				<input type="hidden"  name="no"   value="${equipment.no}" >
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_STATUS"  permissionCode="EQUIPMENT_STATUS">
+				<@p.input type="select"  field="status" value=equipment.status options=optionEquipmentStatus ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_IP_ADDRESS"  permissionCode="EQUIPMENT_IP_ADDRESS">
+				<input class="inputxt"  id="ipAddress" name="ipAddress" value="${equipment.ipAddress!}" datatype="/^(?:(?:2[0-4][0-9]\.)|(?:25[0-5]\.)|(?:1[0-9][0-9]\.)|(?:[1-9][0-9]\.)|(?:[0-9]\.)){3}(?:(?:2[0-5][0-5])|(?:25[0-5])|(?:1[0-9][0-9])|(?:[1-9][0-9])|(?:[0-9]))$/" errormsg="<@s.m code='IP_ERROR_MSG'/>" ignore="ignore" />
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_PLC_TYP"  permissionCode="EQUIPMENT_PLC_TYP">
+				<input class="inputxt"  name="plcTyp"  value="${equipment.plcTyp!}" ignore="ignore"  />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="EQUIPMENT_PLC_BRAND"  permissionCode="EQUIPMENT_PLC_BRAND">
+				<input class="inputxt"  name="plcBrand" value="${equipment.plcBrand!}" ignore="ignore"  />
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_NETWORK_MODEL_TYP"  permissionCode="EQUIPMENT_NETWORK_MODEL_TYP">
+				<input class="inputxt"  name="networkModelTyp" value="${equipment.networkModelTyp!}" ignore="ignore"  />
+			</@p.formColmd>
+		</@p.formRow>
+		 <@p.formRow>
+		 	<@p.formColmd title="EQUIPMENT_TM_ULOC_ID"  permissionCode="EQUIPMENT_ULOC">
+				<@p.input  type="select" field="tmUlocId" id="Uloc" value="${equipment.tmUlocId!}"   options=optionUloc ></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="EQUIPMENT_EQUIPMENT_SUPPLIER"  permissionCode="EQUIPMENT_EQUIPMENT_SUPPLIER">
+				<input class="inputxt"  name="equipmentSupplier" value="${equipment.equipmentSupplier!}" ignore="ignore"  />
+			</@p.formColmd>
+		</@p.formRow>
+		 <@p.formRow>
+<!-- 		 	<@p.formColmd title="EQUIPMENT_WORKING_HOURS"  permissionCode="EQUIPMENT_WORKING_HOURS"> -->
+<!-- 				<input class="inputxt"  name="workingHours"  value="${equipment.workingHours!}" ignore="ignore"  /> -->
+<!-- 			</@p.formColmd> -->
+			<@p.formColmd title="EQUIPMENT_NOTE"  permissionCode="EQUIPMENT_NOTE">
+				<input class="inputxt"  name="note"  Value="${equipment.note!}" ignore="ignore" maxlength="150"//>
+			</@p.formColmd>
+		</@p.formRow>
+   </@p.editForm >
+</body>
+</html>

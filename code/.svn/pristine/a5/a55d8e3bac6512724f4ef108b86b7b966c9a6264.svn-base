@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/porder/task.do" class="form-horizontal"   permissionModule="PORDER">
+		<@p.formRow>
+			<input type="hidden" name="toPorderId" value="${toPorderId}">
+			<@p.formColmd title="PORDER_AVI_TASK_QTY" permissionCode="PORDER_NO">
+				<input name="taskQty" errormsg="填写大于0的数字"class="inputxt"maxlength="36" datatype="/^[1-9]{1,}[0]{0,}$/"/>
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_AVI_TASK_EVERY_QTY" permissionCode="PORDER_NO">
+				<input name="everyQty" errormsg="填写大于0的数字" class="inputxt" maxlength="36"datatype="/^[1-9]{1,}[0]{0,}$/"/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="PORDER_PATH" permissionCode="PORDER_NO">
+				<@p.input type="select"id="taskPathOptions" field="tmPathId" datatype="*"></@p.input>
+				<input type="hidden"id="taskPathId"  value="${porder.tmPathId!}">
+			</@p.formColmd>
+			<@p.formColmd title="PORDER_BOM" permissionCode="PORDER_NO">
+				<@p.input type="select"id="taskBomOptions" field="tmBomId" options=bomOptions></@p.input>
+				<input type="hidden"id="taskBomId"  value="${porder.tmBomId!}">
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+		<@p.formColmd title="PORDER_NOTE" permissionCode="PORDER_NO">
+				<input class="inputxt"name="note" maxlength="150" >
+			</@p.formColmd>
+		</@p.formRow>
+		<input type="hidden" id="taskTmPlantId" value="${porder.tmPlantId!}">
+		<input type="hidden" id="taskTmPartId" value="${porder.tmPartId!}">
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	porderTaskgetPath($("#taskTmPlantId").val(),$("#taskTmPartId").val(),$("#taskPathId").val());
+	porderTaskGetBom($("#taskTmPlantId").val(),$("#taskTmPartId").val(),$("#taskBomId").val());
+});
+function porderTaskgetPath(tmPlantId,tmPartId,path){
+	$.ajax({
+		url:"${baseUrl}/porder/getPaths.do",
+		type:"post",
+		dataType:"json",
+		data:{
+			tmPlantId:tmPlantId,
+			tmPartId:tmPartId
+		},
+		success:function(result){
+			$("#taskPathOptions").empty();
+			$("#taskPathOptions").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(function(i,item){
+				$("#taskPathOptions").append(" <option value='" + item.id + "'>"+item.no+"-"+item.name + "</option>");
+			});
+			$("#taskPathOptions").val(path);
+		}
+	});
+}
+function porderTaskGetBom(tmPlantId,tmPartId,bom){
+	$.ajax({
+		url:"${baseUrl}/porder/getBoms.do",
+		type:"post",
+		dataType:"json",
+		data:{
+			tmPlantId:tmPlantId,
+			tmPartId:tmPartId
+		},
+		success:function(result){
+			$("#taskBomOptions").empty();
+			$("#taskBomOptions").append(" <option value=''>-----请选择-----</option>");
+			$(result).each(function(i,item){
+				$("#taskBomOptions").append(" <option value='" + item.id + "'>"+item.bomversion + "</option>");
+			});
+			$("#taskBomOptions").val(bom);
+		}
+	});
+}
+</script>
+

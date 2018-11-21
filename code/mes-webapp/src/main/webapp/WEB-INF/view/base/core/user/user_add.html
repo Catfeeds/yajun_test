@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+
+</head>	
+<script type="text/javascript">
+function checkUserIsExist() {
+	$.ajax({
+		data:{"code":null,
+			"param":$("#accountId").val()
+		},
+		url:"${baseUrl}/user/checkCode.do",
+		dataType : 'json', 
+		success : function(result) { 
+			if(result.status == "n") {
+				document.getElementById("labelId").style.display="";
+				$("#accountId").focus();
+			} else {
+				document.getElementById("labelId").style.display="none";
+			}
+		},
+		error : function(result, status) { //出错时会执行这里的回调函数 
+			if (status == 'error') {
+				alert(status);
+			}
+		}
+	});
+}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/user/add.do?AUDIT.TYPE=0001&AUDIT.OPERATION=002" class="form-horizontal"   permissionModule="USER">
+	<@p.formRow>
+		<@p.formColmd title="USER_ACCOUNT_NUMBER"  checktip="USER_ACCOUNT_SCOPE"    permissionCode="USER_ACCOUNT_NUMBER">
+			<input type="hidden" name="systemData" value="NO">
+			<input name="account" id="accountId" class="inputxt" onblur="checkUserIsExist();"  datatype="no">
+			<label style="color:red;display:none;" id="labelId">账号已存在</label>
+		</@p.formColmd>
+		<@p.formColmd title="REAL_NAME"  checktip="FILL_IN_THE_PERSONAL_NAMES"     permissionCode="REAL_NAME">
+			  <input name="name" class="inputxt"  datatype="s">
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="PASSWORD"  checktip="PASSWORD_CHARACTERS_SPECIFICATION"   permissionCode="PASSWORD">
+			 <input type="password" class="inputxt"  name="password" datatype="${pwdRegExp!}"/>
+			 <!-- <span class="passwordStrength" style="display: none;"><span><@s.m code='USER_PASSWORD_LEVEL_LOW'/></span>
+			 <span><@s.m code='USER_PASSWORD_LEVEL_NORMAL'/></span><span class="last"><@s.m code='USER_PASSWORD_LEVEL_HIGN'/></span> </span> -->
+		</@p.formColmd>
+		<@p.formColmd title="VERIFY_PASSWORD"  checktip="REPEAT_YOUR_PASSWORD"   permissionCode="VERIFY_PASSWORD">
+			 <input id="repassword" class="inputxt" type="password"  recheck="password" datatype="${pwdRegExp!}">
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_STATUS" checktip="PLEASE_SELECT_STATUS"   permissionCode="USER_STATUS">
+			<@p.input type="select"  excludeSelectOption="true" field="status" options=options></@p.input>
+		</@p.formColmd>
+		<@p.formColmd title="USER_SEX"   permissionCode="USER_SEX">
+			<@p.input type="radio" field="gender" options=sexOptions datatype="*"></@p.input>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_PHONE"   permissionCode="USER_PHONE">
+			 <input class="inputxt" name="phone" datatype="n" errormsg="<@s.m code='USER_PHONE_CHECK_TIP'/>" ignore="ignore">
+		</@p.formColmd>
+		<@p.formColmd title="USER_FAX"    permissionCode="USER_FAX">
+			<input  class="inputxt" name="fax" datatype="n" errormsg="<@s.m code='USER_FAX_CHECK_TIP'/>" ignore="ignore">
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="USER_MAIL"  permissionCode="USER_MAIL">
+			<input class="inputxt"  name="email"  datatype="e" errormsg="<@s.m code='USER_MAIL_CHECK_TIP'/>" ignore="ignore">
+		</@p.formColmd>
+		<@p.formColmd title="PMC_LINE"  permissionCode="USER_STATUS">
+			<@p.input type="multiple" id="tmLineIds" field="tmLineIds" options=lineOptions excludeSelectOption="false"></@p.input>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd class="col-md-8" title="USER_ADDRESS"  permissionCode="USER_ADDRESS">
+			<textarea name="address" class="inputxt" ignore="ignore" ></textarea>
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+</body>
+</html>

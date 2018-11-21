@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/workshop/update.do" idValue=workshop.id class="form-horizontal"   permissionModule="WORKSHOP">
+		<@p.formRow>
+			<@p.formColmd title="WORKSHOP_PLANT"   permissionCode="WORKSHOP_PLANT">
+				<@p.input type="select" disabled="disabled" value="${workshop.tmPlantId}" excludeSelectOption="true"  options=plant ></@p.input>
+				<input type="hidden" name="tmPlantId" value="${workshop.tmPlantId}" >
+			</@p.formColmd>
+			
+			<@p.formColmd title="WORKSHOP_NO" permissionCode="WORKSHOP_NO">
+				<input class="inputxt" name="no" readonly="readonly" value="${workshop.no}" datatype="no"  maxlength='100'/>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORKSHOP_NAME_CN" permissionCode="WORKSHOP_NAME_CN">
+				<input name="nameCn" class="inputxt" value="${workshop.nameCn!}" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="WORKSHOP_NAME_EN" permissionCode="WORKSHOP_NAME_EN">
+				<input name="nameEn" class="inputxt" value="${workshop.nameEn!}" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORKSHOP_NAME_CN_S" permissionCode="WORKSHOP_NAME_CN_S">
+				<input name="nameCnS" class="inputxt" value="${workshop.nameCnS!}" errormsg="<@s.m code='ERROR_CHINESE'/>" ignore="ignore" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="WORKSHOP_NAME_EN_S" permissionCode="WORKSHOP_NAME_EN_S">
+				<input name="nameEnS" class="inputxt" value="${workshop.nameEnS!}" datatype="/^[\w\d-_\\\/\s]+$/" errormsg="<@s.m code='ERROR_ENGLISH'/>" ignore="ignore" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="WORKSHOP_ENABLED" permissionCode="WORKSHOP_ENABLED">
+				<@p.input type="select" excludeSelectOption="true" value=workshop.enabled  field="enabled" options=optionEnab ></@p.input>
+			</@p.formColmd>	
+		</@p.formRow>
+		
+	</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+	<style type="text/css">
+		.jq22-header{margin-bottom: 15px;font-family: "Segoe UI", "Lucida Grande", Helvetica, Arial, "Microsoft YaHei", FreeSans, Arimo, "Droid Sans", "wenquanyi micro hei", "Hiragino Sans GB", "Hiragino Sans GB W3", "FontAwesome", sans-serif;}
+		.jq22-icon{color: #fff;}
+	</style>
+	
+<@p.body title="MENU_MANAGEMENT_LIST_TITILE" permissionModule="MENU">
+<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="MENU_ADD" permissionCode="MenuManagementEdit" iconCls="plus" url="${baseUrl}/menu/addInput.do" type="add"></@p.button>
+			<@p.button title="MENU_DELETE" permissionCode="MenuManagementEdit" iconCls="trash" url="${baseUrl}/user/delete.do" type="delete"></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>	
+	<div class="jq22-container">
+		<div class="container">
+      <div class="row">
+        <div class="col-sm-4">
+          <h2>Menu</h2>
+          <div id="treeview1" class=""></div>
+        </div>
+      </div>	
+	</div>
+	</div>
+</@p.body>
+<script src="${baseUrl}/res/bootstrap/js/bootstrap-treeview.js"></script>
+<script type="text/javascript">
+$(function() {
+	var menu = [];
+	 $.ajax({
+	        data:{},
+	        url:"${baseUrl}/menu/menusList.do",
+	        dataType : 'json',
+	        success : function(result) {
+	        	for(var i=0;i<result.length;i++) {
+	        		var nodes=[];
+	        	    for (var j=0;j<result[i].children.length;j++){
+	        	    	var node = {
+	        	                text:result[i].children[j].name + "url:" + result[i].children[j].url,
+	        	                href: '#child1',
+	        	                tags: ['2']
+	        	              };
+	        	    	nodes.push(node);
+	        	    }
+	        		var parentMenu =   {
+	        	            text: result[i].name,
+	        	            href: '#parent1',
+	        	            tags: ['4'],
+	        	            nodes:nodes
+	        	          };
+	        		menu.push(parentMenu);
+	        	}
+	        	
+	        	 $('#treeview1').treeview({
+	                 data: menu
+	               });
+	        },
+	        error : function(result, status) { 
+	            if (status == 'error') {
+	                infoTip(status);
+	            }
+	        }
+	    });
+	 
+        var defaultData = [
+          {
+            text: 'Parent 1',
+            href: '#parent1',
+            tags: ['4'],
+            nodes: [
+              {
+                text: 'Child 1',
+                href: '#child1',
+                tags: ['2'],
+                nodes: [
+                  {
+                    text: 'Grandchild 1',
+                    href: '#grandchild1',
+                    tags: ['0']
+                  },
+                  {
+                    text: 'Grandchild 2',
+                    href: '#grandchild2',
+                    tags: ['0']
+                  }
+                ]
+              },
+              {
+                text: 'Child 2',
+                href: '#child2',
+                tags: ['0']
+              }
+            ]
+          },
+          {
+            text: 'Parent 2',
+            href: '#parent2',
+            tags: ['0']
+          },
+          {
+            text: 'Parent 3',
+            href: '#parent3',
+             tags: ['0']
+          },
+          {
+            text: 'Parent 4',
+            href: '#parent4',
+            tags: ['0']
+          },
+          {
+            text: 'Parent 5',
+            href: '#parent5'  ,
+            tags: ['0']
+          }
+        ];
+       
+
+        var json = '[' +
+          '{' +
+            '"text": "Parent 1",' +
+            '"nodes": [' +
+              '{' +
+                '"text": "Child 1",' +
+                '"nodes": [' +
+                  '{' +
+                    '"text": "Grandchild 1"' +
+                  '},' +
+                  '{' +
+                    '"text": "Grandchild 2"' +
+                  '}' +
+                ']' +
+              '},' +
+              '{' +
+                '"text": "Child 2"' +
+              '}' +
+            ']' +
+          '},' +
+          '{' +
+            '"text": "Parent 2"' +
+          '},' +
+          '{' +
+            '"text": "Parent 3"' +
+          '},' +
+          '{' +
+            '"text": "Parent 4"' +
+          '},' +
+          '{' +
+            '"text": "Parent 5"' +
+          '}' +
+        ']';
+
+ });
+	  	</script>
+</body>
+</html>

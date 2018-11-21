@@ -1,0 +1,107 @@
+<#include "../include/bootstrapTableCommons.html">
+<@p.body title="EQUIPMENT_HS_LIST_TITLE" permissionModule="MPEQUIPMENTHS">	
+	<@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="EQUIPMENT_STATUS_NO_NAME" type="select" field="tmEquipmentId" options=equipmentOptions ></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_STATUS" field="runningState" type="select" options=eqcirculateStates></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_BEGIN_TIME_START" field="createTimeStart" id="createTimeStart"></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_BEGIN_TIME_END" field="createTimeEnd" id="createTimeEnd"></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_FINISH_TIME_START" field="updateTimeStart" id="updateTimeStart"></@p.input>
+			<@p.input title="EQUIPMENT_STATUS_FINISH_TIME_END" field="updateTimeEnd" id="updateTimeEnd"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<@p.toolbar id="toolbar">
+			<@p.button title="EQUIPMENT_STATUS_EXPORT" url="${baseUrl}/mpEquipment/exportData.do"  permissionCode="mpEquipmentHsExport" onclick="downLoadAjax()" iconCls="upload-alt" type="button"  ></@p.button>
+	</@p.toolbar>
+	<@p.dataGrid url="${baseUrl}/mpEquipment/list.do?queryCondition[IS_HISTORY]=YES">
+		<@p.column checkbox="true"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_DATE" field="createTime" permissionCode="TMWORKTIME"></@p.column>
+		<@p.column title="EQUIPMENT_TM_PLANT" field="tmEquipment.tmPlantId" permissionCode="TMWORKTIME" formatter="getPlants"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_LINE" field="tmLine.nameCn" permissionCode="TMWORKTIME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_CLASSES" field="tmWorktime.shiftno" permissionCode="TMWORKTIME" formatter="rendShiftno"></@p.column>
+		<@p.column title="PRODUCT_TRACING_CLASS_MANAGER_CLASSGROUP" field="tmClassManager.classGroup" permissionCode="TMWORKTIME" formatter="rendClassGroup"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_NO" field="tmEquipment.no" permissionCode="TMEQUIPMENT"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_NAME" field="tmEquipment.name" permissionCode="TMEQUIPMENT"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_STATUS" field="runningState" permissionCode="RUNNINGSTATE" formatter="renderRunningState"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_STATUS_NO" field="codeRule.code" permissionCode="STATUSNUMBER"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_CONTENT" field="codeRule.codeDesc" permissionCode="STATUSCONTENT"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_BEGIN_TIME" field="beginTime" permissionCode="BEGINTIME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_FINISH_TIME" field="finishTime" permissionCode="FINISHTIME"></@p.column>
+		<@p.column title="EQUIPMENT_STATUS_DURATION" field="duration" permissionCode="DURATION"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function renderRunningState(value) {
+	return entryRenderer('SM_CIRCULATE_STATE', value);
+}
+function downLoadAjax(){
+	downAjax("","${baseUrl}/mpEquipment/exportData.do",'dg${currentPageId}');
+}
+$('#createTimeStart').click(function(){
+	var createTimeEnd=$dp.$('createTimeEnd');
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		onpicked:function(){
+			createTimeEnd.click();
+		},
+		maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+	})
+});
+$('#createTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		minDate:'#F{$dp.$D(\'createTimeStart\')}'
+	})
+});
+$('#updateTimeStart').click(function(){
+	var createTimeEnd=$dp.$('updateTimeEnd');
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		onpicked:function(){
+			createTimeEnd.click();
+		},
+		maxDate:'#F{$dp.$D(\'updateTimeEnd\')}'
+	})
+});
+$('#updateTimeEnd').click(function(){
+	WdatePicker({
+		autoPickDate:true,
+		dateFmt:'yyyy-MM-dd HH:mm:ss',
+		minDate:'#F{$dp.$D(\'updateTimeStart\')}'
+	})
+});
+$(function(){
+	initQueryTime();
+});
+function initQueryTime(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	endTime=endTime +" "+caseLessTen(date.getHours())+":"+caseLessTen(date.getMinutes())+":"+caseLessTen(date.getSeconds());
+	$("#createTimeEnd").val(endTime);
+	date = new Date();
+	month = month-1;
+	var startTime = date.getFullYear()+"-"+caseLessTen(month)+"-"+caseLessTen(date.getDate());
+	startTime=startTime +" "+caseLessTen(date.getHours())+":"+caseLessTen(date.getMinutes())+":"+caseLessTen(date.getSeconds());
+	$("#createTimeStart").val(startTime);
+}
+
+function rendShiftno(value){
+	return entryRenderer('SHIFT_TYPE', value);
+}
+function getPlants(value){
+	var plants = eval('('+ '${plants!}' +')');
+	for(var i in plants){
+		if(plants[i].code==value){
+			return plants[i].name;
+		}
+	}
+}
+
+function rendClassGroup(value){
+	return entryRenderer('CLASS_GROUP', value);
+}
+</script>

@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"/> 
+</head>	
+<script type="text/javascript">
+function userCall(dialog){
+	var rowsData = getSelectedRows('dgUserSelectGrid');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+	$('#hidden_assigneeId').val(rowsData[0].id);
+	$('#display_assigneeId').val(rowsData[0].name + '(' + rowsData[0].account +')');
+	dialog.close();
+}
+
+function processDefinitionCall(dialog){
+	var rowsData = getSelectedRows('dgProcessDefinitionSelectGrid');
+	if (!rowsData || rowsData.length == 0) {
+		infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+		return;
+	}
+	$('#hidden_processDefinitionId').val(rowsData[0].defId);
+	$('#display_processDefinitionId').val(rowsData[0].name);
+	$('#processName').val(rowsData[0].name);
+	dialog.close();
+}
+$(function(){
+	$("#startTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\'endTime\')}'});
+	});
+	$("#endTime").focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\'startTime\')}'});
+	});
+});
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/bpm/myoffice/delegateconfig/add.do" class="form-horizontal" permissionModule="DELEGATE_CONFIG">
+		<@p.formRow>
+			<@p.formColmd title="PROCESS_DEFINITION_NAME"  permissionCode="PROCESS_DEFINITION_NAME"   checktip="PROCESS_DEFINITION_SELECT" >
+				<input type="hidden" id="processName" name="processName" />
+				<@p.magnify id="processDefinitionId" field="processDefinitionId" url="${baseUrl}/bpm/definition/listSelect.do?currentPageId=ProcessDefinitionSelectGrid&singleSelect=true" callback="processDefinitionCall" datatype="*"></@p.magnify>
+			</@p.formColmd>
+			<@p.formColmd title="TARGET_USER"    permissionCode="TARGET_USER"  checktip="TARGET_USER_ACCOUNT_SELECT"  >
+				<@p.magnify id="assigneeId" field="assigneeId" url="${baseUrl}/user/listSelect.do?currentPageId=UserSelectGrid&singleSelect=true" callback="userCall" datatype="*"></@p.magnify>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="START_TIME"  permissionCode="START_TIME">
+				<@p.input type="text" id="startTime" datatype="*" errormsg="SELECT_START_TIME" field="startTime"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="END_TIME"  permissionCode="END_TIME">
+				<@p.input type="text" id="endTime" datatype="*" errormsg="SELECT_END_TIME" field="endTime"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
+

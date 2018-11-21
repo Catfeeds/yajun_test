@@ -1,0 +1,31 @@
+<#include "../../include/editorCommons.html">
+<@p.body noBreadcrumbs="true" noPermissionModule="true">
+	<@p.editForm url="" class="form-horizontal" >
+		<@p.formRow>
+			<@p.formColmd title="JOB_LOG_DETAIL_NAME" >
+				<@p.input type="text" value="${detail.taskName!}" readonly="readonly"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="JOB_LOG_DETAIL_CLASS_NAME">
+				<@p.input type="text" value="${detail.taskClassName!}" readonly="readonly"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="JOB_LOG_DETAIL_EXECUTION_TIME" >
+				<@p.input type="text" value="${detail.executionTime!}" readonly="readonly"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="JOB_LOG_DETAIL_EXECUTION_RESULT">
+				<@p.input type="text" value="${detail.executionResult!}" readonly="readonly"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="JOB_LOG_DETAIL_TIME_CONSUMING" >
+				<@p.input type="text" value="${detail.timeConsuming!}" readonly="readonly"></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="JOB_LOG_DETAIL_DETAIL_RESULT" class="col-md-8">
+				<textarea readonly="readonly">${detail.detailResult!}</textarea>
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</@p.body>

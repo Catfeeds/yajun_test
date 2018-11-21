@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="TpRecordUlocMapper" >
+<select id="findUnQualifiedCountByUlocNo" resultType="int" parameterType="java.util.HashMap">
+	SELECT count(*) from tp_record_uloc where OPERATION_TYPE =#{operaType} and ULOC_NO =#{ulocNo}
+	 <if test="workOrder != null and workOrder  != '' ">
+	        and SHIFT_NO= #{SHIFT_NO}
+	 </if>
+	 <if test="workOrder == null or workOrder  == '' ">
+	        and SHIFT_NO is null
+	 </if>
+</select>
+</mapper>  

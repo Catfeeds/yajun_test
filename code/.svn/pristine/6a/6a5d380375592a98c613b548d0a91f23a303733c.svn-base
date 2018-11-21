@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="format-detection" content="telephone=no" />
+	<link rel="stylesheet" href="../../mui/css/mui.min.css" />
+	<script src="../../mui/js/mui.min.js"></script>
+	<script type="text/javascript"  src="../../mui/js/app.js"></script>
+	<script src="../../js/jquery-1.8.0.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+<body>
+	<div class="page-content">
+		<header class="mui-bar mui-bar-nav ">
+			<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+			<h1 class="mui-title">个人中心</h1>
+		</header>
+		<div class="mui-content">
+			<ul class="mui-table-view mui-table-view-chevron">
+				<li class="mui-table-view-cell mui-media">
+					<a class="mui-navigate-right">
+						<img class="mui-media-object mui-pull-left head-img" src="../../images/user_img.jpg">
+						<div class="mui-media-body">
+							<span id="userName"></span>
+							<p class='mui-ellipsis' id="account"></p>
+						</div>
+					</a>
+				</li>
+			</ul>
+			<ul class="mui-table-view" style="margin-top: 10px;">
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right" href="./reset-pwd.html">
+						修改密码
+					</a>
+				</li>
+			</ul>
+			<ul class="mui-table-view" style="margin-top: 10px;">
+				<li class="mui-table-view-cell">
+					<a class="mui-navigate-right">
+						关于R5产线MES系统
+					</a>
+				</li>
+			</ul>
+			<ul class="mui-table-view" style="margin-top: 10px;">
+				<li class="mui-table-view-cell" style="text-align: center;" onclick="logout()">
+					<a>退出登录</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+<script>
+$(function(){
+	var user = JSON.parse(app.localStorage("user"));
+	$('#userName').text(user.name);
+	$('#account').text('账号：'+user.account);
+})
+ function logout(){
+ 	mui.confirm("确定要退出登录吗?", "提示", ["取消", "确定"], function(result){
+		if(result.index === 1){
+			app.localStorage("user","");
+			window.location.href="../login/login.html";
+		}
+	});
+ }
+
+</script>
+</body>
+</html>

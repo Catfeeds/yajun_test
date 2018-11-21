@@ -1,0 +1,57 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<script type="text/javascript">
+	function clickcallback(dialog){
+		var rowsData = getSelectedRows('dgPositionSelectGrid');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		$('#hidden_parentId').val(rowsData[0].id);
+		$('#display_parentId').val(rowsData[0].name);
+		dialog.close();
+	}
+	function beforePositionAddSubmit(){
+		var orgnizationId = '${orgnizationId}';
+		if(orgnizationId==0){
+			infoTip(commons_msg.plsSelOrg);
+			return false;
+		}
+		return true;
+	}
+</script>
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/position/add.do" class="form-horizontal"   permissionModule="POSITION">
+	<input id="beforeSubmit" type="hidden" value="beforePositionAddSubmit">
+	<@p.formRow>
+		<@p.formColmd title="ORG_NAME"  permissionCode="ORG_NAME">
+			<input type="hidden" name="systemData" value="NO">
+			<input type="hidden" name="orgnizationId" value="${orgnizationId!}">
+			<input  readonly="readonly" value="<#if orgnization??>${orgnization.name!}</#if>">
+		</@p.formColmd>
+		<@p.formColmd title="POSITION_PARENT" permissionCode="POSITION_PARENT">
+		  <@p.magnify id="parentId" field="parentId" url="${baseUrl}/position/listSelect.do?orgnizationId=${orgnizationId}&currentPageId=PositionSelectGrid&singleSelect=true" callback="clickcallback"></@p.magnify>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd title="POSITION_CODE"   permissionCode="POSITION_CODE">
+			  <input name="code" ajaxurl="${baseUrl}/position/checkCode.do"  datatype="*2-50">
+			  <!-- <#if orgnization?? && orgnization.type=='COMPANY'>
+			  &nbsp;&nbsp;<span style="color: red"><@s.m code='POSITION_CODE_FZ_CHECK_TIP'/></span>
+			  </#if> -->
+		</@p.formColmd>
+		<@p.formColmd title="POSITION_NAME"  checktip="POSITION_NAME_CHECK_TIP"   permissionCode="POSITION_NAME">
+			  <input name="name" datatype="s2-50" nullmsg='<@s.m code="POSITION_NAME_NULL" />'>
+		</@p.formColmd>
+	</@p.formRow>
+	<@p.formRow>
+		<@p.formColmd class="col-md-8" title="POSITION_DESCRIPTION"   permissionCode="POSITION_DESCRIPTION">
+			<textarea name="description" ignore="ignore" ></textarea>
+		</@p.formColmd>
+	</@p.formRow>
+</@p.editForm>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<#include "../../include/bootstrapTableCommons.html">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>钣金-故障停机明细</title>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<style type="text/css">
+	.report-panel{
+		width:100%;
+		height:75rem;
+		overflow: auto;
+		padding-top: 10px;
+	}
+</style>
+<script type="text/javascript">
+
+var dataObj={
+	gatherBar:{
+		chart:echarts.init(document.getElementById('gatherBar')),
+		xAxisData:[],
+		seriesData1:[],
+		seriesData2:[]
+	}
+};
+
+function getGatherBarData(){
+var option = {
+	    title:{
+	        text:'故障停机汇总',
+	    },
+	    grid: {
+		    left: '10%',
+		    bottom:'30%'
+	    },
+	    tooltip: {
+	        trigger: 'axis',
+	        axisPointer: {
+	            type: 'cross',
+	            crossStyle: {
+	                color: '#999'
+	            }
+	        }
+	    },
+	    toolbox: {
+	        feature: {
+	            dataView: {show: true, readOnly: false},
+	            magicType: {show: true, type: ['line', 'bar']},
+	            restore: {show: true},
+	            saveAsImage: {show: true}
+	        }
+	    },
+	    legend: {
+	        data:['故障停机汇总(分)','故障停机汇总(次)']
+	    },
+	    toolbox: {
+	        show : true,
+	        feature : {
+	            dataView : {show: true, readOnly: false},
+	            magicType : {show: true, type: ['line', 'bar']},
+	            restore : {show: true},
+	            saveAsImage : {show: true}
+	        }
+	    },
+	    dataZoom: [
+	        {show: true, realtime: true, start: 1,end: 30},
+            {type: 'inside',realtime: true, start: 1,end: 30}
+     	],
+	    xAxis: [
+	        {
+	            type: 'category',
+	            data: dataObj.gatherBar.xAxisData,
+	            axisPointer: {
+	                type: 'shadow'
+	            },
+	            axisLabel: {
+		            interval:0,
+		            rotate:50
+	            },
+	            boundaryGap : true
+	        }
+	    ],
+	    yAxis: [
+	        {
+	            type: 'value',
+	            name: '(分)',
+	        	max:function(value) {
+	                return parseInt(value.max*1.1)+1;
+	            },
+	            axisLabel: {
+	                formatter: '{value}'
+	            },
+	            splitLine:{  
+	                show:false
+	            }
+	        },
+	        {
+	            type: 'value',
+	            name: '(次)',
+	            max:function(value) {
+	                return parseInt(value.max*1.1)+1;
+	            },
+	            axisLabel: {
+	                formatter: '{value}'
+	            },
+	            splitLine:{  
+	                show:false
+	            }
+	        }
+	    ],
+	    series: [
+	        {
+	            name:'故障停机汇总(分)',
+	            type:'bar',
+	            itemStyle:{
+	                normal: {
+	                    color: '#4F81BD'
+	                }
+	            },
+	            label: {
+	                normal: {
+	                    show: true,
+	                    position: 'top'
+	                }
+	            },
+	            data:dataObj.gatherBar.seriesData1
+	        },
+	        {
+	            name:'故障停机汇总(次)',
+	            type:'line',
+	            yAxisIndex: 1,
+	            itemStyle:{
+	                normal: {
+	                    color: '#CD5F5B'
+	                }
+	            },
+	            data:dataObj.gatherBar.seriesData2
+	        }
+	    ]
+	};
+	return option;
+}
+
+
+function getReportData(_id){
+	var	data = {
+		'queryCondition[createTimeStart]':$("#createTimeStart").val(),
+		'queryCondition[createTimeEnd]':$("#createTimeEnd").val(),
+		'queryCondition[type]':_id
+	}; 
+ 	ajaxRequest("${baseUrl}/metalplateFauletdReport/noHaltReportData.do", data, function(result){
+ 		var data = result.data;
+ 		dataObj.gatherBar.seriesData1 = data.seriesData1;
+		dataObj.gatherBar.seriesData2 = data.seriesData2;
+		dataObj.gatherBar.xAxisData = data.xAxisData;
+		if(_id == "gatherBar"){
+			dataObj.gatherBar.chart.showLoading();
+			var option = getGatherBarData();
+			dataObj.gatherBar.chart.hideLoading();
+			dataObj.gatherBar.chart.setOption(option,true);
+		}
+ 	}, false);
+}
+</script>
+</head>
+<body>
+<div class="page-content" >
+<@p.searchPanel >
+		<@p.searchColumns showSeachButton="false">
+			<@p.input title="DATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="DATETIME_END" id="createTimeEnd" field="createTimeEnd"></@p.input>
+			<span class="frameInputSpan" style="margin-left: 30px;">
+				<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="conditionalQuery(this)"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+				<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="resetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+			</span>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	
+	<div class="report-panel">
+		<div id="gatherBar" style="width: 85%;height: 80%;"></div>
+	</div>
+</div>
+</body>
+<script type="text/javascript">
+	$(function(){
+		$('#createTimeStart').click(function(){
+			var createTimeEnd=$dp.$('createTimeEnd');
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm',
+				onpicked:function(){
+					createTimeEnd.click();
+				},
+				maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+			})
+		});
+		$('#createTimeEnd').click(function(){
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm',
+				minDate:'#F{$dp.$D(\'createTimeStart\')}'
+			})
+		});
+		$("#createTimeStart").val(initDateTime('yyyy-MM-dd hh:mm',-1,false));
+		$("#createTimeEnd").val(initDateTime('yyyy-MM-dd hh:mm',false,false));
+		getReportData("gatherBar");
+	});
+	
+	function conditionalQuery(searchBtnObj){
+		getReportData("gatherBar");
+	}
+	
+</script>
+</html>

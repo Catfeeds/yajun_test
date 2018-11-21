@@ -1,0 +1,194 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+ function aviDoCancelTask(){
+		var rowsData = getSelectedRows('dg${currentPageId}');
+		if (!rowsData || rowsData.length == 0) {
+			infoTip(commons_msg.plsSelData);
+			return;
+		}
+		var ids = [];
+		for(var i=0 ;i< rowsData.length;i++){
+			if(rowsData[i].isHold=="YES"){
+				errorTip("选中的第 "+(i+1)+" 行生产序列已HOLD,不能取消派工!");
+				return;
+			}
+			if(rowsData[i].status=="PART_ONLINE"){
+				errorTip("选中的第 "+(i+1)+" 行生产序列已部分上线,不能取消派工!");
+				return;
+			}
+			if(rowsData[i].status=="ALL_ONLINE"){
+				errorTip("选中的第 "+(i+1)+" 行生产序列已全部上线,不能取消派工!");
+				return;
+			}
+			if(rowsData[i].status=="FINSH"){
+				errorTip("选中的第 "+(i+1)+" 行生产序列已生产完成,不能取消派工!");
+				return;
+			}
+			if(rowsData[i].status=="CLOSE"){
+				errorTip("选中的第 "+(i+1)+" 行生产序列已关闭,不能取消派工!");
+				return;
+			}
+			ids.push(rowsData[i].id);
+		}
+		var url = "${baseUrl}/avi/doCancelTask.do?ids="+JSON.stringify(ids);
+		createConfirmWindow("取消派工","确认要取消派工吗？",url, 'dg${currentPageId}');
+	}
+ 
+ /**
+  * HOLD/解HOLD
+  */
+ function aviDoHoldOrNotHold(){
+ 	var rowsData = getSelectedRows('dg${currentPageId}');
+ 	if (!rowsData || rowsData.length == 0) {
+ 		infoTip(commons_msg.plsSelData);
+ 		return;
+ 	}
+ 	if (rowsData.length > 1) {
+ 		infoTip(commons_msg.plsSelOne);
+ 		return;
+ 	}
+ 	if(rowsData[0].isHold=="YES"){
+ 		var url = "${baseUrl}/avi/doCancelHold.do?id="+rowsData[0].id;
+ 		createConfirmWindow("解HOLD","确认要解HOLD吗？",url, 'dg${currentPageId}');
+ 	}else{
+ 		var url = "${baseUrl}/avi/doHoldInput.do?id="+rowsData[0].id;
+ 		createwindow("请输入HOLD理由", url, 'dg${currentPageId}');
+ 	}
+ }
+ 
+ /**
+	 *查看BOM信息
+	 */
+	function showBom(value){
+	 	var rowsData = getSelectedRows('dg${currentPageId}');
+	 	if (!rowsData || rowsData.length == 0) {
+	 		infoTip("请先选择生产序列数据!");
+	 		$("#tabBom").hide();
+			$("#tabAvi").hide();
+	 		return;
+	 	}
+	 	if (rowsData.length > 1) {
+	 		infoTip(commons_msg.plsSelOne);
+	 		$("#tabBom").hide();
+			$("#tabAvi").hide();
+	 		return;
+	 	}
+	 	if(value!=1){
+	 		$("#viewAviBom").click();
+	 	}
+		$.ajax({
+	        url: '${baseUrl}/aviBom/listInput.do?currentPageId=aviBomGridId&params=queryCondition[toPorderAviId]='+rowsData[0].id,
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:false,
+	        data : {
+	        	aviId:rowsData[0].id
+	        },
+	        success: function(html){
+        		$("#tabBom").html(html);
+	        }
+	    });
+	}
+ 
+	/**
+	 *查看工艺路径
+	 */
+	function showPath(value){
+	 	var rowsData = getSelectedRows('dg${currentPageId}');
+	 	if (!rowsData || rowsData.length == 0) {
+	 		infoTip("请先选择生产序列数据!");
+	 		$("#tabBom").hide();
+			$("#tabAvi").hide();
+	 		return;
+	 	}
+	 	if (rowsData.length > 1) {
+	 		infoTip(commons_msg.plsSelOne);
+	 		$("#tabBom").hide();
+			$("#tabAvi").hide();
+	 		return;
+	 	}
+	 	if(value!=1){
+	 		$("#viewAviPath").click();
+	 	}
+		$.ajax({
+	        url: '${baseUrl}/aviPath/listInput.do?currentPageId=aviPathGridId&params=queryCondition[toPorderAviId]='+rowsData[0].id,
+	        cache: false,
+	        global: false,
+	        type: "GET",
+	        dataType: "html",
+	        async:false,
+	        data : {
+	        	aviId:rowsData[0].id
+	        },
+	        success: function(html){
+        		$("#tabAvi").html(html);
+	        }
+	    });
+	}
+	
+	function printCard(){
+		var rowsData = getSelectedRows('dg${currentPageId}');
+	 	if (!rowsData || rowsData.length == 0) {
+	 		infoTip(commons_msg.plsSelData);
+	 		return;
+	 	}
+	 	if (rowsData.length > 1) {
+	 		infoTip(commons_msg.plsSelOne);
+	 		return;
+	 	}
+	 	var url="${baseUrl}/avi/printTransferCard.do?id="+rowsData[0].id;
+	 	window.open(url,"打印预览");
+	}
+</script>
+<@p.body title="PORDER_LIST_TITLE" permissionModule="PORDER_AVI" noBreadcrumbs="true">	
+	<div style="color: #428bca;text-align:center; margin:10px" >生产序列</div>
+	<@p.searchPanel >
+	<@p.toolbar> 
+			<@p.button title="PORDER_PRINT_CARD" permissionCode="PorderAviPrintCard" onclick="printCard();" iconCls="print" />
+			<@p.button title="PORDER_AVI_CANCEL_TASK" permissionCode="PorderAviCancelTask" iconCls="edit"onclick="aviDoCancelTask()"></@p.button>
+			<@p.button title="PORDER_HOLD" permissionCode="PorderAviHold" iconCls="edit" onclick="aviDoHoldOrNotHold()"></@p.button>
+			<@p.button title="PORDER_EXPORT" permissionCode="PorderAviExport" iconCls="upload-alt"  url="${baseUrl}/avi/exportData.do?toPorderId="+"${toPorderId}" downName="PORDER_AVI_EXPORT_NAME" type="down"></@p.button>
+			<@p.button title="PORDER_AVI_SHOW_PATH" permissionCode="PorderAviShowPath" onclick="showPath();" iconCls="eye-open"></@p.button>
+			<@p.button title="PORDER_AVI_SHOW_BOM" permissionCode="PorderAviShowBom" onclick="showBom();" iconCls="eye-open"></@p.button>
+	</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/avi/list.do?${params!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PORDER_AVI_NO" field="no" permissionCode="PORDER_AVI_NO"></@p.column>
+		<@p.column title="PORDER_AVI_PATH" field="path.no" permissionCode="PORDER_AVI_PATH" formatter="aviRenderPath"></@p.column>
+		<@p.column title="PORDER_AVI_BOM" field="bom.bomversion" permissionCode="PORDER_AVI_BOM"></@p.column>
+		<@p.column title="PORDER_AVI_QTY" field="qty" permissionCode="PORDER_AVI_QTY"></@p.column>
+		<@p.column title="PORDER_AVI_ONLINEQTY" field="onlineQty" permissionCode="PORDER_AVI_ONLINEQTY"></@p.column>
+		<@p.column title="PORDER_AVI_OFFLINEQTY" field="offlineQty" permissionCode="PORDER_AVI_OFFLINEQTY"></@p.column>
+		<@p.column title="PORDER_AVI_SCRAPQTY" field="scrapQty" permissionCode="PORDER_AVI_SCRAPQTY"></@p.column>
+		<@p.column title="PORDER_AVI_LINE" field="line.no" permissionCode="PORDER_AVI_LINE" formatter="aviRenderLine"></@p.column>
+		<@p.column title="PORDER_AVI_PRODUCT_START_TIME" field="productStartTime" permissionCode="PORDER_AVI_PRODUCT_START_TIME"></@p.column>
+		<@p.column title="PORDER_AVI_PRODUCT_END_TIME" field="productEndTime" permissionCode="PORDER_AVI_PRODUCT_END_TIME"></@p.column>
+		<@p.column title="PORDER_AVI_STATUS" field="status" permissionCode="PORDER_AVI_STATUS"  formatter="aviRenderStatus"></@p.column>
+		<@p.column title="PORDER_AVI_ISHOLD" field="isHold" permissionCode="PORDER_AVI_ISHOLD" formatter="aviRenderIsHold"></@p.column>
+		<@p.column title="PORDER_AVI_NOTE" field="note" permissionCode="PORDER_AVI_NOTE"></@p.column>
+	</@p.dataGrid>
+</@p.body>
+<script type="text/javascript">
+function aviRenderPath(value,record){
+	if(record.path.no){
+		return record.path.no+"-"+record.path.name;
+	}
+	return "";
+}
+function aviRenderStatus(value){
+	return entryRenderer("AVI_STATUS",value);
+}
+function aviRenderLine(value,record){
+	if(record.line.no){
+		return record.line.no+"-"+record.line.nameCn;
+	}
+	return "";
+}
+
+function aviRenderIsHold(value){
+	return entryRenderer("YES_OR_NO",value);
+}
+</script>

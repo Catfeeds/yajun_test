@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../../include/editorCommons.html"> 
+<script>
+
+</script>
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+<@p.editForm url="${baseUrl}/aviPath/update.do" class="form-horizontal" idValue=bean.id permissionModule="AVI_PATH">
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_ULOC" permissionCode="AVI_PATH_ULOC">
+				<@p.input type="select"  options=ulocOptions  datatype="*"  field="tmUlocId"  value="${bean.tmUlocId!}"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_TYPE" permissionCode="AVI_PATH_IS_ONLINE">
+			 	<input type="checkbox" name="ulocType" id="ONLINE" value="ONLINE" <#if "${bean.isOnline!}"=="YES">checked="true"</#if>><label for="ulocType_1" style="margin-right: 10px;">上线点</label>
+				<input type="checkbox" name="ulocType" id="OFFLINE"value="OFFLINE" <#if "${bean.isOffline!}"=="YES">checked="true"</#if>><label for="ulocType_2" style="margin-right: 10px;">下线点</label>
+			 	<input type="hidden" id="ulocQty" value="2" class="col-xs-10 col-sm-5 form-control">
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_OPERATE_TIME" permissionCode="AVI_PATH_OPERATE_TIME">
+				 <input name="operateTime" class="inputxt" maxlength="36" datatype="n" ignore = "ignore" value="${bean.operateTime!}"/>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_INTERVAL_TIME" permissionCode="AVI_PATH_INTERVAL_TIME">
+				<input name="intervalTime" class="inputxt" maxlength="36" datatype="n" ignore = "ignore" value="${bean.intervalTime!}"/>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_IS_SIP" permissionCode="AVI_PATH_IS_SIP">
+				<@p.input type="select"  field="isSip" options=yesOrNoOptions excludeSelectOption="true" value="${bean.isSip!}"></@p.input>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_IS_AUTO_INSTORAGE" permissionCode="AVI_PATH_IS_AUTO_INSTORAGE">
+				 <@p.input type="select"  value ="${bean.isAutoInstorage!}" excludeSelectOption="true" field="isAutoInstorage" options=yesOrNoOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_INSTORAGE_TIME" permissionCode="AVI_PATH_INSTORAGE_TIME">
+				 <input name="instorageTime" class="inputxt"  value ="${bean.instorageTime!}"maxlength="36" datatype="n" ignore = "ignore"/>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_IS_REPORTED" permissionCode="AVI_PATH_IS_REPORTED">
+				 <@p.input type="select"  value="${bean.isReported!}" excludeSelectOption="true" field="isReported" options=yesOrNoOptions ></@p.input>
+			</@p.formColmd>
+		</@p.formRow>
+		
+		<@p.formRow>
+			<@p.formColmd title="PATH_ULOC_ERP_ULOC_CODE" permissionCode="AVI_PATH_ERP_ULOC_CODE">
+				<input name="erpUlocCode" class="inputxt" value="${bean.erpUlocCode!}"  maxlength="100" datatype="no" ignore = "ignore"/>
+			</@p.formColmd>
+			<@p.formColmd title="PATH_ULOC_NOTE" permissionCode="AVI_PATH_NOTE">
+				 <input name="note" class="inputxt" value="${bean.note!}" maxlength="300" />
+			</@p.formColmd>
+		</@p.formRow>
+		<table id="ppathUlocIdsTable_update">
+			<tbody>
+				<tr>
+					<td>上一节点集合:</td>
+					<td>&nbsp;&nbsp;&nbsp;&nbsp;<font color="red">*</font></td>
+					<td width="600"><input id="ulocs_update" readonly="readonly" class ="col-xs-10 col-sm-5 form-control" width="80%"/></td>
+					<input class="hidden"  name ="parentId" id="ppathUlocIds_update" value="${bean.parentId!}" />
+					<td> <a style="margin-left: 5px;vertical-align: middle;cursor: pointer;" onclick="hideSeqsUpdate();">清除</a></td>
+				</tr>
+			</tbody>
+		</table>
+		 <table id="ulocArrayTable_update">
+			<#if parents??>
+				<tbody>
+					 <#list parents as pathUloc>
+					   <#if pathUloc.isOffline != "YES" && pathUloc.seq!="${bean.seq!}">
+					 	 <#if pathUloc_index %5== 0>
+					 		<tr><td width="200"><input type="checkbox" name="checkbox" id="${pathUloc.seq!}_${pathUloc.ulocNo}-${pathUloc.ulocName}" value="${pathUloc.id}" onclick="clickCheckBoxUpdate(this);"/>${pathUloc.seq}_${pathUloc.ulocNo}-${pathUloc.ulocName}</td>
+					 		<#else> <td width="200"><input type="checkbox" name="checkbox" id="${pathUloc.seq!}_${pathUloc.ulocNo}-${pathUloc.ulocName}" value="${pathUloc.id}" onclick="clickCheckBoxUpdate(this);"/>${pathUloc.seq}_${pathUloc.ulocNo}-${pathUloc.ulocName}</td>
+					 	 </#if>
+					 	</#if>
+					  </#list>
+					  </tr>
+					</tbody>
+				</#if>
+		 </table>
+		</div>
+	</@p.editForm>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	
+	Array.prototype.S=String.fromCharCode(2);
+	Array.prototype.in_array=function(e){
+	    var r=new RegExp(this.S+e+this.S);
+	    return (r.test(this.S+this.join(this.S)+this.S));
+	};
+	
+	$("input[name='ulocType']").each(function(){
+		if(this.checked==true&&this.value == "ONLINE"){
+			$("#ppathUlocIdsTable_update").hide();
+			$("#ulocArrayTable_update").hide();
+		}
+	});
+	
+	var ulocs_update="";
+	var ppathUlocIds = $("#ppathUlocIds_update").val().split(",");
+	$("input[name='checkbox']").each(function(i,obj){
+		if(ppathUlocIds.in_array(obj.value)){
+			ulocs_update = ulocs_update==""?obj.id:(ulocs_update+";"+obj.id);
+			this.checked=true;
+		}
+	});
+	$("#ulocs_update").val(ulocs_update);
+});
+
+$("input[name = 'ulocType']").click(function(){
+	if(this.id == "ONLINE"&&this.checked==true){
+		$("#ppathUlocIdsTable_update").hide();
+		$("#ulocArrayTable_update").hide();
+		hideSeqsUpdate();
+	}else{
+		if($("#ulocQty").val()>0){
+			$("#ppathUlocIdsTable_update").show();
+			$("#ulocArrayTable_update").show();
+		}
+	}
+	if($("#ulocQty").val()>0){
+		$("input[name = 'ulocType']").not(this).attr('checked',false);
+	}
+});
+
+
+function hideSeqsUpdate(){
+	$("#ulocs_update").val("");
+	$("#ppathUlocIds_update").val("");
+	$("input[name='checkbox']").each(function(){
+		this.checked=false;
+	});
+}
+
+function clickCheckBoxUpdate(obj){
+	if(obj.checked){
+		$("#ulocs_update").val($("#ulocs_update").val()==""?obj.id:($("#ulocs_update").val()+";"+obj.id));
+		$("#ppathUlocIds_update").val($("#ppathUlocIds_update").val()==""?obj.value:($("#ppathUlocIds_update").val()+","+obj.value));
+	}else{
+		var ulocIds = $("#ppathUlocIds_update").val().split(",");
+		var ppathUlocIds = "";
+		for(var i=0;i<ulocIds.length;i++){
+			if(ulocIds[i] != obj.value){
+				ppathUlocIds = ppathUlocIds==""?ulocIds[i]:(ppathUlocIds +","+ulocIds[i]);
+			}
+		}
+		$("#ppathUlocIds_update").val(ppathUlocIds);
+		var ulocs = $("#ulocs_update").val();
+		if(ulocs.indexOf(";"+obj.id)!=-1){
+			ulocs = ulocs.replace(";"+obj.id,"");
+		}else if(ulocs.indexOf(obj.id+";")!=-1){
+			ulocs = ulocs.replace(obj.id+";","");
+		}else{
+			if(ulocs.indexOf(obj.id)!=-1){
+				ulocs = ulocs.replace(obj.id,"");	
+			}
+		}
+		$("#ulocs_update").val(ulocs);
+	}
+}
+</script>

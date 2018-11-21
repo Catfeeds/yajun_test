@@ -1,0 +1,25 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+
+<#include "../../../include/bootstrapTableCommons.html">
+
+<@p.body title='USER_SELECT_ROLE' permissionModule="PATH_ULOC_PARAMETER" noBreadcrumbs="true" >
+<input type="hidden" name ="tmPathUlocId" value="${tmPathUlocId!}"/>
+	<@p.searchPanel gridId="add_param_sett_gridId">
+		<@p.searchColumns>
+			<@p.input title="PATH_ULOC_PARAMETER_NAME" id="tmEquipmentId"  type="select"  field="tmEquipmentId" options=tmEquipment  ></@p.input>
+			<@p.input title="PATH_ULOC_PARAMETER_PARAMETERNAME" field="parameterName"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<!-- PAGE CONTENT BEGINS -->
+		 <@p.dataGrid  id="add_param_sett_gridId"  url="${baseUrl}/path/uloc/parameter/getEquipmentByParameterData.do?${params!}" singleSelect=singleSelect>
+				<@p.column checkbox="true" ></@p.column>
+			<@p.column title="PATH_ULOC_PARAMETER_EQUIPMENTNAME" field="TMEQUIPMENTNOANDNAME" permissionCode="PATH_ULOC_PARAMETER_EQUIPMENTNAME"></@p.column>
+			<@p.column title="PATH_ULOC_PARAMETER_PARAMETERNAME" field="PARAMETERNAME" permissionCode="PATH_ULOC_PARAMETER_PARAMETERNAME"></@p.column>
+			<@p.column title="PATH_ULOC_PARAMETER_PARAMETEREXPLAIN" field="PARAMETEREXPLAIN" permissionCode="PATH_ULOC_PARAMETER_PARAMETEREXPLAIN"></@p.column>
+		</@p.dataGrid>
+</@p.body>
+
+<script type="text/javascript">
+
+
+</script>

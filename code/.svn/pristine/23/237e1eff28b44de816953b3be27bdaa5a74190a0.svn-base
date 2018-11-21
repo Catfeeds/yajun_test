@@ -1,0 +1,219 @@
+<#include "../../../../include/bootstrapTableCommons.html">
+<@p.body title="PATH_LIST_TITLE" permissionModule="PATH_ULOC_SIP" noBreadcrumbs="true">	
+<!-- <div style="color: #428bca;text-align:center; margin:10px" >参数信息</div> -->
+<input id="sip_tmPathUlocId" type="hidden" value="${tmPathUlocId!}" />
+<input id="sip_rectSeq" type="hidden" value="${rectSeq!}"/>
+<input id="sip_ulocId" type="hidden" value="${tmUlocId!}">
+	<@p.searchPanel >
+		<@p.toolbar> 
+			<@p.button title="PATH_ADD" permissionCode="PathUlocSipAdd" iconCls="plus" onclick="sipAdd();" type="button"  ></@p.button>
+			<@p.button title="PATH_UPDATE" permissionCode="PathUlocSipUpdate" iconCls="edit" onclick="sipUpdate()" type="button"></@p.button>
+			<@p.button title="PATH_DELETE" permissionCode="PathUlocSipDelete" iconCls="trash" onclick="sipDelete()" type="button"></@p.button>
+<!-- 			<@p.button title="PATH_IMPORT" permissionCode="PathUlocSipImport" downName="PATH_ULOC_SIP_IMPORT_NAME" onclick="importData();" iconCls="signin" /> -->
+<!-- 			<@p.button title="PATH_EXPORT" permissionCode="PathUlocSipExport" downName="PATH_ULOC_SIP_EXPORT_NAME" url="${baseUrl}/path/uloc/sip/exportData.do?tmPathUlocId=${tmPathUlocId!}"  iconCls="upload-alt" type="down" /> -->
+<!-- 			<@p.button title="PATH_EXPORT_TEMPLTE" permissionCode="PathUlocSipImport" iconCls="upload-alt"  url="${baseUrl}/path/uloc/sip/exportTemplate.do" type="down"></@p.button> -->
+		</@p.toolbar>
+	</@p.searchPanel>
+	<div id="sip_table_div" style="display: none">
+		<table class="table table-bordered table-hover table-condensed">
+			<thead><tr>
+			<th style="text-align: center"><input type="checkbox" id="sipAllChecked" onclick="sipAllChecked(this);"></th>
+			<th>质检项编号</th><th>质检项名称</th><th>质检项表达式</th><th>质检项变量</th><th>质检项说明</th><th>备注</th></tr></thead>
+			<tbody id="table_sip">	</tbody>
+		</table>
+	</div>
+	
+	<div id="dip_dataGrid_div" style="display: none">
+	<@p.dataGrid url="${baseUrl}/path/uloc/sip/graph_list.do?tmPathUlocId=${tmPathUlocId!}&tmUlocId=${tmUlocId!}">
+		<@p.column checkbox="true" ></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_NO" field="parameter.code" permissionCode="PATH_ULOC_SIP_PARAMETER_NO"></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_NAME" field="parameter.name" permissionCode="PATH_ULOC_SIP_PARAMETER_NAME" ></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_REGULAREXRESSION" field="parameter.regularExpression" permissionCode="PATH_ULOC_SIP_PARAMETER_REGULAREXRESSION" ></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_VARIUABLE_NAME" field="parameter.variuableName" permissionCode="PATH_ULOC_SIP_PARAMETER_VARIUABLE_NAME"></@p.column>
+		<@p.column title="PATH_ULOC_SIP_PARAMETER_NOTE" field="parameter.note" permissionCode="PATH_ULOC_SIP_PARAMETER_NOTE"></@p.column>
+		<@p.column title="PATH_ULOC_SIP_NOTE" field="note" permissionCode="PATH_ULOC_SIP_NOTE"></@p.column>
+	</@p.dataGrid>
+	</div>
+</@p.body>
+<script type="text/javascript">
+$(function(){
+	$(".clearfix").hide();
+	if($("#sip_tmPathUlocId").val()==""){
+		loadSipArray($("#sip_rectSeq").val());
+		$("#sip_table_div").show();
+	}else{
+		$("#dip_dataGrid_div").show();
+	}
+});
+
+function loadSipArray(rectSeq){
+	$(sipArray).each(function(i,sipObject){
+		if(sipObject.key ==rectSeq){
+			var tableStr = "";
+			$(sipObject.value).each(function(j,bean){
+				var parameter  = bean.parameter;
+				tableStr += "<tr id="+bean.id+"><td style='text-align: center'><input type='checkbox' id="+bean.id+" value="
+									+bean.tsParameterId+" name='sipCheckbox'></td><td>"+parameter.code+"</td><td>"+parameter.name+"</td><td>"
+									+parameter.variuableName+"</td><td>"+parameter.defaultValue+"</td><td>"+parameter.note+"</td><td>"	+bean.note+"</td></tr>";
+			});
+			$("#table_sip").html(tableStr);
+			$("#table_sip").find("tr td").not("tr td:first-child").bind('click',function(){
+				clickSipTr($(this).parent("tr").attr("id"));
+			});
+			return false;
+		}
+	});
+}
+function clickSipTr(checkId){
+	$("#sipAllChecked").attr("checked",false);
+	$("input[name='sipCheckbox']").each(function(){
+		if(this.id == checkId){
+			this.checked=true;
+		}else{
+			this.checked =false;
+		}
+	});
+}
+function sipAllChecked(obj){
+	if(obj.checked){
+		$("input[name='sipCheckbox']").each(function(){
+			this.checked =true;
+		});
+	}else{
+		$("input[name='sipCheckbox']").each(function(){
+			this.checked =false;
+		});
+	}
+}
+
+function sipAdd(){
+	if($("#sip_tmPathUlocId").val()!=""){
+		url="${baseUrl}/path/uloc/sip/graph_addInput.do?tmPathUlocId=${tmPathUlocId!}" ;
+		add("<@s.m code="PATH_ADD" />", url, "dg${currentPageId}");
+	}else{
+		var id="";
+		$("input[name='sipCheckbox']").each(function(){
+				id = id==""?this.value:(id+","+this.value);
+		});
+		var url="${baseUrl}/path/uloc/sip/graph_addInput.do?rectSeq=${rectSeq!}&tmUlocId=${tmUlocId!}&tsParameterIds="+id;
+		createwindow("<@s.m code="PATH_ADD" />", url, "dg${currentPageId}");
+	}
+}
+
+function sipUpdate(){
+	if($("#sip_tmPathUlocId").val()!=""){
+		var url="${baseUrl}/path/uloc/sip/graph_updateInput.do?tmPathUlocId=${tmPathUlocId!}";
+		update("<@s.m code="PATH_UPDATE" />", url, "dg${currentPageId}");
+	} else {
+		var checkdCount = 0;
+		var id;
+		$("input[name='sipCheckbox']").each(function(){
+			if(this.checked){
+				checkdCount++;
+				id= this.id;
+			}
+		});
+		if(checkdCount == 0){
+			infoTip("请选择数据!");
+			return;
+		}
+		if(checkdCount >1){
+			infoTip("请选择一条数据!");
+			return;
+		}
+		var sipObj="";
+		var tsParameterIds = "";
+		$(sipArray).each(function(i,obj){
+			if(obj.key ==$("#sip_rectSeq").val()){
+				$(obj.value).each(function(j,bean){
+					if(bean.id == id){
+						sipObj = bean;
+					}
+					tsParameterIds = tsParameterIds==""?bean.tsParameterId:(tsParameterIds+","+bean.tsParameterId);
+				});
+				return false;
+			}
+		});
+		var url="${baseUrl}/path/uloc/sip/graph_updateInput.do?tmUlocId=${tmUlocId!}&tsParameterIds="+tsParameterIds+"&rectSeq=${rectSeq!}&id="
+						+sipObj.id+"&tsParameterId="+sipObj.tsParameterId+"&note="+sipObj.note;
+		createwindow("<@s.m code="PATH_UPDATE" />", url, "dg${currentPageId}");
+	}
+}		
+
+function sipDelete(){
+		if($("#sip_tmPathUlocId").val()!=""){
+			frame_grid_remove("${baseUrl}/path/uloc/sip/delete.do","dg${currentPageId}");
+		} else {
+			var checkdCount = 0;
+			var ids = new Array();
+			$("input[name='sipCheckbox']").each(function(){
+				if(this.checked){
+					checkdCount++;
+					ids.push(this.id);
+				}
+			});
+			if(checkdCount == 0){
+				infoTip("请选择数据!");
+				return;
+			}
+			
+			if(confirm("确认要删除吗?")){
+				var result = getSipIsExiameList($("#sip_ulocId").val());
+				var isExame=false;
+				$(sipArray).each(function(i,item){
+					if(item.key == $("#sip_rectSeq").val()){
+						$(ids).each(function(k,id){
+							$(item.value).each(function(j,bean){
+								if(bean.id == id){
+									//校验是否为必检项
+									$(result).each(function(k,item){
+										if(item.id  == bean.tsParameterId){
+											isExame = true;
+											errorTip("检查项["+bean.parameter.code+"]是必检项，不能删除!");
+											return false;
+										}
+									});
+									if(isExame){
+										return false;
+									}
+									item.value.splice(j,1);
+									return false;
+								}
+							});
+							if(isExame){
+								return false;
+							}
+						});
+						return false;
+					}
+				});
+				$("#sipAllChecked").attr("checked",false);
+				loadSipArray($("#sip_rectSeq").val());
+			}
+		}
+}
+
+function getSipIsExiameList(tmUlocId){
+	var data="";
+	$.ajax({
+		url:"${baseUrl}/path/uloc/sip/getSipIsExiameList.do",
+		type:"GET",
+		dataType:"json",
+		data:{
+			"tmUlocId":tmUlocId
+		},
+		async:false,
+		success:function(result){
+			data = result;
+		}
+	});
+	return data;
+}
+/* function renderYesOrNo(value) {
+	return entryRenderer('YES_OR_NO', value);
+} */
+
+function importData(){ 
+    importFile("<@s.m code="PATH_IMPORT" />", "${baseUrl}/PATH/importData.do", "dg${currentPageId}","${baseUrl}/PATH/exportTemplate.do");
+}
+</script>

@@ -1,0 +1,82 @@
+<script type="text/javascript">
+    // BOOTSTRAP TABLE INIT
+    // =======================
+
+    $(function () {
+        $('[data-toggle="table"]').bootstrapTable({
+        	'onDblClickRow':function(row, $element, field) {
+        		var dgId = this.id;
+        		$('#'+dgId).bootstrapTable('uncheckAll');
+        		$('#'+dgId).bootstrapTable('check', $($element).data('index'));
+        		window.console.log($('#'+dgId).parents('.bootstrap-table').prev().prev('.toolbar').html());
+        		$('#'+dgId).parents('.bootstrap-table').prev().prev('.toolbar').find("span[onclick^='detail(']").click();
+        	},
+        	'onLoadSuccess': function(status) {
+        		if(status.success == false) {
+        			return errorTip(status.message);
+        		}
+        		var dgId = this.id;
+        		$('#'+dgId).parents('.fixed-table-container').find('.fixed-table-body-columns').find('input[type="checkbox"]').each(function(index, fixcheckbox) {
+        			$(fixcheckbox).change(function() {
+        				if (fixcheckbox.checked) {
+	        				$('#'+dgId).bootstrapTable('check', $(fixcheckbox).data('index'));
+						} else {
+							$('#'+dgId).bootstrapTable('uncheck', $(fixcheckbox).data('index'));
+						}
+        			});
+        		});
+        		var btSelectAll = $('#'+dgId).parents('.fixed-table-container').find('.fixed-table-header-columns').find('input[type="checkbox"][name="btSelectAll"]')[0];
+        		$(btSelectAll).change(function() {
+       				$('#'+dgId).parents('.fixed-table-container').find('.fixed-table-body-columns').find('input[type="checkbox"]').each(function(index, fixcheckbox) {
+           				if (btSelectAll.checked) {
+   	        				$('#'+dgId).bootstrapTable('check', $(fixcheckbox).data('index'));
+   						} else {
+   							$('#'+dgId).bootstrapTable('uncheck', $(fixcheckbox).data('index'));
+   						}
+               		});
+        		});
+        		$('#'+dgId).find("td").each(function(index, element){
+        			if(!$(element).hasClass("bs-checkbox")){
+        				$(element).attr("title",$(element).html());
+        			}
+        		});
+        	},
+        	'onCheck': function(row, $element) {
+        		var dgId = this.id;
+        		$('#'+dgId).parents('.fixed-table-container').find('.fixed-table-body-columns').find('input[type="checkbox"][data-index="'+$($element).data('index')+'"]').prop('checked', true);
+        		var allchecked = true;
+        		$('#'+dgId).parents('.fixed-table-container').find('.fixed-table-body-columns').find('input[type="checkbox"]').each(function(index, fixcheckbox) {
+        			if (!fixcheckbox.checked) {
+        				allchecked = false;
+        			}
+        		});
+        		if (allchecked) {
+        			$('#'+dgId).parents('.fixed-table-container').find('.fixed-table-header-columns').find('input[type="checkbox"][name="btSelectAll"]').prop('checked', true);
+				}
+        	},
+        	'onUncheck': function(row, $element) {
+        		var dgId = this.id;
+        		$('#'+dgId).parents('.fixed-table-container').find('.fixed-table-body-columns').find('input[type="checkbox"][data-index="'+$($element).data('index')+'"]').prop('checked', false);
+        		$('#'+dgId).parents('.fixed-table-container').find('.fixed-table-header-columns').find('input[type="checkbox"][name="btSelectAll"]').prop('checked', false);
+        	}
+        });
+    	$(".fixed-table-toolbar").each(function() {
+    		this.hidden = true;
+    		/* if($.trim($(this).html()) == '') {
+    			$(this).addClass("fixed-table-toolbar-0");
+    		} */
+    	});
+    	$(window).resize(function() {
+            $('[data-toggle="table"]').bootstrapTable('resetView')
+        });
+    	$(".searchColumns").bind("keydown",function(e){
+            // 兼容FF和IE和Opera    
+	    	var theEvent = e || window.event;    
+	    	var code = theEvent.keyCode || theEvent.which || theEvent.charCode;    
+	    	if (code == 13) {    
+	    	    //回车执行查询
+	                $(this).find(".btnSearchSubmit").click();
+	            }    
+	    });
+    });
+</script>

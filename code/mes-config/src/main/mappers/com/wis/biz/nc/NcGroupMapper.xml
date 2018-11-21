@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="NcGroupMapper">
+	
+	<!-- 分页查询 -->
+	<select id="findByPage" resultType="com.wis.mes.master.nc.entity.TmNcGroup" parameterType="java.util.HashMap">
+		SELECT a.ID,a.NAME FROM (SELECT ID,NAME FROM TM_NC_GROUP ORDER BY ID) a LIMIT #{start},5;
+	</select>
+	
+	<!-- 获取条数 -->
+	<select id="getCount" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+		SELECT COUNT(*) FROM TM_NC_GROUP;
+	</select>
+	
+</mapper>

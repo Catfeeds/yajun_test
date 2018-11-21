@@ -1,0 +1,64 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<#include "../include/bootstrapTableCommons.html">
+<script type="text/javascript">
+	$(function(){
+		$('#createTimeStart').click(function(){
+			var createTimeEnd=$dp.$('createTimeEnd');
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm',
+				onpicked:function(){
+					createTimeEnd.click();
+				},
+				maxDate:'#F{$dp.$D(\'createTimeEnd\')}'
+			})
+		});
+		$('#createTimeEnd').click(function(){
+			WdatePicker({
+				autoPickDate:true,
+				dateFmt:'yyyy-MM-dd HH:mm',
+				minDate:'#F{$dp.$D(\'createTimeStart\')}'
+			})
+		});
+		$("#createTimeStart").val(initDateTime('yyyy-MM-dd hh:mm',-1,false));
+		$("#createTimeEnd").val(initDateTime('yyyy-MM-dd hh:mm',false,false));
+	});
+	function rendClassGroup(value){
+		return entryRenderer('CLASS_GROUP', value);
+	}
+	function rendShiftno(value){
+		return entryRenderer('SHIFT_TYPE', value);
+	}
+	function downLoadAjax(){
+		downAjax("","${baseUrl}/tmpRegionPrdInfo/exportData.do",'dg${currentPageId}');
+	}
+</script>
+
+<@p.body title="REGION_STATUS_LIST_TITLE" permissionModule="REGION_PRD_INFO">
+  <@p.searchPanel >
+		<@p.searchColumns>
+			<@p.input title="REGION_PRD_INFO_NO" type="select" field="regionNo" options=regionMarks></@p.input>
+			<!-- <@p.input title="REGION_PRD_INFO_CLASSES" type="select" field="worktime.shiftno" options=codeClassOrders ></@p.input> -->
+			<@p.input title="CREATETIME_START" id="createTimeStart" field="createTimeStart"></@p.input>
+			<@p.input title="CREATETIME_END" id="createTimeEnd" field="createTimeEnd" ></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar id="toolbar">
+			<@p.button title="BTN_EXPORT" permissionCode="regionStatusexport"  onclick="downLoadAjax()" iconCls="upload-alt" type="button" />
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/tmpRegionPrdInfo/list.do"  >
+			<@p.column checkbox="true"></@p.column>
+			<@p.column title="REGION_PRD_INFO_DATE" field="createTime" permissionCode="REGION_PRD_INFO_DATE" ></@p.column>
+			<@p.column title="REGION_PRD_INFO_PLANT" field="plant.no" permissionCode="REGION_PRD_INFO_PLANT"></@p.column>
+			<@p.column title="REGION_PRD_INFO_LINE" field="line.nameCn" permissionCode="REGION_PRD_INFO_LINE"></@p.column>
+			<@p.column title="REGION_PRD_INFO_CLASSES" field="worktime.shiftno" permissionCode="REGION_PRD_INFO_CLASSES" formatter="rendShiftno"></@p.column>
+			<@p.column title="REGION_PRD_INFO_CLASSES_GROUP" field="tmClassManager.classGroup" permissionCode="REGION_PRD_INFO_CLASSES_GROUP" formatter="rendClassGroup"></@p.column>
+			<@p.column title="REGION_PRD_INFO_NO" field="regionNo" permissionCode="REGION_PRD_INFO_NO" ></@p.column>
+			<@p.column title="REGION_PRD_INFO_GRAIN_MOVING_TIME" field="grainMovingTime" permissionCode="REGION_PRD_INFO_GRAIN_MOVING_TIME"></@p.column>
+			<@p.column title="REGION_PRD_INFO_PROCESS_TIME" field="processTime" permissionCode="REGION_PRD_INFO_PROCESS_TIME" ></@p.column>
+			<@p.column title="REGION_PRD_INFO_DOWN_TIME" field="downTime" permissionCode="REGION_PRD_INFO_DOWN_TIME" ></@p.column>
+			<@p.column title="REGION_PRD_INFO_NO_DOWN_TIME" field="noDownTime" permissionCode="REGION_PRD_INFO_NO_DOWN_TIME" ></@p.column>
+			<@p.column title="REGION_PRD_INFO_AVAILABILITY_RATE" field="availabilityRate" permissionCode="REGION_PRD_INFO_AVAILABILITY_RATE" ></@p.column>
+	</@p.dataGrid>  
+</@p.body>	
+

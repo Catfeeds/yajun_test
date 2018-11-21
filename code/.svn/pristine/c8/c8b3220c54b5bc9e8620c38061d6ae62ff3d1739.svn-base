@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="snPrint" language="groovy" pageWidth="260" pageHeight="100" columnWidth="90" leftMargin="2" rightMargin="2" topMargin="2" bottomMargin="2" uuid="5b317810-26cc-430d-ab48-83ffe5a95fe7">
+	<property name="ireport.zoom" value="2.5937424601000036"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SN" class="java.lang.String"/>
+	<parameter name="currDate" class="java.lang.String"/>
+	<parameter name="snTxt" class="java.lang.String"/>
+	<title>
+		<band height="96" splitType="Stretch">
+			<componentElement>
+				<reportElement x="4" y="0" width="248" height="66" isPrintInFirstWholeBand="true" uuid="7c0cb332-b030-4e62-93a6-c1dbf8cd85d2"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="true" barHeight="150">
+					<jr:codeExpression><![CDATA[$P{SN}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<staticText>
+				<reportElement x="33" y="76" width="76" height="20" uuid="df11a135-b95f-4377-b78b-9936bd983afa"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="微软雅黑" size="13" isBold="true" isItalic="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[制造日期：]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="109" y="76" width="143" height="20" uuid="04e958d3-d533-414f-b5df-f6309eda3899"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font fontName="微软雅黑" size="12" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{currDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="58" width="256" height="19" uuid="66e33a3c-054c-4ce4-9415-ca6473de89fe"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="微软雅黑" size="14" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{snTxt}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+</jasperReport>

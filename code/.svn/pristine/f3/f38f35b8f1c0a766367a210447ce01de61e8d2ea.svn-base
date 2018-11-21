@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>每日生产状况表</title>
+<script type="text/javascript" src="${baseUrl}/res/js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/highcharts.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/xrange.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/oldie.js"></script>
+<script type="text/javascript" src="${baseUrl}/res/js/exporting.js"></script>
+</head>
+<body>
+	<div id="productionStatus" style="width: 100%; height: 20rem;"></div>
+<script type="text/javascript">
+$(function(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var dateTime = date.getFullYear()+"-"+month+"-"+date.getDate();
+	report(dateTime, 'A', 'MORNINGSHIFT');
+});
+function report(dataTime,regionNo,shiftno){
+	$.ajax({
+	     url:'${baseUrl}/metalplateFauletdReport/productionStatusData.do',
+	     type:"GET",
+	     dateType:"json",
+	     data:{
+	    	 'queryCondition[dataTime]':dataTime,
+	    	 'queryCondition[regionNo]':regionNo,
+	    	 'queryCondition[shiftno]':shiftno
+	     },
+	     success:function(res){
+	    	 var result = res.data;
+	    	 if(result){
+	    		var seriesData = JSON.parse(result.seriesData);
+	    		for(var i in seriesData){
+	    			var date1 = new Date(seriesData[i].x);
+	    			var date2 = new Date(seriesData[i].x2);
+	    			var dateTime1 = date1.getUTCFullYear()+","+date1.getUTCMonth()+","+date1.getDate()+","+date1.getHours()+","+date1.getMinutes()+","+date1.getSeconds();
+	    			var dateTime2 = date2.getUTCFullYear()+","+date2.getUTCMonth()+","+date2.getDate()+","+date2.getHours()+","+date2.getMinutes()+","+date2.getSeconds();
+	    			seriesData[i].x =eval('Date.UTC('+dateTime1+')');
+ 	    			seriesData[i].x2 = eval('Date.UTC('+dateTime2+')');
+	    		} 
+	    		productionStatusReport(seriesData,JSON.parse(result.yCategories));
+			}
+	     }
+	});
+}
+function productionStatusReport(seriesData,yCategories){
+	Highcharts.setOptions({ 
+		global: { useUTC: true } ,
+		lang:{
+			contextButtonTitle:"图表导出菜单",
+			decimalPoint:".",
+			downloadJPEG:"下载JPEG图片",
+			downloadPDF:"下载PDF文件",
+			downloadPNG:"下载PNG文件",
+			downloadSVG:"下载SVG文件",
+			printChart:"打印图表",
+			drillUpText:"返回 {series.name}",
+			loading:"加载中",
+			noData:"没有数据",
+			resetZoom:"恢复缩放",
+			resetZoomTitle:"恢复图表",
+			thousandsSep:","
+		}
+	});
+	Highcharts.chart('productionStatus', {
+		chart: {
+			type: 'xrange',
+			zoomType : 'x'
+		},
+		credits: { enabled: false },
+		title: {
+			text: '每日生产状况表'
+		},
+		legend : {
+			enabled : false
+		},
+		xAxis: {
+			type: 'datetime',
+			dateTimeLabelFormats: {
+				millisecond: '%H:%M:%S',
+				second: '%H:%M:%S',
+				minute: '%H:%M',
+				hour: '%H:%M',
+				day: '%m-%d',
+				week: '%m-%d',
+				month: '%Y-%m',
+				year: '%Y'
+			},
+			tickInterval: 3600 * 1000
+		},
+		yAxis: {
+			title: {
+				text: ''
+			},
+			categories:yCategories,
+			reversed: false
+		},
+		tooltip: {
+			dateTimeLabelFormats: {
+				millisecond: '%H:%M:%S',
+				second: '%H:%M:%S',
+				minute: '%H:%M',
+				hour: '%H:%M',
+				day: '%m-%d',
+				week: '%m-%d',
+				month: '%Y-%m',
+				year: '%Y'
+			}
+		},
+		series: [{
+			name: '每日生产状况表',
+			borderColor: 'gray',
+			pointWidth: 20,
+			//pointStart: Date.UTC(2018, 9, 24),
+			//pointInterval: 3600 * 1000,
+			data: seriesData,
+			colors:['#B0B0B0','#05BC57','#D8D405','#F87519','#843C0C','#FF0505','#3939FF'],
+			dataLabels: {
+				enabled: false
+			}
+		}]
+	});
+}
+
+</script>
+</body>
+</html>

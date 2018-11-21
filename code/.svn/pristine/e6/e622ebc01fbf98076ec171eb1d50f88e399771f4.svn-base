@@ -1,0 +1,68 @@
+<#include "../../include/bootstrapTableCommons.html">
+<html>
+<head>
+<meta charset="UTF-8">
+<title>钣金-生产管理报表</title>
+<script src="${baseUrl}/res/js/echarts4.js"></script>
+<style type="text/css">
+.report-panel{
+	width:100%;
+	overflow-y: hidden;
+	padding-top: 10px;
+}
+</style>
+<script type="text/javascript">
+
+function refreshReport(){
+	var dataTime = $("#productionDate").val();
+	var regionNo = $("#regionNo").val();
+	var shiftno = $("#shiftNo").val();
+	myFrame.window.report(dataTime,regionNo,shiftno);
+}
+
+function thisResetSearch(){
+	var date = new Date();
+	var month = date.getMonth()+1;
+	var endTime = date.getFullYear()+"-"+month+"-"+date.getDate();
+	$("#productionDate").val(endTime);
+	$("#equipment").val('A');
+	$("#shiftNo").val('MORNINGSHIFT');
+}
+ 
+</script>
+</head>
+<body>
+<div class="page-content" >
+	<div class="report-panel">
+		<div>
+			<@p.body title="METALPLATEPRODUCTIONRECORD_LIST_TITLE" permissionModule="PRODUCTION_RECORD">	
+				<@p.searchPanel >
+					<@p.searchColumns  showSeachButton="false">
+						<@p.input title="PRODUCTIONSCHEDULE_DATE" field="productionDate" id="productionDate"></@p.input>
+						<@p.input title="TM_CODE_RULE_LINE" id="regionNo" type="select" value="A" options=regionMarks></@p.input>
+						<@p.input title="CLASS_MANAGER_CLASS_NAME" field="workSchedule" id="shiftNo" value="MORNINGSHIFT" type="select"  options=shiftArray></@p.input>
+						<div class="search_btn_box">
+							<a href="javascript:void(0)" class="btn btn-sm btn-info btnSearchSubmit" onclick="refreshReport()"><span class="icon-search"></span><@s.m code="FRAME_SEARCH" /></a>
+							<a href="javascript:void(0)" class="btn btn-sm btn-info" onclick="thisResetSearch()"><span class="icon-retweet"></span><@s.m code="FRAME_RESET"/></a>
+						</div>
+					</@p.searchColumns>
+				</@p.searchPanel>
+			</@p.body>
+		</div>
+		<div style="width: 80%;height:35rem;margin-left: 5rem;">
+			<iframe name="myFrame" src="${baseUrl}/metalplateFauletdReport/productionStatusInput.do" style="width:100%;height:100%" frameborder="no"></iframe>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
+<script type="text/javascript">
+$(function(){
+	$('#productionDate').focus(function(){
+		WdatePicker({dateFmt:'yyyy-MM-dd',readOnly:true});
+	});
+	var productionDate = initDateTime(false,false,false);
+	$("#productionDate").val(productionDate);
+})
+</script>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/ncGroup/update.do" class="form-horizontal" idValue=ncGroup.id permissionModule="NC_GROUP">
+		<@p.formRow>
+			<@p.formColmd title="NC_LINE" permissionCode="TM_NC_GROUP_NO">
+				<@p.input type="select" disabled="disabled" value="${ncGroup.tmLineId!}" datatype="*" options=lines ></@p.input>
+				<input type="hidden" name="tmLineId" value="${ncGroup.tmLineId!}" >
+			</@p.formColmd>
+			<@p.formColmd title="NC_NO" permissionCode="TM_NC_GROUP_NO">
+				<input name="no" value="${ncGroup.no}" readonly="readonly" class="inputxt" errormsg="<@s.m code='NO_ONLY'/>" datatype="/^[\w\d-_\\\/]+$/" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="NC_NAME" permissionCode="TM_NC_GROUP_NAME">
+				<input name="name" value="${ncGroup.name}" class="inputxt" datatype="*" maxlength='150' />
+			</@p.formColmd>
+			<@p.formColmd title="NC_REMARKS" permissionCode="TM_NC_GROUP_REMARKS">
+				<input name="remarks" class="inputxt" value="${ncGroup.remarks!}" maxlength='150' />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+

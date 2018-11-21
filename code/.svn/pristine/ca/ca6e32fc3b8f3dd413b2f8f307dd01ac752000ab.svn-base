@@ -1,0 +1,29 @@
+<#include "../../../include/bootstrapTableCommons.html">
+<@p.body  permissionModule="RECORD" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="recordUlocParameterGrid">
+		<@p.searchColumns>
+			<@p.input title="PECORD_ULOC_PARAMETER_PARAMETER_CODE" field="parameterCode"  permissionCode="PECORD_ULOC_PARAMETER_PARAMETER_CODE"></@p.input>
+			<@p.input title="PECORD_ULOC_PARAMETER_PARAMETER_VALUE" field="parameterValue"  permissionCode="PECORD_ULOC_PARAMETER_PARAMETER_VALUE"></@p.input>
+		</@p.searchColumns>
+	</@p.searchPanel>
+	<div style="color: #428bca;text-align:center; margin:10px" >产品档案参数信息</div>
+	<@p.dataGrid url="${baseUrl}/record/uloc/parameter/list.do?queryCondition[tpRecordUlocId]=${tpRecordUlocId}" id="recordUlocParameterGrid">
+			<@p.column checkbox="true" ></@p.column>
+			<@p.column title="PECORD_ULOC_PARAMETER_PARAMETER_CODE" field="parameterCode" permissionCode="PECORD_ULOC_PARAMETER_PARAMETER_CODE" ></@p.column>
+			<@p.column title="PECORD_ULOC_PARAMETER_PARAMETER_VALUE" field="parameterValue" permissionCode="PECORD_ULOC_PARAMETER_PARAMETER_VALUE" ></@p.column>
+			<@p.column title="PECORD_ULOC_PARAMETER_PARAMETER_TYPE" field="parameterType" permissionCode="PECORD_ULOC_PARAMETER_PARAMETER_TYPE" formatter="renderParameterType"></@p.column>
+			<@p.column title="PECORD_ULOC_PART_IS_REPLACE" field="isReplace" permissionCode="PECORD_ULOC_PARAMETER_PARAMETER_TYPE" formatter="renderGender"></@p.column>
+			<@p.column title="PECORD_ULOC_PARAMETER_NOTE" field="note" permissionCode="PECORD_ULOC_PARAMETER_NOTE" formatter="renderNullValue"></@p.column>
+		</@p.dataGrid>
+</@p.body>	
+<script type="text/javascript">
+function renderNullValue(value){
+	return value == null ? "" : value;
+}
+function renderParameterType(value){
+	return entryRenderer('PARAMETER_TYPE', value);
+}
+function renderGender(value) {
+	return entryRenderer('YES_OR_NO', value);
+}
+</script>

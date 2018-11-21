@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="format-detection" content="telephone=no" />
+	<link rel="stylesheet" href="../../mui/css/mui.min.css" />
+	<link rel="stylesheet" href="../../css/main-list.css" />
+	<script src="../../mui/js/mui.min.js"></script>
+	<script src="../../mui/js/app.js"></script>
+	<script src="../../js/jquery-1.8.0.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=2.0,user-scalable=no,width=device-width" />
+<body>
+	<header class="mui-bar mui-bar-nav">
+		<a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left"></a>
+		<h1 class="mui-title">故障机明细</h1>
+	</header>
+	<div class="page-content" style="margin:44px 5px 0px 5px">
+	 <form id="formId">
+		 <input id="valid" name="id" type="hidden"/>
+		<div class="title-form-group">
+			<div class="mui-input-row my-input-row">
+				<label>背番号：</label>
+				<input type="text" disabled="disabled" name="backNumber"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机种名：</label>
+				<input type="text" disabled="disabled" name="machineOfName"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>机&nbsp;&nbsp;号：</label>
+				<input type="text" disabled="disabled" name="machineName"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>班&nbsp;&nbsp;次：</label>
+				<select id="shiftno" name="shiftno" disabled="disabled"></select>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>信息来源：</label>
+				<input type="text" disabled="disabled" name="discoveryNote"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label class="edit-label-color">故障类型：</label>
+				<select id="tmNcGroupId" name="tmNcGroupId" title="故障类型" onchange="ncListAdd(this.value)"></select>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label class="edit-label-color">故障内容：</label>
+				<select id="tmNcId" name="tmNcId" title="故障内容" onchange="ngLevelOrExit(this.value)"></select>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label class="edit-label-color">处理方式：</label>
+				<select id="ncProcessMode" name="ncProcessMode" title="处理方式"></select>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>故障等级：</label>
+				<input type="text" disabled="disabled" id="ngLevel" name="ngLevel"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>适应NG入口：</label>
+				<input type="text" id="ngEntrance" name="ngEntrance"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label class="edit-label-color">发现工位：</label>
+				<select id="discoveryStation" name="discoveryStation" title="发现工位"></select>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>NG出口：</label>
+				<input type="text" disabled="disabled" name="ngExit"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>状态：</label>
+				<select id="status" name="status" disabled="disabled"></select>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>录入时间：</label>
+				<input type="text" disabled="disabled" name="createTime"/>
+			</div>
+			<div class="mui-input-row my-input-row">
+				<label>提交人：</label>
+				<input type="text" disabled="disabled" name="userName"/>
+			</div>
+		</div>
+	</form>
+</div>
+<div class="nav-bth" id="bthIsdisplay" >
+	 <button type="button"  onclick="submit()">提交</button>
+	 <button type="button"  onclick="unqualifiedClosure()">故障关闭</button>
+</div>
+<script>
+var data ={
+	datas:false,
+	formData:false,
+	ncDictDatas:[],
+	theRequest:{}
+}
+$(function(){
+	var url = window.location.search;
+	if ( url.indexOf( "?" ) != -1 ) {
+	  var str = url.substr( 1 ); //substr()方法返回从参数值开始到结束的字符串；
+	  var strs = str.split( "&" );
+	  for ( var i = 0; i < strs.length; i++ ) {
+		data.theRequest[ strs[ i ].split( "=" )[ 0 ] ] = ( strs[ i ].split( "=" )[ 1 ] );
+	  }
+	 }
+	 document.getElementById("valid").value=data.theRequest.id;
+	 loadDetail();
+})
+function loadDetail(){
+	app.ajaxRequest({
+	 	url:'faultMachineApp/faultMachineDetailInput.do',
+	 	data:{id:data.theRequest.id},
+	 	callback:function(res){
+	 		data.formData = res.data.bean;
+	 		data.datas = res.data;
+	 		if(data.formData.status && data.formData.status == 'CLOSED'){
+	 			$('#bthIsdisplay').hide();
+	 		}
+	 		initFormData();
+	 	}
+	 });
+}
+function initFormData(){
+	app.initSelect('shiftno','',app.getEntrys('SHIFT_TYPE'));
+	app.initSelect('tmNcGroupId','',data.datas.ncGroup);
+	app.initSelect('ncProcessMode','',app.getEntrys('NC_STATUS'));
+	app.initSelect('discoveryStation','',data.datas.optionUloc);
+	app.initSelect('status','',app.getEntrys('UNQUALIFIED_STATE'));
+	var formData = document.getElementById("formId");
+    for(var i=0;i<formData.length;i++){
+      var name = formData.elements[i].name;
+	  if(name){
+	  	if(name=='userName'){
+			if(data.formData.employee){
+				formData.elements[i].value = data.formData.employee.name;
+			}
+	  	}else if(name=='discoveryNote'){
+ 			if(data.formData.discoveryUloc){
+			  formData.elements[i].value = data.formData.discoveryUloc.note;
+		    }
+	  	}else{
+			var elemVal = data.formData[formData.elements[i].name];
+			if(elemVal){
+				formData.elements[i].value = data.formData[formData.elements[i].name];
+			}
+	  	}
+	  }
+    }
+    if(data.formData.tmNcGroupId){
+    	ncListAdd(data.formData.tmNcGroupId);
+    }
+}
+function ncListAdd(value){
+	app.ajaxRequest({
+		url:'faultMachineApp/getNcItem.do',
+		data:{tmNcGroupId:value},
+		callback:function(res){
+			data.ncDictDatas = res.data;
+			app.initSelect('tmNcId',data.formData.tmNcId,res.data);
+			if(data.formData.tmNcId){
+				ngLevelOrExit(data.formData.tmNcId);
+			}
+		}
+	});
+  }
+ function ngLevelOrExit(value){
+	var levelId = '';
+	for(var ncData in data.ncDictDatas){
+		if(data.ncDictDatas[ncData].code == value){
+			levelId =data.ncDictDatas[ncData].ngLevel;
+		}
+	}
+	if(levelId){
+		var faultGrades = data.datas.faultGrades;
+		var optionNgEntrance = data.datas.optionNgEntrance;
+		for(var i in faultGrades){
+			if(faultGrades[i].code==levelId){
+				document.getElementById("ngLevel").value=faultGrades[i].name;
+				document.getElementById("ngEntrance").value = app.keysValue(optionNgEntrance,faultGrades[i].relevantParameter);
+				data.formData.ngLevel = faultGrades[i].name;
+				data.formData.ngEntrance = app.keysValue(optionNgEntrance,faultGrades[i].relevantParameter);
+			}
+		}
+	}else{
+		document.getElementById("ngLevel").value='';
+		document.getElementById("ngEntrance").value='';
+		data.formData.ngLevel = '';
+		data.formData.ngEntrance = '';
+	}
+  }
+  function submit(){
+	var formDataAll = document.getElementById("formId");
+    for(var i=0;i<formDataAll.length;i++){
+	  if(formDataAll.elements[i].name!="" && formDataAll.elements[i].value=="" && formDataAll.elements[i].title){
+		  mui.toast(formDataAll.elements[i].title+"不能为空！",{ duration:'short', type:'div' });
+		  formDataAll.elements[i].focus();
+		  return ;
+	  }
+    }
+    app.ajaxRequest({
+		url:'faultMachineApp/faultMachineUpdate.do',
+		data:$('#formId').serialize(),
+		callback:function(res){
+			loadDetail();
+			mui.toast("执行成功。",{ duration:'short', type:'div' })
+		}
+	});
+  }
+  function unqualifiedClosure(){
+  	var this_id = data.theRequest.id;
+	 mui.confirm("故障关闭", "提示", ['取消','确认'], function(e){
+	 debugger;
+		if(e.index === 1){
+			 app.ajaxRequest({
+				url:'faultMachineApp/UnqualifiedClosure.do',
+				data:{id:this_id},
+				callback:function(res){
+					loadDetail();
+					mui.toast("执行成功。",{ duration:'short', type:'div' })
+				}
+			});
+		}
+	});
+  }
+</script>
+<style>
+	.page-content {
+		background: #FFFFFF;
+	}
+	.title-form-group {
+		border-radius: 5px;
+		margin: 0em 0em 3.5em 0em;
+		border: 0.5px solid #ccc;
+	}
+	.title-form-group label {
+		background: #F0F0F0;
+		border-radius: 5px;
+	}
+	.title-form-group div {
+		border-bottom: 1px solid #F2F2F2;
+	}
+	.edit-label-color {
+	 color: #0062cc;;
+	}
+	.nav-bth{
+		background: #FFFFFF;
+		height: 3.5em;
+		position: fixed;
+		bottom: 0;
+		width: 100%;
+		text-align: -webkit-center;
+		border-bottom: 1px solid #F0F0F0;
+		border-top: 1px solid #F0F0F0;
+	}
+	.nav-bth button{
+		height: 2.5em;
+		background: #007AFF;
+		color: #FFFFFF;
+		font-size: 14px;
+		border-radius: 10px;
+		padding: 5px;
+		margin-top: 9px;
+	}
+</style>
+</body>
+</html>

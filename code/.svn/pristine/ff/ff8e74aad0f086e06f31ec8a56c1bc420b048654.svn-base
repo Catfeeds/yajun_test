@@ -1,0 +1,69 @@
+<#include "../../include/bootstrapTableCommons.html">
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">	
+<script type="text/javascript">
+function  addFormPermissionSet() {
+	BootstrapDialog.show({
+		size : BootstrapDialog.SIZE_WIDE,
+		title : '<@s.m code="SELECT_PERMISSION_SET" />',
+		message : function(dialog) {
+			var $message = $('<div></div>');
+			var pageToLoad = dialog.getData('pageToLoad');
+			$message.load(pageToLoad);
+
+			return $message;
+		},
+		buttons : [ {
+			label : commons_msg.btnConfirm,
+			cssClass : 'btn-primary',
+			action : function(dialogRef) {
+			    var rows=getSelectedRows('permissionSetListGrid');
+				if (rows.length > 0) {
+					var ids =getSelectedIds('permissionSetListGrid');
+					ajaxRequest('${baseUrl}/user/addUserRelation.do', {
+						'userId' : '${userId}','setIds' :JSON.stringify(ids)
+					}, function() {
+						reloadTable('permissionSelectGrid');
+						dialogRef.close();
+					});
+				
+				}else{
+					infoTip('<@s.m code='NO_CHOOSE_DATA'/>');
+				}
+
+			}
+		}, {
+			label : commons_msg.btnClose,
+			cssClass : 'btn-default',
+			action : function(dialogRef) {
+				dialogRef.close();
+			}
+		} ],
+		data : {
+			'pageToLoad' : '${baseUrl}/user/permissionSetList.do'
+		}
+	});        
+}
+
+</script>
+
+
+<@p.body permissionModule="FORM_PERMISSION_SET" noBreadcrumbs="true">
+	<@p.searchPanel   gridId="permissionSelectGrid" >
+		<@p.searchColumns >
+			<@p.input title="PERMISSION_SET_CODE" field="code"  permissionCode="PERMISSION_SET_CODE"></@p.input>
+			<@p.input title="PERMISSION_SET_NAME" field="name"  permissionCode="PERMISSION_SET_NAME"></@p.input>
+		</@p.searchColumns>
+		<@p.toolbar     id="tbPermissionSelectGrid">
+	    	<@p.button title="BTN_ADD"  iconCls="plus" permissionCode="FormPermissionSetEdit"  onclick="addFormPermissionSet()" ></@p.button>
+			<@p.button title="BTN_DELETE"  iconCls="trash" permissionCode="FormPermissionSetEdit"  url="${baseUrl}/user/deleteUserRelation.do?userId=${userId}"  type="delete">></@p.button>
+		</@p.toolbar>
+	</@p.searchPanel>
+	<@p.dataGrid url="${baseUrl}/formPermissionSet/list.do?queryCondition[userId]=${userId}"   id="permissionSelectGrid">
+		<@p.column title="Id" checkbox="true" field="Id" ></@p.column>
+		<@p.column title="PERMISSION_SET_CODE" field="code"  permissionCode="PERMISSION_SET_CODE" ></@p.column>
+		<@p.column title="PERMISSION_SET_NAME" field="name"  permissionCode="PERMISSION_SET_NAME" ></@p.column>
+		<@p.column title="PERMISSION_SET_DESCRIPTION" field="description"  permissionCode="PERMISSION_SET_DESCRIPTION" ></@p.column>
+	</@p.dataGrid>
+</@p.body>	
+

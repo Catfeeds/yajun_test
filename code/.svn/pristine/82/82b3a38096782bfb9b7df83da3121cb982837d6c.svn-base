@@ -1,0 +1,12 @@
+
+<#list permissionList as permission>  
+	<span class="tree-icon tree-file role">&nbsp;</span>
+	<span >
+	<input style="vertical-align:middle;" type="checkbox" name="formPermissionIds" value='${permission["id"]}'
+	 <#if permission.checked>
+		checked="checked"
+	</#if>/>
+	</span><span style="vertical-align:middle;">${permission["name"]}</span>
+	<br>
+</#list>
+

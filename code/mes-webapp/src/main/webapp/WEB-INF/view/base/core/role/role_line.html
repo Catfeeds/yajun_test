@@ -1,0 +1,9 @@
+
+<#list lineList as line>  
+	<span class="tree-icon tree-file role">&nbsp;</span>
+	<span >
+	<input style="vertical-align:middle;" type="checkbox" name="lineIds" value='${line["id"]!}' <#if line.checked>checked='checked'</#if> />
+	</span><span style="vertical-align:middle;">${line["no"]!}-${line["name"]!}</span>
+	<br>
+</#list>
+

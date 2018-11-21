@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#include "../../include/editorCommons.html"> 
+</head>	
+<body style="overflow-y: hidden" scroll="no">
+	<@p.editForm url="${baseUrl}/scrap/add.do" class="form-horizontal" permissionModule="SCRAP">
+		<@p.formRow>
+			<@p.formColmd title="NC_NO" permissionCode="TM_SCRAP_NO">
+				<input name="no" class="inputxt" errormsg="<@s.m code='NO_ONLY'/>" datatype="/^[\w\d-_\\\/]+$/" maxlength='100' />
+			</@p.formColmd>
+			<@p.formColmd title="NC_NAME" permissionCode="TM_SCRAP_NOTE">
+				<input name="note" class="inputxt" datatype="*" maxlength='150' />
+			</@p.formColmd>
+		</@p.formRow>
+		<@p.formRow>
+			<@p.formColmd title="NC_EXTCODE" permissionCode="TM_SCRAP_EXT_CODE">
+				<input name="extCode" class="inputxt" errormsg="<@s.m code='NO_ONLY'/>" datatype="/^[\w\d-_\\\/]{0,}$/" ignore="ignore" maxlength='100' />
+			</@p.formColmd>
+		</@p.formRow>
+	</@p.editForm>
+</body>
+</html>
+
